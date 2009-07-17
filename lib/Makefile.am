@@ -1,8 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS     =
-AM_FFLAGS     =
-AM_FCFLAGS    =
+AM_CFLAGS     = -I$(top_srcdir) -I$(top_builddir)
+AM_CFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS    = -I$(top_srcdir) -I$(top_builddir)
+AM_FCFLAGS   += -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_LDFLAGS    =
 bin_PROGRAMS  =
 BUILT_SOURCES =

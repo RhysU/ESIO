@@ -30,7 +30,7 @@
 #ifndef _ESIO_H
 #define _ESIO_H
 
-// External header dependencies here, e.g. #include <stdlib.h>
+/* External header dependencies here, e.g. #include <stdlib.h> */
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
@@ -44,8 +44,8 @@
 
 __BEGIN_DECLS
 
-// Public esio API function prototypes here
+/* Public esio API function prototypes here */
 
 __END_DECLS
 
-#endif // _ESIO_H
+#endif /* _ESIO_H */
