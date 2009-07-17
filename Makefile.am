@@ -19,12 +19,11 @@ AUX_DIST = build-aux/install-sh    \
            build-aux/mkinstalldirs \
            build-aux/missing
 
+# Files to be deleted by make clean variants
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
-
-# Files to be deleted by 'make maintainer-clean'
+DISTCLEANFILES = aminclude.am
 MAINTAINERCLEANFILES =     \
 	aclocal.m4             \
-	aminclude.am           \
 	autom4te.cache/*       \
 	$(AUX_DIST)            \
 	config.log             \
