@@ -13,9 +13,9 @@ CC=@MPICC@
 FC=@MPIFC@
 
 ## Sample test program
-#check_PROGRAMS         += test_something
-#test_something_SOURCES  = test_something.c
-#test_something_LDADD    = ../esio/libesio.la
+check_PROGRAMS += sample
+sample_SOURCES  = sample.c
+sample_LDADD    = ../esio/libesio.la
 
 TESTS_ENVIRONMENT =
 TESTS = $(check_PROGRAMS)
