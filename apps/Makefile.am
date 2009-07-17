@@ -10,10 +10,17 @@ BUILT_SOURCES =
 BUILT_DOCS    =
 EXTRA_DIST    =
 
-## Sample progams
-#bin_PROGRAMS   += driver
-#driver_SOURCES  = driver.c
-#driver_LDADD    =
+# Use MPI compilers
+CC=@MPICC@
+FC=@MPIFC@
+
+# Sample progams
+bin_PROGRAMS       += hellompi_c
+hellompi_c_SOURCES  = hellompi_c.c
+
+bin_PROGRAMS              += hellompi_f90
+hellompi_f90_SOURCES       = hellompi_f90.f90
+hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
