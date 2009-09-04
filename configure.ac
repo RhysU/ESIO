@@ -47,6 +47,8 @@ dnl ------------------------------------------------
 dnl MPI toolchain checks
 dnl ------------------------------------------------
 AC_LANG([C])
+AC_CHECK_HEADER([hdf5.h],,AC_MSG_ERROR([Could not find HDF5 header.]))
+AC_CHECK_LIB([hdf5],[main],,AC_MSG_ERROR([Could not link against HDF5 library.]))
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for C, e.g. mpicc.))
 AC_LANG([Fortran])
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpif90.))
