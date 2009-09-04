@@ -19,17 +19,17 @@ FC=@MPIFC@
 # Headers installed with the library
 pkginclude_HEADERS += esio.h
 
-# Source files built into the library:
+# Public ESIO library containing C and Fortran interfaces
 # Need distinct C and Fortran sublibraries for libtool --tag purposes
 lib_LTLIBRARIES     += libesio.la
 libesio_la_SOURCES   = # Required even if empty
 libesio_la_LIBADD    = libesio_c.la libesio_f.la
 
-# C sources built into the public esio library
+# C sources to place into the public library
 noinst_LTLIBRARIES   += libesio_c.la
 libesio_c_la_SOURCES  = esio.c
 
-# Fortran sources built into the public library
+# Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
 libesio_f_la_SOURCES       = esiof.90
 libesio_f_la_LIBTOOLFLAGS  = --tag=FC
