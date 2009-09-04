@@ -23,10 +23,6 @@ bin_PROGRAMS              += hellompi_f90
 hellompi_f90_SOURCES       = hellompi_f90.f90
 hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 
-# test program
-bin_PROGRAMS       += 
-npmtest_SOURCES   = 
-
 # Nick's test program
 bin_PROGRAMS      += main
 main_SOURCES       = header.f90 main.f90
