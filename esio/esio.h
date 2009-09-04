@@ -44,7 +44,15 @@
 
 __BEGIN_DECLS
 
-/* Public esio API function prototypes here */
+void esio_test_(int *passed);
+void esio_init_(char FILE1[], int *ny,int *nx,int *nz,int *nc,int *passed,int fname_len);
+void esio_read_();
+void esio_read_to_var_();
+void esio_write_();
+void esio_write_field_(char FILE1[], int *ny,int *xist,int *zjst, int *xisz, int *zjsz, int fname_len);
+void esio_read_field_();
+void esio_timer_();
+void esio_diff_();
 
 __END_DECLS
 
