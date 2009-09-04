@@ -34,5 +34,8 @@ noinst_LTLIBRARIES        += libesio_f.la
 libesio_f_la_SOURCES       = esiof.f90
 libesio_f_la_LIBTOOLFLAGS  = --tag=FC
 
+# Clean up Fortran modules on 'make clean'
+CLEANFILES = esiof.mod
+
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

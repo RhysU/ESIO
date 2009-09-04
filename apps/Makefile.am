@@ -33,5 +33,8 @@ main_SOURCES       = header.f90 main.f90
 main_LDADD         = ../esio/libesio.la
 main_LIBTOOLFLAGS  = --tag=FC
 
+# Clean up Fortran modules on 'make clean'
+CLEANFILES = header.mod
+
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
