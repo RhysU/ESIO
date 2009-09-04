@@ -31,7 +31,7 @@ libesio_c_la_SOURCES  = esio.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
-libesio_f_la_SOURCES       = esiof.90
+libesio_f_la_SOURCES       = esiof.f90
 libesio_f_la_LIBTOOLFLAGS  = --tag=FC
 
 # Required for AX_AM_MACROS
