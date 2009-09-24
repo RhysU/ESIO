@@ -11,6 +11,7 @@ lib_LTLIBRARIES    = # Append below
 noinst_HEADERS     = # Append below
 noinst_LTLIBRARIES = # Append below
 pkginclude_HEADERS = # Append below
+CLEANFILES         = # Append below
 
 # Use MPI compilers
 CC=@MPICC@
@@ -34,8 +35,10 @@ noinst_LTLIBRARIES        += libesio_f.la
 libesio_f_la_SOURCES       = esiof.f90
 libesio_f_la_LIBTOOLFLAGS  = --tag=FC
 
-# Clean up Fortran modules on 'make clean'
-CLEANFILES = esiof.mod
+# Fortran module installation for esiof
+moduledir   = @libdir@
+module_DATA = esiof.mod
+CLEANFILES += esiof.mod
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
