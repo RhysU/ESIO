@@ -23,6 +23,7 @@ pkginclude_HEADERS += esio.h
 # Public ESIO library containing C and Fortran interfaces
 # Need distinct C and Fortran sublibraries for libtool --tag purposes
 lib_LTLIBRARIES     += libesio.la
+libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_SOURCES   = # Required even if empty
 libesio_la_LIBADD    = libesio_c.la libesio_f.la
 

@@ -1,6 +1,6 @@
-dl ------------------------------------------------
-dnl Package name and version number
-dnl ------------------------------------------------
+dnl ----------------------------------------------------
+dnl Package name and release number
+dnl ---------------------------------------------------
 AC_INIT(esio, [0.0.1], [rhys@ices.utexas.edu])
 AC_REVISION([$Id$])
 
