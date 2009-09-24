@@ -1,13 +1,14 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS      = -I$(top_srcdir) -I$(top_builddir)
-AM_CFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS     = -I$(top_srcdir) -I$(top_builddir)
-AM_FCFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS    += -I$(top_srcdir)/esio -I$(top_builddir)/esio
-bin_PROGRAMS   = # Append below
-check_PROGRAMS = # Append below
-noinst_HEADERS = # Append below
+AM_CFLAGS       = -I$(top_srcdir) -I$(top_builddir)
+AM_CFLAGS      += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS      = -I$(top_srcdir) -I$(top_builddir)
+AM_FCFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS     += -I$(top_srcdir)/esio -I$(top_builddir)/esio
+bin_PROGRAMS    = # Append below
+check_PROGRAMS  = # Append below
+noinst_HEADERS  = # Append below
+noinst_PROGRAMS = # Append below
 
 # Use MPI compilers
 CC=@MPICC@
@@ -19,7 +20,7 @@ sample_SOURCES  = sample.c
 sample_LDADD    = ../esio/libesio.la
 
 ## Fortran test program to read/write a field
-bin_PROGRAMS           += simplef90
+noinst_PROGRAMS        += simplef90
 simplef90_SOURCES       = header.f90 simplef90.f90
 simplef90_LDADD         = ../esio/libesio.la
 simplef90_LIBTOOLFLAGS  = --tag=FC
