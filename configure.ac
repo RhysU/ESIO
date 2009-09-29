@@ -81,6 +81,7 @@ AC_CONFIG_FILES([
     lib/Makefile
     esio/Makefile
     tests/Makefile
+    esio.pc
 ])
 
 AC_OUTPUT()

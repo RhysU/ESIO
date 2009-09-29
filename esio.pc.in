@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: esio
+Description: ESIO is a restart file library for HPC exascale IO geared especially for turbulence applications
+Requires:
+Version: @VERSION@
+Libs: -L${libdir} -lesio
+Cflags: -I${includedir}

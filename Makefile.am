@@ -19,6 +19,10 @@ AUX_DIST = build-aux/install-sh    \
            build-aux/mkinstalldirs \
            build-aux/missing
 
+# Support for pkgconfig
+pkgconfigdir   = $(libdir)/pkgconfig
+pkgconfig_DATA = esio.pc
+
 # Files to be deleted by make clean variants
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 DISTCLEANFILES = aminclude.am
