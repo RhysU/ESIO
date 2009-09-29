@@ -95,10 +95,14 @@ void esio_init_(char FILE1[], int *ny,int *nx,int *nz,int *nc,int *passed,int fn
 
   hid_t file1, dataset1;
   hid_t mid1, fid1;
-  hsize_t fdim[] = {DIM1, DIM2, DIM3};
+  hsize_t fdim[3];
   int buf1[DIM1][DIM2][DIM3];
   herr_t ret;
   unsigned int  i, j, k;
+
+  fdim[0] = DIM1;
+  fdim[1] = DIM2;
+  fdim[2] = DIM3;
   
   /* for testing */
   for ( i = 0; i < DIM1; i++ ) 
