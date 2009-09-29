@@ -25,6 +25,7 @@ AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
 AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 AC_PROG_FC
+AC_FC_WRAPPERS
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
