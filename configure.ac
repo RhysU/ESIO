@@ -45,14 +45,29 @@ AX_CFLAGS_WARN_ALL_ANSI
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
+dnl HPC Toolkit checks
+dnl ------------------------------------------------
+AC_LANG([C])
+PKG_CHECK_MODULES(HPCT, hpct >= 0.26.0)
+# Must trim HPCT values from pkgconfig to appending to work in Makefile.am
+HPCT_CFLAGS=CS_TRIM(${HPCT_CFLAGS})
+HPCT_LIBS=CS_TRIM(${HPCT_LIBS})
+AC_SUBST(HPCT_CFLAGS)
+AC_SUBST(HPCT_LIBS)
+AC_CACHE_SAVE
+
+dnl ------------------------------------------------
+dnl HDF5 checks
+dnl ------------------------------------------------
+AC_LANG([C])
+AC_CHECK_HEADER([hdf5.h],,AC_MSG_ERROR([Could not find HDF5 header.]))
+AC_CHECK_LIB([hdf5],[main],,AC_MSG_ERROR([Could not link against HDF5 library.]))
+AC_CACHE_SAVE
+
+dnl ------------------------------------------------
 dnl MPI toolchain checks
 dnl ------------------------------------------------
 AC_LANG([C])
-PKG_CHECK_MODULES(HPCT, hpct >= 0.25.2)
-AC_SUBST(HPCT_CFLAGS)
-AC_SUBST(HPCT_LIBS)
-AC_CHECK_HEADER([hdf5.h],,AC_MSG_ERROR([Could not find HDF5 header.]))
-AC_CHECK_LIB([hdf5],[main],,AC_MSG_ERROR([Could not link against HDF5 library.]))
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for C, e.g. mpicc.))
 AC_LANG([Fortran])
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpif90.))
