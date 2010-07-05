@@ -13,12 +13,14 @@
 # Number of processors
 #Specify Parallel Environment (pe)
 #$ -pe 1way 16
+
+# place output in current directory
 #$ -cwd
 
 # Job Name
-#$ -N esio_posix
+#$ -N esio
 
-# Source
+# Specify shell path
 #$ -S /bin/bash
 
 # Max Run Time
@@ -28,24 +30,16 @@
 #$ -q development
 #
 
-# email nick to let him know you started a job  (note: nick isnt interested if you dont happen to be nick)
-mail -s "Job $JOB_ID ($JOB_NAME) Started" nick@ices.utexas.edu << EOF
-Started from : $PWD
-EOF
+# email upon start and completion
+#$ -M nick@ices.utexas.edu
+#$ -m be
 
-#Loading Modules  -- best to configure in ~/.login_user
-# ./etc/profile.d/modules.sh
-# module purge  #remove all modules
-#module load TACC
-module swap mvapich mvapich2
-module load fftw3
-module load mkl
+# merge standard out, standard error
+#$ -j y
 
-#source ~/.bashrc
-
+# run
 #cd ~/src/esio/trunk/apps
 ibrun ./esio_posix
-#./DNS2d.x
 
 ################################
 # Commands

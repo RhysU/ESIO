@@ -48,12 +48,11 @@ dnl ------------------------------------------------
 dnl HPC Toolkit checks
 dnl ------------------------------------------------
 AC_LANG([C])
-PKG_CHECK_MODULES(HPCT, hpct >= 0.26.0)
-# Must trim HPCT values from pkgconfig to appending to work in Makefile.am
-HPCT_CFLAGS=CS_TRIM(${HPCT_CFLAGS})
-HPCT_LIBS=CS_TRIM(${HPCT_LIBS})
-AC_SUBST(HPCT_CFLAGS)
-AC_SUBST(HPCT_LIBS)
+PKG_CHECK_MODULES(grvy >= 0.27.0)
+AX_PECOS_DEFAULTS
+AX_PATH_GRVY
+AC_SUBST(GRVY_CFLAGS)
+AC_SUBST(GRVY_LIBS)
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
