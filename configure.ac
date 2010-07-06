@@ -48,9 +48,7 @@ dnl ------------------------------------------------
 dnl HPC Toolkit checks
 dnl ------------------------------------------------
 AC_LANG([C])
-PKG_CHECK_MODULES(grvy >= 0.27.0)
-AX_PECOS_DEFAULTS
-AX_PATH_GRVY
+PKG_CHECK_MODULES(GRVY, grvy >= 0.27.0)
 AC_SUBST(GRVY_CFLAGS)
 AC_SUBST(GRVY_LIBS)
 AC_CACHE_SAVE

@@ -15,10 +15,10 @@ noinst_PROGRAMS = # Append below
 CC=@MPICC@
 FC=@MPIFC@
 
-## Pick up HPCT library installation
-AM_CFLAGS  += $(HPCT_CFLAGS)
-AM_FCFLAGS += $(HPCT_CFLAGS)/../lib
-AM_LDFLAGS += $(HPCT_LIBS)
+## Pick up GRVY library installation
+AM_CFLAGS  += $(GRVY_CFLAGS)
+AM_FCFLAGS += $(GRVY_CFLAGS)
+AM_LDFLAGS += $(GRVY_LIBS)
 
 ## Sample test program
 check_PROGRAMS += sample
