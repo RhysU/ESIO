@@ -4,10 +4,10 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 # Build in these directories:
-SUBDIRS = lib esio tests apps doc
+SUBDIRS = lib esio tests apps
 
 # Distribute these items:
-DIST_SUBDIRS = lib esio tests apps doc
+DIST_SUBDIRS = lib esio tests apps
 EXTRA_DIST= bootstrap $(DX_CONFIG)
 
 # Eliminate .svn directories in dist tarball

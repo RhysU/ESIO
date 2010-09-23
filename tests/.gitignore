@@ -1,3 +1,5 @@
 /.deps
+/*.mod
 /Makefile
 /Makefile.in
+/simplef90

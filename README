@@ -14,6 +14,8 @@ Unix-like systems.
 The code depends upon the following libraries:
 
     1) A working MPI stack present in your path
+    2) The Groovy Toolkit (GRVY)
+    3) HDF5
 
 
 2. Configuration
@@ -47,4 +49,4 @@ Unit tests can be compiled and run using 'make check'.
 5. API documentation
 --------------
 
-API documentation can be produced in doxygen-doc by running 'make doxygen-doc'.
+API documentation can be produced in docs by running 'make doxygen-doc'.

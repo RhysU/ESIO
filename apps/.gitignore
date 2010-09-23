@@ -1,5 +1,7 @@
 /.deps
+/*.mod
 /hellompi_c
 /hellompi_f90
+/main
 /Makefile
 /Makefile.in
