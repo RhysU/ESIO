@@ -1,0 +1,59 @@
+#!/bin/bash
+#################################################
+#script to run esio_posix 
+#created by Nicholas Malaya
+#################################################
+# Load all enviroment variables
+#$ -V
+
+# Project number : TG-MCA99S022
+# NSF PETA APPS 
+#$ -A TG-MCA99S022
+
+# Number of processors
+#Specify Parallel Environment (pe)
+#$ -pe 1way 16
+#$ -cwd
+
+# Job Name
+#$ -N esio_hdf
+
+# Source
+#$ -S /bin/bash
+
+# Max Run Time
+#$ -l h_rt=0:15:00
+
+# Queue Type (qconf -sql)
+#$ -q development
+#
+
+# email nick to let him know you started a job  (note: nick isnt interested if you dont happen to be nick)
+mail -s "Job $JOB_ID ($JOB_NAME) Started" nick@ices.utexas.edu << EOF
+Started from : $PWD
+EOF
+
+#Loading Modules  -- best to configure in ~/.login_user
+# ./etc/profile.d/modules.sh
+# module purge  #remove all modules
+#module load TACC
+module swap mvapich mvapich2
+module load fftw3
+module load mkl
+
+#source ~/.bashrc
+
+#cd ~/src/esio/trunk/apps
+ibrun ./esio_chunk
+#./DNS2d.x
+
+################################
+# Commands
+#
+# qstat -u npm7 :: display all jobs
+# where npm7 is the user name
+#
+###############################
+
+
+
