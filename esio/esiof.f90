@@ -40,7 +40,7 @@ module esiof
   ! global module variables here
 
   ! permissions
-  public  :: esiof_read, esiof_read_to_var, esiof_write, esiof_timer, esiof_diff
+  public  :: esiof_timer, esiof_diff
   public  :: esiof_test, esiof_init, esiof_write_field, esiof_read_field
 
   integer(4) :: precision  !precision in use
@@ -62,7 +62,7 @@ module esiof
       character(len=20),intent(out) :: filename     
 
       call esio_init(filename,ny,nx,nz,nc,np)
-      
+
     end subroutine esiof_init
 
     !##############################
@@ -79,48 +79,6 @@ module esiof
       call esio_test(testint)
       
     end subroutine esiof_test
-
-    !##############################
-    !#
-    !# Function esiof_read
-    !# 
-    !# INPUT : 
-    !# OUTPUT:
-    !#
-    !##############################
-    subroutine esiof_read()
-
-      call esio_read
-      
-    end subroutine esiof_read
-    
-    !##############################
-    !#
-    !# Function esiof_read_to_var
-    !# 
-    !# INPUT : 
-    !# OUTPUT: 
-    !#
-    !##############################
-    subroutine esiof_read_to_var()
-  
-      call esio_read_to_var()
-
-    end subroutine esiof_read_to_var
-
-    !##############################
-    !#
-    !# Function esiof_write
-    !# 
-    !# INPUT : 
-    !# OUTPUT: 
-    !#
-    !##############################
-    subroutine esiof_write()
-    
-      call esio_write()
-
-    end subroutine esiof_write
 
     !##############################
     !#

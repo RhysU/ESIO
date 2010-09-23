@@ -32,28 +32,20 @@
 
 /* External header dependencies here, e.g. #include <stdlib.h> */
 
-#undef __BEGIN_DECLS
-#undef __END_DECLS
 #ifdef __cplusplus
-# define __BEGIN_DECLS extern "C" {
-# define __END_DECLS }
-#else
-# define __BEGIN_DECLS /* empty */
-# define __END_DECLS   /* empty */
+extern "C" {
 #endif
 
-__BEGIN_DECLS
 
 void esio_test_(int *passed);
-void esio_init_(char FILE1[], int *ny,int *nx,int *nz,int *nc,int *passed,int fname_len);
-void esio_read_();
-void esio_read_to_var_();
-void esio_write_();
+void esio_init_(char FILE1[], int *ny,int *nx,int *nz,int *nc,int fname_len);
 void esio_write_field_(char FILE1[], int *ny,int *xist,int *zjst, int *xisz, int *zjsz, int fname_len);
 void esio_read_field_();
 void esio_timer_();
 void esio_diff_();
 
-__END_DECLS
+#ifdef __cplusplus
+} /* __cplusplus */
+#endif
 
 #endif /* _ESIO_H */

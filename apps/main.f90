@@ -15,7 +15,7 @@
 !#
 
 program main
-  use mpi    !for mpi
+  use mpi    ! for mpi
   use header ! modulefile contains problem size, initial conditions, precision, etc.
   use esiof  ! this is a module with the ESIO fortran interface
   implicit none
@@ -26,7 +26,9 @@ program main
   character(len=20) :: filename
   character(len=20) :: ci
 
-  leapfrog = 10  !number of read/write restarts to make
+  real(8) :: stime,etime ! timers
+
+  leapfrog = 10  ! number of read/write restarts to make
 
   call mpi_init(ierr)
   call mpi_comm_rank(mpi_comm_world, myid, ierr)
@@ -44,26 +46,30 @@ program main
   ! initial filename for writing field
   filename="field/outpen.1.h5"//char(0)
   
+  stime=mpi_wtime()
+
   ! allow for multiple writes/reads
-  do i=1,leapfrog     
-     
-     !open hdf file -- pass filename
+  do i=1,leapfrog               
+
+     ! open hdf file -- pass filename
      call esiof_init(filename, ny, nx, nz, nc, myid)
      
      if(myid.eq.0) write(6,*) "write no. ",i
      call esiof_write_field(filename,ny,xist,zjst,xisz,zjsz,nc,u) 
      
-     u(:,:,:,:)=0 !set field to zero to be sure 
+     u(:,:,:,:)=0 ! set field to zero to be sure 
      
      if(myid.eq.0) write(6,*) "read no. ",i
      call esiof_read_field(filename,ny,xist,zjst,xisz,zjsz,nc,u)
 
      write(ci,*) i+1
      ci=adjustl(ci)
-     filename="field/outpen."//trim(ci)//".h5"//char(0) !save new file each timestep
+     filename="field/outpen."//trim(ci)//".h5"//char(0) ! save new file each timestep
   enddo
   
-  if(myid.eq.0) write(6,*) "program is finalizing"
+  etime=mpi_wtime()  
+
+  if(myid.eq.0) write(6,*) "program is finalizing, time was: ", etime-stime, "for ",leapfrog," iterations"
   call mpi_finalize(ierr)
   
 end program main
