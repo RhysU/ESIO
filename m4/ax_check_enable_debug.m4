@@ -23,11 +23,11 @@
 #
 # LAST MODIFICATION
 #
-#   2009-11-02
+#   2010-04-08
 #
 # COPYLEFT
 #
-#   Copyright (c) 2009 Rhys Ulerich <rhys.ulerich@gmail.com>
+#   Copyright (c) 2010 Rhys Ulerich <rhys.ulerich@gmail.com>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
@@ -40,11 +40,11 @@ AC_DEFUN([AX_CHECK_ENABLE_DEBUG],[
     AC_BEFORE([$0],[AC_PROG_FC])dnl
 
     AC_MSG_CHECKING(whether to enable debugging)
-    ax_enable_debug_default="m4_tolower(m4_normalize(ifelse([$1],,[no],[$1])))"
+    m4_define(ax_enable_debug_default,[m4_tolower(m4_normalize(ifelse([$1],,[no],[$1])))])
     AC_ARG_ENABLE(debug,
-        [AS_HELP_STRING([--enable-debug],[enable compiler debug flags])],
-        [],enable_debug=$ax_enable_debug_default)
-    if test "x$enable_debug" = "xyes"; then
+        [AS_HELP_STRING([--enable-debug]@<:@=ax_enable_debug_default@:>@,[compile with debugging; one of yes/info/no])],
+        [],enable_debug=ax_enable_debug_default)
+    if test "x$enable_debug" = "xyes" || test "x$enable_debug" = "x"; then
         AC_MSG_RESULT(yes)
         CFLAGS="${CFLAGS} -g -O0"
         CXXFLAGS="${CXXFLAGS} -g -O0"

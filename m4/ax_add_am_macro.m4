@@ -1,5 +1,5 @@
 # ===========================================================================
-#            http://autoconf-archive.cryp.to/ax_add_am_macro.html
+#      http://www.gnu.org/software/autoconf-archive/ax_add_am_macro.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -8,19 +8,20 @@
 #
 # DESCRIPTION
 #
-#   Adds the specified rule to $AMINCLUDE
+#   Adds the specified rule to $AMINCLUDE. This macro will only work
+#   properly with implementations of Make which allow include statements.
+#   See also AX_ADD_AM_MACRO_STATIC.
 #
-# LAST MODIFICATION
+# LICENSE
 #
-#   2008-04-12
-#
-# COPYLEFT
-#
-#   Copyright (c) 2008 Tom Howard <tomhoward@users.sf.net>
+#   Copyright (c) 2009 Tom Howard <tomhoward@users.sf.net>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
-#   and this notice are preserved.
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 9
 
 AC_DEFUN([AX_ADD_AM_MACRO],[
   AC_REQUIRE([AX_AM_MACROS])
