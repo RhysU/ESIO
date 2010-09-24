@@ -27,6 +27,7 @@ hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 bin_PROGRAMS      += main
 main_SOURCES       = header.f90 main.f90
 main_LDADD         = ../esio/libesio.la
+main_LDADD        += $(HDF5_LDFLAGS)
 main_LIBTOOLFLAGS  = --tag=FC
 
 # Clean up Fortran modules on 'make clean'

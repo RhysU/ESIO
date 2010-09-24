@@ -20,6 +20,11 @@ AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_CFLAGS)
 AM_LDFLAGS += $(GRVY_LIBS)
 
+## Pick up HDF5 installation
+AM_CFLAGS  += $(HDF5_CFLAGS)
+AM_FCFLAGS += $(HDF5_FFLAGS)
+AM_LDFLAGS += $(HDF5_LDFLAGS)
+
 ## Sample test program
 check_PROGRAMS += sample
 sample_SOURCES  = sample.c

@@ -57,8 +57,7 @@ dnl ------------------------------------------------
 dnl HDF5 checks
 dnl ------------------------------------------------
 AC_LANG([C])
-AC_CHECK_HEADER([hdf5.h],,AC_MSG_ERROR([Could not find HDF5 header.]))
-AC_CHECK_LIB([hdf5],[main],,AC_MSG_ERROR([Could not link against HDF5 library.]))
+AX_LIB_HDF5([])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
