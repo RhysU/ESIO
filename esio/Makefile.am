@@ -13,9 +13,9 @@ noinst_LTLIBRARIES = # Append below
 pkginclude_HEADERS = # Append below
 CLEANFILES         = # Append below
 
-# Use MPI compilers
-CC=@MPICC@
-FC=@MPIFC@
+# Use HDF5 compiler wrappers
+CC=@H5CC@
+FC=@H5FC@
 
 # Headers installed with the library
 pkginclude_HEADERS += esio.h
@@ -29,17 +29,12 @@ libesio_la_LIBADD    = libesio_c.la libesio_f.la
 
 # C sources to place into the public library
 noinst_LTLIBRARIES   += libesio_c.la
-libesio_c_la_SOURCES  = esio.c
+libesio_c_la_SOURCES  = esiow.c esiofb.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
 libesio_f_la_SOURCES       = esiof.f90
 libesio_f_la_LIBTOOLFLAGS  = --tag=FC
-
-# Fortran module installation for esiof
-moduledir   = @libdir@
-module_DATA = esiof.mod
-CLEANFILES += esiof.mod
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

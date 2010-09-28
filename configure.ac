@@ -23,7 +23,6 @@ dnl Check for compiler toolchain
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
-AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 AC_PROG_FC
 AC_FC_WRAPPERS
 AC_CACHE_SAVE
@@ -54,19 +53,19 @@ AC_SUBST(GRVY_LIBS)
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
-dnl HDF5 checks
-dnl ------------------------------------------------
-AC_LANG([C])
-AX_LIB_HDF5([])
-AC_CACHE_SAVE
-
-dnl ------------------------------------------------
 dnl MPI toolchain checks
 dnl ------------------------------------------------
 AC_LANG([C])
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for C, e.g. mpicc.))
 AC_LANG([Fortran])
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpif90.))
+AC_CACHE_SAVE
+
+dnl ------------------------------------------------
+dnl HDF5 checks
+dnl ------------------------------------------------
+AC_LANG([C])
+AX_LIB_HDF5([parallel])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
