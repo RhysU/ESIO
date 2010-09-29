@@ -23,11 +23,21 @@ dnl Check for compiler toolchain
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
+if test "x$ax_enable_debug" != "xno"; then
+    AX_TRACEBACK()
+fi
 AX_PATH_GRVY_NEW([0.27],[no])
 AX_CFLAGS_WARN_ALL_ANSI
 AC_PROG_FC
+if test "x$ax_enable_debug" != "xno"; then
+    AX_TRACEBACK()
+fi
 AC_FC_WRAPPERS
 AC_CACHE_SAVE
+
+dnl ------------------------------------------------
+dnl Add traceback information to compiler flags
+dnl ------------------------------------------------
 
 dnl ------------------------------------------------
 dnl Enable GNU libtool

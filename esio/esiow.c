@@ -208,7 +208,6 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
                             int zst, int zsz, double* data,
                             char *filename, char *dataname, char *overwrite)
 {
-    char* prec = "double";
     double start, end;
 #ifdef TIMERS
     double timer;
@@ -222,8 +221,8 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
     /* start timers */
     start = MPI_Wtime();
 
-    esio_fopen(filename, overwrite);        /* create file */
-    esio_dopen(ny, nx, nz, dataname, prec); /* create */
+    esio_fopen(filename, overwrite);            /* create file */
+    esio_dopen(ny, nx, nz, dataname, "double"); /* create dataset */
 
     /* hard to get around this sort of pointer gymnastics */
     for (i = 1; i < xsz + 1; i++)
