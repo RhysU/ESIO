@@ -40,13 +40,20 @@ int esio_fopen(char* file, char* trunc)
     if (strncmp(trunc, "o", 1) == 0) /* starts with n */
     {
         file_id = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+        if (file_id < 0)
+        {
+            printf("\nESIO FATAL ERROR: "
+                   "Unable to create file\n");
+            MPI_Abort(comm, 1);
+        }
     }
     else /* do not overwrite old dataset -- will fail if file already exists */
     {
         file_id = H5Fcreate(file, H5F_ACC_EXCL, H5P_DEFAULT, plist_id);
         if (file_id < 0)
         {
-            printf("\nESIO FATAL ERROR: File already exists\n");
+            printf("\nESIO FATAL ERROR: "
+                   "File already exists\n");
             MPI_Abort(comm, 1);
         }
     }
@@ -63,7 +70,8 @@ int esio_fclose()
 
     if (error < 0)
     {
-        printf("\nESIO FATAL ERROR: File unable to close\n");
+        printf("\nESIO FATAL ERROR: "
+               "File unable to close\n");
         MPI_Abort(comm, 1);
     }
 
@@ -115,7 +123,7 @@ int esio_dopen(int ny, int nx, int nz, char* datasetname, char* precision)
         printf("\nESIO FATAL ERROR: "
                 "Cannot open dataset -- precision not properly specified\n");
         printf("User Must specify either double or single precision\n");
-        MPI_Abort(comm, 0);
+        MPI_Abort(comm, 1);
     }
 
     H5Sclose(filespace);
@@ -130,7 +138,8 @@ int esio_dclose()
     int error = H5Dclose(dset_id);
     if (error < 0)
     {
-        printf("\nESIO FATAL ERROR: File unable to close\n");
+        printf("\nESIO FATAL ERROR: "
+               "File unable to close\n");
         MPI_Abort(comm, 1);
     }
     dset_id = -1; /* reset */
