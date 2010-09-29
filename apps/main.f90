@@ -16,7 +16,6 @@
 
 program main
   use mpi    ! for mpi
-  use grvy   ! PECOS Groovy Toolkit (GRVY)
 
   ! modulefile contains problem size, initial conditions, precision, etc.
   use header, only: ny,nx,nz,nc,xist,xisz,zjst,zjsz,u,initialize_problem,initialize_field
@@ -43,9 +42,8 @@ program main
   call initialize_field(myid)            ! sets initial field (local field is u)
 
   ! initial filename for writing field
-  filename="field/outpen.1.h5"//char(0)
+  filename="outpen.1.h5"//char(0)
   dataset="u.field"//char(0)
-  call grvy_check_file_path(filename, ierr)
 
   stime=mpi_wtime() !mpi timer
   call esiof_write_field(ny,nx,nz,nc,xist,xisz,zjst,zjsz,u,filename,dataset,overwrite);

@@ -23,7 +23,7 @@ dnl Check for compiler toolchain
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
-AX_PATH_GRVY_NEW([0.27],[yes])
+AX_PATH_GRVY_NEW([0.27],[no])
 AX_CFLAGS_WARN_ALL_ANSI
 AC_PROG_FC
 AC_FC_WRAPPERS
