@@ -20,11 +20,6 @@ AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_CFLAGS)
 AM_LDFLAGS += $(GRVY_LIBS)
 
-## Pick up HDF5 installation
-AM_CFLAGS  += $(HDF5_CFLAGS)
-AM_FCFLAGS += $(HDF5_FFLAGS)
-AM_LDFLAGS += $(HDF5_LDFLAGS)
-
 # FIXME This should not be necessary for C-only tests
 ## Pick up Fortran support libraries
 AM_LDFLAGS += $(FCLIBS)
