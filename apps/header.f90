@@ -10,55 +10,55 @@
 module header
   use mpi
   implicit none ! this setting is global to module: applies to each subroutine
-  
+
   ! 5 megs write size
   integer(4), parameter :: nx=50     ! x,y,z lengths (these wont change)
   integer(4), parameter :: ny=1000   ! these lengths are for physical space!
-  integer(4), parameter :: nz=25    
+  integer(4), parameter :: nz=25
 
   integer(4), parameter :: nc=1     ! number of velocity components
 
   integer(4) :: xist,xjst,xisz,xjsz,xien,xjen ! pencil widths and heights
   integer(4) :: yist,yjst,yisz,yjsz,yien,yjen
   integer(4) :: zist,zjst,zisz,zjsz,zien,zjen
-  
+
   real(4),dimension(:,:,:,:),allocatable :: u ! test velocity field: u(ny,zjsz,xisz,nc)
   real(4),dimension(:,:,:,:),allocatable :: bigu ! full velocity field: u(ny,nz,nx,nc)
-  
+
   !public (anyone using the module gets these)
   public  :: u, xisz, zjsz, ny, nc                ! velocity field data - local
   public  :: xist,xien,zjst,zjen                  ! absolute coordinates of field
   public  :: nz,nx                                ! size of field
   public  :: initialize_problem, initialize_field ! public subroutines
-  
+
 contains
 
   !##################################################
   !#
   !#    Subroutine initialize_field
-  !# 
-  !# This routine should generate a local 
+  !#
+  !# This routine should generate a local
   !# initial field for each processor
   !#
-  !# For reference, xisz (x-size) -- local coordinates 
+  !# For reference, xisz (x-size) -- local coordinates
   !#                zjsz (z-size) -- on each processor
-  !#                ny   
+  !#                ny
   !#
   !# ny,nx,nz are the total sizes
   !#
   !#           and,
   !#                xist xien    (x start -- x finish)
-  !#                zjst zjen    -- absolute coordinates 
+  !#                zjst zjen    -- absolute coordinates
   !#                ny           -- on each proc
   !#
   !#  Lets set the field as follows:
-  !#  f(x,y,z) = x + z^2 + y^3  
+  !#  f(x,y,z) = x + z^2 + y^3
   !#
   !##################################################
   subroutine initialize_field(proc)
-    
+
     integer(4) :: i,j,k,n,proc
-    
+
     !this loop is stride-1: u(ny,zjsz,xisz)
     !write(6,*) 'xisz, zjsz, ny: ', xisz, zjsz, ny
 
@@ -79,10 +79,10 @@ contains
   !#
   !# Subroutine initialize_problem
   !#
-  !# this subroutine breaks the grid up based on 
-  !# how large the total problem is, as well as the 
+  !# this subroutine breaks the grid up based on
+  !# how large the total problem is, as well as the
   !# number of processors being used
-  !# we are always using a 2d-decomposition on 
+  !# we are always using a 2d-decomposition on
   !# a rectangular grid
   !#
   !# subroutine should set xisz, zjsz, etc.
@@ -91,10 +91,10 @@ contains
   !#        total is number of processors
   !#
   !# Note: this routine has lots of junk in it
-  !# 
-  !##################################################  
-  subroutine initialize_problem(procnumber,total)    
-      
+  !#
+  !##################################################
+  subroutine initialize_problem(procnumber,total)
+
       ! input
       integer(4), intent(in) :: procnumber,total
 
@@ -121,7 +121,7 @@ contains
 
       !array of one's
       integer, dimension(:), allocatable :: oneAr
-      
+
       integer :: padx,pady,padz,szmax,szf
       integer mpi_comm_cart
       integer mpi_comm_row, mpi_comm_col
@@ -139,22 +139,22 @@ contains
       integer,dimension(:),allocatable:: KrSndCnts,KrSndStrt
       integer,dimension(:),allocatable:: KrRcvCnts,KrRcvStrt
       integer,dimension(:,:),allocatable:: status
-           
+
       integer i,j,k,n1
       logical iex
-      
+
       nypad=ny  ! dont worry about why we are using different vars for these
       nzpad=nz  ! (related to dealiasing)
       nxpad=nx
-      nxh=nx/2  ! ; nxhp=nxh+1 ; nxhp2=2*nxhp         
+      nxh=nx/2  ! ; nxhp=nxh+1 ; nxhp2=2*nxhp
 
       allocate(status(MPI_STATUS_SIZE,total))
 
       dims(1) = 0
       dims(2) = 0
-      
+
       !    total is divided into a iproc x jproc stencil
-      !      
+      !
       call MPI_Dims_create(total,2,dims,ierr)
 
       if(dims(1) .gt. dims(2)) then
@@ -241,13 +241,13 @@ contains
       enddo
       !
       !Mapping 3-D data arrays onto 2-D process grid
-      ! (nx+2,ny+2,nz) => (iproc,jproc)      
-      ! 
+      ! (nx+2,ny+2,nz) => (iproc,jproc)
+      !
       call MapDataToProc(nxh,iproc,iist,iien,iisz)
       call MapDataToProc(nypad,jproc,jjst,jjen,jjsz)
       call MapDataToProc(nzpad,iproc,kist,kien,kisz)
       call MapDataToProc(nz,jproc,kjst,kjen,kjsz)
-    
+
       xist = iist(ipid)   !x start
       xisz = iisz(ipid)   !x size
       xien = iien(ipid)   !x end
@@ -263,15 +263,15 @@ contains
       zjsz = kjsz(jpid)
       zjen = kjen(jpid)
       zjst = kjst(jpid)
-      
+
       !write(6,*) "xist: ", xist
       !write(6,*) "xisz: ", xisz
       !write(6,*) "xien: ", xien
-            
+
       !write(6,*) "yjst: ", yjst
       !write(6,*) "yjsz: ", yjsz
       !write(6,*) "yjen: ", yjen
-            
+
       !write(6,*) "zist: ", zist
       !write(6,*) "zisz: ", zisz
       !write(6,*) "zien: ", zien
@@ -286,26 +286,26 @@ contains
 
       !  mpi derived data types
 
-      allocate (IfSndCnts(0:iproc-1))     
+      allocate (IfSndCnts(0:iproc-1))
       allocate (IfRcvCnts(0:iproc-1))
-      allocate (KfSndCnts(0:jproc-1))     
+      allocate (KfSndCnts(0:jproc-1))
       allocate (KfRcvCnts(0:jproc-1))
 
-      allocate (JrSndCnts(0:jproc-1))     
+      allocate (JrSndCnts(0:jproc-1))
       allocate (JrRcvCnts(0:jproc-1))
 
-      allocate (KrSndCnts(0:iproc-1))     
+      allocate (KrSndCnts(0:iproc-1))
       allocate (KrRcvCnts(0:iproc-1))
 
-      allocate (IfSndStrt(0:iproc-1))     
+      allocate (IfSndStrt(0:iproc-1))
       allocate (IfRcvStrt(0:iproc-1))
-      allocate (KfSndStrt(0:jproc-1))     
+      allocate (KfSndStrt(0:jproc-1))
       allocate (KfRcvStrt(0:jproc-1))
 
-      allocate (JrSndStrt(0:jproc-1))     
+      allocate (JrSndStrt(0:jproc-1))
       allocate (JrRcvStrt(0:jproc-1))
 
-      allocate (KrSndStrt(0:iproc-1))     
+      allocate (KrSndStrt(0:iproc-1))
       allocate (KrRcvStrt(0:iproc-1))
 
       ! now, allocate velocity field
@@ -316,7 +316,7 @@ contains
 
   !##################################################
   !# Subroutine MapDataToProc
-  !# 
+  !#
   !# called by initialize_problem
   !#
   !#
@@ -340,7 +340,7 @@ contains
           sz(i) = size2
           en(i) = en(i-1) + size2
        enddo
-       en(proc-1)= data 
+       en(proc-1)= data
        sz(proc-1)= data-st(i-1)+1
     endif
     !
@@ -348,7 +348,7 @@ contains
 
   !##################################################
   !#    Subroutine buildbig
-  !# 
+  !#
   !# called by main
   !# test program that builds the field pieces into
   !# one big field
@@ -356,21 +356,21 @@ contains
   !#  Going to require some MPI calls
   !#
   !#  DONT USE for huge fields --- memory req too high
-  !# 
+  !#
   !##################################################
 
   subroutine buildbig
-    
+
     allocate (bigu(ny,nz,nx,nc))
-    
+
   end subroutine buildbig
   !##################################################
   !#    Subroutine buildbig
   !#    same as build but not allocating
   !#    called by main
   !##################################################
-  subroutine updatebig        
-    
+  subroutine updatebig
+
 
   end subroutine updatebig
 
