@@ -17,7 +17,7 @@ FC=@H5FC@
 
 ## Pick up GRVY library installation
 AM_CFLAGS  += $(GRVY_CFLAGS)
-AM_FCFLAGS += $(GRVY_CFLAGS)
+AM_FCFLAGS += $(GRVY_FCFLAGS)
 AM_LDFLAGS += $(GRVY_LIBS)
 
 # FIXME This should not be necessary for C-only tests

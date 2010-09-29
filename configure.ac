@@ -23,6 +23,8 @@ dnl Check for compiler toolchain
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
+AX_PATH_GRVY_NEW([0.27],[yes])
+AX_CFLAGS_WARN_ALL_ANSI
 AC_PROG_FC
 AC_FC_WRAPPERS
 AC_CACHE_SAVE
@@ -34,22 +36,6 @@ dnl ------------------------------------------------
 LT_INIT
 LT_PREREQ([2.2.6])
 AC_SUBST(LIBTOOL_DEPS)
-AC_CACHE_SAVE
-
-dnl ------------------------------------------------
-dnl C strictness checks
-dnl ------------------------------------------------
-AC_LANG([C])
-AX_CFLAGS_WARN_ALL_ANSI
-AC_CACHE_SAVE
-
-dnl ------------------------------------------------
-dnl HPC Toolkit checks
-dnl ------------------------------------------------
-AC_LANG([C])
-PKG_CHECK_MODULES(GRVY, grvy >= 0.27.0)
-AC_SUBST(GRVY_CFLAGS)
-AC_SUBST(GRVY_LIBS)
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------

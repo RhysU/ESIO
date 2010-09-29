@@ -15,6 +15,11 @@ EXTRA_DIST     =
 CC=@H5CC@
 FC=@H5FC@
 
+## Pick up GRVY library installation
+AM_CFLAGS  += $(GRVY_CFLAGS)
+AM_FCFLAGS += $(GRVY_FCFLAGS)
+AM_LDFLAGS += $(GRVY_LIBS)
+
 # Sample progams
 bin_PROGRAMS       += hellompi_c
 hellompi_c_SOURCES  = hellompi_c.c
