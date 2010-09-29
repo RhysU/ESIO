@@ -13,7 +13,7 @@ noinst_LTLIBRARIES = # Append below
 pkginclude_HEADERS = # Append below
 CLEANFILES         = # Append below
 
-# Use HDF5 compiler wrappers
+# Use parallel HDF5 compiler wrappers per configure.ac
 CC=@H5CC@
 FC=@H5FC@
 

@@ -11,26 +11,19 @@ module header
   use mpi
   implicit none ! this setting is global to module: applies to each subroutine
   
+  ! 5 megs write size
+  integer(4), parameter :: nx=50     ! x,y,z lengths (these wont change)
+  integer(4), parameter :: ny=1000   ! these lengths are for physical space!
+  integer(4), parameter :: nz=25    
 
-  integer(4),parameter :: prec = 8             ! set double precision
-! integer(4),parameter :: prec = 4             ! set single precision
-  
-  integer(4), parameter :: nx=2    ! x,y,z lengths (these wont change)
-  integer(4), parameter :: ny=4     ! these lengths are for physical space!
-  integer(4), parameter :: nz=3
-
-  !integer(4), parameter :: nx=64    ! x,y,z lengths (these wont change)
-  !integer(4), parameter :: ny=64     ! these lengths are for physical space!
-  !integer(4), parameter :: nz=64
-
-  integer(4), parameter :: nc=3     ! number of velocity components
+  integer(4), parameter :: nc=1     ! number of velocity components
 
   integer(4) :: xist,xjst,xisz,xjsz,xien,xjen ! pencil widths and heights
   integer(4) :: yist,yjst,yisz,yjsz,yien,yjen
   integer(4) :: zist,zjst,zisz,zjsz,zien,zjen
   
-  complex(prec),dimension(:,:,:,:),allocatable :: u ! test velocity field: u(ny,zjsz,xisz,nc)
-  real(prec),dimension(:,:,:,:),allocatable :: bigu ! full velocity field: u(ny,nz,nx,nc)
+  real(4),dimension(:,:,:,:),allocatable :: u ! test velocity field: u(ny,zjsz,xisz,nc)
+  real(4),dimension(:,:,:,:),allocatable :: bigu ! full velocity field: u(ny,nz,nx,nc)
   
   !public (anyone using the module gets these)
   public  :: u, xisz, zjsz, ny, nc                ! velocity field data - local
@@ -62,9 +55,9 @@ contains
   !#  f(x,y,z) = x + z^2 + y^3  
   !#
   !##################################################
-  subroutine initialize_field()
+  subroutine initialize_field(proc)
     
-    integer(4) :: i,j,k,n
+    integer(4) :: i,j,k,n,proc
     
     !this loop is stride-1: u(ny,zjsz,xisz)
     !write(6,*) 'xisz, zjsz, ny: ', xisz, zjsz, ny
@@ -73,9 +66,8 @@ contains
        do i=1,xisz
           do j=1,zjsz
              do k=1,ny
-!               u(k,j,i,n) = 0
+!                u(k,j,i,n) = 1
                 u(k,j,i,n) = k*k*k + (zjst+j)*(zjst+j) + (xist+i)
-!               write(6,*) 'ny:',k,'z: ',zjst+j,'x: ',xist+i, 'u:',u(k,j,i,n)
              enddo
           enddo
        enddo
@@ -119,7 +111,7 @@ contains
       integer iproc, jproc, ipid, jpid
       integer impid, ippid, jmpid, jppid
 
-      real(prec) mpixx
+      real(8) mpixx
 
       integer, dimension(:), allocatable :: iist,iien,iisz
       integer, dimension(:), allocatable :: jjst,jjen,jjsz
@@ -151,8 +143,8 @@ contains
       integer i,j,k,n1
       logical iex
       
-      nypad=ny
-      nzpad=nz
+      nypad=ny  ! dont worry about why we are using different vars for these
+      nzpad=nz  ! (related to dealiasing)
       nxpad=nx
       nxh=nx/2  ! ; nxhp=nxh+1 ; nxhp2=2*nxhp         
 
@@ -161,7 +153,7 @@ contains
       dims(1) = 0
       dims(2) = 0
       
-      !    total is devided into a iproc x jproc stencil
+      !    total is divided into a iproc x jproc stencil
       !      
       call MPI_Dims_create(total,2,dims,ierr)
 

@@ -11,9 +11,9 @@ BUILT_SOURCES  =
 BUILT_DOCS     =
 EXTRA_DIST     =
 
-# Use MPI compilers
-CC=@MPICC@
-FC=@MPIFC@
+# Use parallel HDF5 compiler wrappers per configure.ac
+CC=@H5CC@
+FC=@H5FC@
 
 # Sample progams
 bin_PROGRAMS       += hellompi_c

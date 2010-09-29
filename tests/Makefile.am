@@ -11,9 +11,9 @@ check_PROGRAMS  = # Append below
 noinst_HEADERS  = # Append below
 noinst_PROGRAMS = # Append below
 
-# Use MPI compilers
-CC=@MPICC@
-FC=@MPIFC@
+# Use parallel HDF5 compiler wrappers per configure.ac
+CC=@H5CC@
+FC=@H5FC@
 
 ## Pick up GRVY library installation
 AM_CFLAGS  += $(GRVY_CFLAGS)
@@ -25,16 +25,21 @@ AM_CFLAGS  += $(HDF5_CFLAGS)
 AM_FCFLAGS += $(HDF5_FFLAGS)
 AM_LDFLAGS += $(HDF5_LDFLAGS)
 
+# FIXME This should not be necessary for C-only tests
+## Pick up Fortran support libraries
+AM_LDFLAGS += $(FCLIBS)
+
 ## Sample test program
 check_PROGRAMS += sample
 sample_SOURCES  = sample.c
 sample_LDADD    = ../esio/libesio.la
 
+# FIXME Disabled Fortran test
 ## Fortran test program to read/write a field
-noinst_PROGRAMS        += simplef90
-simplef90_SOURCES       = header.f90 simplef90.f90
-simplef90_LDADD         = ../esio/libesio.la
-simplef90_LIBTOOLFLAGS  = --tag=FC
+#noinst_PROGRAMS        += simplef90
+#simplef90_SOURCES       = header.f90 simplef90.f90
+#simplef90_LDADD         = ../esio/libesio.la
+#simplef90_LIBTOOLFLAGS  = --tag=FC
 
 TESTS_ENVIRONMENT =
 TESTS = $(check_PROGRAMS)

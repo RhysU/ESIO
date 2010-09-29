@@ -1,3 +1,0 @@
-#!/bin/bash
-
-mpicc -O3 -g -o esio_posix -I/share/home/00161/karl/bin/hpct-0.24/include/ posix_writer.c -L/share/home/00161/karl/bin/hpct-0.24/lib/ -lhpct -Wl,-rpath,/share/home/00161/karl/bin/hpct-0.24/lib/
