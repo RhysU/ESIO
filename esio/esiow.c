@@ -153,47 +153,39 @@ int esio_dclose()
  * in the file.
  */
 
-int esio_write_double(int ny, int stepover, double* data)
+int esio_write_double(int ny, int zxstepover, double* data)
 {
 
     hid_t    filespace;      /* file and memory dataspace identifiers */
     hid_t    memspace;       /* memory dataspace identifier */
     hid_t    plist_id;       /* property list identifier */
-    hsize_t  count[RANK];    /* hyperslab selection parameters */
-    hsize_t  offset[RANK];
-    hsize_t  stride[RANK];
-    herr_t   status;
+    herr_t  status;
+
+    /* hyperslab selection parameters */
+     hsize_t count[RANK]  = {         1, ny}; /* # of values to write */
+     hsize_t offset[RANK] = {zxstepover,  0}; /* offset */
+     hsize_t stride[RANK] = {         1,  1}; /* dont skip values */
 
     /*
      * Initialize data buffer
      */
-    count[0] = 1;         /* nx / mpi_size || how many vectors to write */
-    count[1] = ny;        /* ny */
-
-    offset[0] = stepover; /* how far 'down' the dataset is (offset) */
-    offset[1] = 0;
-
-    stride[0] = 1;        /* dont skip values */
-    stride[1] = 1;
-
     memspace = H5Screate_simple(RANK, count, NULL);
 
     /*
-     * Select hyperslab in the file.
+     * Select hyperslab in the file
      */
     filespace = H5Dget_space(dset_id);
     H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                         offset, stride, count, NULL);
 
     /*
-     * Create property list for collective dataset write.
+     * Create property list for collective dataset write
      */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
 
     status = H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace,
                       filespace, plist_id, data);
-
     if (status < 0)
     {
         /* user wants to know if data isn't being written properly */
@@ -202,7 +194,7 @@ int esio_write_double(int ny, int stepover, double* data)
     }
 
     /*
-     * Close/release resources.
+     * Close/release resources
      */
     H5Sclose(filespace);
     H5Sclose(memspace);
@@ -217,41 +209,37 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
                             int zst, int zsz, double* data,
                             char *filename, char *dataname, char *overwrite)
 {
-    double start, end;
 #ifdef TIMERS
-    double timer;
+    double start, end, timer;
     int mpi_rank;
 #endif
-    int offset;
     int i, j;
 
-    offset = xst;
-
+#ifdef TIMERS
     /* start timers */
     start = MPI_Wtime();
+#endif
 
-    esio_fopen(filename, overwrite);            /* create file */
-    esio_dopen(ny, nx, nz, dataname, "double"); /* create dataset */
+    esio_fopen(filename, overwrite);                      /* create file */
+    esio_dopen(ny, nx, nz, dataname, "double");           /* create dataset */
 
-    /* hard to get around this sort of pointer gymnastics */
-    for (i = 1; i < xsz + 1; i++)
-        for (j = 1; j < zsz + 1; j++)
+    --zst; /* convert to zero-indexed value */            /* FIXME Unify */
+    --xst; /* convert to zero-indexed value */            /* FIXME Unify */
+    for (i = 0; i < xsz; i++)
+        for (j = 0; j < zsz; j++)
         {
-            /* offset is the absolute location of the field */
-            offset = ((zst-1 + j)) + ((nz)*(i-1 + xst-1)) - 1;
-
-/*             fprintf(stderr, "i=%3d, j=%3d, offset=%12d\n",i,j,offset); */
-
-            /* pass vector (ny x 1) of data to routine */
-            esio_write_double(ny, offset, &data[j*ny + i*ny*zsz]);
-            offset++;
+            esio_write_double(ny,                         /* ny x 1 vector */
+                              (j + zst) + (i + xst) * nz, /* global zx ndx */
+                              data + j*ny + i*ny*zsz);    /* local storage */
         }
 
-    esio_dclose();                          /* close dataset */
-    esio_fclose();                          /* close file */
+    esio_dclose();                                        /* close dataset */
+    esio_fclose();                                        /* close file */
 
+#ifdef TIMERS
     /* end timers */
     end = MPI_Wtime();
+#endif
 
     /* finalize and report */
 #ifdef TIMERS
