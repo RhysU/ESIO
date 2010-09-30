@@ -15,7 +15,7 @@
 !#
 
 program main
-  use mpi    ! for mpi
+  use mpi
 
   ! modulefile contains problem size, initial conditions, precision, etc.
   use header, only: ny,nx,nz,nc,xist,xisz,zjst,zjsz,u,initialize_problem,initialize_field

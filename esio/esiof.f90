@@ -5,10 +5,9 @@ subroutine esiof_write_field(ny,nx,nz,nc,                     &
                              xst,xsz,zst,zsz,                 &
                              data,filename,dataset,overwrite)
 
-  use, intrinsic :: iso_c_binding, only : c_double,    &
-                                          c_loc,       &
-                                          c_int,       &
-                                          c_null_char
+  use, intrinsic :: iso_c_binding,   only : c_double,    &
+                                            c_int,       &
+                                            c_null_char
 
   implicit none
 
@@ -22,7 +21,7 @@ subroutine esiof_write_field(ny,nx,nz,nc,                     &
   integer(c_int),intent(in) :: zst
   integer(c_int),intent(in) :: zsz
 
-  real(c_double),intent(in),target,dimension(ny,nx) :: data
+  real(c_double),intent(in),dimension(ny,nx) :: data
 
   character(len=20),intent(in) :: filename
   character(len=20),intent(in) :: dataset
@@ -37,7 +36,7 @@ subroutine esiof_write_field(ny,nx,nz,nc,                     &
   ! call the function
   call esiofb_write_double_field(ny,nx,nz,nc,                     &
                                  xst,xsz,zst,zsz,                 &
-                                 c_loc(data),                     &
+                                 data,                            &
                                  filename_c,dataset_c,overwrite_c)
 
 end subroutine esiof_write_field

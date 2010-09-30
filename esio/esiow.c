@@ -240,6 +240,8 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
             /* offset is the absolute location of the field */
             offset = ((zst-1 + j)) + ((nz)*(i-1 + xst-1)) - 1;
 
+/*             fprintf(stderr, "i=%3d, j=%3d, offset=%12d\n",i,j,offset); */
+
             /* pass vector (ny x 1) of data to routine */
             esio_write_double(ny, offset, &data[j*ny + i*ny*zsz]);
             offset++;
