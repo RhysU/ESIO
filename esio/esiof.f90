@@ -4,33 +4,40 @@
 subroutine esiof_write_field(ny,nx,nz,nc,                     &
                              xst,xsz,zst,zsz,                 &
                              data,filename,dataset,overwrite)
+
+  use, intrinsic :: iso_c_binding, only : c_double,    &
+                                          c_loc,       &
+                                          c_int,       &
+                                          c_null_char
+
   implicit none
 
   ! inputs -- not to be edited
-  integer(4),intent(in) :: ny
-  integer(4),intent(in) :: nx
-  integer(4),intent(in) :: nz
-  integer(4),intent(in) :: nc
-  integer(4),intent(in) :: xst
-  integer(4),intent(in) :: xsz
-  integer(4),intent(in) :: zst
-  integer(4),intent(in) :: zsz
+  integer(c_int),intent(in) :: ny
+  integer(c_int),intent(in) :: nx
+  integer(c_int),intent(in) :: nz
+  integer(c_int),intent(in) :: nc
+  integer(c_int),intent(in) :: xst
+  integer(c_int),intent(in) :: xsz
+  integer(c_int),intent(in) :: zst
+  integer(c_int),intent(in) :: zsz
 
-  real(8),intent(in),dimension(ny,nx) :: data
+  real(c_double),intent(in),target,dimension(ny,nx) :: data
 
-  ! inputs -- must be altered to play nice with C
-  character(len=20),intent(inout) :: filename
-  character(len=20),intent(inout) :: dataset
-  character(len=20),intent(inout) :: overwrite
+  character(len=20),intent(in) :: filename
+  character(len=20),intent(in) :: dataset
+  character(len=20),intent(in) :: overwrite
 
   ! trim to make C happy
-  filename = TRIM(filename) //char(0)
-  dataset  = TRIM(dataset)  //char(0)
-  overwrite= TRIM(overwrite)//char(0)
+  character(len=20) :: filename_c, dataset_c, overwrite_c
+  filename_c =TRIM(filename) //c_null_char
+  dataset_c  =TRIM(dataset)  //c_null_char
+  overwrite_c=TRIM(overwrite)//c_null_char
 
   ! call the function
   call esiofb_write_double_field(ny,nx,nz,nc,                     &
                                  xst,xsz,zst,zsz,                 &
-                                 data,filename,dataset,overwrite)
+                                 c_loc(data),                     &
+                                 filename_c,dataset_c,overwrite_c)
 
 end subroutine esiof_write_field
