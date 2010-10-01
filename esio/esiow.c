@@ -216,8 +216,7 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
     int i, j;
 
 #ifdef TIMERS
-    /* start timers */
-    start = MPI_Wtime();
+    start = MPI_Wtime();                                  /* start timers */
 #endif
 
     esio_fopen(filename, overwrite);                      /* create file */
@@ -237,8 +236,7 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
     esio_fclose();                                        /* close file */
 
 #ifdef TIMERS
-    /* end timers */
-    end = MPI_Wtime();
+    end = MPI_Wtime();                                    /* end timers */
 #endif
 
     /* finalize and report */

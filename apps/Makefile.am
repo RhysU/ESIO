@@ -28,11 +28,13 @@ bin_PROGRAMS              += hellompi_f90
 hellompi_f90_SOURCES       = hellompi_f90.f90
 hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 
-# Nick's test program
+# PSDNS iokernel test program
 bin_PROGRAMS      += main
 main_SOURCES       = header.f90 main.f90
 main_LDADD         = ../esio/libesio.la
 main_LIBTOOLFLAGS  = --tag=FC
+# Fortran module dependencies
+main.o: header.f90 main.f90
 
 # Clean up Fortran modules on 'make clean'
 CLEANFILES = header.mod

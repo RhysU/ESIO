@@ -16,14 +16,14 @@ module header
   integer(4), parameter :: ny=1000   ! these lengths are for physical space!
   integer(4), parameter :: nz=25
 
-  integer(4), parameter :: nc=1     ! number of velocity components
+  integer(4), parameter :: nc=1      ! number of velocity components
 
   integer(4) :: xist,xjst,xisz,xjsz,xien,xjen ! pencil widths and heights
   integer(4) :: yist,yjst,yisz,yjsz,yien,yjen
   integer(4) :: zist,zjst,zisz,zjsz,zien,zjen
 
-  real(4),dimension(:,:,:,:),allocatable :: u ! test velocity field: u(ny,zjsz,xisz,nc)
-  real(4),dimension(:,:,:,:),allocatable :: bigu ! full velocity field: u(ny,nz,nx,nc)
+  real(8),dimension(:,:,:,:),allocatable :: u ! test velocity field: u(ny,zjsz,xisz,nc)
+  real(8),dimension(:,:,:,:),allocatable :: bigu ! full velocity field: u(ny,nz,nx,nc)
 
   !public (anyone using the module gets these)
   public  :: u, xisz, zjsz, ny, nc                ! velocity field data - local
