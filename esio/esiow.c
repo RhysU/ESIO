@@ -162,9 +162,15 @@ int esio_write_double(int ny, int zxstepover, double* data)
     herr_t  status;
 
     /* hyperslab selection parameters */
-     hsize_t count[RANK]  = {         1, ny}; /* # of values to write */
-     hsize_t offset[RANK] = {zxstepover,  0}; /* offset */
-     hsize_t stride[RANK] = {         1,  1}; /* dont skip values */
+     hsize_t count[RANK];
+     hsize_t offset[RANK];
+     hsize_t stride[RANK];
+     count[0]  = 1;          /* # of values to write */
+     count[1]  = ny;
+     offset[0] = zxstepover; /* offset               */
+     offset[1] = 0;
+     stride[0] = 1;
+     stride[1] = 1;          /* dont skip values */
 
     /*
      * Initialize data buffer
@@ -211,14 +217,15 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
 {
 #ifdef TIMERS
     double start, end, timer;
-    int mpi_rank;
 #endif
+    int mpi_rank;
     int i, j;
 
 #ifdef TIMERS
     start = MPI_Wtime();                                  /* start timers */
 #endif
 
+    MPI_Comm_rank(comm, &mpi_rank);
     esio_fopen(filename, overwrite);                      /* create file */
     esio_dopen(ny, nx, nz, dataname, "double");           /* create dataset */
 
@@ -227,9 +234,9 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
     for (i = 0; i < xsz; i++)
         for (j = 0; j < zsz; j++)
         {
-            esio_write_double(ny,                         /* ny x 1 vector */
-                              (j + zst) + (i + xst) * nz, /* global zx ndx */
-                              data + j*ny + i*ny*zsz);    /* local storage */
+            const int zxstepover = (j + zst) + (i + xst) * nz;
+            const int loffset    = j*ny + i*ny*zsz;
+            esio_write_double(ny, zxstepover, data + loffset);
         }
 
     esio_dclose();                                        /* close dataset */
@@ -241,7 +248,6 @@ int esio_write_double_field(int ny, int nx, int nz, int nc,
 
     /* finalize and report */
 #ifdef TIMERS
-    MPI_Comm_rank(comm, &mpi_rank);
     if (mpi_rank == 0)
     {
         timer = end - start;

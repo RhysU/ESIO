@@ -12,9 +12,9 @@ module header
   implicit none ! this setting is global to module: applies to each subroutine
 
   ! 5 megs write size
-  integer(4), parameter :: nx=50     ! x,y,z lengths (these wont change)
+  integer(4), parameter :: nx=32     ! x,y,z lengths (these wont change)
   integer(4), parameter :: ny=1000   ! these lengths are for physical space!
-  integer(4), parameter :: nz=25
+  integer(4), parameter :: nz=16
 
   integer(4), parameter :: nc=1      ! number of velocity components
 

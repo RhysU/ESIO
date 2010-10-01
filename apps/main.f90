@@ -25,12 +25,10 @@ program main
                     initialize_problem, initialize_field
   implicit none
 
-  integer(4) :: myid, numprocs, ierr, a
-  integer(4) :: i, leapfrog
+  integer(4)            :: myid, numprocs, ierr, i
+  integer(4), parameter :: niter = 1
 
-  character(len=20) :: filename
-  character(len=20) :: dataset
-  character(len=20) :: ci
+  character(len=20) :: filename, dataset, ci
   character(len=20) :: overwrite="o"//char(0)
 
   real(8) :: stime, etime ! timers
@@ -44,28 +42,40 @@ program main
   call initialize_problem(myid,numprocs)
 
   ! initial field (local field is u)
-  if (myid.eq.0) write(*,*) "initializing field"
+  if (myid.eq.0) write(*,*) "initializing field:", ny, nz, nx, nc
   call initialize_field(myid)
-  if (myid.eq.0) write(*,*) "global field has shape: ", ny, nz, nx, nc
 
-  ! initial filename for writing field
+! Print domain decomposition details
+! do i = 0, numprocs - 1
+!   call mpi_barrier(mpi_comm_world, ierr)
+!   if (myid.eq.i) then
+!     write(*,*) myid, "local field has shape:  ", shape(u)
+!     write(*,*) myid, "local xis{tz}, zjs{tz}: ", xist, xisz, zjst, zjsz
+!     flush (6)
+!   end if
+!   call mpi_barrier(mpi_comm_world, ierr)
+! end do
+
+  ! filename for output field
   filename="outpen.1.h5"//char(0)
   dataset="u.field"//char(0)
 
   stime=mpi_wtime() !mpi timer
-  call esiof_write_field(ny, nx, nz, nc, xist, xisz, zjst, zjsz, u, &
-                         filename, dataset, overwrite);
+  do i = 1, niter
+    call esiof_write_field(ny, nx, nz, nc, xist, xisz, zjst, zjsz, u, &
+                          filename, dataset, overwrite);
+  end do
   etime=mpi_wtime() !mpi end timer
 
-  ! TODO Leapfrog details broken in output
   if (myid.eq.0) then
     write(*,*) "program is finalizing, time was: ", etime-stime
-    write(*,*) "In ",leapfrog," iterations"
+    write(*,*) "In ", niter, " iterations"
     write(*,*) "wrote / read: ", &
-               leapfrog*(nc*8*ny*nz*real(nx/2.))/(10e6), " MB"
+               niter*(nc*8*ny*nz*real(nx/2.))/(10e6), " MB"
     write(*,*) "speed: ", &
-               (leapfrog*(nc*8*ny*nz*nx/2.)/(10e6))/(etime-stime), " MB/s"
+               (niter*(nc*8*ny*nz*nx/2.)/(10e6))/(etime-stime), " MB/s"
   end if
+
   call mpi_finalize(ierr)
 
 end program main
