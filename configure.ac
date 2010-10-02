@@ -19,20 +19,29 @@ AX_ADD_AM_CTAGSFLAGS
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
-dnl Check for compiler toolchain
+dnl Check for C compiler toolchain
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
+AC_LANG_PUSH([C])
 if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
 fi
 AX_PATH_GRVY_NEW([0.27],[no])
-AX_CFLAGS_WARN_ALL_ANSI
+AX_CFLAGS_WARN_ALL_ANSI([CFLAGS])
+AC_LANG_POP([C])
+
+dnl ------------------------------------------------
+dnl Check for Fortran compiler toolchain
+dnl ------------------------------------------------
 AC_PROG_FC
+AC_LANG_PUSH([Fortran])
 if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
 fi
 AC_FC_WRAPPERS
+AX_FCFLAGS_WARN_ALL
+AC_LANG_POP([Fortran])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
