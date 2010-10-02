@@ -1,25 +1,15 @@
-!#
-!#  Program designed to 'chunk' a field into multiple pieces
-!#  So we can load it up into an HDF-like storage
-!#  Ideally, field should be similar to what is currently
-!#  Used in PSDNS
-!#
-!#  This routine will therefore be an early test for
-!#  The ESIO library
-!#
-!#  Lets set the field as follows:
-!#  f(x,y,z) = x + y^2 + z^3
-!#
-!#  This way, we know exactly how the domain should 'look'
-!#  If we were to print it all out.
-!#
-
+!> Program designed to 'chunk' a field into multiple pieces so we can
+!! load it up into an HDF-like storage.  Ideally, field should be similar
+!! to what is currently used in PSDNS.
+!!
+!! This routine will therefore be an early test for the ESIO library.
 program main
+
   use mpi
 
-  ! The header contains problem size, initial conditions, precision, etc.
-  ! The header declares physical space extents but xis{t,z}/zjs{t,z} and
-  ! local storage u are allocated using the wave space extents.
+! The header contains problem size, initial conditions, precision, etc.
+! The header declares physical space extents but xis{t,z}/zjs{t,z} and
+! local storage u are allocated using the wave space extents.
   use header, only: ny, nx, nz, nc,                      & ! Physical space
                     xist, xisz, zjst, zjsz, u,           & ! Wave space
                     initialize_problem, initialize_field
@@ -28,7 +18,7 @@ program main
   integer(4)            :: myid, numprocs, ierr, i
   integer(4), parameter :: niter = 1
 
-  character(len=20) :: filename, dataset, ci
+  character(len=20) :: filename, dataset
   character(len=20) :: overwrite="o"//char(0)
 
   real(8) :: stime, etime ! timers
@@ -37,15 +27,13 @@ program main
   call mpi_comm_rank(mpi_comm_world, myid, ierr)
   call mpi_comm_size(mpi_comm_world, numprocs, ierr)
 
-  ! subroutine to 'chunk' problem -- header module
   if (myid.eq.0) write(*,*) "initializing problem"
   call initialize_problem(myid,numprocs)
 
-  ! initial field (local field is u)
   if (myid.eq.0) write(*,*) "initializing field:", ny, nz, nx, nc
   call initialize_field(myid)
 
-! Print domain decomposition details
+! Print domain decomposition details on each MPI rank
 ! do i = 0, numprocs - 1
 !   call mpi_barrier(mpi_comm_world, ierr)
 !   if (myid.eq.i) then
@@ -56,16 +44,15 @@ program main
 !   call mpi_barrier(mpi_comm_world, ierr)
 ! end do
 
-  ! filename for output field
-  filename="outpen.1.h5"//char(0)
-  dataset="u.field"//char(0)
+  filename="outpen.1.h5"//char(0)     ! filename for output field
+  dataset="u.field"//char(0)          ! dataset name for output field
 
-  stime=mpi_wtime() !mpi timer
+  stime=mpi_wtime()
   do i = 1, niter
     call esiof_write_field(ny, nx, nz, nc, xist, xisz, zjst, zjsz, u, &
                           filename, dataset, overwrite);
   end do
-  etime=mpi_wtime() !mpi end timer
+  etime=mpi_wtime()
 
   if (myid.eq.0) then
     write(*,*) "program is finalizing, time was: ", etime-stime
