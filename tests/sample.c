@@ -29,16 +29,33 @@
  *-------------------------------------------------------------------------- */
 
 #include "config.h"
-
-#include <assert.h>
-#include <stdlib.h>
+#include "fct.h"
 #include <esio/esio.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-int main(void)
+FCT_BGN()
 {
-  puts("Hello World!");
-  return EXIT_SUCCESS;
+   FCT_SUITE_BGN(sample)
+   {
+      FCT_TEST_BGN(strcmp_eq)
+      {
+         fct_chk(strcmp("durka", "durka") == 0);
+      }
+      FCT_TEST_END();
+
+
+      FCT_TEST_BGN(chk_neq)
+      {
+         fct_chk(strcmp("daka", "durka") !=0 );
+      }
+      FCT_TEST_END();
+
+   }
+   FCT_SUITE_END();
+
 }
+FCT_END()

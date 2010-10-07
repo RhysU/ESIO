@@ -8,7 +8,7 @@ AM_FCFLAGS     += -I$(top_srcdir)/esio -I$(top_builddir)/esio
 AM_LDFLAGS      = # Append below
 bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
-noinst_HEADERS  = # Append below
+noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
 
 # Use parallel HDF5 compiler wrappers per configure.ac
