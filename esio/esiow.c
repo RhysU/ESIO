@@ -153,7 +153,7 @@ int esio_dclose()
  * in the file.
  */
 
-int esio_write_double(int ny, int zxstepover, double* data)
+static int esio_write_double(int ny, int zxstepover, double* data)
 {
 
     hid_t    filespace;      /* file and memory dataspace identifiers */

@@ -49,14 +49,6 @@ void FC_FUNC_(esiofb_dclose,ESIOFB_DCLOSE)
     esio_dclose();
 }
 
-void FC_FUNC_(esiofb_write_double,ESIOFB_WRITE_DOUBLE)
-    (int *ny,
-     int *stepover,
-     double *data)
-{
-    esio_write_double(*ny, *stepover, data);
-}
-
 void FC_FUNC_(esiofb_write_double_field,ESIOFB_WRITE_DOUBLE_FIELD)
     (int *ny,
      int *nx,
