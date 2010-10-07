@@ -30,32 +30,28 @@
 
 #include "config.h"
 #include "fct.h"
+#include <mpi.h>
 #include <esio/esio.h>
-
-#include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 FCT_BGN()
 {
-   FCT_SUITE_BGN(sample)
-   {
-      FCT_TEST_BGN(strcmp_eq)
-      {
-         fct_chk(strcmp("durka", "durka") == 0);
-      }
-      FCT_TEST_END();
+    /* MPI setup: MPI_Init and atexit(MPI_Finalize) */
+    int world_size, world_rank;
+    MPI_Init(&argc, &argv);
+    atexit((void (*) ()) MPI_Finalize);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
+    FCT_SUITE_BGN(sample)
+    {
+        FCT_TEST_BGN(strcmp_eq)
+        {
+            fct_chk_eq_int(world_rank, 0);
+        }
+        FCT_TEST_END();
 
-      FCT_TEST_BGN(chk_neq)
-      {
-         fct_chk(strcmp("daka", "durka") !=0 );
-      }
-      FCT_TEST_END();
-
-   }
-   FCT_SUITE_END();
-
+    }
+    FCT_SUITE_END();
 }
 FCT_END()
