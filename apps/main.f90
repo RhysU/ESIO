@@ -6,6 +6,7 @@
 program main
 
   use mpi
+  use esio
 
 ! The header contains problem size, initial conditions, precision, etc.
 ! The header declares physical space extents but xis{t,z}/zjs{t,z} and
@@ -17,15 +18,20 @@ program main
 
   integer(4)            :: myid, numprocs, ierr, i
   integer(4), parameter :: niter = 1
+  type(esio_state)      :: state
 
-  character(len=20) :: filename, dataset
-  character(len=20) :: overwrite="o"//char(0)
+  character(len=20) :: filename  = "outpen.1.h5"
+  character(len=20) :: fieldname = "u.field"
 
   real(8) :: stime, etime ! timers
 
   call mpi_init(ierr)
   call mpi_comm_rank(mpi_comm_world, myid, ierr)
   call mpi_comm_size(mpi_comm_world, numprocs, ierr)
+
+  if (myid.eq.0) write(*,*) "initializing esio"
+  state = esio_init(mpi_comm_world)
+  ierr  = esio_file_create(state, filename, .TRUE.)
 
   if (myid.eq.0) write(*,*) "initializing problem"
   call initialize_problem(myid,numprocs)
@@ -44,15 +50,15 @@ program main
 !   call mpi_barrier(mpi_comm_world, ierr)
 ! end do
 
-  filename="outpen.1.h5"//char(0)     ! filename for output field
-  dataset="u.field"//char(0)          ! dataset name for output field
-
-  stime=mpi_wtime()
+  stime = mpi_wtime()
   do i = 1, niter
-    call esiof_write_field(ny, nx, nz, nc, xist, xisz, zjst, zjsz, u, &
-                          filename, dataset, overwrite);
+!   TODO Use generic, precision-agnostic call
+    ierr = esio_field_write_double(state, fieldname, u, &
+                                   ny, 1,    ny,        &
+                                   nx, xist, xisz,      &
+                                   nz, zjst, zjsz)
   end do
-  etime=mpi_wtime()
+  etime = mpi_wtime()
 
   if (myid.eq.0) then
     write(*,*) "program is finalizing, time was: ", etime-stime
@@ -63,6 +69,8 @@ program main
                (niter*(nc*8*ny*nz*nx/2.)/(10e6))/(etime-stime), " MB/s"
   end if
 
+  ierr = esio_file_close(state)
+  ierr = esio_finalize(state)
   call mpi_finalize(ierr)
 
 end program main
