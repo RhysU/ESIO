@@ -98,11 +98,18 @@ FCT_BGN()
         }
         FCT_TEST_END();
 
-        FCT_TEST_BGN(file_create)
+        FCT_TEST_BGN(file_create_and_open)
         {
             // Create with overwrite should always work
             fct_req(0 == esio_file_create(state, filename, 1 /* overwrite */));
+
+            // Close the file
             fct_req(0 == esio_file_close(state));
+
+            // Double closure should fail
+            esio_set_error_handler_off();
+            fct_req(0 != esio_file_close(state));
+            esio_set_error_handler(esio_handler);
 
             // Create without overwrite should fail
             H5Eset_auto(H5E_DEFAULT, NULL, NULL);
@@ -114,8 +121,27 @@ FCT_BGN()
             // Remove the file and create without overwrite should succeed
             fct_req(0 == unlink(filename));
             fct_req(0 == esio_file_create(state, filename, 0 /* no overwrite */));
+
+            // Close the file
+            fct_req(0 == esio_file_close(state));
+
+            // Ensure we can open in read-only mode
+            fct_req(0 == esio_file_open(state, filename, 0 /* read-only */));
+
+            // Close the file
+            fct_req(0 == esio_file_close(state));
+
+            // Ensure we can open in read-write mode
+            fct_req(0 == esio_file_open(state, filename, 1 /* read-write */));
+
+            // Close the file
+            fct_req(0 == esio_file_close(state));
+
+            // Remove the file
+            fct_req(0 == unlink(filename));
         }
         FCT_TEST_END();
+
     }
     FCT_FIXTURE_SUITE_END();
 }

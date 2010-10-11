@@ -205,6 +205,9 @@ int
 esio_finalize(esio_state s)
 {
     if (s) {
+        if (s->file_id != -1) {
+            esio_file_close(s); // Force file closure
+        }
         if (s->comm != MPI_COMM_NULL) {
             ESIO_MPICHKR(MPI_Comm_free(&s->comm));
             s->comm = MPI_COMM_NULL;
