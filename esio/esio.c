@@ -471,6 +471,8 @@ hid_t layout1_field_writer(hid_t dset_id, void *field,
 {
     // TODO Error checking here
 
+    (void) nc; // Unused but present for API consistency
+
     // Create property list for collective write
     const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
@@ -492,11 +494,20 @@ hid_t layout1_field_writer(hid_t dset_id, void *field,
             H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                 offset, stride, count, NULL);
 
+            // Compute in-memory offset to hyperslab's data
+            // Note use of type_size when adding to (void *) field
+            const size_t  moffset = j*na + i*na*bsz;
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:1338)
+#endif
+            void         *p_field = field + (type_size * moffset);
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
+
             // Write to hyperslab from memory
-            const size_t moffset = type_size * (j*na + i*na*bsz);
             const herr_t status = H5Dwrite(dset_id, type_id, memspace,
-                                           filespace, plist_id,
-                                           field + moffset);
+                                           filespace, plist_id, p_field);
             if (status < 0) {
                 H5Sclose(filespace);
                 H5Sclose(memspace);
