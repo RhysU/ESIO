@@ -28,6 +28,8 @@
 !!--------------------------------------------------------------------------
 
 ! TODO Document Fortran API
+! TODO Allow Fortran to detect invalid state before other failure
+! TODO Allow Fortran to use customizable error handling
 
 module esio
 
@@ -89,16 +91,19 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_finalize ()
+  integer function esio_finalize (state)
+
+    type(esio_state), intent(in) :: state
 
     interface
-      function impl () bind (C, name="esio_finalize")
+      function impl (state) bind (C, name="esio_finalize")
         import
-        integer(c_int) :: impl
+        integer(c_int)                      :: impl
+        type(esio_state), intent(in), value :: state
       end function impl
     end interface
 
-    esio_finalize = impl()
+    esio_finalize = impl(state)
 
   end function esio_finalize
 
