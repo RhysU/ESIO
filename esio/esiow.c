@@ -1,5 +1,3 @@
-/* these are the esio writing c routines for hdf5 */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -9,258 +7,462 @@
 #include <string.h>
 #include <stdlib.h>
 #include <hdf5.h>
+#include <hdf5_hl.h>
 #include <mpi.h>
 #include "esio.h"
+#include "error.h"
 
-#define RANK (2)                               /* Dimensionality */
-static const MPI_Comm comm =  MPI_COMM_WORLD;  /* Communicator */
-static       hid_t dset_id = -1;               /* file identifier */
-static       hid_t file_id = -1;               /* dataset identifier */
+//*********************************************************************
+// INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
+//*********************************************************************
 
-int esio_fopen(char* file, char* trunc)
+static
+MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
+
+static
+hid_t layout1_filespace_creator(int na, int nb, int nc);
+
+static
+int layout1_field_writer(hid_t dset_id, void *data,
+                         int na, int ast, int asz,
+                         int nb, int bst, int bsz,
+                         int nc, int cst, int csz,
+                         hid_t type_id, size_t type_size);
+
+static
+hid_t esio_field_create(esio_state s,
+                        int na, int nb, int nc,
+                        const char* name, hid_t type_id);
+
+static
+int esio_field_close(hid_t dataset_id);
+
+static
+int esio_field_write_internal(esio_state s,
+                              const char* name,
+                              void *data,
+                              int na, int ast, int asz,
+                              int nb, int bst, int bsz,
+                              int nc, int cst, int csz,
+                              hid_t type_id,
+                              size_t type_size);
+
+//*********************************************************************
+// INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
+//*********************************************************************
+
+typedef struct esio_layout {
+    int tag;
+    const char * name;
+    hid_t (*filespace_creator)(int, int, int);
+    int   (*field_writer)     (hid_t, void *,
+                               int, int, int,
+                               int, int, int,
+                               int, int, int,
+                               hid_t, size_t);
+} esio_layout;
+
+static const esio_layout layout_1 = {
+    1, "2D(a_bc)", &layout1_filespace_creator, &layout1_field_writer
+};
+
+struct esio_state_s {
+    MPI_Comm    comm;      //< Communicator used for collective operations
+    int         comm_rank; //< Process rank within in MPI communicator
+    int         comm_size; //< Number of ranks within MPI communicator
+    MPI_Info    info;      //< Info object used for collective operations
+    hid_t       file_id;   //< Active HDF file identifier
+    esio_layout layout;    //< Active field layout within HDF5 file
+};
+
+
+//***************************************************************************
+// IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION
+//***************************************************************************
+
+static
+MPI_Comm
+esio_MPI_Comm_dup_with_name(MPI_Comm comm)
 {
-    hid_t plist_id;                 /* property list identifier */
+    if (comm == MPI_COMM_NULL) return MPI_COMM_NULL;
 
-    plist_id = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist_id, comm, MPI_INFO_NULL);
-
-    if (file_id != -1) /* another open file exists-- abort */
-    {
-        printf("\nESIO FATAL ERROR: "
-               "Cannot open new file -- previous file not closed!\n");
-        printf("ESIO Does not support multiple open files.\n");
-        MPI_Abort(comm, 1);
+#ifdef MPI_MAX_OBJECT_NAME
+    char buffer[MPI_MAX_OBJECT_NAME] = "";
+#else
+    char buffer[MPI_MAX_NAME_STRING] = "";
+#endif
+    int resultlen = 0;
+    const int get_name_error = MPI_Comm_get_name(comm, buffer, &resultlen);
+    if (get_name_error) {
+        ESIO_MPICHKR(get_name_error /* MPI_Comm_get_name */);
+        return MPI_COMM_NULL;
     }
 
-    /*
-     * Create a new file collectively
-     * OR
-     * Delete old data and update values
-     */
-    if (strncmp(trunc, "o", 1) == 0) /* starts with n */
-    {
-        file_id = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-        if (file_id < 0)
-        {
-            printf("\nESIO FATAL ERROR: "
-                   "Unable to create file\n");
-            MPI_Abort(comm, 1);
+    MPI_Comm retval = MPI_COMM_NULL;
+
+    const int dup_error = MPI_Comm_dup(comm, &retval);
+    if (dup_error) {
+        ESIO_MPICHKR(dup_error /* MPI_Comm_dup */);
+        return MPI_COMM_NULL;
+    }
+
+    if (resultlen > 0) {
+        const int set_name_error = MPI_Comm_set_name(retval, buffer);
+        if (set_name_error) {
+            ESIO_MPICHKR(set_name_error /* MPI_Comm_set_name */);
+            ESIO_MPICHKR(MPI_Comm_free(&retval));
+            return MPI_COMM_NULL;
         }
     }
-    else /* do not overwrite old dataset -- will fail if file already exists */
-    {
-        file_id = H5Fcreate(file, H5F_ACC_EXCL, H5P_DEFAULT, plist_id);
-        if (file_id < 0)
-        {
-            printf("\nESIO FATAL ERROR: "
-                   "File already exists\n");
-            MPI_Abort(comm, 1);
+
+    return retval;
+}
+
+esio_state
+esio_init(MPI_Comm comm)
+{
+    // Sanity check incoming arguments
+    if (comm == MPI_COMM_NULL) {
+        ESIO_ERROR_NULL("comm == MPI_COMM_NULL required", ESIO_EINVAL);
+    }
+
+    // Get number of processors and the local rank within the communicator
+    int comm_size;
+    ESIO_MPICHKN(MPI_Comm_size(comm, &comm_size));
+    int comm_rank;
+    ESIO_MPICHKN(MPI_Comm_rank(comm, &comm_rank));
+
+    // Initialize an MPI Info instance
+    MPI_Info info;
+    ESIO_MPICHKN(MPI_Info_create(&info));
+
+    // Create and initialize ESIO's opaque state struct
+    esio_state s = calloc(1, sizeof(struct esio_state_s));
+    if (s == NULL) {
+        ESIO_ERROR_NULL("failed to allocate space for state", ESIO_ENOMEM);
+    }
+    s->comm              = esio_MPI_Comm_dup_with_name(comm);
+    s->comm_rank         = comm_rank;
+    s->comm_size         = comm_size;
+    s->info              = info;
+    s->file_id           = -1;
+    s->layout            = layout_1;
+
+    if (s->comm == MPI_COMM_NULL) {
+        esio_finalize(s);
+        ESIO_ERROR_NULL("Detected MPI_COMM_NULL in s->comm", ESIO_ESANITY);
+    }
+
+    return s;
+}
+
+void
+esio_finalize(esio_state s)
+{
+    if (s) {
+        if (s->comm != MPI_COMM_NULL) {
+            ESIO_MPICHKR(MPI_Comm_free(&s->comm));
+            s->comm = MPI_COMM_NULL;
+        }
+        if (s->info != MPI_INFO_NULL) {
+            ESIO_MPICHKR(MPI_Info_free(&s->info));
+            s->info = MPI_INFO_NULL;
+        }
+        free(s);
+    }
+}
+
+int
+esio_file_create(esio_state s, const char *file, int overwrite)
+{
+    // Sanity check incoming arguments
+    if (s == NULL) {
+        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+    }
+    if (s->file_id != -1) {
+        ESIO_ERROR("Cannot create file because previous file not closed",
+                   ESIO_EINVAL);
+    }
+    if (file == NULL) {
+        ESIO_ERROR("file == NULL", ESIO_EINVAL);
+    }
+
+    // Initialize file creation property list identifier
+    const hid_t fcpl_id = H5P_DEFAULT;
+
+    // Initialize file access list property identifier
+    const hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (fapl_id == -1) {
+        ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
+    }
+    // Set collective details
+    if (H5Pset_fapl_mpio(fapl_id, s->comm, s->info)) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
+    }
+
+    // Collectively create the file
+    hid_t file_id;
+    if (overwrite) {
+        // Create new file or truncate existing file
+        file_id = H5Fcreate(file, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+        if (file_id < 0) {
+            H5Pclose(fapl_id);
+            ESIO_ERROR("Unable to create file", ESIO_ESANITY);
+        }
+    } else {
+        // Avoid overwriting existing file
+        file_id = H5Fcreate(file, H5F_ACC_EXCL, fcpl_id, fapl_id);
+        if (file_id < 0) {
+            H5Pclose(fapl_id);
+            ESIO_ERROR("File already exists", ESIO_ESANITY);
         }
     }
 
-    H5Pclose(plist_id);   /* release property list identifier */
+    // File creation successful: update state
+    s->file_id = file_id;
 
-    return 0;
+    // Clean up temporary resources
+    H5Pclose(fapl_id);
+
+    return ESIO_SUCCESS;
 }
 
-int esio_fclose()
+int
+esio_file_open(esio_state s, const char *file, int readwrite)
 {
-
-    int error = H5Fclose(file_id);
-
-    if (error < 0)
-    {
-        printf("\nESIO FATAL ERROR: "
-               "File unable to close\n");
-        MPI_Abort(comm, 1);
+    // Sanity check incoming arguments
+    if (s == NULL) {
+        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+    }
+    if (s->file_id != -1) {
+        ESIO_ERROR("Cannot open new file because previous file not closed",
+                   ESIO_EINVAL);
+    }
+    if (file == NULL) {
+        ESIO_ERROR("file == NULL", ESIO_EINVAL);
     }
 
-    file_id = -1; /* reset unique file identifier */
-    return 0;
+    // Initialize file access list property identifier
+    const hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (fapl_id == -1) {
+        ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
+    }
+    // Set collective details
+    if (H5Pset_fapl_mpio(fapl_id, s->comm, s->info)) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
+    }
+
+    // Initialize access flags
+    const unsigned flags = readwrite ? H5F_ACC_RDWR : H5F_ACC_RDONLY;
+
+    // Collectively open the file
+    const hid_t file_id = H5Fopen(file, flags, fapl_id);
+    if (file_id < 0) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to open existing file", ESIO_ESANITY);
+    }
+
+    // File creation successful: update state
+    s->file_id = file_id;
+
+    // Clean up temporary resources
+    H5Pclose(fapl_id);
+
+    return ESIO_SUCCESS;
 }
 
-int esio_dopen(int ny, int nx, int nz, char* datasetname, char* precision)
+int esio_file_close(esio_state s)
 {
-    hid_t   filespace;                /* file identifier */
-    hsize_t dimsf[RANK];              /* dataset dimensions */
-
-    assert(ny > 0);
-    assert(nx > 0);
-    assert(nz > 0);
-
-    if (dset_id != -1) /* another open dataset exists -- abort */
-    {
-        printf("\nESIO FATAL ERROR: "
-               "Cannot open new dataset -- previous not closed!\n");
-        printf("ESIO Does not support multiple open datasets.\n");
-        MPI_Abort(comm, 1);
+    // Sanity check incoming arguments
+    if (s == NULL) {
+        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+    }
+    if (s->file_id == -1) {
+        ESIO_ERROR("No file currently open", ESIO_EINVAL);
     }
 
-    /*
-     * Create the dataspace for the dataset.
-     */
-    dimsf[0] = nx * nz;
-    dimsf[1] = ny;
-    filespace = H5Screate_simple(RANK, dimsf, NULL);
-
-    /*
-     * Create the dataset with default properties and close filespace.
-     */
-    if (strncmp(precision, "d", 1) == 0)
-    {
-        /* write doubles */
-        dset_id = H5Dcreate1(file_id, datasetname, H5T_NATIVE_DOUBLE,
-                             filespace, H5P_DEFAULT);
-    }
-    else if ((strncmp(precision, "f", 1) || strncmp(precision, "s", 1)) == 0)
-    {
-        /* write single precision */
-        dset_id = H5Dcreate1(file_id, datasetname, H5T_NATIVE_FLOAT,
-                             filespace, H5P_DEFAULT);
-    }
-    else
-    {
-        printf("\nESIO FATAL ERROR: "
-                "Cannot open dataset -- precision not properly specified\n");
-        printf("User Must specify either double or single precision\n");
-        MPI_Abort(comm, 1);
+    // Close any open file
+    if (H5Fclose(s->file_id) < 0) {
+        ESIO_ERROR("Unable to close file", ESIO_EFAILED);
     }
 
+    // File closing successful: update state
+    s->file_id = -1;
+
+    return ESIO_SUCCESS;
+}
+
+static
+hid_t esio_field_create(esio_state s,
+                        int na, int nb, int nc,
+                        const char* name, hid_t type_id)
+{
+    // Create the filespace using current layout within state state
+    const hid_t filespace = (s->layout.filespace_creator)(na, nb, nc);
+    if (filespace < 0) {
+        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+    }
+
+    // Create the dataspace
+    const hid_t dset_id
+        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+    }
+
+    // Stash the layout tag as an attribute
+    if (H5LTset_attribute_int(s->file_id, name, "esio_layout_tag",
+                              &(s->layout.tag), 1)) {
+        ESIO_ERROR("Unable to save layout tag", ESIO_ESANITY);
+    }
+
+    // Clean up temporary resources
     H5Sclose(filespace);
 
-    return 0;
-
+    return dset_id;
 }
 
-int esio_dclose()
+static
+int esio_field_close(hid_t dataset_id)
 {
-
-    int error = H5Dclose(dset_id);
-    if (error < 0)
-    {
-        printf("\nESIO FATAL ERROR: "
-               "File unable to close\n");
-        MPI_Abort(comm, 1);
+    if (H5Dclose(dataset_id) < 0) {
+        ESIO_ERROR("Error closing field", ESIO_EFAILED);
     }
-    dset_id = -1; /* reset */
-    return 0;
+
+    return ESIO_SUCCESS;
 }
 
+// TODO esio_field_open
+// TODO use esio_field_{create,open} based upon H5LT_find_dataset
 
-
-/*
- * Each process defines dataset in memory and writes it to the hyperslab
- * in the file.
- */
-
-static int esio_write_double(int ny, int zxstepover, double* data)
+int esio_field_write_double(esio_state s,
+                            const char* name,
+                            double *data,
+                            int na, int ast, int asz,
+                            int nb, int bst, int bsz,
+                            int nc, int cst, int csz)
 {
+    return esio_field_write_internal(s, name, data,
+                                     na, ast, asz,
+                                     nb, bst, bsz,
+                                     nc, cst, csz,
+                                     H5T_NATIVE_DOUBLE,
+                                     sizeof(double));
+}
 
-    hid_t    filespace;      /* file and memory dataspace identifiers */
-    hid_t    memspace;       /* memory dataspace identifier */
-    hid_t    plist_id;       /* property list identifier */
-    herr_t  status;
+int esio_field_write_float(esio_state s,
+                           const char* name,
+                           float *data,
+                           int na, int ast, int asz,
+                           int nb, int bst, int bsz,
+                           int nc, int cst, int csz)
+{
+    return esio_field_write_internal(s, name, data,
+                                     na, ast, asz,
+                                     nb, bst, bsz,
+                                     nc, cst, csz,
+                                     H5T_NATIVE_FLOAT,
+                                     sizeof(float));
+}
 
-    /* hyperslab selection parameters */
-     hsize_t count[RANK];
-     hsize_t offset[RANK];
-     hsize_t stride[RANK];
-     count[0]  = 1;          /* # of values to write */
-     count[1]  = ny;
-     offset[0] = zxstepover; /* offset               */
-     offset[1] = 0;
-     stride[0] = 1;
-     stride[1] = 1;          /* dont skip values */
+static
+int esio_field_write_internal(esio_state s,
+                              const char* name,
+                              void *data,
+                              int na, int ast, int asz,
+                              int nb, int bst, int bsz,
+                              int nc, int cst, int csz,
+                              hid_t type_id,
+                              size_t type_size)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (data == NULL)     ESIO_ERROR("data == NULL",           ESIO_EINVAL);
+    if (na  < 0)          ESIO_ERROR("na < 0",                 ESIO_EINVAL);
+    if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
+    if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
+    if (nb  < 0)          ESIO_ERROR("nb < 0",                 ESIO_EINVAL);
+    if (bst < 0)          ESIO_ERROR("bst < 0",                ESIO_EINVAL);
+    if (bsz < 1)          ESIO_ERROR("bsz < 1",                ESIO_EINVAL);
+    if (nc  < 0)          ESIO_ERROR("nc < 0",                 ESIO_EINVAL);
+    if (cst < 0)          ESIO_ERROR("cst < 0",                ESIO_EINVAL);
+    if (csz < 1)          ESIO_ERROR("csz < 1",                ESIO_EINVAL);
 
-    /*
-     * Initialize data buffer
-     */
-    memspace = H5Screate_simple(RANK, count, NULL);
+    // TODO Error checking here
+    const hid_t dset_id = esio_field_create(s, na, nb, nc, name, type_id);
+    (s->layout.field_writer)(dset_id, data,
+                             na, ast, asz,
+                             nb, bst, bsz,
+                             nc, cst, csz,
+                             type_id, type_size);
+    esio_field_close(dset_id);
 
-    /*
-     * Select hyperslab in the file
-     */
-    filespace = H5Dget_space(dset_id);
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                        offset, stride, count, NULL);
+    return ESIO_SUCCESS;
+}
 
-    /*
-     * Create property list for collective dataset write
-     */
-    plist_id = H5Pcreate(H5P_DATASET_XFER);
+// **************************************************************
+// LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
+// **************************************************************
+
+static
+hid_t layout1_filespace_creator(int na, int nb, int nc)
+{
+    const hsize_t dims[2] = { nb * nc, na };
+    return H5Screate_simple(2, dims, NULL);
+}
+
+static
+hid_t layout1_field_writer(hid_t dset_id, void *data,
+                           int na, int ast, int asz,
+                           int nb, int bst, int bsz,
+                           int nc, int cst, int csz,
+                           hid_t type_id, size_t type_size)
+{
+    // TODO Error checking here
+
+    // Create property list for collective write
+    const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
 
-    status = H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, memspace,
-                      filespace, plist_id, data);
-    if (status < 0)
+    // Initialize one-time write details
+    const hsize_t stride[2] = { 1, 1 };
+    const hsize_t count[2]  = { 1, asz };
+    const hid_t   memspace  = H5Screate_simple(2, count, NULL);
+    const hid_t   filespace = H5Dget_space(dset_id);
+
+    hsize_t offset[2];
+    for (int i = 0; i < csz; i++)
     {
-        /* user wants to know if data isn't being written properly */
-        printf("\nESIO FATAL ERROR: Write Failed\n");
-        MPI_Abort(comm, 1);
+        for (int j = 0; j < bsz; j++)
+        {
+            // Select hyperslab in the file
+            offset[0] = (j + bst) + (i + cst) * nb;
+            offset[1] = ast;
+            H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                offset, stride, count, NULL);
+
+            // Write to hyperslab from memory
+            const size_t moffset = type_size * (j*na + i*na*bsz);
+            const herr_t status = H5Dwrite(dset_id, type_id, memspace,
+                                           filespace, plist_id,
+                                           data + moffset);
+            if (status < 0) {
+                H5Sclose(filespace);
+                H5Sclose(memspace);
+                H5Pclose(plist_id);
+                ESIO_ERROR("Write failed", ESIO_EFAILED);
+            }
+        }
     }
 
-    /*
-     * Close/release resources
-     */
+    // Release temporary resources
     H5Sclose(filespace);
     H5Sclose(memspace);
     H5Pclose(plist_id);
 
-    return 0;
-
-}
-
-int esio_write_double_field(int ny, int nx, int nz, int nc,
-                            int xst, int xsz,
-                            int zst, int zsz, double* data,
-                            char *filename, char *dataname, char *overwrite)
-{
-#ifdef TIMERS
-    double start, end, timer;
-#endif
-    int mpi_rank;
-    int i, j;
-
-#ifdef TIMERS
-    start = MPI_Wtime();                                  /* start timers */
-#endif
-
-    MPI_Comm_rank(comm, &mpi_rank);
-    esio_fopen(filename, overwrite);                      /* create file */
-    esio_dopen(ny, nx, nz, dataname, "double");           /* create dataset */
-
-    --zst; /* convert to zero-indexed value */            /* FIXME Unify */
-    --xst; /* convert to zero-indexed value */            /* FIXME Unify */
-    for (i = 0; i < xsz; i++)
-        for (j = 0; j < zsz; j++)
-        {
-            const int zxstepover = (j + zst) + (i + xst) * nz;
-            const int loffset    = j*ny + i*ny*zsz;
-            esio_write_double(ny, zxstepover, data + loffset);
-        }
-
-    esio_dclose();                                        /* close dataset */
-    esio_fclose();                                        /* close file */
-
-#ifdef TIMERS
-    end = MPI_Wtime();                                    /* end timers */
-#endif
-
-    /* finalize and report */
-#ifdef TIMERS
-    if (mpi_rank == 0)
-    {
-        timer = end - start;
-        printf("\nfinalizing\n");
-        printf("total time was: %g\n", timer);
-        printf("wrote: %g MB\n",
-               (nc*sizeof(double)*ny*nz*nx) / (1024.*1024.));
-        printf("write speed was: %g GB/s\n",
-               ((nc*sizeof(double)*ny*nz*nx) / (1024.*1024.*1024.)) / (timer));
-/*         printf("wrote: %g MB\n", */
-/*                (nc*sizeof(double)*ny*nz*nx/2.) / (1024.*1024.)); */
-    }
-#endif
-
-    return 0;
+    return ESIO_SUCCESS;
 }

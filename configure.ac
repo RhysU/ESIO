@@ -28,7 +28,8 @@ if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
 fi
 AX_PATH_GRVY_NEW([0.27],[no])
-AX_CFLAGS_WARN_ALL_ANSI([CFLAGS])
+AX_CFLAGS_WARN_ALL
+AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 AC_LANG_POP([C])
 
 dnl ------------------------------------------------

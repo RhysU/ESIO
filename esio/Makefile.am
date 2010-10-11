@@ -19,6 +19,7 @@ FC=@H5FC@
 
 # Headers installed with the library
 pkginclude_HEADERS += esio.h
+pkginclude_HEADERS += error.h
 
 # Public ESIO library containing C and Fortran interfaces
 # Need distinct C and Fortran sublibraries for libtool --tag purposes
@@ -29,7 +30,7 @@ libesio_la_LIBADD    = libesio_c.la libesio_f.la
 
 # C sources to place into the public library
 noinst_LTLIBRARIES   += libesio_c.la
-libesio_c_la_SOURCES  = esiow.c esiofb.c
+libesio_c_la_SOURCES  = esiow.c esiofb.c error.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
