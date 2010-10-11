@@ -29,6 +29,11 @@ check_PROGRAMS += sample
 sample_SOURCES  = sample.c
 sample_LDADD    = ../esio/libesio.la
 
+## Layout test program
+check_PROGRAMS += basic
+basic_SOURCES   = basic.c
+basic_LDADD     = ../esio/libesio.la
+
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field
 #noinst_PROGRAMS        += simplef90
@@ -36,7 +41,8 @@ sample_LDADD    = ../esio/libesio.la
 #simplef90_LDADD         = ../esio/libesio.la
 #simplef90_LIBTOOLFLAGS  = --tag=FC
 
-TESTS_ENVIRONMENT =
+TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
+TESTS_ENVIRONMENT += ESIO_TEST_OUPUT_DIR=.
 TESTS = $(check_PROGRAMS)
 
 # Required for AX_AM_MACROS

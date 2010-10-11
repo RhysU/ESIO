@@ -1,34 +1,37 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------
  *
- * Copyright (C) 2009 The PSDNS Development Team
+ * Copyright (C) 2010 The PSDNS Development Team
  *
  * Please see https://wiki.ices.utexas.edu/PSDNS for more information.
  *
  * This file is part of the esio library.
  *
- * esio is free software: you can redistribute it and/or modify
+ * ESIO is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * esio is distributed in the hope that it will be useful,
+ * ESIO is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with esio.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
  *
  *--------------------------------------------------------------------------
  *
- * esio.c: esio public api implementations
+ * sample.c: sample unit test using the FCTX framework
  *
  * $Id$
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "fct.h"
 #include <mpi.h>
 #include <esio/esio.h>
