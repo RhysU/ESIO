@@ -23,6 +23,7 @@
 #endif
 #include "error.h"
 #include <stdlib.h>
+#include <mpi.h>
 
 esio_error_handler_t * esio_error_handler = NULL;
 
@@ -49,7 +50,7 @@ esio_error(const char * reason,
     fprintf (stderr, "Default esio error handler invoked.\n");
     fflush (stderr);
 
-    abort ();
+    MPI_Abort (MPI_COMM_WORLD, 1);
 }
 
 esio_error_handler_t *
