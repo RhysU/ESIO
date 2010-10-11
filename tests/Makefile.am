@@ -10,6 +10,7 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
+EXTRA_DIST      = field_realvalued.c
 
 # Use parallel HDF5 compiler wrappers per configure.ac
 CC=@H5CC@
@@ -29,10 +30,22 @@ check_PROGRAMS += sample
 sample_SOURCES  = sample.c
 sample_LDADD    = ../esio/libesio.la
 
-## Layout test program
+## Basic C API sanity checks
 check_PROGRAMS += basic
 basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
+
+## Double precision fields from C
+check_PROGRAMS            += field_double
+field_double_SOURCES       = field_double.c
+field_double_LDADD         = ../esio/libesio.la
+field_double.o: field_double.c field_realvalued.c
+
+## Single precision fields from C
+check_PROGRAMS       += field_float
+field_float_SOURCES   = field_float.c
+field_float_LDADD     = ../esio/libesio.la
+field_float.o: field_float.c field_realvalued.c
 
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field
