@@ -53,7 +53,7 @@ static
 hid_t layout1_filespace_creator(int na, int nb, int nc);
 
 static
-int layout1_field_writer(hid_t dset_id, void *data,
+int layout1_field_writer(hid_t dset_id, void *field,
                          int na, int ast, int asz,
                          int nb, int bst, int bsz,
                          int nc, int cst, int csz,
@@ -70,7 +70,7 @@ int esio_field_close(hid_t dataset_id);
 static
 int esio_field_write_internal(esio_state s,
                               const char* name,
-                              void *data,
+                              void *field,
                               int na, int ast, int asz,
                               int nb, int bst, int bsz,
                               int nc, int cst, int csz,
@@ -386,12 +386,12 @@ int esio_field_close(hid_t dataset_id)
 
 int esio_field_write_double(esio_state s,
                             const char* name,
-                            double *data,
+                            double *field,
                             int na, int ast, int asz,
                             int nb, int bst, int bsz,
                             int nc, int cst, int csz)
 {
-    return esio_field_write_internal(s, name, data,
+    return esio_field_write_internal(s, name, field,
                                      na, ast, asz,
                                      nb, bst, bsz,
                                      nc, cst, csz,
@@ -401,12 +401,12 @@ int esio_field_write_double(esio_state s,
 
 int esio_field_write_float(esio_state s,
                            const char* name,
-                           float *data,
+                           float *field,
                            int na, int ast, int asz,
                            int nb, int bst, int bsz,
                            int nc, int cst, int csz)
 {
-    return esio_field_write_internal(s, name, data,
+    return esio_field_write_internal(s, name, field,
                                      na, ast, asz,
                                      nb, bst, bsz,
                                      nc, cst, csz,
@@ -417,7 +417,7 @@ int esio_field_write_float(esio_state s,
 static
 int esio_field_write_internal(esio_state s,
                               const char* name,
-                              void *data,
+                              void *field,
                               int na, int ast, int asz,
                               int nb, int bst, int bsz,
                               int nc, int cst, int csz,
@@ -428,7 +428,7 @@ int esio_field_write_internal(esio_state s,
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (data == NULL)     ESIO_ERROR("data == NULL",           ESIO_EINVAL);
+    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EINVAL);
     if (na  < 0)          ESIO_ERROR("na < 0",                 ESIO_EINVAL);
     if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
@@ -441,7 +441,7 @@ int esio_field_write_internal(esio_state s,
 
     // TODO Error checking here
     const hid_t dset_id = esio_field_create(s, na, nb, nc, name, type_id);
-    (s->layout.field_writer)(dset_id, data,
+    (s->layout.field_writer)(dset_id, field,
                              na, ast, asz,
                              nb, bst, bsz,
                              nc, cst, csz,
@@ -463,7 +463,7 @@ hid_t layout1_filespace_creator(int na, int nb, int nc)
 }
 
 static
-hid_t layout1_field_writer(hid_t dset_id, void *data,
+hid_t layout1_field_writer(hid_t dset_id, void *field,
                            int na, int ast, int asz,
                            int nb, int bst, int bsz,
                            int nc, int cst, int csz,
@@ -496,7 +496,7 @@ hid_t layout1_field_writer(hid_t dset_id, void *data,
             const size_t moffset = type_size * (j*na + i*na*bsz);
             const herr_t status = H5Dwrite(dset_id, type_id, memspace,
                                            filespace, plist_id,
-                                           data + moffset);
+                                           field + moffset);
             if (status < 0) {
                 H5Sclose(filespace);
                 H5Sclose(memspace);

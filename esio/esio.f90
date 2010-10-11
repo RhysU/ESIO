@@ -35,7 +35,6 @@ module esio
 ! Rename C_PTR to ESIO_STATE to make the handle object types more opaque.
 ! State traverses the language boundary as TYPE(ESIO_STATE)s.
 ! Renaming also prevents collision if caller uses ISO_C_BINDING directly.
-! Other interoperation details are kept hidden from the client.
   use, intrinsic :: iso_c_binding, only: c_char,             &
                                          c_double,           &
                                          c_double_complex,   &
@@ -44,8 +43,13 @@ module esio
                                          c_int,              &
                                          c_null_char,        &
                                          esio_state => c_ptr
+
+  implicit none
+
+! C Interoperation details are kept hidden from the client...
   private :: c_char, c_double, c_double_complex
   private :: c_float, c_float_complex, c_int, c_null_char
+! ... with the exception of our opaque handle object type.
   public  :: esio_state
 
 ! Public functionality
@@ -72,8 +76,8 @@ contains
 
     ! See C routine esio_init_fortran re: MPI communicator interoperation
     interface
-      import
       function impl (comm) bind (C, name="esio_init_fortran")
+        import
         type(esio_state)           :: impl
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
       end function impl
@@ -88,8 +92,8 @@ contains
   integer function esio_finalize ()
 
     interface
-      import
       function impl () bind (C, name="esio_finalize")
+        import
         integer(c_int) :: impl
       end function impl
     end interface
@@ -107,12 +111,12 @@ contains
     logical,          intent(in) :: overwrite
 
     interface
-      import
       function impl (state, file, overwrite) bind (C, name="esio_file_create")
+        import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
-        character(len=1,kind=c_char), intent(in), value :: file
-        logical,                      intent(in), value :: overwrite
+        character(len=1,kind=c_char), intent(in)        :: file(*)
+        integer(c_int),               intent(in), value :: overwrite
       end function impl
     end interface
 
@@ -129,12 +133,12 @@ contains
     logical,          intent(in) :: readwrite
 
     interface
-      import
       function impl (state, file, readwrite) bind (C, name="esio_file_open")
+        import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
-        character(len=1,kind=c_char), intent(in), value :: file
-        logical,                      intent(in), value :: readwrite
+        character(len=1,kind=c_char), intent(in)        :: file(*)
+        integer(c_int),               intent(in), value :: readwrite
       end function impl
     end interface
 
@@ -149,14 +153,14 @@ contains
     type(esio_state), intent(in) :: state
 
     interface
-      import
       function impl (state) bind (C, name="esio_file_close")
+        import
         integer(c_int)                      :: impl
         type(esio_state), intent(in), value :: state
       end function impl
     end interface
 
-    esio_file_close = impl(state, f_c_string(file), f_c_logical(readwrite))
+    esio_file_close = impl(state)
 
   end function esio_file_close
 
@@ -165,28 +169,28 @@ contains
 ! TODO Use Autoconf to find c_double value at compile time and use in API.
 ! Would eliminate "leaking" c_double in the API and leave, e.g., real(8).
 
-  integer function esio_field_write_double (state, name, data, &
-                                            na, ast, asz,      &
-                                            nb, bst, bsz,      &
+  integer function esio_field_write_double (state, name, field, &
+                                            na, ast, asz,       &
+                                            nb, bst, bsz,       &
                                             nc, cst, csz)
 
     type(esio_state), intent(in) :: state
     character(len=*), intent(in) :: name
-    real(c_double),   intent(in) :: data(*)
+    real(c_double),   intent(in) :: field(*)
     integer,          intent(in) :: na, ast, asz
     integer,          intent(in) :: nb, bst, bsz
     integer,          intent(in) :: nc, cst, csz
 
     interface
-      import
-      function impl (state, name, data, &
+      function impl (state, name, field, &
                      na, ast, asz,      &
                      nb, bst, bsz,      &
                      nc, cst, csz) bind (C, name="esio_field_write_double")
+        import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
-        character(len=1,kind=c_char), intent(in), value :: name
-        real(c_double),               intent(in), value :: data(*)
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        real(c_double),               intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: na, ast, asz
         integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
@@ -194,9 +198,9 @@ contains
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
-    esio_field_write_double = impl(state, f_c_string(name), data, &
-                                   na, ast - 1, asz,              &
-                                   nb, bst - 1, bsz,              &
+    esio_field_write_double = impl(state, f_c_string(name), field, &
+                                   na, ast - 1, asz,               &
+                                   nb, bst - 1, bsz,               &
                                    nc, cst - 1, csz)
 
   end function esio_field_write_double
@@ -206,28 +210,28 @@ contains
 ! TODO Use Autoconf to find c_float value at compile time and use in API.
 ! Would eliminate "leaking" c_float in the API and leave, e.g., real(4).
 
-  integer function esio_field_write_single (state, name, data, &
-                                            na, ast, asz,      &
-                                            nb, bst, bsz,      &
+  integer function esio_field_write_single (state, name, field, &
+                                            na, ast, asz,       &
+                                            nb, bst, bsz,       &
                                             nc, cst, csz)
 
     type(esio_state), intent(in) :: state
     character(len=*), intent(in) :: name
-    real(c_float),    intent(in) :: data(*)
+    real(c_float),    intent(in) :: field(*)
     integer,          intent(in) :: na, ast, asz
     integer,          intent(in) :: nb, bst, bsz
     integer,          intent(in) :: nc, cst, csz
 
     interface
-      import
-      function impl (state, name, data, &
-                     na, ast, asz,      &
-                     nb, bst, bsz,      &
+      function impl (state, name, field, &
+                     na, ast, asz,       &
+                     nb, bst, bsz,       &
                      nc, cst, csz) bind (C, name="esio_field_write_float")
+        import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
-        character(len=1,kind=c_char), intent(in), value :: name
-        real(c_float),                intent(in), value :: data(*)
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        real(c_float),                intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: na, ast, asz
         integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
@@ -235,12 +239,12 @@ contains
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
-    esio_field_write_single = impl(state, f_c_string(name), data, &
-                                   na, ast - 1, asz,              &
-                                   nb, bst - 1, bsz,              &
+    esio_field_write_single = impl(state, f_c_string(name), field, &
+                                   na, ast - 1, asz,               &
+                                   nb, bst - 1, bsz,               &
                                    nc, cst - 1, csz)
 
-  end function esio_field_write_double
+  end function esio_field_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
