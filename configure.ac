@@ -76,6 +76,11 @@ DX_PDF_FEATURE([OFF])
 DX_PS_FEATURE([OFF])
 DX_INIT_DOXYGEN([esio],[doxygen.cfg],[docs])
 
+#--------------------------
+# Checks for code coverage
+#-------------------------
+AX_CODE_COVERAGE
+
 dnl ------------------------------------------------
 dnl Generate Makefiles
 dnl ------------------------------------------------
