@@ -156,7 +156,22 @@ esio_init(MPI_Comm comm)
     return s;
 }
 
-void
+#ifdef __INTEL_COMPILER
+// remark #1418: external function definition with no prior declaration
+#pragma warning(push,disable:1418)
+#endif
+esio_state
+esio_init_fortran(MPI_Fint fcomm)
+{
+    // Converting MPI communicators from Fortran to C requires MPI_Comm_f2c
+    // See section 16.3.4 of the MPI 2.2 Standard for details
+    return esio_init(MPI_Comm_f2c(fcomm));
+}
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
+
+int
 esio_finalize(esio_state s)
 {
     if (s) {
@@ -170,6 +185,8 @@ esio_finalize(esio_state s)
         }
         free(s);
     }
+
+    return ESIO_SUCCESS;
 }
 
 int

@@ -8,7 +8,7 @@
 typedef struct esio_state_s *esio_state;
 
 esio_state esio_init(MPI_Comm comm);
-void esio_finalize(esio_state s);
+int esio_finalize(esio_state s);
 
 int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
