@@ -80,6 +80,8 @@ FCT_BGN()
     {
         FCT_SETUP_BGN()
         {
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
+
             (void) input_dir; // Unused
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
             esio_set_error_handler(esio_handler);
@@ -92,6 +94,9 @@ FCT_BGN()
             }
             ESIO_MPICHKR(MPI_Bcast(&filenamelen, 1, MPI_INT,
                                    0, MPI_COMM_WORLD));
+            if (world_rank > 0) {
+                filename = calloc(filenamelen + 1, sizeof(char));
+            }
             ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
                                    0, MPI_COMM_WORLD));
             assert(filename);
@@ -106,8 +111,12 @@ FCT_BGN()
         FCT_TEARDOWN_BGN()
         {
             esio_finalize(state);
-            const int status = unlink(filename);
-            assert(0 == status);
+            if (world_rank == 0) {
+                const int status = unlink(filename);
+                assert(0 == status);
+            }
+
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
         }
         FCT_TEARDOWN_END();
 
@@ -130,10 +139,13 @@ FCT_BGN()
 
             { // Populate the field with test data
                 TEST_REAL * p_field = field;
-                for (int k = cst; k < cst + csz; ++k)
-                    for (int j = bst; j < bst + bsz; ++j)
-                        for (int i = ast; i < ast + asz; ++i)
+                for (int k = cst; k < cst + csz; ++k) {
+                    for (int j = bst; j < bst + bsz; ++j) {
+                        for (int i = ast; i < ast + asz; ++i) {
                             *p_field++ = (2*i + 3) + (5*j + 7) + (11*k + 13);
+                        }
+                    }
+                }
             }
 
             // Write the data to disk
@@ -141,10 +153,11 @@ FCT_BGN()
                     na, ast, asz, nb, bst, bsz, nc, cst, csz);
             fct_req(status == 0);
 
-            free(field);
-
             // Close the file
             fct_req(0 == esio_file_close(state));
+
+            // Free the field
+            free(field);
 
             // Reopen the file using normal HDF5 APIs on root processor
             // Examine the contents to ensure it matches
@@ -158,20 +171,20 @@ FCT_BGN()
                 fct_req(status1 >= 0);
 
                 TEST_REAL * p_field = field;
-                for (int k = 0; k < nc; ++k)
-                    for (int j = 0; j < nb; ++j)
-                        for (int i = 0; i < na; ++i)
-                            {
-                                const TEST_REAL value = *p_field++;
-                                fct_chk_eq_dbl(
-                                    value, (2*i + 3) + (5*j + 7) + (11*k + 13));
-                            }
+                for (int k = 0; k < nc; ++k) {
+                    for (int j = 0; j < nb; ++j) {
+                        for (int i = 0; i < na; ++i) {
+                            const TEST_REAL value = *p_field++;
+                            fct_chk_eq_dbl(
+                                value, (2*i + 3) + (5*j + 7) + (11*k + 13));
+                        }
+                    }
+                }
 
                 const herr_t status2 = H5Fclose(file_id);
                 fct_req(status2 >= 0);
                 free(field);
             }
-
         }
         FCT_TEST_END();
 
