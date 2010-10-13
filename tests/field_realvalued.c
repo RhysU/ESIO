@@ -228,6 +228,16 @@ FCT_BGN()
                         na, ast, asz, nb, bst, bsz, nc, cst, csz);
                 fct_req(status == 0);
 
+                // Ensure the global size was written correctly
+                {
+                    int tmp_na, tmp_nb, tmp_nc;
+                    fct_req(0 == esio_field_size(state, "field",
+                                                 &tmp_na, &tmp_nb, &tmp_nc));
+                    fct_chk_eq_int(na, tmp_na);
+                    fct_chk_eq_int(nb, tmp_nb);
+                    fct_chk_eq_int(nc, tmp_nc);
+                }
+
                 // Close the file
                 fct_req(0 == esio_file_close(state));
 

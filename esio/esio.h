@@ -44,6 +44,10 @@ int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
 int esio_file_close(esio_state s);
 
+int esio_field_size(esio_state s,
+                    const char* name,
+                    int *na, int *nb, int *nc);
+
 int esio_field_write_double(esio_state s,
                             const char* name,
                             const double *field,

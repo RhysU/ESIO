@@ -30,7 +30,7 @@
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid state before other failure
 ! TODO Allow Fortran to use customizable error handling
-! TODO Add esio_field_read_* and esio_field_size
+! TODO Add esio_field_read_*
 
 module esio
 
@@ -58,6 +58,7 @@ module esio
 ! Public functionality
   public :: esio_init, esio_finalize
   public :: esio_file_create, esio_file_open, esio_file_close
+  public :: esio_field_size
   public :: esio_field_write, esio_field_write_double, esio_field_write_single
 
 ! Generic, precision-agnostic field interfaces
@@ -169,6 +170,37 @@ contains
     esio_file_close = impl(state)
 
   end function esio_file_close
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  integer function esio_field_size (state, name, na, nb, nc)
+
+    type(esio_state), intent(in)  :: state
+    character(len=*), intent(in)  :: name
+    integer,          intent(out) :: na
+    integer,          intent(out) :: nb
+    integer,          intent(out) :: nc
+
+    integer(c_int) :: tmp_na, tmp_nb, tmp_nc
+
+    interface
+      function impl (state, name, na, nb, nc) bind (C, name="esio_field_size")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_state),             intent(in), value :: state
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: na
+        integer(c_int),               intent(inout)     :: nb
+        integer(c_int),               intent(inout)     :: nc
+      end function impl
+    end interface
+
+    esio_field_size = impl(state, f_c_string(name), tmp_na, tmp_nb, tmp_nc)
+    na = tmp_na
+    nb = tmp_nb
+    nc = tmp_nc
+
+  end function esio_field_size
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

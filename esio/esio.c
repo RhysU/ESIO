@@ -376,7 +376,7 @@ hid_t esio_field_create(esio_state s,
 
     // Stash some metadata as a field attribute
     // Meant to be opaque but the cool kids will figure it out. :P
-    // esio_field_read_internal must be synced with these contents
+    // esio_field_{size,read_internal} must be synced with these contents
     const int metadata[] = {
         ESIO_MAJOR_VERSION,
         ESIO_MINOR_VERSION,
@@ -404,6 +404,40 @@ int esio_field_close(hid_t dataset_id)
     if (H5Dclose(dataset_id) < 0) {
         ESIO_ERROR("Error closing field", ESIO_EFAILED);
     }
+
+    return ESIO_SUCCESS;
+}
+
+int esio_field_size(esio_state s,
+                    const char* name,
+                    int *na, int *nb, int *nc)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (na == NULL)       ESIO_ERROR("na == NULL",             ESIO_EINVAL);
+    if (nb == NULL)       ESIO_ERROR("nb == NULL",             ESIO_EINVAL);
+    if (nc == NULL)       ESIO_ERROR("nc == NULL",             ESIO_EINVAL);
+
+    // Read metadata from the field.  See esio_field_create for contents.
+    int metadata[7];
+    const herr_t status
+        = H5LTget_attribute_int(s->file_id, name, "esio_metadata", metadata);
+    if (status < 0) {
+        ESIO_ERROR("Unable to open attribute esio_metadata", ESIO_EFAILED);
+    }
+
+    // Sanity check metadata
+    const int layout_tag = metadata[3];
+    if (layout_tag < 0 || layout_tag >= esio_nlayout) {
+        ESIO_ERROR("esio_metadata contains unknown layout_tag", ESIO_ESANITY);
+    }
+
+    // Store na, nb, nc in arguments
+    *na = metadata[4];
+    *nb = metadata[5];
+    *nc = metadata[6];
 
     return ESIO_SUCCESS;
 }
