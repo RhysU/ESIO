@@ -12,6 +12,10 @@ noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
 EXTRA_DIST      = field_realvalued.c
 
+TESTS              = # Append below
+TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
+TESTS_ENVIRONMENT += ESIO_TEST_OUPUT_DIR=.
+
 # Use parallel HDF5 compiler wrappers per configure.ac
 CC=@H5CC@
 FC=@H5FC@
@@ -26,22 +30,28 @@ AM_LDFLAGS += $(GRVY_LIBS)
 AM_LDFLAGS += $(FCLIBS)
 
 ## Sample test program
+TESTS          += sample
 check_PROGRAMS += sample
 sample_SOURCES  = sample.c
 sample_LDADD    = ../esio/libesio.la
 
 ## Basic C API sanity checks
+TESTS          += basic
 check_PROGRAMS += basic
 basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
 
 ## Double precision fields from C
-check_PROGRAMS            += field_double
-field_double_SOURCES       = field_double.c
-field_double_LDADD         = ../esio/libesio.la
+TESTS                += field_double.sh    # NB Wrapper script
+EXTRA_DIST           += field_double.sh    # NB Wrapper script
+check_PROGRAMS       += field_double
+field_double_SOURCES  = field_double.c
+field_double_LDADD    = ../esio/libesio.la
 field_double.o: field_double.c field_realvalued.c
 
 ## Single precision fields from C
+TESTS                += field_float.sh          # NB Wrapper script
+EXTRA_DIST           += field_float.sh          # NB Wrapper script
 check_PROGRAMS       += field_float
 field_float_SOURCES   = field_float.c
 field_float_LDADD     = ../esio/libesio.la
@@ -53,10 +63,6 @@ field_float.o: field_float.c field_realvalued.c
 #simplef90_SOURCES       = header.f90 simplef90.f90
 #simplef90_LDADD         = ../esio/libesio.la
 #simplef90_LIBTOOLFLAGS  = --tag=FC
-
-TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
-TESTS_ENVIRONMENT += ESIO_TEST_OUPUT_DIR=.
-TESTS = $(check_PROGRAMS)
 
 # Build test programs without running 'make check'
 .PHONY: check-programs
