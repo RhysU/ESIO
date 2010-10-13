@@ -17,7 +17,7 @@ CLEANFILES         = # Append below
 CC=@H5CC@
 FC=@H5FC@
 
-# Headers installed with the library
+# Headers shipped with the library
 pkginclude_HEADERS += esio.h
 pkginclude_HEADERS += error.h
 # Headers internal to the library
@@ -32,7 +32,9 @@ libesio_la_LIBADD    = libesio_c.la libesio_f.la
 
 # C sources to place into the public library
 noinst_LTLIBRARIES   += libesio_c.la
-libesio_c_la_SOURCES  = error.c layout.c esio.c
+libesio_c_la_SOURCES  = error.c
+libesio_c_la_SOURCES += esio.c
+libesio_c_la_SOURCES += layout.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
