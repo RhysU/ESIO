@@ -76,12 +76,10 @@ FCT_BGN()
     char * filename = NULL;
     esio_state state;
 
-    FCT_FIXTURE_SUITE_BGN(esio_file)
+    FCT_FIXTURE_SUITE_BGN(field_realvalued)
     {
         FCT_SETUP_BGN()
         {
-            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
-
             (void) input_dir; // Unused
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
             esio_set_error_handler(esio_handler);
@@ -103,88 +101,121 @@ FCT_BGN()
 
             state = esio_init(MPI_COMM_WORLD);
             assert(state);
-            const int status = esio_file_create(state, filename, 1);
-            assert(0 == status);
         }
         FCT_SETUP_END();
 
         FCT_TEARDOWN_BGN()
         {
             esio_finalize(state);
-            if (world_rank == 0) {
-                const int status = unlink(filename);
-                assert(0 == status);
-            }
-
             ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
         }
         FCT_TEARDOWN_END();
 
-        FCT_TEST_BGN(slabs_A)
+        FCT_TEST_BGN(uniform_directionally_split)
         {
-            // Test data partitioned in the fastest index
-            const int asz = 3;
-            const int na  = asz * world_size;
-            const int ast = asz * world_rank;
-            const int nb  = 2;
-            const int bst = 0;
-            const int bsz = nb;
-            const int nc  = 2;
-            const int cst = 0;
-            const int csz = nc;
+            int na, ast, asz;
+            int nb, bst, bsz;
+            int nc, cst, csz;
 
-            const size_t nelem = asz * bsz * csz;
-            TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
-            assert(field);
+            for (int casenum = 0; casenum < 3; ++casenum) {
 
-            { // Populate the field with test data
-                TEST_REAL * p_field = field;
-                for (int k = cst; k < cst + csz; ++k) {
-                    for (int j = bst; j < bst + bsz; ++j) {
-                        for (int i = ast; i < ast + asz; ++i) {
-                            *p_field++ = 2*(i + 3) + 3*(j + 5) + 7*(k + 11);
-                        }
-                    }
+                ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
+
+                na = ast = asz = nb = bst = bsz = nc = cst = csz = -1;
+                switch (casenum) {
+                    case 0:
+                        // Data uniformly partitioned in the fastest index
+                        asz = 3;
+                        na  = asz * world_size;
+                        ast = asz * world_rank;
+
+                        nb  = bsz = 2;
+                        nc  = csz = 2;
+                        bst = cst = 0;
+                        break;
+                    case 1:
+                        // Data uniformly partitioned in the medium index
+                        bsz = 3;
+                        nb  = bsz * world_size;
+                        bst = bsz * world_rank;
+
+                        na  = asz = 2;
+                        nc  = csz = 2;
+                        ast = cst = 0;
+                        break;
+                    case 2:
+                        // Data uniformly partitioned in the slow index
+                        csz = 3;
+                        nc  = csz * world_size;
+                        cst = csz * world_rank;
+
+                        na  = asz = 2;
+                        nb  = bsz = 2;
+                        ast = bst = 0;
+                        break;
+                    default:
+                        fct_req(0); // Sanity failure
                 }
-            }
 
-            // Write the data to disk
-            const int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
-                    na, ast, asz, nb, bst, bsz, nc, cst, csz);
-            fct_req(status == 0);
+                fct_req(0 == esio_file_create(state, filename, 1));
 
-            // Close the file
-            fct_req(0 == esio_file_close(state));
-
-            // Free the field
-            free(field);
-
-            // Reopen the file using normal HDF5 APIs on root processor
-            // Examine the contents to ensure it matches
-            if (world_rank == 0) {
-                field = calloc(na * nb * nc, sizeof(TEST_REAL));
+                const size_t nelem = asz * bsz * csz;
+                TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
                 fct_req(field);
-                const hid_t file_id
-                    = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                const herr_t status1
-                    = TEST_H5LTREAD_DATASET(file_id, "field", field);
-                fct_req(status1 >= 0);
 
-                TEST_REAL * p_field = field;
-                for (int k = 0; k < nc; ++k) {
-                    for (int j = 0; j < nb; ++j) {
-                        for (int i = 0; i < na; ++i) {
-                            const TEST_REAL value = *p_field++;
-                            fct_chk_eq_dbl(
-                                value, 2*(i + 3) + 3*(j + 5) + 7*(k + 11));
+                { // Populate the field with test data
+                    TEST_REAL * p_field = field;
+                    for (int k = cst; k < cst + csz; ++k) {
+                        for (int j = bst; j < bst + bsz; ++j) {
+                            for (int i = ast; i < ast + asz; ++i) {
+                                *p_field++ = 2*(i+3)+5*(j+7)+11*(k+13);
+                            }
                         }
                     }
                 }
 
-                const herr_t status2 = H5Fclose(file_id);
-                fct_req(status2 >= 0);
+                // Write the data to disk
+                const int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
+                        na, ast, asz, nb, bst, bsz, nc, cst, csz);
+                fct_req(status == 0);
+
+                // Close the file
+                fct_req(0 == esio_file_close(state));
+
+                // Free the field
                 free(field);
+
+                // Reopen the file using normal HDF5 APIs on root processor
+                // Examine the contents to ensure it matches
+                if (world_rank == 0) {
+                    field = calloc(na * nb * nc, sizeof(TEST_REAL));
+                    fct_req(field);
+                    const hid_t file_id
+                        = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+                    const herr_t status1
+                        = TEST_H5LTREAD_DATASET(file_id, "field", field);
+                    fct_req(status1 >= 0);
+
+                    TEST_REAL * p_field = field;
+                    for (int k = 0; k < nc; ++k) {
+                        for (int j = 0; j < nb; ++j) {
+                            for (int i = 0; i < na; ++i) {
+                                const TEST_REAL value = *p_field++;
+                                fct_chk_eq_dbl(
+                                    value, 2*(i+3)+5*(j+7)+11*(k+13));
+                            }
+                        }
+                    }
+
+                    const herr_t status2 = H5Fclose(file_id);
+                    fct_req(status2 >= 0);
+                    free(field);
+
+                    const int status = unlink(filename);
+                    assert(0 == status);
+                }
             }
+
         }
         FCT_TEST_END();
 
