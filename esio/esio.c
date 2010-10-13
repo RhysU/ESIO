@@ -53,7 +53,7 @@ static
 hid_t layout1_filespace_creator(int na, int nb, int nc);
 
 static
-int layout1_field_writer(hid_t dset_id, void *field,
+int layout1_field_writer(hid_t dset_id, const void *field,
                          int na, int ast, int asz,
                          int nb, int bst, int bsz,
                          int nc, int cst, int csz,
@@ -70,7 +70,7 @@ int esio_field_close(hid_t dataset_id);
 static
 int esio_field_write_internal(esio_state s,
                               const char* name,
-                              void *field,
+                              const void *field,
                               int na, int ast, int asz,
                               int nb, int bst, int bsz,
                               int nc, int cst, int csz,
@@ -85,7 +85,7 @@ typedef struct esio_layout {
     int tag;
     const char * name;
     hid_t (*filespace_creator)(int, int, int);
-    int   (*field_writer)     (hid_t, void *,
+    int   (*field_writer)     (hid_t, const void *,
                                int, int, int,
                                int, int, int,
                                int, int, int,
@@ -389,7 +389,7 @@ int esio_field_close(hid_t dataset_id)
 
 int esio_field_write_double(esio_state s,
                             const char* name,
-                            double *field,
+                            const double *field,
                             int na, int ast, int asz,
                             int nb, int bst, int bsz,
                             int nc, int cst, int csz)
@@ -404,7 +404,7 @@ int esio_field_write_double(esio_state s,
 
 int esio_field_write_float(esio_state s,
                            const char* name,
-                           float *field,
+                           const float *field,
                            int na, int ast, int asz,
                            int nb, int bst, int bsz,
                            int nc, int cst, int csz)
@@ -420,7 +420,7 @@ int esio_field_write_float(esio_state s,
 static
 int esio_field_write_internal(esio_state s,
                               const char* name,
-                              void *field,
+                              const void *field,
                               int na, int ast, int asz,
                               int nb, int bst, int bsz,
                               int nc, int cst, int csz,
@@ -466,7 +466,7 @@ hid_t layout1_filespace_creator(int na, int nb, int nc)
 }
 
 static
-hid_t layout1_field_writer(hid_t dset_id, void *field,
+hid_t layout1_field_writer(hid_t dset_id, const void *field,
                            int na, int ast, int asz,
                            int nb, int bst, int bsz,
                            int nc, int cst, int csz,
@@ -503,7 +503,7 @@ hid_t layout1_field_writer(hid_t dset_id, void *field,
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:1338)
 #endif
-            void *p_field = field + (type_size * moffset);
+            const void *p_field = field + (type_size * moffset);
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
 #endif
