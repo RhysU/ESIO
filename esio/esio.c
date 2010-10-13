@@ -88,7 +88,7 @@ struct esio_state_s {
 };
 
 static const esio_layout_details esio_layout[] = {
-    {0, &esio_layout1_filespace_creator, &esio_layout1_field_writer}
+    {0, &esio_layout0_filespace_creator, &esio_layout0_field_writer}
 };
 static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
 

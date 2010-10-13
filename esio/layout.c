@@ -42,13 +42,13 @@
 // LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
 // **************************************************************
 
-hid_t esio_layout1_filespace_creator(int na, int nb, int nc)
+hid_t esio_layout0_filespace_creator(int na, int nb, int nc)
 {
     const hsize_t dims[2] = { nb * nc, na };
     return H5Screate_simple(2, dims, NULL);
 }
 
-hid_t esio_layout1_field_writer(hid_t dset_id, const void *field,
+hid_t esio_layout0_field_writer(hid_t dset_id, const void *field,
                                 int na, int ast, int asz,
                                 int nb, int bst, int bsz,
                                 int nc, int cst, int csz,

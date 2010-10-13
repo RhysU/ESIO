@@ -49,9 +49,9 @@ typedef int   (*esio_field_writer_t)     (hid_t, const void *,
 // INTERNAL DECLARATIONS INTERNAL DECLARATIONS INTERNAL DECLARATIONS
 //******************************************************************
 
-hid_t esio_layout1_filespace_creator(int na, int nb, int nc);
+hid_t esio_layout0_filespace_creator(int na, int nb, int nc);
 
-int esio_layout1_field_writer(hid_t dset_id, const void *field,
+int esio_layout0_field_writer(hid_t dset_id, const void *field,
                               int na, int ast, int asz,
                               int nb, int bst, int bsz,
                               int nc, int cst, int csz,
