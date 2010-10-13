@@ -45,6 +45,8 @@
 #include "layout.h"
 #include "version.h"
 
+// TODO ESIO_ESANITY vs ESIO_EFAILED usage consistency
+
 //*********************************************************************
 // INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
 //*********************************************************************
@@ -70,33 +72,49 @@ int esio_field_write_internal(esio_state s,
                               hid_t type_id,
                               size_t type_size);
 
+static
+int esio_field_read_internal(esio_state s,
+                             const char* name,
+                             void *field,
+                             int na, int ast, int asz,
+                             int nb, int bst, int bsz,
+                             int nc, int cst, int csz,
+                             hid_t type_id,
+                             size_t type_size);
+
 //*********************************************************************
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
 
-typedef struct esio_layout_details {
-    int tag;
-    esio_filespace_creator_t filespace_creator;
-    esio_field_writer_t field_writer;
-} esio_layout_details;
-
 struct esio_state_s {
-    MPI_Comm            comm;      //< Communicator used for collective calls
-    int                 comm_rank; //< Process rank within in MPI communicator
-    int                 comm_size; //< Number of ranks within MPI communicator
-    MPI_Info            info;      //< Info object used for collective calls
-    hid_t               file_id;   //< Active HDF file identifier
-    esio_layout_details layout;    //< Active field layout within HDF5 file
+    MPI_Comm  comm;       //< Communicator used for collective calls
+    int       comm_rank;  //< Process rank within in MPI communicator
+    int       comm_size;  //< Number of ranks within MPI communicator
+    MPI_Info  info;       //< Info object used for collective calls
+    hid_t     file_id;    //< Active HDF file identifier
+    int       layout_tag; //< Active field layout_tag within HDF5 file
 };
-
-static const esio_layout_details esio_layout[] = {
-    {0, &esio_layout0_filespace_creator, &esio_layout0_field_writer}
-};
-static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
 
 //***************************************************************************
 // IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION
 //***************************************************************************
+
+// Lookup table of all the different layout types we understand
+static const struct {
+    int                      tag;
+    esio_filespace_creator_t filespace_creator;
+    esio_field_writer_t      field_writer;
+    esio_field_reader_t      field_reader;
+} esio_layout[] = {
+    {
+        0,
+        &esio_layout0_filespace_creator,
+        &esio_layout0_field_writer,
+        &esio_layout0_field_reader
+    }
+};
+static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
+
 
 static
 MPI_Comm
@@ -159,12 +177,12 @@ esio_init(MPI_Comm comm)
     if (s == NULL) {
         ESIO_ERROR_NULL("failed to allocate space for state", ESIO_ENOMEM);
     }
-    s->comm              = esio_MPI_Comm_dup_with_name(comm);
-    s->comm_rank         = comm_rank;
-    s->comm_size         = comm_size;
-    s->info              = info;
-    s->file_id           = -1;
-    s->layout            = esio_layout[0];
+    s->comm        = esio_MPI_Comm_dup_with_name(comm);
+    s->comm_rank   = comm_rank;
+    s->comm_size   = comm_size;
+    s->info        = info;
+    s->file_id     = -1;
+    s->layout_tag  = 0;
 
     if (s->comm == MPI_COMM_NULL) {
         esio_finalize(s);
@@ -337,8 +355,14 @@ hid_t esio_field_create(esio_state s,
                         int na, int nb, int nc,
                         const char* name, hid_t type_id)
 {
-    // Create the filespace using current layout within state state
-    const hid_t filespace = (s->layout.filespace_creator)(na, nb, nc);
+    // Sanity check that the state's layout_tag matches our internal table
+    if (esio_layout[s->layout_tag].tag != s->layout_tag) {
+        ESIO_ERROR("SEVERE: Consistency error in esio_layout", ESIO_ESANITY);
+    }
+
+    // Create the filespace using current layout within state
+    const hid_t filespace
+        = (esio_layout[s->layout_tag].filespace_creator)(na, nb, nc);
     if (filespace < 0) {
         ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
     }
@@ -352,11 +376,12 @@ hid_t esio_field_create(esio_state s,
 
     // Stash some metadata as a field attribute
     // Meant to be opaque but the cool kids will figure it out. :P
+    // esio_field_read_internal must be synced with these contents
     const int metadata[] = {
         ESIO_MAJOR_VERSION,
         ESIO_MINOR_VERSION,
         ESIO_POINT_VERSION,
-        s->layout.tag,
+        s->layout_tag,
         na,
         nb,
         nc
@@ -383,7 +408,6 @@ int esio_field_close(hid_t dataset_id)
     return ESIO_SUCCESS;
 }
 
-// TODO esio_field_open
 // TODO use esio_field_{create,open} based upon H5LT_find_dataset
 
 int esio_field_write_double(esio_state s,
@@ -443,11 +467,113 @@ int esio_field_write_internal(esio_state s,
 
     // TODO Error checking here
     const hid_t dset_id = esio_field_create(s, na, nb, nc, name, type_id);
-    (s->layout.field_writer)(dset_id, field,
-                             na, ast, asz,
-                             nb, bst, bsz,
-                             nc, cst, csz,
-                             type_id, type_size);
+    (esio_layout[s->layout_tag].field_writer)(dset_id, field,
+                                              na, ast, asz,
+                                              nb, bst, bsz,
+                                              nc, cst, csz,
+                                              type_id, type_size);
+    esio_field_close(dset_id);
+
+    return ESIO_SUCCESS;
+}
+
+int esio_field_read_double(esio_state s,
+                           const char* name,
+                           double *field,
+                           int na, int ast, int asz,
+                           int nb, int bst, int bsz,
+                           int nc, int cst, int csz)
+{
+    return esio_field_read_internal(s, name, field,
+                                    na, ast, asz,
+                                    nb, bst, bsz,
+                                    nc, cst, csz,
+                                    H5T_NATIVE_DOUBLE,
+                                    sizeof(double));
+}
+
+int esio_field_read_float(esio_state s,
+                          const char* name,
+                          float *field,
+                          int na, int ast, int asz,
+                          int nb, int bst, int bsz,
+                          int nc, int cst, int csz)
+{
+    return esio_field_read_internal(s, name, field,
+                                    na, ast, asz,
+                                    nb, bst, bsz,
+                                    nc, cst, csz,
+                                    H5T_NATIVE_FLOAT,
+                                    sizeof(float));
+}
+
+static
+int esio_field_read_internal(esio_state s,
+                             const char* name,
+                             void *field,
+                             int na, int ast, int asz,
+                             int nb, int bst, int bsz,
+                             int nc, int cst, int csz,
+                             hid_t type_id,
+                             size_t type_size)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EINVAL);
+    if (na  < 0)          ESIO_ERROR("na < 0",                 ESIO_EINVAL);
+    if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
+    if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
+    if (nb  < 0)          ESIO_ERROR("nb < 0",                 ESIO_EINVAL);
+    if (bst < 0)          ESIO_ERROR("bst < 0",                ESIO_EINVAL);
+    if (bsz < 1)          ESIO_ERROR("bsz < 1",                ESIO_EINVAL);
+    if (nc  < 0)          ESIO_ERROR("nc < 0",                 ESIO_EINVAL);
+    if (cst < 0)          ESIO_ERROR("cst < 0",                ESIO_EINVAL);
+    if (csz < 1)          ESIO_ERROR("csz < 1",                ESIO_EINVAL);
+
+    // TODO Error checking here
+
+    // Read metadata from the field.  See esio_field_create for contents.
+    int metadata[7];
+    const herr_t status
+        = H5LTget_attribute_int(s->file_id, name, "esio_metadata", metadata);
+    if (status < 0) {
+        ESIO_ERROR("Unable to open attribute esio_metadata", ESIO_EFAILED);
+    }
+
+    // Sanity check metadata; ensure caller gave correct size information
+    const int layout_tag = metadata[3];
+    if (layout_tag < 0 || layout_tag >= esio_nlayout) {
+        ESIO_ERROR("esio_metadata contains unknown layout_tag", ESIO_ESANITY);
+    }
+    if (na != metadata[4]) {
+        ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
+    }
+    if (na != metadata[5]) {
+        ESIO_ERROR("field read request has incorrect nb", ESIO_EINVAL);
+    }
+    if (na != metadata[6]) {
+        ESIO_ERROR("field read request has incorrect nc", ESIO_EINVAL);
+    }
+
+    // Open existing dataset
+    const hid_t dapl_id = H5P_DEFAULT;
+    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to open dataset", ESIO_ESANITY);
+    }
+
+    // Read the field based on the metadata's layout_tag
+    // Note that this means we can read any layout ESIO understands
+    // Note that reading does not change the chosen field write layout_tag
+    (esio_layout[layout_tag].field_reader)(dset_id, field,
+                                           na, ast, asz,
+                                           nb, bst, bsz,
+                                           nc, cst, csz,
+                                           type_id, type_size);
+
+    // Close dataset
     esio_field_close(dset_id);
 
     return ESIO_SUCCESS;

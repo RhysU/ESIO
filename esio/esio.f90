@@ -30,6 +30,7 @@
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid state before other failure
 ! TODO Allow Fortran to use customizable error handling
+! TODO Add esio_field_read_* and esio_field_size
 
 module esio
 

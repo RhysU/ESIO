@@ -109,3 +109,12 @@ hid_t esio_layout0_field_writer(hid_t dset_id, const void *field,
 
     return ESIO_SUCCESS;
 }
+
+int esio_layout0_field_reader(hid_t dset_id, void *field,
+                              int na, int ast, int asz,
+                              int nb, int bst, int bsz,
+                              int nc, int cst, int csz,
+                              hid_t type_id, size_t type_size)
+{
+    return ESIO_ESANITY; // FIXME Implement
+}
