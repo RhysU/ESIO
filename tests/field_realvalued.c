@@ -142,7 +142,7 @@ FCT_BGN()
                 for (int k = cst; k < cst + csz; ++k) {
                     for (int j = bst; j < bst + bsz; ++j) {
                         for (int i = ast; i < ast + asz; ++i) {
-                            *p_field++ = (2*i + 3) + (5*j + 7) + (11*k + 13);
+                            *p_field++ = 2*(i + 3) + 3*(j + 5) + 7*(k + 11);
                         }
                     }
                 }
@@ -176,7 +176,7 @@ FCT_BGN()
                         for (int i = 0; i < na; ++i) {
                             const TEST_REAL value = *p_field++;
                             fct_chk_eq_dbl(
-                                value, (2*i + 3) + (5*j + 7) + (11*k + 13));
+                                value, 2*(i + 3) + 3*(j + 5) + 7*(k + 11));
                         }
                     }
                 }

@@ -487,9 +487,9 @@ hid_t layout1_field_writer(hid_t dset_id, void *field,
     const hid_t   filespace = H5Dget_space(dset_id);
 
     hsize_t offset[2];
-    for (int i = 0; i < csz; i++)
+    for (int i = 0; i < csz; ++i)
     {
-        for (int j = 0; j < bsz; j++)
+        for (int j = 0; j < bsz; ++j)
         {
             // Select hyperslab in the file
             offset[0] = (j + bst) + (i + cst) * nb;
@@ -499,11 +499,11 @@ hid_t layout1_field_writer(hid_t dset_id, void *field,
 
             // Compute in-memory offset to hyperslab's data
             // Note use of type_size when adding to (void *) field
-            const size_t  moffset = j*na + i*na*bsz;
+            const size_t moffset = j*asz + i*asz*bsz;
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:1338)
 #endif
-            void         *p_field = field + (type_size * moffset);
+            void *p_field = field + (type_size * moffset);
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
 #endif
