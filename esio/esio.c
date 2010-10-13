@@ -39,9 +39,11 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <mpi.h>
-#include "esio.h"
+
 #include "error.h"
+#include "esio.h"
 #include "layout.h"
+#include "version.h"
 
 //*********************************************************************
 // INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
@@ -348,10 +350,21 @@ hid_t esio_field_create(esio_state s,
         ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
     }
 
-    // Stash the layout tag as an attribute
-    if (H5LTset_attribute_int(s->file_id, name, "esio_layout_tag",
-                              &(s->layout.tag), 1)) {
-        ESIO_ERROR("Unable to save layout tag", ESIO_ESANITY);
+    // Stash some metadata as a field attribute
+    // Meant to be opaque but the cool kids will figure it out. :P
+    const int metadata[] = {
+        ESIO_MAJOR_VERSION,
+        ESIO_MINOR_VERSION,
+        ESIO_POINT_VERSION,
+        s->layout.tag,
+        na,
+        nb,
+        nc
+    };
+    const int metadata_size = sizeof(metadata)/sizeof(metadata[0]);
+    if (H5LTset_attribute_int(s->file_id, name, "esio_metadata",
+                              metadata, metadata_size)) {
+        ESIO_ERROR("Unable to save metadata", ESIO_ESANITY);
     }
 
     // Clean up temporary resources
