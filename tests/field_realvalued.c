@@ -52,6 +52,25 @@
 
 #include "fct.h"
 
+
+// Add command line options
+static fctcl_init_t my_cl_options[] = {
+    {
+        "--partitioned-size",
+         "-p",
+          FCTCL_STORE_VALUE,
+         "Sets size/rank of directions to be uniformly partitioned"
+    },
+    {
+        "--unpartitioned-size",
+        "-u",
+         FCTCL_STORE_VALUE,
+        "Sets size of directions which are not partitioned"
+    },
+    FCTCL_INIT_NULL /* Sentinel */
+};
+
+
 FCT_BGN()
 {
     // MPI setup: MPI_Init and atexit(MPI_Finalize)
@@ -60,6 +79,23 @@ FCT_BGN()
     atexit((void (*) ()) MPI_Finalize);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+    // Install the command line options defined above.
+    fctcl_install(my_cl_options);
+
+    // Retrieve either the default or supplied problem sizes
+    const int partitioned_size = (int) strtol(
+        fctcl_val2("--partitioned-size","3"), (char **) NULL, 10);
+    if (partitioned_size < 1) {
+        fprintf(stderr, "\n--partitioned-size=%d < 1\n", partitioned_size);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+    const int unpartitioned_size = (int) strtol(
+        fctcl_val2("--unpartitioned-size","2"), (char **) NULL, 10);
+    if (unpartitioned_size < 1) {
+        fprintf(stderr, "\n--unpartitioned-size=%d < 1\n", unpartitioned_size);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
 
     // Obtain default HDF5 error handler
     H5E_auto2_t hdf5_handler;
@@ -123,34 +159,33 @@ FCT_BGN()
 
                 na = ast = asz = nb = bst = bsz = nc = cst = csz = -1;
                 switch (casenum) {
-                    case 0:
-                        // Data uniformly partitioned in the fastest index
-                        asz = 3;
+                    case 0: // Data uniformly partitioned in the fastest index
+                        asz = partitioned_size;
                         na  = asz * world_size;
                         ast = asz * world_rank;
 
-                        nb  = bsz = 2;
-                        nc  = csz = 2;
+                        nb  = bsz = unpartitioned_size;
+                        nc  = csz = unpartitioned_size;
                         bst = cst = 0;
                         break;
-                    case 1:
-                        // Data uniformly partitioned in the medium index
-                        bsz = 3;
+
+                    case 1: // Data uniformly partitioned in the medium index
+                        bsz = partitioned_size;
                         nb  = bsz * world_size;
                         bst = bsz * world_rank;
 
-                        na  = asz = 2;
-                        nc  = csz = 2;
+                        na  = asz = unpartitioned_size;
+                        nc  = csz = unpartitioned_size;
                         ast = cst = 0;
                         break;
-                    case 2:
-                        // Data uniformly partitioned in the slow index
-                        csz = 3;
+
+                    case 2: // Data uniformly partitioned in the slow index
+                        csz = partitioned_size;
                         nc  = csz * world_size;
                         cst = csz * world_rank;
 
-                        na  = asz = 2;
-                        nb  = bsz = 2;
+                        na  = asz = unpartitioned_size;
+                        nb  = bsz = unpartitioned_size;
                         ast = bst = 0;
                         break;
                     default:
