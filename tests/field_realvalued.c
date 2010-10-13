@@ -57,15 +57,21 @@
 static fctcl_init_t my_cl_options[] = {
     {
         "--partitioned-size",
-         "-p",
-          FCTCL_STORE_VALUE,
-         "Sets size/rank of directions to be uniformly partitioned"
+        "-p",
+        FCTCL_STORE_VALUE,
+        "Sets size/rank of directions to be uniformly partitioned"
     },
     {
         "--unpartitioned-size",
         "-u",
-         FCTCL_STORE_VALUE,
+        FCTCL_STORE_VALUE,
         "Sets size of directions which are not partitioned"
+    },
+    {
+        "--preserve",
+        "-t",
+        FCTCL_STORE_TRUE,
+        "Are temporary filenames displayed and files preserved?"
     },
     FCTCL_INIT_NULL /* Sentinel */
 };
@@ -73,6 +79,8 @@ static fctcl_init_t my_cl_options[] = {
 
 FCT_BGN()
 {
+    int preserve = 0;
+
     // MPI setup: MPI_Init and atexit(MPI_Finalize)
     int world_size, world_rank;
     MPI_Init(&argc, &argv);
@@ -83,7 +91,8 @@ FCT_BGN()
     // Install the command line options defined above.
     fctcl_install(my_cl_options);
 
-    // Retrieve either the default or supplied problem sizes
+    // Retrieve and sanity check command line options
+    preserve = fctcl_is("--preserve");
     const int partitioned_size = (int) strtol(
         fctcl_val2("--partitioned-size","3"), (char **) NULL, 10);
     if (partitioned_size < 1) {
@@ -119,21 +128,6 @@ FCT_BGN()
             (void) input_dir; // Unused
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
             esio_set_error_handler(esio_handler);
-
-            // Only one process generates a unique filename
-            int filenamelen;
-            if (world_rank == 0) {
-                filename = tempnam(output_dir, "l1tst");
-                filenamelen = strlen(filename);
-            }
-            ESIO_MPICHKR(MPI_Bcast(&filenamelen, 1, MPI_INT,
-                                   0, MPI_COMM_WORLD));
-            if (world_rank > 0) {
-                filename = calloc(filenamelen + 1, sizeof(char));
-            }
-            ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
-                                   0, MPI_COMM_WORLD));
-            assert(filename);
 
             state = esio_init(MPI_COMM_WORLD);
             assert(state);
@@ -192,13 +186,33 @@ FCT_BGN()
                         fct_req(0); // Sanity failure
                 }
 
+                // Rank 0 generates a unique filename and broadcasts it
+                int filenamelen;
+                if (world_rank == 0) {
+                    filename = tempnam(output_dir, "l00t");
+                    if (preserve) {
+                        printf("\ncase %d filename: %s\n", casenum, filename);
+                    }
+                    filenamelen = strlen(filename);
+                }
+                ESIO_MPICHKR(MPI_Bcast(&filenamelen, 1, MPI_INT,
+                                       0, MPI_COMM_WORLD));
+                if (world_rank > 0) {
+                    filename = calloc(filenamelen + 1, sizeof(char));
+                }
+                ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
+                                       0, MPI_COMM_WORLD));
+                assert(filename);
+
+                // Open unique file
                 fct_req(0 == esio_file_create(state, filename, 1));
 
+                // Determine local rank's portion of global field
                 const size_t nelem = asz * bsz * csz;
                 TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
                 fct_req(field);
 
-                { // Populate the field with test data
+                { // Populate local field with test data
                     TEST_REAL * p_field = field;
                     for (int k = cst; k < cst + csz; ++k) {
                         for (int j = bst; j < bst + bsz; ++j) {
@@ -209,7 +223,7 @@ FCT_BGN()
                     }
                 }
 
-                // Write the data to disk
+                // Write local data to disk
                 const int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
                         na, ast, asz, nb, bst, bsz, nc, cst, csz);
                 fct_req(status == 0);
@@ -246,8 +260,11 @@ FCT_BGN()
                     fct_req(status2 >= 0);
                     free(field);
 
-                    const int status = unlink(filename);
-                    assert(0 == status);
+                    if (!preserve) {
+                        const int status = unlink(filename);
+                        assert(0 == status);
+                    }
+                    if (filename) free(filename);
                 }
             }
 
