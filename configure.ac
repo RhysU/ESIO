@@ -16,6 +16,10 @@ AM_INIT_AUTOMAKE(1.9 no-define tar-ustar -Wall -Werror foreign)
 AC_PREREQ([2.61])
 AX_AM_MACROS
 AX_ADD_AM_CTAGSFLAGS
+AX_SPLIT_VERSION
+AC_SUBST([AX_MAJOR_VERSION])
+AC_SUBST([AX_MINOR_VERSION])
+AC_SUBST([AX_POINT_VERSION])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
@@ -89,6 +93,7 @@ AC_CONFIG_FILES([
     apps/Makefile
     lib/Makefile
     esio/Makefile
+    esio/version.h
     tests/Makefile
     esio.pc
 ])

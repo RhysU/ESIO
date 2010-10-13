@@ -18,8 +18,9 @@ CC=@H5CC@
 FC=@H5FC@
 
 # Headers shipped with the library
-pkginclude_HEADERS += esio.h
 pkginclude_HEADERS += error.h
+pkginclude_HEADERS += esio.h
+pkginclude_HEADERS += version.h
 # Headers internal to the library
 noinst_HEADERS += layout.h
 

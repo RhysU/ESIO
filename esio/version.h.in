@@ -1,0 +1,41 @@
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------
+ *
+ * Copyright (C) 2010 The PECOS Development Team
+ *
+ * Please see http://pecos.ices.utexas.edu for more information.
+ *
+ * This file is part of ESIO.
+ *
+ * ESIO is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ESIO is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *--------------------------------------------------------------------------
+ *
+ * version.h.in: Header #defining library version information
+ *
+ * $Id$
+ *--------------------------------------------------------------------------
+ *-------------------------------------------------------------------------- */
+
+#ifndef __ESIO_VERSION_H__
+#define __ESIO_VERSION_H__
+
+#define ESIO_MAJOR_VERSION @AX_MAJOR_VERSION@
+#define ESIO_MINOR_VERSION @AX_MINOR_VERSION@
+#define ESIO_POINT_VERSION @AX_POINT_VERSION@
+#define ESIO_VERSION (  ESIO_MAJOR_VERSION * 100000  \
+                      + ESIO_MINOR_VERSION *    100  \
+                      + ESIO_POINT_VERSION *      1)
+
+#endif /* __ESIO_VERSION_H__ */
