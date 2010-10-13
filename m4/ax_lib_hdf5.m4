@@ -10,11 +10,11 @@
 #
 #   This macro provides tests of the availability of HDF5 library.
 #
-#   The optional macro argument should be either 'serial' or 'parallel'.
-#   The former only looks for serial HDF5 installations via h5cc.
-#   The latter only looks for parallel HDF5 installations via h5pcc.
-#   If the optional argument is omitted, serial installations will be
-#   preferred over parallel ones.
+#   The optional macro argument should be either 'serial' or 'parallel'. The
+#   former only looks for serial HDF5 installations via h5cc. The latter
+#   only looks for parallel HDF5 installations via h5pcc. If the optional
+#   argument is omitted, serial installations will be preferred over
+#   parallel ones.
 #
 #   The macro adds a --with-hdf5 option accepting one of three values:
 #
@@ -38,10 +38,11 @@
 #   H5CC and H5FC will contain the appropriate serial or parallel HDF5
 #   wrapper script locations.
 #
-#   If HDF5 is disabled or not found, this macros sets with_hdf5="no"
-#   and with_hdf5_fortran="no".
+#   If HDF5 is disabled or not found, this macros sets with_hdf5="no" and
+#   with_hdf5_fortran="no".
 #
-#   Your configuration script can test $with_hdf to take any further actions.
+#   Your configuration script can test $with_hdf to take any further
+#   actions.
 #
 #   To use the macro, one would code one of the following in "configure.ac"
 #   before AC_OUTPUT:
@@ -62,14 +63,14 @@
 # LICENSE
 #
 #   Copyright (c) 2009 Timothy Brown <tbrown@freeshell.org>
+#   Copyright (c) 2010 Rhys Ulerich <rhys.ulerich@gmail.com>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#   serial 2
-
+#serial 3
 
 AC_DEFUN([AX_LIB_HDF5], [
 
