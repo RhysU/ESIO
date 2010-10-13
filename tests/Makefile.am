@@ -58,5 +58,9 @@ TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
 TESTS_ENVIRONMENT += ESIO_TEST_OUPUT_DIR=.
 TESTS = $(check_PROGRAMS)
 
+# Build test programs without running 'make check'
+.PHONY: check-programs
+check-programs: $(check_PROGRAMS)
+
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
