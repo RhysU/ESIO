@@ -41,6 +41,7 @@
 #include <mpi.h>
 #include "esio.h"
 #include "error.h"
+#include "layout.h"
 
 //*********************************************************************
 // INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
@@ -48,16 +49,6 @@
 
 static
 MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
-
-static
-hid_t layout1_filespace_creator(int na, int nb, int nc);
-
-static
-int layout1_field_writer(hid_t dset_id, const void *field,
-                         int na, int ast, int asz,
-                         int nb, int bst, int bsz,
-                         int nc, int cst, int csz,
-                         hid_t type_id, size_t type_size);
 
 static
 hid_t esio_field_create(esio_state s,
@@ -81,30 +72,25 @@ int esio_field_write_internal(esio_state s,
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
 
-typedef struct esio_layout {
+typedef struct esio_layout_details {
     int tag;
-    const char * name;
-    hid_t (*filespace_creator)(int, int, int);
-    int   (*field_writer)     (hid_t, const void *,
-                               int, int, int,
-                               int, int, int,
-                               int, int, int,
-                               hid_t, size_t);
-} esio_layout;
-
-static const esio_layout layout_1 = {
-    1, "2D(a_bc)", &layout1_filespace_creator, &layout1_field_writer
-};
+    esio_filespace_creator_t filespace_creator;
+    esio_field_writer_t field_writer;
+} esio_layout_details;
 
 struct esio_state_s {
-    MPI_Comm    comm;      //< Communicator used for collective operations
-    int         comm_rank; //< Process rank within in MPI communicator
-    int         comm_size; //< Number of ranks within MPI communicator
-    MPI_Info    info;      //< Info object used for collective operations
-    hid_t       file_id;   //< Active HDF file identifier
-    esio_layout layout;    //< Active field layout within HDF5 file
+    MPI_Comm            comm;      //< Communicator used for collective calls
+    int                 comm_rank; //< Process rank within in MPI communicator
+    int                 comm_size; //< Number of ranks within MPI communicator
+    MPI_Info            info;      //< Info object used for collective calls
+    hid_t               file_id;   //< Active HDF file identifier
+    esio_layout_details layout;    //< Active field layout within HDF5 file
 };
 
+static const esio_layout_details esio_layout[] = {
+    {0, &esio_layout1_filespace_creator, &esio_layout1_field_writer}
+};
+static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
 
 //***************************************************************************
 // IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION IMPLEMENTATION
@@ -176,7 +162,7 @@ esio_init(MPI_Comm comm)
     s->comm_size         = comm_size;
     s->info              = info;
     s->file_id           = -1;
-    s->layout            = layout_1;
+    s->layout            = esio_layout[0];
 
     if (s->comm == MPI_COMM_NULL) {
         esio_finalize(s);
@@ -450,80 +436,6 @@ int esio_field_write_internal(esio_state s,
                              nc, cst, csz,
                              type_id, type_size);
     esio_field_close(dset_id);
-
-    return ESIO_SUCCESS;
-}
-
-// **************************************************************
-// LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
-// **************************************************************
-
-static
-hid_t layout1_filespace_creator(int na, int nb, int nc)
-{
-    const hsize_t dims[2] = { nb * nc, na };
-    return H5Screate_simple(2, dims, NULL);
-}
-
-static
-hid_t layout1_field_writer(hid_t dset_id, const void *field,
-                           int na, int ast, int asz,
-                           int nb, int bst, int bsz,
-                           int nc, int cst, int csz,
-                           hid_t type_id, size_t type_size)
-{
-    // TODO Error checking here
-
-    (void) nc; // Unused but present for API consistency
-
-    // Create property list for collective write
-    const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
-
-    // Initialize one-time write details
-    const hsize_t stride[2] = { 1, 1 };
-    const hsize_t count[2]  = { 1, asz };
-    const hid_t   memspace  = H5Screate_simple(2, count, NULL);
-    const hid_t   filespace = H5Dget_space(dset_id);
-
-    hsize_t offset[2];
-    for (int i = 0; i < csz; ++i)
-    {
-        for (int j = 0; j < bsz; ++j)
-        {
-            // Select hyperslab in the file
-            offset[0] = (j + bst) + (i + cst) * nb;
-            offset[1] = ast;
-            H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                                offset, stride, count, NULL);
-
-            // Compute in-memory offset to hyperslab's data
-            // Note use of type_size when adding to (void *) field
-            const size_t moffset = j*asz + i*asz*bsz;
-#ifdef __INTEL_COMPILER
-#pragma warning(push,disable:1338)
-#endif
-            const void *p_field = field + (type_size * moffset);
-#ifdef __INTEL_COMPILER
-#pragma warning(pop)
-#endif
-
-            // Write to hyperslab from memory
-            const herr_t status = H5Dwrite(dset_id, type_id, memspace,
-                                           filespace, plist_id, p_field);
-            if (status < 0) {
-                H5Sclose(filespace);
-                H5Sclose(memspace);
-                H5Pclose(plist_id);
-                ESIO_ERROR("Write failed", ESIO_EFAILED);
-            }
-        }
-    }
-
-    // Release temporary resources
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }
