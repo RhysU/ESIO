@@ -30,7 +30,6 @@
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid state before other failure
 ! TODO Allow Fortran to use customizable error handling
-! TODO Add esio_field_read_*
 
 module esio
 
@@ -60,10 +59,16 @@ module esio
   public :: esio_file_create, esio_file_open, esio_file_close
   public :: esio_field_size
   public :: esio_field_write, esio_field_write_double, esio_field_write_single
+  public :: esio_field_read, esio_field_read_double, esio_field_read_single
 
 ! Generic, precision-agnostic field interfaces
   interface esio_field_write
-    module procedure esio_field_write_double, esio_field_write_single
+    module procedure esio_field_write_double
+    module procedure esio_field_write_single
+  end interface
+  interface esio_field_read
+    module procedure esio_field_read_double
+    module procedure esio_field_read_single
   end interface
 
 ! Private utilities to convert types from Fortran- to C-style.
@@ -202,6 +207,7 @@ contains
 
   end function esio_field_size
 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! TODO Use Autoconf to find c_double value at compile time and use in API.
@@ -283,6 +289,88 @@ contains
                                    nc, cst - 1, csz)
 
   end function esio_field_write_single
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! TODO Use Autoconf to find c_double value at compile time and use in API.
+! Would eliminate "leaking" c_double in the API and leave, e.g., real(8).
+
+  integer function esio_field_read_double (state, name, field, &
+                                           na, ast, asz,       &
+                                           nb, bst, bsz,       &
+                                           nc, cst, csz)
+
+    type(esio_state), intent(in)  :: state
+    character(len=*), intent(in)  :: name
+    real(c_double),   intent(out) :: field(*)
+    integer,          intent(in)  :: na, ast, asz
+    integer,          intent(in)  :: nb, bst, bsz
+    integer,          intent(in)  :: nc, cst, csz
+
+    interface
+      function impl (state, name, field, &
+                     na, ast, asz,       &
+                     nb, bst, bsz,       &
+                     nc, cst, csz) bind (C, name="esio_field_read_double")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_state),             intent(in), value :: state
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        real(c_double),               intent(out)       :: field(*)
+        integer(c_int),               intent(in), value :: na, ast, asz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: nc, cst, csz
+      end function impl
+    end interface
+
+!   Note conversion from one- to zero-based starting offsets
+    esio_field_read_double = impl(state, f_c_string(name), field, &
+                                  na, ast - 1, asz,               &
+                                  nb, bst - 1, bsz,               &
+                                  nc, cst - 1, csz)
+
+  end function esio_field_read_double
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! TODO Use Autoconf to find c_float value at compile time and use in API.
+! Would eliminate "leaking" c_float in the API and leave, e.g., real(4).
+
+  integer function esio_field_read_single (state, name, field, &
+                                           na, ast, asz,       &
+                                           nb, bst, bsz,       &
+                                           nc, cst, csz)
+
+    type(esio_state), intent(in)  :: state
+    character(len=*), intent(in)  :: name
+    real(c_float),    intent(out) :: field(*)
+    integer,          intent(in)  :: na, ast, asz
+    integer,          intent(in)  :: nb, bst, bsz
+    integer,          intent(in)  :: nc, cst, csz
+
+    interface
+      function impl (state, name, field, &
+                     na, ast, asz,       &
+                     nb, bst, bsz,       &
+                     nc, cst, csz) bind (C, name="esio_field_read_float")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_state),             intent(in), value :: state
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        real(c_float),                intent(out)       :: field(*)
+        integer(c_int),               intent(in), value :: na, ast, asz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: nc, cst, csz
+      end function impl
+    end interface
+
+!   Note conversion from one- to zero-based starting offsets
+    esio_field_read_single = impl(state, f_c_string(name), field, &
+                                  na, ast - 1, asz,               &
+                                  nb, bst - 1, bsz,               &
+                                  nc, cst - 1, csz)
+
+  end function esio_field_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
