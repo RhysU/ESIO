@@ -33,6 +33,7 @@
 #endif
 
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -53,6 +54,19 @@
 
 static
 MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
+
+static
+herr_t esio_field_metadata_write(hid_t loc_id,
+                                 const char *name,
+                                 int layout_tag, int nc, int nb, int na);
+
+static
+herr_t esio_field_metadata_read(hid_t loc_id,
+                                const char *name,
+                                int *layout_tag, int *nc, int *nb, int *na);
+
+// See esio_field_metadata_write and esio_field_metadata_read
+#define ESIO_FIELD_METADATA_SIZE (7)
 
 static
 hid_t esio_field_create(esio_state s,
@@ -351,6 +365,75 @@ int esio_file_close(esio_state s)
 }
 
 static
+herr_t esio_field_metadata_write(hid_t loc_id,
+                                 const char *name,
+                                 int layout_tag, int nc, int nb, int na)
+{
+    // Meant to be opaque but the cool kids will figure it out. :P
+    const int metadata[ESIO_FIELD_METADATA_SIZE] = {
+        ESIO_MAJOR_VERSION,
+        ESIO_MINOR_VERSION,
+        ESIO_POINT_VERSION,
+        layout_tag,
+        nc,
+        nb,
+        na
+    };
+    return H5LTset_attribute_int(loc_id, name, "esio_metadata",
+                                 metadata, ESIO_FIELD_METADATA_SIZE);
+}
+
+static
+herr_t esio_field_metadata_read(hid_t loc_id,
+                                const char *name,
+                                int *layout_tag, int *nc, int *nb, int *na)
+{
+    // Obtain current HDF5 error handler
+    H5E_auto2_t hdf5_handler;
+    void *hdf5_client_data;
+    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data);
+
+    // Disable HDF5 error handler during metadata read
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    // Local scratch space into which we read the metadata
+    // Employ a sentinel to balk if/when we accidentally blow out the buffer
+    int metadata[ESIO_FIELD_METADATA_SIZE + 1];
+    const int sentinel = INT_MIN + 999983;
+    metadata[ESIO_FIELD_METADATA_SIZE] = sentinel;
+
+    // Read the metadata into the buffer
+    const herr_t err = H5LTget_attribute_int(
+            loc_id, name, "esio_metadata", metadata);
+
+    // Re-enable the HDF5 error handler
+    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
+
+    // Check that our sentinel survived the read process
+    if (metadata[ESIO_FIELD_METADATA_SIZE] != sentinel) {
+        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+    }
+
+    // On success...
+    if (err >= 0) {
+        // ... populate all requested, outgoing arguments
+        if (layout_tag) *layout_tag = metadata[3];
+        if (nc)         *nc         = metadata[4];
+        if (nb)         *nb         = metadata[5];
+        if (na)         *na         = metadata[6];
+
+        // ... sanity check layout_tag's value
+        if (metadata[3] < 0 || metadata[3] >= esio_nlayout) {
+            ESIO_ERROR_VAL("ESIO metadata contains unknown layout_tag",
+                           ESIO_ESANITY, err);
+        }
+    }
+
+    // Return the H5LTget_attribute_int error code
+    return err;
+}
+
+static
 hid_t esio_field_create(esio_state s,
                         int nc, int nb, int na,
                         const char* name, hid_t type_id)
@@ -374,22 +457,11 @@ hid_t esio_field_create(esio_state s,
         ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
     }
 
-    // Stash some metadata as a field attribute
-    // Meant to be opaque but the cool kids will figure it out. :P
-    // esio_field_{size,read_internal} must be synced with these contents
-    const int metadata[] = {
-        ESIO_MAJOR_VERSION,
-        ESIO_MINOR_VERSION,
-        ESIO_POINT_VERSION,
-        s->layout_tag,
-        nc,
-        nb,
-        na
-    };
-    const int metadata_size = sizeof(metadata)/sizeof(metadata[0]);
-    if (H5LTset_attribute_int(s->file_id, name, "esio_metadata",
-                              metadata, metadata_size)) {
-        ESIO_ERROR("Unable to save metadata", ESIO_ESANITY);
+    // Stash field's metadata
+    const herr_t status = esio_field_metadata_write(s->file_id, name,
+                                                    s->layout_tag, nc, nb, na);
+    if (status < 0) {
+        ESIO_ERROR("Unable to save field's ESIO metadata", ESIO_ESANITY);
     }
 
     // Clean up temporary resources
@@ -420,24 +492,11 @@ int esio_field_size(esio_state s,
     if (nb == NULL)       ESIO_ERROR("nb == NULL",             ESIO_EINVAL);
     if (na == NULL)       ESIO_ERROR("na == NULL",             ESIO_EINVAL);
 
-    // Read metadata from the field.  See esio_field_create for contents.
-    int metadata[7];
     const herr_t status
-        = H5LTget_attribute_int(s->file_id, name, "esio_metadata", metadata);
+        = esio_field_metadata_read(s->file_id, name, NULL, nc, nb, na);
     if (status < 0) {
-        ESIO_ERROR("Unable to open attribute esio_metadata", ESIO_EFAILED);
+        ESIO_ERROR("Unable to open field's ESIO metadata", ESIO_EFAILED);
     }
-
-    // Sanity check metadata
-    const int layout_tag = metadata[3];
-    if (layout_tag < 0 || layout_tag >= esio_nlayout) {
-        ESIO_ERROR("esio_metadata contains unknown layout_tag", ESIO_ESANITY);
-    }
-
-    // Store nc, nb, na in arguments
-    *nc = metadata[4];
-    *nb = metadata[5];
-    *na = metadata[6];
 
     return ESIO_SUCCESS;
 }
@@ -567,28 +626,22 @@ int esio_field_read_internal(esio_state s,
     if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
 
-    // TODO Error checking here
-
-    // Read metadata from the field.  See esio_field_create for contents.
-    int metadata[7];
-    const herr_t status
-        = H5LTget_attribute_int(s->file_id, name, "esio_metadata", metadata);
+    // Read metadata for the field
+    int layout_tag, field_nc, field_nb, field_na;
+    const herr_t status = esio_field_metadata_read(
+            s->file_id, name, &layout_tag, &field_nc, &field_nb, &field_na);
     if (status < 0) {
-        ESIO_ERROR("Unable to open attribute esio_metadata", ESIO_EFAILED);
+        ESIO_ERROR("Unable to read field's ESIO metadata", ESIO_ESANITY);
     }
 
-    // Sanity check metadata; ensure caller gave correct size information
-    const int layout_tag = metadata[3];
-    if (layout_tag < 0 || layout_tag >= esio_nlayout) {
-        ESIO_ERROR("esio_metadata contains unknown layout_tag", ESIO_ESANITY);
-    }
-    if (nc != metadata[4]) {
+    // Ensure caller gave correct size information
+    if (nc != field_nc) {
         ESIO_ERROR("field read request has incorrect nc", ESIO_EINVAL);
     }
-    if (nb != metadata[5]) {
+    if (nb != field_nb) {
         ESIO_ERROR("field read request has incorrect nb", ESIO_EINVAL);
     }
-    if (na != metadata[6]) {
+    if (na != field_na) {
         ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
     }
 
