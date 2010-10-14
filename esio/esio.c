@@ -386,6 +386,9 @@ herr_t esio_field_metadata_read(hid_t loc_id,
                                 const char *name,
                                 int *layout_tag, int *nc, int *nb, int *na)
 {
+    // This routine should not invoke any ESIO error handling--
+    // It is sometimes used to query for the existence of a field.
+
     // Obtain current HDF5 error handler
     H5E_auto2_t hdf5_handler;
     void *hdf5_client_data;
@@ -556,15 +559,63 @@ int esio_field_write_internal(esio_state s,
     if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
 
-    // TODO Error checking here
-    // TODO Overwrite existing case using same layout
-    const hid_t dset_id = esio_field_create(s, nc, nb, na, name, type_id);
-    (esio_layout[s->layout_tag].field_writer)(dset_id, field,
-                                              nc, cst, csz,
-                                              nb, bst, bsz,
-                                              na, ast, asz,
-                                              type_id, type_size);
-    esio_field_close(dset_id);
+    // Attempt to read metadata for the field (which may or may not exist)
+    int layout_tag, field_nc, field_nb, field_na;
+    const herr_t mstat = esio_field_metadata_read(
+            s->file_id, name, &layout_tag, &field_nc, &field_nb, &field_na);
+
+    if (mstat < 0) {
+        // Field did not exist
+
+        // Create dataset and write it with the active field layout
+        const hid_t dset_id
+            = esio_field_create(s, nc, nb, na, name, type_id);
+        const int wstat
+            = (esio_layout[s->layout_tag].field_writer)(dset_id, field,
+                                                        nc, cst, csz,
+                                                        nb, bst, bsz,
+                                                        na, ast, asz,
+                                                        type_id, type_size);
+        if (wstat != ESIO_SUCCESS) {
+            esio_field_close(dset_id);
+            ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
+        }
+        esio_field_close(dset_id);
+
+    } else {
+        // Field already existed
+
+        // Ensure caller gave correct size information
+        if (nc != field_nc) {
+            ESIO_ERROR("field read request has incorrect nc", ESIO_EINVAL);
+        }
+        if (nb != field_nb) {
+            ESIO_ERROR("field read request has incorrect nb", ESIO_EINVAL);
+        }
+        if (na != field_na) {
+            ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
+        }
+
+        // Open the existing field's dataset
+        const hid_t dset_id = H5Dopen1(s->file_id, name);
+        if (dset_id < 0) {
+            ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
+        }
+
+        // Overwrite existing data using layout routines per metadata
+        const int wstat
+            = (esio_layout[layout_tag].field_writer)(dset_id, field,
+                                                     nc, cst, csz,
+                                                     nb, bst, bsz,
+                                                     na, ast, asz,
+                                                     type_id, type_size);
+        if (wstat != ESIO_SUCCESS) {
+            esio_field_close(dset_id);
+            ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
+        }
+        esio_field_close(dset_id);
+
+    }
 
     return ESIO_SUCCESS;
 }
