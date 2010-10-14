@@ -1631,7 +1631,7 @@ fct_clp__parse(fct_clp_t *clp, int argc, char const *argv[])
         next_token = NULL;
         arg = fctstr_clone(argv[argi]);
 
-#if _MSC_VER > 1300
+#if defined(_MSC_VER) && _MSC_VER > 1300
         token = strtok_s(arg, "=", &next_token);
 #else
         token = strtok(arg, "=");
@@ -1881,18 +1881,23 @@ static fctcl_init_t FCT_CLP_OPTIONS[] =
     /* Totally unsafe, since we are assuming we can clean out this data,
     what I need to do is have an "initialization" object, full of
     const objects. But for now, this should work. */
-    {FCT_OPT_VERSION,
+    {
+        FCT_OPT_VERSION,
         FCT_OPT_VERSION_SHORT,
         FCTCL_STORE_TRUE,
-        "Displays the FCTX version number and exits."},
-    {FCT_OPT_HELP,
-     FCT_OPT_HELP_SHORT,
-     FCTCL_STORE_TRUE,
-     "Shows this help."},
-    {FCT_OPT_LOGGER,
-     FCT_OPT_LOGGER_SHORT,
-     FCTCL_STORE_VALUE,
-     NULL
+        "Displays the FCTX version number and exits."
+    },
+    {
+        FCT_OPT_HELP,
+        FCT_OPT_HELP_SHORT,
+        FCTCL_STORE_TRUE,
+        "Shows this help."
+    },
+    {
+        FCT_OPT_LOGGER,
+        FCT_OPT_LOGGER_SHORT,
+        FCTCL_STORE_VALUE,
+        NULL
     },
     FCTCL_INIT_NULL /* Sentinel */
 };
@@ -1907,17 +1912,20 @@ struct _fct_logger_types_t
 
 static fct_logger_types_t FCT_LOGGER_TYPES[] =
 {
-    {"standard",
+    {
+        "standard",
         (fct_logger_new_fn)fct_standard_logger_new,
         "the basic fctx logger"
     },
-    {"minimal",
-     (fct_logger_new_fn)fct_minimal_logger_new,
-     "the least amount of logging information."
+    {
+        "minimal",
+        (fct_logger_new_fn)fct_minimal_logger_new,
+        "the least amount of logging information."
     },
-    {"junit",
-     (fct_logger_new_fn)fct_junit_logger_new,
-     "junit compatable xml"
+    {
+        "junit",
+        (fct_logger_new_fn)fct_junit_logger_new,
+        "junit compatable xml"
     },
     {NULL, (fct_logger_new_fn)NULL, NULL} /* Sentinel */
 };
@@ -3247,12 +3255,22 @@ int main(int argc, char* argv[])\
         );\
         exit(EXIT_FAILURE);\
    }\
- 
+
+/* Silence Intel complaints about unspecified operand order in user's code */
+#ifndef __INTEL_COMPILER
+# define FCT_END_WARNINGFIX_BGN
+# define FCT_END_WARNINGFIX_END
+#else
+# define FCT_END_WARNINGFIX_BGN _Pragma("warning(push,disable:981)");
+# define FCT_END_WARNINGFIX_END _Pragma("warning(pop)");
+#endif
+
 /* Ends the test suite by returning the number failed. The "chk_cnt" call is
 made in order allow strict compilers to pass when it encounters unreferenced
 functions. */
 #define FCT_END()\
    {\
+      FCT_END_WARNINGFIX_BGN\
       size_t num_failed__ =0;\
       num_failed__ = fctkern__tst_cnt_failed((fctkern_ptr__));\
       fctkern__log_end(fctkern_ptr__);\
@@ -3263,6 +3281,7 @@ functions. */
           return 0;\
       }\
       return (int)num_failed__;\
+      FCT_END_WARNINGFIX_END\
    }\
 }
 

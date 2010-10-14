@@ -44,7 +44,14 @@
 #include <esio/esio.h>
 #include <esio/error.h>
 
+// Include FCTX and silence useless warnings
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:981)
+#endif
 #include "fct.h"
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
 
 FCT_BGN()
 {
@@ -145,4 +152,4 @@ FCT_BGN()
     }
     FCT_FIXTURE_SUITE_END();
 }
-FCT_END();
+FCT_END()

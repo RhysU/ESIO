@@ -29,12 +29,6 @@ AM_LDFLAGS += $(GRVY_LIBS)
 ## Pick up Fortran support libraries
 AM_LDFLAGS += $(FCLIBS)
 
-## Sample test program
-TESTS          += sample
-check_PROGRAMS += sample
-sample_SOURCES  = sample.c
-sample_LDADD    = ../esio/libesio.la
-
 ## Basic C API sanity checks
 TESTS          += basic
 check_PROGRAMS += basic

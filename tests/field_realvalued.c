@@ -50,8 +50,14 @@
 #include <esio/esio.h>
 #include <esio/error.h>
 
+// Include FCTX and silence useless warnings
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:981)
+#endif
 #include "fct.h"
-
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
 
 // Add command line options
 static fctcl_init_t my_cl_options[] = {
@@ -217,7 +223,8 @@ FCT_BGN()
                     for (int k = cst; k < cst + csz; ++k) {
                         for (int j = bst; j < bst + bsz; ++j) {
                             for (int i = ast; i < ast + asz; ++i) {
-                                *p_field++ = 2*(i+3)+5*(j+7)+11*(k+13);
+                                *p_field++
+                                    = (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13);
                             }
                         }
                     }
@@ -261,7 +268,8 @@ FCT_BGN()
                             for (int i = 0; i < na; ++i) {
                                 const TEST_REAL value = *p_field++;
                                 fct_chk_eq_dbl(
-                                    value, 2*(i+3)+5*(j+7)+11*(k+13));
+                                        value,
+                                        (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
                             }
                         }
                     }
@@ -285,7 +293,8 @@ FCT_BGN()
                             for (int i = ast; i < ast + asz; ++i) {
                                 const TEST_REAL value = *p_field++;
                                 fct_chk_eq_dbl(
-                                    value, 2*(i+3)+5*(j+7)+11*(k+13));
+                                    value,
+                                    (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
                             }
                         }
                     }
@@ -295,10 +304,7 @@ FCT_BGN()
 
                 // Clean up
                 if (world_rank == 0) {
-                    if (!preserve) {
-                        const int status = unlink(filename);
-                        assert(0 == status);
-                    }
+                    if (!preserve) fct_req(0 == unlink(filename));
                 }
                 if (filename) free(filename);
             }
@@ -309,4 +315,4 @@ FCT_BGN()
     }
     FCT_FIXTURE_SUITE_END();
 }
-FCT_END();
+FCT_END()

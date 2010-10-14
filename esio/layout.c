@@ -52,13 +52,6 @@ hid_t esio_layout0_filespace_creator(int na, int nb, int nc)
     return H5Screate_simple(2, dims, NULL);
 }
 
-/* #ifdef __INTEL_COMPILER */
-/* #pragma warning(push,disable:1338) */
-/* #endif */
-/* #ifdef __INTEL_COMPILER */
-/* #pragma warning(pop) */
-/* #endif */
-
 // Reading and writing differ only by an HDF5 operation name and a const
 // qualifier.  Define a macro that we'll use to implement both operations.
 #define ESIO_LAYOUT0_FIELD_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)           \
@@ -68,6 +61,7 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
                  int nc, int cst, int csz,                                   \
                  hid_t type_id, size_t type_size)                            \
 {                                                                            \
+    (void) na; /* Unused but present for API consistency */                  \
     (void) nc; /* Unused but present for API consistency */                  \
                                                                              \
     /* Create property list for collective operation */                      \
@@ -120,8 +114,18 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
     return ESIO_SUCCESS;                                                     \
 }
 
+
+#ifdef __INTEL_COMPILER
+/* warning #1338: arithmetic on pointer to void or function type */
+#pragma warning(push,disable:1338)
+#endif
+
 // Routine to transfer data from const buffer to storage
 ESIO_LAYOUT0_FIELD_TRANSFER(esio_layout0_field_writer, H5Dwrite, const)
 
 // Routine to transfer data from storage to mutable buffer
 ESIO_LAYOUT0_FIELD_TRANSFER(esio_layout0_field_reader, H5Dread, /* mutable */)
+
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
