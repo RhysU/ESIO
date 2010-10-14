@@ -224,7 +224,7 @@ FCT_BGN()
                 }
 
                 // Write local data to disk
-                const int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
+                int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
                         na, ast, asz, nb, bst, bsz, nc, cst, csz);
                 fct_req(status == 0);
 
@@ -269,13 +269,38 @@ FCT_BGN()
                     const herr_t status2 = H5Fclose(file_id);
                     fct_req(status2 >= 0);
                     free(field);
+                }
 
+                // Re-read the file in a distributed manner and verify contents
+                field = calloc(nelem, sizeof(TEST_REAL));
+                fct_req(field);
+                fct_req(0 == esio_file_open(state, filename, 0));
+                status = TEST_ESIO_FIELD_READ(state, "field", field,
+                        na, ast, asz, nb, bst, bsz, nc, cst, csz);
+                fct_req(status == 0);
+                {
+                    TEST_REAL * p_field = field;
+                    for (int k = cst; k < cst + csz; ++k) {
+                        for (int j = bst; j < bst + bsz; ++j) {
+                            for (int i = ast; i < ast + asz; ++i) {
+                                const TEST_REAL value = *p_field++;
+                                fct_chk_eq_dbl(
+                                    value, 2*(i+3)+5*(j+7)+11*(k+13));
+                            }
+                        }
+                    }
+                }
+                free(field);
+                fct_req(0 == esio_file_close(state));
+
+                // Clean up
+                if (world_rank == 0) {
                     if (!preserve) {
                         const int status = unlink(filename);
                         assert(0 == status);
                     }
-                    if (filename) free(filename);
                 }
+                if (filename) free(filename);
             }
 
         }

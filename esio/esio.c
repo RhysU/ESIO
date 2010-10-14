@@ -584,10 +584,10 @@ int esio_field_read_internal(esio_state s,
     if (na != metadata[4]) {
         ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
     }
-    if (na != metadata[5]) {
+    if (nb != metadata[5]) {
         ESIO_ERROR("field read request has incorrect nb", ESIO_EINVAL);
     }
-    if (na != metadata[6]) {
+    if (nc != metadata[6]) {
         ESIO_ERROR("field read request has incorrect nc", ESIO_EINVAL);
     }
 
