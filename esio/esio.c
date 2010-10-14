@@ -46,8 +46,6 @@
 #include "layout.h"
 #include "version.h"
 
-// TODO ESIO_ESANITY vs ESIO_EFAILED usage consistency
-
 //*********************************************************************
 // INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
 //*********************************************************************
@@ -278,14 +276,14 @@ esio_file_create(esio_state s, const char *file, int overwrite)
         file_id = H5Fcreate(file, H5F_ACC_TRUNC, fcpl_id, fapl_id);
         if (file_id < 0) {
             H5Pclose(fapl_id);
-            ESIO_ERROR("Unable to create file", ESIO_ESANITY);
+            ESIO_ERROR("Unable to create file", ESIO_EFAILED);
         }
     } else {
         // Avoid overwriting existing file
         file_id = H5Fcreate(file, H5F_ACC_EXCL, fcpl_id, fapl_id);
         if (file_id < 0) {
             H5Pclose(fapl_id);
-            ESIO_ERROR("File already exists", ESIO_ESANITY);
+            ESIO_ERROR("File already exists", ESIO_EFAILED);
         }
     }
 
@@ -331,7 +329,7 @@ esio_file_open(esio_state s, const char *file, int readwrite)
     const hid_t file_id = H5Fopen(file, flags, fapl_id);
     if (file_id < 0) {
         H5Pclose(fapl_id);
-        ESIO_ERROR("Unable to open existing file", ESIO_ESANITY);
+        ESIO_ERROR("Unable to open existing file", ESIO_EFAILED);
     }
 
     // File creation successful: update state
@@ -461,7 +459,7 @@ hid_t esio_field_create(esio_state s,
     const herr_t status = esio_field_metadata_write(s->file_id, name,
                                                     s->layout_tag, nc, nb, na);
     if (status < 0) {
-        ESIO_ERROR("Unable to save field's ESIO metadata", ESIO_ESANITY);
+        ESIO_ERROR("Unable to save field's ESIO metadata", ESIO_EFAILED);
     }
 
     // Clean up temporary resources
@@ -631,7 +629,7 @@ int esio_field_read_internal(esio_state s,
     const herr_t status = esio_field_metadata_read(
             s->file_id, name, &layout_tag, &field_nc, &field_nb, &field_na);
     if (status < 0) {
-        ESIO_ERROR("Unable to read field's ESIO metadata", ESIO_ESANITY);
+        ESIO_ERROR("Unable to read field's ESIO metadata", ESIO_EFAILED);
     }
 
     // Ensure caller gave correct size information
@@ -649,7 +647,7 @@ int esio_field_read_internal(esio_state s,
     const hid_t dapl_id = H5P_DEFAULT;
     const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
     if (dset_id < 0) {
-        ESIO_ERROR("Unable to open dataset", ESIO_ESANITY);
+        ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
 
     // Read the field based on the metadata's layout_tag
