@@ -55,18 +55,18 @@ typedef int   (*esio_field_reader_t)     (hid_t, void *,
 // INTERNAL DECLARATIONS INTERNAL DECLARATIONS INTERNAL DECLARATIONS
 //******************************************************************
 
-hid_t esio_layout0_filespace_creator(int na, int nb, int nc);
+hid_t esio_layout0_filespace_creator(int nc, int nb, int na);
 
 int esio_layout0_field_writer(hid_t dset_id, const void *field,
-                              int na, int ast, int asz,
-                              int nb, int bst, int bsz,
                               int nc, int cst, int csz,
+                              int nb, int bst, int bsz,
+                              int na, int ast, int asz,
                               hid_t type_id, size_t type_size);
 
 int esio_layout0_field_reader(hid_t dset_id, void *field,
-                              int na, int ast, int asz,
-                              int nb, int bst, int bsz,
                               int nc, int cst, int csz,
+                              int nb, int bst, int bsz,
+                              int na, int ast, int asz,
                               hid_t type_id, size_t type_size);
 
 #endif /* __ESIO_LAYOUT_H */

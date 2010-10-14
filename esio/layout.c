@@ -46,9 +46,9 @@
 // LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
 // **************************************************************
 
-hid_t esio_layout0_filespace_creator(int na, int nb, int nc)
+hid_t esio_layout0_filespace_creator(int nc, int nb, int na)
 {
-    const hsize_t dims[2] = { nb * nc, na };
+    const hsize_t dims[2] = { nc * nb, na };
     return H5Screate_simple(2, dims, NULL);
 }
 
@@ -56,13 +56,13 @@ hid_t esio_layout0_filespace_creator(int na, int nb, int nc)
 // qualifier.  Define a macro that we'll use to implement both operations.
 #define ESIO_LAYOUT0_FIELD_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)           \
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
-                 int na, int ast, int asz,                                   \
-                 int nb, int bst, int bsz,                                   \
                  int nc, int cst, int csz,                                   \
+                 int nb, int bst, int bsz,                                   \
+                 int na, int ast, int asz,                                   \
                  hid_t type_id, size_t type_size)                            \
 {                                                                            \
-    (void) na; /* Unused but present for API consistency */                  \
     (void) nc; /* Unused but present for API consistency */                  \
+    (void) na; /* Unused but present for API consistency */                  \
                                                                              \
     /* Create property list for collective operation */                      \
     const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);                      \

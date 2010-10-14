@@ -46,33 +46,33 @@ int esio_file_close(esio_state s);
 
 int esio_field_size(esio_state s,
                     const char* name,
-                    int *na, int *nb, int *nc);
+                    int *nc, int *nb, int *na);
 
 int esio_field_write_double(esio_state s,
                             const char* name,
                             const double *field,
-                            int na, int ast, int asz,
+                            int nc, int cst, int csz,
                             int nb, int bst, int bsz,
-                            int nc, int cst, int csz);
+                            int na, int ast, int asz);
 int esio_field_write_float(esio_state s,
                            const char* name,
                            const float *field,
-                           int na, int ast, int asz,
+                           int nc, int cst, int csz,
                            int nb, int bst, int bsz,
-                           int nc, int cst, int csz);
+                           int na, int ast, int asz);
 
 int esio_field_read_double(esio_state s,
                            const char* name,
                            double *field,
-                           int na, int ast, int asz,
+                           int nc, int cst, int csz,
                            int nb, int bst, int bsz,
-                           int nc, int cst, int csz);
+                           int na, int ast, int asz);
 int esio_field_read_float(esio_state s,
                           const char* name,
                           float *field,
-                          int na, int ast, int asz,
+                          int nc, int cst, int csz,
                           int nb, int bst, int bsz,
-                          int nc, int cst, int csz);
+                          int na, int ast, int asz);
 
 
 #endif /* __ESIO_ESIO_H */

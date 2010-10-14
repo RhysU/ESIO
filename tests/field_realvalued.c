@@ -149,9 +149,9 @@ FCT_BGN()
 
         FCT_TEST_BGN(uniform_directionally_split)
         {
-            int na, ast, asz;
-            int nb, bst, bsz;
             int nc, cst, csz;
+            int nb, bst, bsz;
+            int na, ast, asz;
 
             for (int casenum = 0; casenum < 3; ++casenum) {
 
@@ -232,17 +232,17 @@ FCT_BGN()
 
                 // Write local data to disk
                 int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
-                        na, ast, asz, nb, bst, bsz, nc, cst, csz);
+                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
                 fct_req(status == 0);
 
                 // Ensure the global size was written correctly
                 {
                     int tmp_na, tmp_nb, tmp_nc;
                     fct_req(0 == esio_field_size(state, "field",
-                                                 &tmp_na, &tmp_nb, &tmp_nc));
-                    fct_chk_eq_int(na, tmp_na);
-                    fct_chk_eq_int(nb, tmp_nb);
+                                                 &tmp_nc, &tmp_nb, &tmp_na));
                     fct_chk_eq_int(nc, tmp_nc);
+                    fct_chk_eq_int(nb, tmp_nb);
+                    fct_chk_eq_int(na, tmp_na);
                 }
 
                 // Close the file
@@ -254,7 +254,7 @@ FCT_BGN()
                 // Reopen the file using normal HDF5 APIs on root processor
                 // Examine the contents to ensure it matches
                 if (world_rank == 0) {
-                    field = calloc(na * nb * nc, sizeof(TEST_REAL));
+                    field = calloc(nc * nb * na, sizeof(TEST_REAL));
                     fct_req(field);
                     const hid_t file_id
                         = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -284,7 +284,7 @@ FCT_BGN()
                 fct_req(field);
                 fct_req(0 == esio_file_open(state, filename, 0));
                 status = TEST_ESIO_FIELD_READ(state, "field", field,
-                        na, ast, asz, nb, bst, bsz, nc, cst, csz);
+                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
                 fct_req(status == 0);
                 {
                     TEST_REAL * p_field = field;

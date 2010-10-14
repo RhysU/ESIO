@@ -186,21 +186,22 @@ contains
     integer,          intent(out) :: nb
     integer,          intent(out) :: nc
 
-    integer(c_int) :: tmp_na, tmp_nb, tmp_nc
+    integer(c_int) :: tmp_nc, tmp_nb, tmp_na
 
     interface
-      function impl (state, name, na, nb, nc) bind (C, name="esio_field_size")
+      function impl (state, name, nc, nb, na) bind (C, name="esio_field_size")
         import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
         character(len=1,kind=c_char), intent(in)        :: name(*)
-        integer(c_int),               intent(inout)     :: na
-        integer(c_int),               intent(inout)     :: nb
         integer(c_int),               intent(inout)     :: nc
+        integer(c_int),               intent(inout)     :: nb
+        integer(c_int),               intent(inout)     :: na
       end function impl
     end interface
 
-    esio_field_size = impl(state, f_c_string(name), tmp_na, tmp_nb, tmp_nc)
+!   Note reordering Fortran's (na, nb, nc) -> to C's (nc, nb, na)
+    esio_field_size = impl(state, f_c_string(name), tmp_nc, tmp_nb, tmp_na)
     na = tmp_na
     nb = tmp_nb
     nc = tmp_nc
@@ -227,25 +228,26 @@ contains
 
     interface
       function impl (state, name, field, &
-                     na, ast, asz,      &
-                     nb, bst, bsz,      &
-                     nc, cst, csz) bind (C, name="esio_field_write_double")
+                     nc, cst, csz,       &
+                     nb, bst, bsz,       &
+                     na, ast, asz) bind (C, name="esio_field_write_double")
         import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(in)        :: field(*)
-        integer(c_int),               intent(in), value :: na, ast, asz
-        integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: na, ast, asz
       end function impl
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (na, nb, nc) -> to C's (nc, nb, na)
     esio_field_write_double = impl(state, f_c_string(name), field, &
-                                   na, ast - 1, asz,               &
+                                   nc, cst - 1, csz,               &
                                    nb, bst - 1, bsz,               &
-                                   nc, cst - 1, csz)
+                                   na, ast - 1, asz)
 
   end function esio_field_write_double
 
@@ -268,25 +270,26 @@ contains
 
     interface
       function impl (state, name, field, &
-                     na, ast, asz,       &
+                     nc, cst, csz,       &
                      nb, bst, bsz,       &
-                     nc, cst, csz) bind (C, name="esio_field_write_float")
+                     na, ast, asz) bind (C, name="esio_field_write_float")
         import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(in)        :: field(*)
-        integer(c_int),               intent(in), value :: na, ast, asz
-        integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: na, ast, asz
       end function impl
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (na, nb, nc) -> to C's (nc, nb, na)
     esio_field_write_single = impl(state, f_c_string(name), field, &
-                                   na, ast - 1, asz,               &
+                                   nc, cst - 1, csz,               &
                                    nb, bst - 1, bsz,               &
-                                   nc, cst - 1, csz)
+                                   na, ast - 1, asz)
 
   end function esio_field_write_single
 
@@ -309,25 +312,26 @@ contains
 
     interface
       function impl (state, name, field, &
-                     na, ast, asz,       &
+                     nc, cst, csz,       &
                      nb, bst, bsz,       &
-                     nc, cst, csz) bind (C, name="esio_field_read_double")
+                     na, ast, asz) bind (C, name="esio_field_read_double")
         import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(out)       :: field(*)
-        integer(c_int),               intent(in), value :: na, ast, asz
-        integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: na, ast, asz
       end function impl
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (na, nb, nc) -> to C's (nc, nb, na)
     esio_field_read_double = impl(state, f_c_string(name), field, &
-                                  na, ast - 1, asz,               &
+                                  nc, cst - 1, csz,               &
                                   nb, bst - 1, bsz,               &
-                                  nc, cst - 1, csz)
+                                  na, ast - 1, asz)
 
   end function esio_field_read_double
 
@@ -350,25 +354,26 @@ contains
 
     interface
       function impl (state, name, field, &
-                     na, ast, asz,       &
+                     nc, cst, csz,       &
                      nb, bst, bsz,       &
-                     nc, cst, csz) bind (C, name="esio_field_read_float")
+                     na, ast, asz) bind (C, name="esio_field_read_float")
         import
         integer(c_int)                                  :: impl
         type(esio_state),             intent(in), value :: state
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(out)       :: field(*)
-        integer(c_int),               intent(in), value :: na, ast, asz
-        integer(c_int),               intent(in), value :: nb, bst, bsz
         integer(c_int),               intent(in), value :: nc, cst, csz
+        integer(c_int),               intent(in), value :: nb, bst, bsz
+        integer(c_int),               intent(in), value :: na, ast, asz
       end function impl
     end interface
 
 !   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (na, nb, nc) -> to C's (nc, nb, na)
     esio_field_read_single = impl(state, f_c_string(name), field, &
-                                  na, ast - 1, asz,               &
+                                  nc, cst - 1, csz,               &
                                   nb, bst - 1, bsz,               &
-                                  nc, cst - 1, csz)
+                                  na, ast - 1, asz)
 
   end function esio_field_read_single
 
