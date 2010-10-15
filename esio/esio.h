@@ -74,5 +74,35 @@ int esio_field_read_float(esio_state s,
                           int nb, int bst, int bsz,
                           int na, int ast, int asz);
 
+int esio_vfield_write_double(esio_state s,
+                             const char* name,
+                             const double *field,
+                             int nc, int cst, int csz,
+                             int nb, int bst, int bsz,
+                             int na, int ast, int asz,
+                             int ncomponents);
+int esio_vfield_write_float(esio_state s,
+                            const char* name,
+                            const float *field,
+                            int nc, int cst, int csz,
+                            int nb, int bst, int bsz,
+                            int na, int ast, int asz,
+                            int ncomponents);
+
+int esio_vfield_read_double(esio_state s,
+                            const char* name,
+                            double *field,
+                            int nc, int cst, int csz,
+                            int nb, int bst, int bsz,
+                            int na, int ast, int asz,
+                            int ncomponents);
+int esio_vfield_read_float(esio_state s,
+                           const char* name,
+                           float *field,
+                           int nc, int cst, int csz,
+                           int nb, int bst, int bsz,
+                           int na, int ast, int asz,
+                           int ncomponents);
+
 
 #endif /* __ESIO_ESIO_H */
