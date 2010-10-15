@@ -46,11 +46,10 @@ module esio
                                          c_null_char,        &
                                          esio_state => c_ptr
 
-  implicit none
+  implicit none  ! Nothing implicit
+  private        ! Everything default private
 
 ! C Interoperation details are kept hidden from the client...
-  private :: c_char, c_double, c_double_complex
-  private :: c_float, c_float_complex, c_int, c_null_char
 ! ... with the exception of our opaque handle object type.
   public  :: esio_state
 
@@ -58,22 +57,21 @@ module esio
   public :: esio_init, esio_finalize
   public :: esio_file_create, esio_file_open, esio_file_close
   public :: esio_field_size
-  public :: esio_field_write, esio_field_write_double, esio_field_write_single
-  public :: esio_field_read, esio_field_read_double, esio_field_read_single
+  public :: esio_field_write_double, esio_field_write_single
+  public :: esio_field_read_double, esio_field_read_single
 
-! Generic, precision-agnostic field interfaces
+! Generic, precision-agnostic interfaces
+  public :: esio_field_write
   interface esio_field_write
     module procedure esio_field_write_double
     module procedure esio_field_write_single
   end interface
+
+  public :: esio_field_read
   interface esio_field_read
     module procedure esio_field_read_double
     module procedure esio_field_read_single
   end interface
-
-! Private utilities to convert types from Fortran- to C-style.
-  private :: f_c_string
-  private :: f_c_logical
 
 contains
 
