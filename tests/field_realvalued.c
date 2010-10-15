@@ -218,6 +218,11 @@ FCT_BGN()
                 TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
                 fct_req(field);
 
+                // Write all zeros to disk
+                int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
+                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
+                fct_req(status == 0);
+
                 { // Populate local field with test data
                     TEST_REAL * p_field = field;
                     for (int k = cst; k < cst + csz; ++k) {
@@ -230,8 +235,8 @@ FCT_BGN()
                     }
                 }
 
-                // Write local data to disk
-                int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
+                // Overwrite zeros on disk with test data
+                status = TEST_ESIO_FIELD_WRITE(state, "field", field,
                         nc, cst, csz, nb, bst, bsz, na, ast, asz);
                 fct_req(status == 0);
 
