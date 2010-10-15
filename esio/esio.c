@@ -54,17 +54,22 @@ static
 MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
 
 static
-herr_t esio_field_metadata_write(hid_t loc_id,
-                                 const char *name,
-                                 int layout_tag, int nc, int nb, int na);
+int esio_type_ncomponents(hid_t type_id);
 
 static
-herr_t esio_field_metadata_read(hid_t loc_id,
-                                const char *name,
-                                int *layout_tag, int *nc, int *nb, int *na);
+herr_t esio_field_metadata_write(hid_t loc_id, const char *name,
+                                 int layout_tag,
+                                 int nc, int nb, int na,
+                                 int ncomponents);
+
+static
+herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
+                                int *layout_tag,
+                                int *nc, int *nb, int *na,
+                                int *ncomponents);
 
 // See esio_field_metadata_write and esio_field_metadata_read
-#define ESIO_FIELD_METADATA_SIZE (7)
+#define ESIO_FIELD_METADATA_SIZE (8)
 
 static
 hid_t esio_field_create(esio_state s,
@@ -361,11 +366,52 @@ int esio_file_close(esio_state s)
 }
 
 static
-herr_t esio_field_metadata_write(hid_t loc_id,
-                                 const char *name,
-                                 int layout_tag, int nc, int nb, int na)
+int esio_type_ncomponents(hid_t type_id)
+{
+    hsize_t ncomponents = 0;
+
+    // Look up number of scalar components contained in the given type
+    switch (H5Tget_class(type_id)) {
+        case H5T_ENUM:
+        case H5T_FLOAT:
+        case H5T_INTEGER:
+        case H5T_OPAQUE:
+            // Scalar types contain a single component for metadata purposes
+            ncomponents = 1;
+            break;
+        case H5T_ARRAY:
+            // One dimensional arrays have ncomponents equal to their size
+            assert(H5Tget_array_ndims(type_id) == 1);
+            H5Tget_array_dims2(type_id, &ncomponents);
+            break;
+        case H5T_COMPOUND:
+            ESIO_ERROR_VAL("H5T_COMPOUND not supported", ESIO_ESANITY, -1);
+        case H5T_REFERENCE:
+            ESIO_ERROR_VAL("H5T_REFERENCE not supported", ESIO_ESANITY, -1);
+        case H5T_STRING:
+            ESIO_ERROR_VAL("H5T_STRING not supported", ESIO_ESANITY, -1);
+        case H5T_VLEN:
+            ESIO_ERROR_VAL("H5T_VLEN not supported", ESIO_ESANITY, -1);
+        case H5T_TIME:
+            ESIO_ERROR_VAL("H5T_TIME not supported", ESIO_ESANITY, -1);
+        default:
+            ESIO_ERROR_VAL("Unknown H5T_class_t value", ESIO_ESANITY, -1);
+            break;
+    }
+
+    // Coerce to int and return
+    assert(ncomponents > 0 && ncomponents <= INT_MAX);
+    return (int) ncomponents;
+}
+
+static
+herr_t esio_field_metadata_write(hid_t loc_id, const char *name,
+                                 int layout_tag,
+                                 int nc, int nb, int na,
+                                 hid_t type_id)
 {
     // Meant to be opaque but the cool kids will figure it out. :P
+    const int ncomponents = esio_type_ncomponents(type_id);
     const int metadata[ESIO_FIELD_METADATA_SIZE] = {
         ESIO_MAJOR_VERSION,
         ESIO_MINOR_VERSION,
@@ -373,16 +419,18 @@ herr_t esio_field_metadata_write(hid_t loc_id,
         layout_tag,
         nc,
         nb,
-        na
+        na,
+        ncomponents
     };
     return H5LTset_attribute_int(loc_id, name, "esio_metadata",
                                  metadata, ESIO_FIELD_METADATA_SIZE);
 }
 
 static
-herr_t esio_field_metadata_read(hid_t loc_id,
-                                const char *name,
-                                int *layout_tag, int *nc, int *nb, int *na)
+herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
+                                int *layout_tag,
+                                int *nc, int *nb, int *na,
+                                int *ncomponents)
 {
     // This routine should not invoke any ESIO error handling--
     // It is sometimes used to query for the existence of a field.
@@ -416,10 +464,11 @@ herr_t esio_field_metadata_read(hid_t loc_id,
     // On success...
     if (err >= 0) {
         // ... populate all requested, outgoing arguments
-        if (layout_tag) *layout_tag = metadata[3];
-        if (nc)         *nc         = metadata[4];
-        if (nb)         *nb         = metadata[5];
-        if (na)         *na         = metadata[6];
+        if (layout_tag)  *layout_tag  = metadata[3];
+        if (nc)          *nc          = metadata[4];
+        if (nb)          *nb          = metadata[5];
+        if (na)          *na          = metadata[6];
+        if (ncomponents) *ncomponents = metadata[7];
 
         // ... sanity check layout_tag's value
         if (metadata[3] < 0 || metadata[3] >= esio_nlayout) {
@@ -458,7 +507,9 @@ hid_t esio_field_create(esio_state s,
 
     // Stash field's metadata
     const herr_t status = esio_field_metadata_write(s->file_id, name,
-                                                    s->layout_tag, nc, nb, na);
+                                                    s->layout_tag,
+                                                    nc, nb, na,
+                                                    type_id);
     if (status < 0) {
         ESIO_ERROR("Unable to save field's ESIO metadata", ESIO_EFAILED);
     }
@@ -492,7 +543,7 @@ int esio_field_size(esio_state s,
     if (na == NULL)       ESIO_ERROR("na == NULL",             ESIO_EINVAL);
 
     const herr_t status
-        = esio_field_metadata_read(s->file_id, name, NULL, nc, nb, na);
+        = esio_field_metadata_read(s->file_id, name, NULL, nc, nb, na, NULL);
     if (status < 0) {
         ESIO_ERROR("Unable to open field's ESIO metadata", ESIO_EFAILED);
     }
@@ -555,9 +606,9 @@ int esio_field_write_internal(esio_state s,
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
 
     // Attempt to read metadata for the field (which may or may not exist)
-    int layout_tag, field_nc, field_nb, field_na;
-    const herr_t mstat = esio_field_metadata_read(
-            s->file_id, name, &layout_tag, &field_nc, &field_nb, &field_na);
+    int layout_tag, field_nc, field_nb, field_na, field_ncomponents;
+    const herr_t mstat = esio_field_metadata_read(s->file_id, name,
+            &layout_tag, &field_nc, &field_nb, &field_na, &field_ncomponents);
 
     if (mstat < 0) {
         // Field did not exist
@@ -582,13 +633,19 @@ int esio_field_write_internal(esio_state s,
 
         // Ensure caller gave correct size information
         if (nc != field_nc) {
-            ESIO_ERROR("field read request has incorrect nc", ESIO_EINVAL);
+            ESIO_ERROR("request nc mismatch with existing field", ESIO_EINVAL);
         }
         if (nb != field_nb) {
-            ESIO_ERROR("field read request has incorrect nb", ESIO_EINVAL);
+            ESIO_ERROR("request nb mismatch with existing field", ESIO_EINVAL);
         }
         if (na != field_na) {
-            ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
+            ESIO_ERROR("request na mismatch with existing field", ESIO_EINVAL);
+        }
+
+        // Ensure caller gave type with correct component count
+        if (esio_type_ncomponents(type_id) != field_ncomponents) {
+            ESIO_ERROR("request ncomponents mismatch with existing field",
+                       ESIO_EINVAL);
         }
 
         // Open the existing field's dataset
@@ -596,6 +653,17 @@ int esio_field_write_internal(esio_state s,
         if (dset_id < 0) {
             ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
         }
+
+        // Check if supplied type can be converted to the field's type
+        const hid_t field_type_id = H5Dget_type(dset_id);
+        H5T_cdata_t *pcdata;
+        const H5T_conv_t converter = H5Tfind(type_id, field_type_id, &pcdata);
+        if (converter == NULL) {
+            H5Tclose(field_type_id);
+            ESIO_ERROR("request type not convertible to existing field type",
+                       ESIO_EINVAL);
+        }
+        H5Tclose(field_type_id);
 
         // Overwrite existing data using layout routines per metadata
         const int wstat
@@ -668,9 +736,9 @@ int esio_field_read_internal(esio_state s,
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
 
     // Read metadata for the field
-    int layout_tag, field_nc, field_nb, field_na;
-    const herr_t status = esio_field_metadata_read(
-            s->file_id, name, &layout_tag, &field_nc, &field_nb, &field_na);
+    int layout_tag, field_nc, field_nb, field_na, field_ncomponents;
+    const herr_t status = esio_field_metadata_read(s->file_id, name,
+            &layout_tag, &field_nc, &field_nb, &field_na, &field_ncomponents);
     if (status < 0) {
         ESIO_ERROR("Unable to read field's ESIO metadata", ESIO_EFAILED);
     }
@@ -686,12 +754,29 @@ int esio_field_read_internal(esio_state s,
         ESIO_ERROR("field read request has incorrect na", ESIO_EINVAL);
     }
 
+    // Ensure caller gave type with correct component count
+    if (esio_type_ncomponents(type_id) != field_ncomponents) {
+        ESIO_ERROR("request ncomponents mismatch with existing field",
+                    ESIO_EINVAL);
+    }
+
     // Open existing dataset
     const hid_t dapl_id = H5P_DEFAULT;
     const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
     if (dset_id < 0) {
         ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
+
+    // Check if supplied type can be converted to the field's type
+    const hid_t field_type_id = H5Dget_type(dset_id);
+    H5T_cdata_t *pcdata;
+    const H5T_conv_t converter = H5Tfind(type_id, field_type_id, &pcdata);
+    if (converter == NULL) {
+        H5Tclose(field_type_id);
+        ESIO_ERROR("request type not convertible to existing field type",
+                    ESIO_EINVAL);
+    }
+    H5Tclose(field_type_id);
 
     // Read the field based on the metadata's layout_tag
     // Note that this means we can read any layout ESIO understands
