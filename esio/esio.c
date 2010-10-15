@@ -551,35 +551,23 @@ int esio_field_size(esio_state s,
     return ESIO_SUCCESS;
 }
 
-// TODO use esio_field_{create,open} based upon H5LT_find_dataset
-
-int esio_field_write_double(esio_state s,
-                            const char* name,
-                            const double *field,
-                            int nc, int cst, int csz,
-                            int nb, int bst, int bsz,
-                            int na, int ast, int asz)
-{
-    return esio_field_write_internal(s, name, field,
-                                     nc, cst, csz,
-                                     nb, bst, bsz,
-                                     na, ast, asz,
-                                     H5T_NATIVE_DOUBLE);
+#define ESIO_FIELD_WRITE_SCALAR(METHODNAME,TYPE,H5TYPE)           \
+int METHODNAME(esio_state s, const char* name, const TYPE *field, \
+               int nc, int cst, int csz,                          \
+               int nb, int bst, int bsz,                          \
+               int na, int ast, int asz)                          \
+{                                                                 \
+    return esio_field_write_internal(s, name, field,              \
+                                     nc, cst, csz,                \
+                                     nb, bst, bsz,                \
+                                     na, ast, asz,                \
+                                     H5TYPE);                     \
 }
 
-int esio_field_write_float(esio_state s,
-                           const char* name,
-                           const float *field,
-                           int nc, int cst, int csz,
-                           int nb, int bst, int bsz,
-                           int na, int ast, int asz)
-{
-    return esio_field_write_internal(s, name, field,
-                                     nc, cst, csz,
-                                     nb, bst, bsz,
-                                     na, ast, asz,
-                                     H5T_NATIVE_FLOAT);
-}
+ESIO_FIELD_WRITE_SCALAR(esio_field_write_double,double,H5T_NATIVE_DOUBLE)
+
+ESIO_FIELD_WRITE_SCALAR(esio_field_write_float,float,H5T_NATIVE_FLOAT)
+
 
 static
 int esio_field_write_internal(esio_state s,
@@ -683,33 +671,22 @@ int esio_field_write_internal(esio_state s,
     return ESIO_SUCCESS;
 }
 
-int esio_field_read_double(esio_state s,
-                           const char* name,
-                           double *field,
-                           int nc, int cst, int csz,
-                           int nb, int bst, int bsz,
-                           int na, int ast, int asz)
-{
-    return esio_field_read_internal(s, name, field,
-                                    nc, cst, csz,
-                                    nb, bst, bsz,
-                                    na, ast, asz,
-                                    H5T_NATIVE_DOUBLE);
+#define ESIO_FIELD_READ_SCALAR(METHODNAME,TYPE,H5TYPE)      \
+int METHODNAME(esio_state s, const char* name, TYPE *field, \
+               int nc, int cst, int csz,                    \
+               int nb, int bst, int bsz,                    \
+               int na, int ast, int asz)                    \
+{                                                           \
+    return esio_field_read_internal(s, name, field,         \
+                                    nc, cst, csz,           \
+                                    nb, bst, bsz,           \
+                                    na, ast, asz,           \
+                                    H5TYPE);                \
 }
 
-int esio_field_read_float(esio_state s,
-                          const char* name,
-                          float *field,
-                          int nc, int cst, int csz,
-                          int nb, int bst, int bsz,
-                          int na, int ast, int asz)
-{
-    return esio_field_read_internal(s, name, field,
-                                    nc, cst, csz,
-                                    nb, bst, bsz,
-                                    na, ast, asz,
-                                    H5T_NATIVE_FLOAT);
-}
+ESIO_FIELD_READ_SCALAR(esio_field_read_double,double,H5T_NATIVE_DOUBLE)
+
+ESIO_FIELD_READ_SCALAR(esio_field_read_float,float,H5T_NATIVE_FLOAT)
 
 static
 int esio_field_read_internal(esio_state s,
