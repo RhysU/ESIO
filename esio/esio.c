@@ -551,7 +551,7 @@ int esio_field_size(esio_state s,
     return ESIO_SUCCESS;
 }
 
-#define ESIO_FIELD_WRITE_SCALAR(METHODNAME,TYPE,H5TYPE)           \
+#define ESIO_FIELD_WRITE(METHODNAME,TYPE,H5TYPE)                  \
 int METHODNAME(esio_state s, const char* name, const TYPE *field, \
                int nc, int cst, int csz,                          \
                int nb, int bst, int bsz,                          \
@@ -564,10 +564,45 @@ int METHODNAME(esio_state s, const char* name, const TYPE *field, \
                                      H5TYPE);                     \
 }
 
-ESIO_FIELD_WRITE_SCALAR(esio_field_write_double,double,H5T_NATIVE_DOUBLE)
+ESIO_FIELD_WRITE(esio_field_write_double,double,H5T_NATIVE_DOUBLE)
 
-ESIO_FIELD_WRITE_SCALAR(esio_field_write_float,float,H5T_NATIVE_FLOAT)
+ESIO_FIELD_WRITE(esio_field_write_float,float,H5T_NATIVE_FLOAT)
 
+#define ESIO_VFIELD_WRITE(METHODNAME,TYPE,H5TYPE)                           \
+int METHODNAME(esio_state s, const char* name, const TYPE *field,           \
+               int nc, int cst, int csz,                                    \
+               int nb, int bst, int bsz,                                    \
+               int na, int ast, int asz,                                    \
+               int ncomponents)                                             \
+{                                                                           \
+    if (ncomponents < 1) ESIO_ERROR("ncomponents < 1", ESIO_EINVAL);        \
+                                                                            \
+    if (ncomponents == 1) {                                                 \
+        /* Degenerate case */                                               \
+        return esio_field_write_internal(s, name, field,                    \
+                                        nc, cst, csz,                       \
+                                        nb, bst, bsz,                       \
+                                        na, ast, asz,                       \
+                                        H5TYPE);                            \
+    } else {                                                                \
+        const hsize_t dims[1]     = { ncomponents };                        \
+        const hid_t array_type_id = H5Tarray_create2(H5TYPE, 1, dims);      \
+        if (array_type_id < 0) {                                            \
+            ESIO_ERROR("Error creating array type", ESIO_ESANITY);          \
+        }                                                                   \
+        const int retval = esio_field_write_internal(s, name, field,        \
+                                                     nc, cst, csz,          \
+                                                     nb, bst, bsz,          \
+                                                     na, ast, asz,          \
+                                                     array_type_id);        \
+        H5Tclose(array_type_id);                                            \
+        return retval;                                                      \
+    }                                                                       \
+}
+
+ESIO_VFIELD_WRITE(esio_vfield_write_double,double,H5T_NATIVE_DOUBLE)
+
+ESIO_VFIELD_WRITE(esio_vfield_write_float,float,H5T_NATIVE_FLOAT)
 
 static
 int esio_field_write_internal(esio_state s,
@@ -671,7 +706,7 @@ int esio_field_write_internal(esio_state s,
     return ESIO_SUCCESS;
 }
 
-#define ESIO_FIELD_READ_SCALAR(METHODNAME,TYPE,H5TYPE)      \
+#define ESIO_FIELD_READ(METHODNAME,TYPE,H5TYPE)             \
 int METHODNAME(esio_state s, const char* name, TYPE *field, \
                int nc, int cst, int csz,                    \
                int nb, int bst, int bsz,                    \
@@ -684,9 +719,9 @@ int METHODNAME(esio_state s, const char* name, TYPE *field, \
                                     H5TYPE);                \
 }
 
-ESIO_FIELD_READ_SCALAR(esio_field_read_double,double,H5T_NATIVE_DOUBLE)
+ESIO_FIELD_READ(esio_field_read_double,double,H5T_NATIVE_DOUBLE)
 
-ESIO_FIELD_READ_SCALAR(esio_field_read_float,float,H5T_NATIVE_FLOAT)
+ESIO_FIELD_READ(esio_field_read_float,float,H5T_NATIVE_FLOAT)
 
 static
 int esio_field_read_internal(esio_state s,
