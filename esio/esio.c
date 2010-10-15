@@ -81,8 +81,7 @@ int esio_field_write_internal(esio_state s,
                               int nc, int cst, int csz,
                               int nb, int bst, int bsz,
                               int na, int ast, int asz,
-                              hid_t type_id,
-                              size_t type_size);
+                              hid_t type_id);
 
 static
 int esio_field_read_internal(esio_state s,
@@ -91,8 +90,7 @@ int esio_field_read_internal(esio_state s,
                              int nc, int cst, int csz,
                              int nb, int bst, int bsz,
                              int na, int ast, int asz,
-                             hid_t type_id,
-                             size_t type_size);
+                             hid_t type_id);
 
 //*********************************************************************
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
@@ -515,8 +513,7 @@ int esio_field_write_double(esio_state s,
                                      nc, cst, csz,
                                      nb, bst, bsz,
                                      na, ast, asz,
-                                     H5T_NATIVE_DOUBLE,
-                                     sizeof(double));
+                                     H5T_NATIVE_DOUBLE);
 }
 
 int esio_field_write_float(esio_state s,
@@ -530,8 +527,7 @@ int esio_field_write_float(esio_state s,
                                      nc, cst, csz,
                                      nb, bst, bsz,
                                      na, ast, asz,
-                                     H5T_NATIVE_FLOAT,
-                                     sizeof(float));
+                                     H5T_NATIVE_FLOAT);
 }
 
 static
@@ -541,8 +537,7 @@ int esio_field_write_internal(esio_state s,
                               int nc, int cst, int csz,
                               int nb, int bst, int bsz,
                               int na, int ast, int asz,
-                              hid_t type_id,
-                              size_t type_size)
+                              hid_t type_id)
 {
     // Sanity check incoming arguments
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
@@ -575,7 +570,7 @@ int esio_field_write_internal(esio_state s,
                                                         nc, cst, csz,
                                                         nb, bst, bsz,
                                                         na, ast, asz,
-                                                        type_id, type_size);
+                                                        type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
             ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
@@ -608,7 +603,7 @@ int esio_field_write_internal(esio_state s,
                                                      nc, cst, csz,
                                                      nb, bst, bsz,
                                                      na, ast, asz,
-                                                     type_id, type_size);
+                                                     type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
             ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
@@ -631,8 +626,7 @@ int esio_field_read_double(esio_state s,
                                     nc, cst, csz,
                                     nb, bst, bsz,
                                     na, ast, asz,
-                                    H5T_NATIVE_DOUBLE,
-                                    sizeof(double));
+                                    H5T_NATIVE_DOUBLE);
 }
 
 int esio_field_read_float(esio_state s,
@@ -646,8 +640,7 @@ int esio_field_read_float(esio_state s,
                                     nc, cst, csz,
                                     nb, bst, bsz,
                                     na, ast, asz,
-                                    H5T_NATIVE_FLOAT,
-                                    sizeof(float));
+                                    H5T_NATIVE_FLOAT);
 }
 
 static
@@ -657,8 +650,7 @@ int esio_field_read_internal(esio_state s,
                              int nc, int cst, int csz,
                              int nb, int bst, int bsz,
                              int na, int ast, int asz,
-                             hid_t type_id,
-                             size_t type_size)
+                             hid_t type_id)
 {
     // Sanity check incoming arguments
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
@@ -708,7 +700,7 @@ int esio_field_read_internal(esio_state s,
                                            nc, cst, csz,
                                            nb, bst, bsz,
                                            na, ast, asz,
-                                           type_id, type_size);
+                                           type_id);
 
     // Close dataset
     esio_field_close(dset_id);

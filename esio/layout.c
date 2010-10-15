@@ -59,7 +59,7 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
                  int nc, int cst, int csz,                                   \
                  int nb, int bst, int bsz,                                   \
                  int na, int ast, int asz,                                   \
-                 hid_t type_id, size_t type_size)                            \
+                 hid_t type_id)                                              \
 {                                                                            \
     (void) nc; /* Unused but present for API consistency */                  \
     (void) na; /* Unused but present for API consistency */                  \
@@ -72,11 +72,17 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
                    ESIO_EFAILED);                                            \
     }                                                                        \
                                                                              \
-    /* Initialize one-time operation details */                              \
+    /* Establish one-time operation details */                               \
+    const size_t  type_size = H5Tget_size(type_id);                          \
     const hsize_t stride[2] = { 1, 1 };                                      \
     const hsize_t count[2]  = { 1, asz };                                    \
     const hid_t   memspace  = H5Screate_simple(2, count, NULL);              \
     const hid_t   filespace = H5Dget_space(dset_id);                         \
+                                                                             \
+    /* Sanity check one-time details */                                      \
+    assert(type_size > 0);                                                   \
+    assert(memspace >= 0);                                                   \
+    assert(filespace >= 0);                                                  \
                                                                              \
     hsize_t offset[2];                                                       \
     for (int i = 0; i < csz; ++i)                                            \
