@@ -49,18 +49,18 @@ module esio
   implicit none  ! Nothing implicit
   private        ! Everything default private
 
-! C Interoperation details are kept hidden from the client...
+! C interoperation details are kept hidden from the client...
 ! ... with the exception of our opaque handle object type.
-  public  :: esio_state
+  public :: esio_state
 
-! Public functionality
+! Public API
   public :: esio_init, esio_finalize
   public :: esio_file_create, esio_file_open, esio_file_close
   public :: esio_field_size
   public :: esio_field_write_double, esio_field_write_single
   public :: esio_field_read_double, esio_field_read_single
 
-! Generic, precision-agnostic interfaces
+! Generic, precision-agnostic interfaces atop the public API
   public :: esio_field_write
   interface esio_field_write
     module procedure esio_field_write_double
