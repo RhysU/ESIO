@@ -551,59 +551,6 @@ int esio_field_size(esio_state s,
     return ESIO_SUCCESS;
 }
 
-#define ESIO_FIELD_WRITE(METHODNAME,TYPE,H5TYPE)                  \
-int METHODNAME(esio_state s, const char* name, const TYPE *field, \
-               int nc, int cst, int csz,                          \
-               int nb, int bst, int bsz,                          \
-               int na, int ast, int asz)                          \
-{                                                                 \
-    return esio_field_write_internal(s, name, field,              \
-                                     nc, cst, csz,                \
-                                     nb, bst, bsz,                \
-                                     na, ast, asz,                \
-                                     H5TYPE);                     \
-}
-
-ESIO_FIELD_WRITE(esio_field_write_double,double,H5T_NATIVE_DOUBLE)
-
-ESIO_FIELD_WRITE(esio_field_write_float,float,H5T_NATIVE_FLOAT)
-
-#define ESIO_VFIELD_WRITE(METHODNAME,TYPE,H5TYPE)                           \
-int METHODNAME(esio_state s, const char* name, const TYPE *field,           \
-               int nc, int cst, int csz,                                    \
-               int nb, int bst, int bsz,                                    \
-               int na, int ast, int asz,                                    \
-               int ncomponents)                                             \
-{                                                                           \
-    if (ncomponents < 1) ESIO_ERROR("ncomponents < 1", ESIO_EINVAL);        \
-                                                                            \
-    if (ncomponents == 1) {                                                 \
-        /* Degenerate case */                                               \
-        return esio_field_write_internal(s, name, field,                    \
-                                        nc, cst, csz,                       \
-                                        nb, bst, bsz,                       \
-                                        na, ast, asz,                       \
-                                        H5TYPE);                            \
-    } else {                                                                \
-        const hsize_t dims[1]     = { ncomponents };                        \
-        const hid_t array_type_id = H5Tarray_create2(H5TYPE, 1, dims);      \
-        if (array_type_id < 0) {                                            \
-            ESIO_ERROR("Error creating array type", ESIO_ESANITY);          \
-        }                                                                   \
-        const int retval = esio_field_write_internal(s, name, field,        \
-                                                     nc, cst, csz,          \
-                                                     nb, bst, bsz,          \
-                                                     na, ast, asz,          \
-                                                     array_type_id);        \
-        H5Tclose(array_type_id);                                            \
-        return retval;                                                      \
-    }                                                                       \
-}
-
-ESIO_VFIELD_WRITE(esio_vfield_write_double,double,H5T_NATIVE_DOUBLE)
-
-ESIO_VFIELD_WRITE(esio_vfield_write_float,float,H5T_NATIVE_FLOAT)
-
 static
 int esio_field_write_internal(esio_state s,
                               const char* name,
@@ -627,6 +574,7 @@ int esio_field_write_internal(esio_state s,
     if (na  < 0)          ESIO_ERROR("na < 0",                 ESIO_EINVAL);
     if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
 
     // Attempt to read metadata for the field (which may or may not exist)
     int layout_tag, field_nc, field_nb, field_na, field_ncomponents;
@@ -706,23 +654,6 @@ int esio_field_write_internal(esio_state s,
     return ESIO_SUCCESS;
 }
 
-#define ESIO_FIELD_READ(METHODNAME,TYPE,H5TYPE)             \
-int METHODNAME(esio_state s, const char* name, TYPE *field, \
-               int nc, int cst, int csz,                    \
-               int nb, int bst, int bsz,                    \
-               int na, int ast, int asz)                    \
-{                                                           \
-    return esio_field_read_internal(s, name, field,         \
-                                    nc, cst, csz,           \
-                                    nb, bst, bsz,           \
-                                    na, ast, asz,           \
-                                    H5TYPE);                \
-}
-
-ESIO_FIELD_READ(esio_field_read_double,double,H5T_NATIVE_DOUBLE)
-
-ESIO_FIELD_READ(esio_field_read_float,float,H5T_NATIVE_FLOAT)
-
 static
 int esio_field_read_internal(esio_state s,
                              const char* name,
@@ -746,6 +677,7 @@ int esio_field_read_internal(esio_state s,
     if (na  < 0)          ESIO_ERROR("na < 0",                 ESIO_EINVAL);
     if (ast < 0)          ESIO_ERROR("ast < 0",                ESIO_EINVAL);
     if (asz < 1)          ESIO_ERROR("asz < 1",                ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
 
     // Read metadata for the field
     int layout_tag, field_nc, field_nb, field_na, field_ncomponents;
@@ -804,3 +736,77 @@ int esio_field_read_internal(esio_state s,
 
     return ESIO_SUCCESS;
 }
+
+#define GEN_ESIO_FIELD_WRITE(TYPE,H5TYPE)                         \
+int esio_field_write_ ## TYPE (esio_state s,                      \
+                               const char* name,                  \
+                               const TYPE *field,                 \
+                               int nc, int cst, int csz,          \
+                               int nb, int bst, int bsz,          \
+                               int na, int ast, int asz)          \
+{                                                                 \
+    return esio_field_write_internal(s, name, field,              \
+                                     nc, cst, csz,                \
+                                     nb, bst, bsz,                \
+                                     na, ast, asz,                \
+                                     H5TYPE);                     \
+}
+
+#define GEN_ESIO_FIELD_READ(TYPE,H5TYPE)                    \
+int esio_field_read_ ## TYPE(esio_state s,                  \
+                             const char* name,              \
+                             TYPE *field,                   \
+                             int nc, int cst, int csz,      \
+                             int nb, int bst, int bsz,      \
+                             int na, int ast, int asz)      \
+{                                                           \
+    return esio_field_read_internal(s, name, field,         \
+                                    nc, cst, csz,           \
+                                    nb, bst, bsz,           \
+                                    na, ast, asz,           \
+                                    H5TYPE);                \
+}
+
+GEN_ESIO_FIELD_READ(double,H5T_NATIVE_DOUBLE)
+GEN_ESIO_FIELD_WRITE(double,H5T_NATIVE_DOUBLE)
+
+GEN_ESIO_FIELD_WRITE(float,H5T_NATIVE_FLOAT)
+GEN_ESIO_FIELD_READ(float,H5T_NATIVE_FLOAT)
+
+#define GEN_ESIO_VFIELD_WRITE(TYPE,H5TYPE)                                  \
+int esio_vfield_write_ ## TYPE(esio_state s,                                \
+                               const char* name,                            \
+                               const TYPE *field,                           \
+                               int nc, int cst, int csz,                    \
+                               int nb, int bst, int bsz,                    \
+                               int na, int ast, int asz,                    \
+                               int ncomponents)                             \
+{                                                                           \
+    if (ncomponents < 1) ESIO_ERROR("ncomponents < 1", ESIO_EINVAL);        \
+                                                                            \
+    if (ncomponents == 1) {                                                 \
+        /* Degenerate case */                                               \
+        return esio_field_write_internal(s, name, field,                    \
+                                        nc, cst, csz,                       \
+                                        nb, bst, bsz,                       \
+                                        na, ast, asz,                       \
+                                        H5TYPE);                            \
+    } else {                                                                \
+        const hsize_t dims[1]     = { ncomponents };                        \
+        const hid_t array_type_id = H5Tarray_create2(H5TYPE, 1, dims);      \
+        if (array_type_id < 0) {                                            \
+            ESIO_ERROR("Error creating array type", ESIO_ESANITY);          \
+        }                                                                   \
+        const int retval = esio_field_write_internal(s, name, field,        \
+                                                     nc, cst, csz,          \
+                                                     nb, bst, bsz,          \
+                                                     na, ast, asz,          \
+                                                     array_type_id);        \
+        H5Tclose(array_type_id);                                            \
+        return retval;                                                      \
+    }                                                                       \
+}
+
+GEN_ESIO_VFIELD_WRITE(double,H5T_NATIVE_DOUBLE)
+
+GEN_ESIO_VFIELD_WRITE(float,H5T_NATIVE_FLOAT)

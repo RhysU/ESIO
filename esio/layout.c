@@ -54,7 +54,7 @@ hid_t esio_layout0_filespace_creator(int nc, int nb, int na)
 
 // Reading and writing differ only by an HDF5 operation name and a const
 // qualifier.  Define a macro that we'll use to implement both operations.
-#define ESIO_LAYOUT0_FIELD_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)           \
+#define GEN_LAYOUT0_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)                  \
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
                  int nc, int cst, int csz,                                   \
                  int nb, int bst, int bsz,                                   \
@@ -127,10 +127,10 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
 #endif
 
 // Routine to transfer data from const buffer to storage
-ESIO_LAYOUT0_FIELD_TRANSFER(esio_layout0_field_writer, H5Dwrite, const)
+GEN_LAYOUT0_TRANSFER(esio_layout0_field_writer, H5Dwrite, const)
 
 // Routine to transfer data from storage to mutable buffer
-ESIO_LAYOUT0_FIELD_TRANSFER(esio_layout0_field_reader, H5Dread, /* mutable */)
+GEN_LAYOUT0_TRANSFER(esio_layout0_field_reader, H5Dread, /* mutable */)
 
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
