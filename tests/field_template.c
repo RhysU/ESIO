@@ -149,44 +149,46 @@ FCT_BGN()
 
         FCT_TEST_BGN(uniform_directionally_split)
         {
-            int nc, cst, csz;
-            int nb, bst, bsz;
-            int na, ast, asz;
+            int cglobal, cstart, clocal;
+            int bglobal, bstart, blocal;
+            int aglobal, astart, alocal;
 
             for (int casenum = 0; casenum < 3; ++casenum) {
 
                 ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
 
-                na = ast = asz = nb = bst = bsz = nc = cst = csz = -1;
+                aglobal = astart = alocal = -1;
+                bglobal = bstart = blocal = -1;
+                cglobal = cstart = clocal = -1;
                 switch (casenum) {
                     case 0: // Data uniformly partitioned in the fastest index
-                        asz = partitioned_size;
-                        na  = asz * world_size;
-                        ast = asz * world_rank;
+                        alocal = partitioned_size;
+                        aglobal  = alocal * world_size;
+                        astart = alocal * world_rank;
 
-                        nb  = bsz = unpartitioned_size;
-                        nc  = csz = unpartitioned_size;
-                        bst = cst = 0;
+                        bglobal  = blocal = unpartitioned_size;
+                        cglobal  = clocal = unpartitioned_size;
+                        bstart = cstart = 0;
                         break;
 
                     case 1: // Data uniformly partitioned in the medium index
-                        bsz = partitioned_size;
-                        nb  = bsz * world_size;
-                        bst = bsz * world_rank;
+                        blocal = partitioned_size;
+                        bglobal  = blocal * world_size;
+                        bstart = blocal * world_rank;
 
-                        na  = asz = unpartitioned_size;
-                        nc  = csz = unpartitioned_size;
-                        ast = cst = 0;
+                        aglobal  = alocal = unpartitioned_size;
+                        cglobal  = clocal = unpartitioned_size;
+                        astart = cstart = 0;
                         break;
 
                     case 2: // Data uniformly partitioned in the slow index
-                        csz = partitioned_size;
-                        nc  = csz * world_size;
-                        cst = csz * world_rank;
+                        clocal = partitioned_size;
+                        cglobal  = clocal * world_size;
+                        cstart = clocal * world_rank;
 
-                        na  = asz = unpartitioned_size;
-                        nb  = bsz = unpartitioned_size;
-                        ast = bst = 0;
+                        aglobal  = alocal = unpartitioned_size;
+                        bglobal  = blocal = unpartitioned_size;
+                        astart = bstart = 0;
                         break;
                     default:
                         fct_req(0); // Sanity failure
@@ -214,20 +216,23 @@ FCT_BGN()
                 fct_req(0 == esio_file_create(state, filename, 1));
 
                 // Determine local rank's portion of global field
-                const size_t nelem = asz * bsz * csz;
+                const size_t nelem = alocal * blocal * clocal;
                 TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
                 fct_req(field);
 
                 // Write all zeros to disk
-                int status = TEST_ESIO_FIELD_WRITE(state, "field", field,
-                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
+                int status = TEST_ESIO_FIELD_WRITE(
+                        state, "field", field,
+                        cglobal, cstart, clocal,
+                        bglobal, bstart, blocal,
+                        aglobal, astart, alocal);
                 fct_req(status == 0);
 
                 { // Populate local field with test data
                     TEST_REAL * p_field = field;
-                    for (int k = cst; k < cst + csz; ++k) {
-                        for (int j = bst; j < bst + bsz; ++j) {
-                            for (int i = ast; i < ast + asz; ++i) {
+                    for (int k = cstart; k < cstart + clocal; ++k) {
+                        for (int j = bstart; j < bstart + blocal; ++j) {
+                            for (int i = astart; i < astart + alocal; ++i) {
                                 *p_field++
                                     = (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13);
                             }
@@ -236,18 +241,23 @@ FCT_BGN()
                 }
 
                 // Overwrite zeros on disk with test data
-                status = TEST_ESIO_FIELD_WRITE(state, "field", field,
-                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
+                status = TEST_ESIO_FIELD_WRITE(
+                        state, "field", field,
+                        cglobal, cstart, clocal,
+                        bglobal, bstart, blocal,
+                        aglobal, astart, alocal);
                 fct_req(status == 0);
 
                 // Ensure the global size was written correctly
                 {
-                    int tmp_na, tmp_nb, tmp_nc;
+                    int tmp_aglobal, tmp_bglobal, tmp_cglobal;
                     fct_req(0 == esio_field_size(state, "field",
-                                                 &tmp_nc, &tmp_nb, &tmp_na));
-                    fct_chk_eq_int(nc, tmp_nc);
-                    fct_chk_eq_int(nb, tmp_nb);
-                    fct_chk_eq_int(na, tmp_na);
+                                                 &tmp_cglobal,
+                                                 &tmp_bglobal,
+                                                 &tmp_aglobal));
+                    fct_chk_eq_int(cglobal, tmp_cglobal);
+                    fct_chk_eq_int(bglobal, tmp_bglobal);
+                    fct_chk_eq_int(aglobal, tmp_aglobal);
                 }
 
                 // Close the file
@@ -259,7 +269,8 @@ FCT_BGN()
                 // Reopen the file using normal HDF5 APIs on root processor
                 // Examine the contents to ensure it matches
                 if (world_rank == 0) {
-                    field = calloc(nc * nb * na, sizeof(TEST_REAL));
+                    field = calloc(cglobal * bglobal * aglobal,
+                                   sizeof(TEST_REAL));
                     fct_req(field);
                     const hid_t file_id
                         = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -268,9 +279,9 @@ FCT_BGN()
                     fct_req(status1 >= 0);
 
                     TEST_REAL * p_field = field;
-                    for (int k = 0; k < nc; ++k) {
-                        for (int j = 0; j < nb; ++j) {
-                            for (int i = 0; i < na; ++i) {
+                    for (int k = 0; k < cglobal; ++k) {
+                        for (int j = 0; j < bglobal; ++j) {
+                            for (int i = 0; i < aglobal; ++i) {
                                 const TEST_REAL value = *p_field++;
                                 fct_chk_eq_dbl(
                                         value,
@@ -288,14 +299,17 @@ FCT_BGN()
                 field = calloc(nelem, sizeof(TEST_REAL));
                 fct_req(field);
                 fct_req(0 == esio_file_open(state, filename, 0));
-                status = TEST_ESIO_FIELD_READ(state, "field", field,
-                        nc, cst, csz, nb, bst, bsz, na, ast, asz);
+                status = TEST_ESIO_FIELD_READ(
+                        state, "field", field,
+                        cglobal, cstart, clocal,
+                        bglobal, bstart, blocal,
+                        aglobal, astart, alocal);
                 fct_req(status == 0);
                 {
                     TEST_REAL * p_field = field;
-                    for (int k = cst; k < cst + csz; ++k) {
-                        for (int j = bst; j < bst + bsz; ++j) {
-                            for (int i = ast; i < ast + asz; ++i) {
+                    for (int k = cstart; k < cstart + clocal; ++k) {
+                        for (int j = bstart; j < bstart + blocal; ++j) {
+                            for (int i = astart; i < astart + alocal; ++i) {
                                 const TEST_REAL value = *p_field++;
                                 fct_chk_eq_dbl(
                                     value,

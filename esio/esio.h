@@ -46,62 +46,62 @@ int esio_file_close(esio_state s);
 
 int esio_field_size(esio_state s,
                     const char* name,
-                    int *nc, int *nb, int *na);
+                    int *cglobal, int *bglobal, int *aglobal);
 
 int esio_field_write_double(esio_state s,
                             const char* name,
                             const double *field,
-                            int nc, int cst, int csz,
-                            int nb, int bst, int bsz,
-                            int na, int ast, int asz);
+                            int cglobal, int cstart, int clocal,
+                            int bglobal, int bstart, int blocal,
+                            int aglobal, int astart, int alocal);
 int esio_field_write_float(esio_state s,
                            const char* name,
                            const float *field,
-                           int nc, int cst, int csz,
-                           int nb, int bst, int bsz,
-                           int na, int ast, int asz);
+                           int cglobal, int cstart, int clocal,
+                           int bglobal, int bstart, int blocal,
+                           int aglobal, int astart, int alocal);
 
 int esio_field_read_double(esio_state s,
                            const char* name,
                            double *field,
-                           int nc, int cst, int csz,
-                           int nb, int bst, int bsz,
-                           int na, int ast, int asz);
+                           int cglobal, int cstart, int clocal,
+                           int bglobal, int bstart, int blocal,
+                           int aglobal, int astart, int alocal);
 int esio_field_read_float(esio_state s,
                           const char* name,
                           float *field,
-                          int nc, int cst, int csz,
-                          int nb, int bst, int bsz,
-                          int na, int ast, int asz);
+                          int cglobal, int cstart, int clocal,
+                          int bglobal, int bstart, int blocal,
+                          int aglobal, int astart, int alocal);
 
 int esio_vfield_write_double(esio_state s,
                              const char* name,
                              const double *field,
-                             int nc, int cst, int csz,
-                             int nb, int bst, int bsz,
-                             int na, int ast, int asz,
+                             int cglobal, int cstart, int clocal,
+                             int bglobal, int bstart, int blocal,
+                             int aglobal, int astart, int alocal,
                              int ncomponents);
 int esio_vfield_write_float(esio_state s,
                             const char* name,
                             const float *field,
-                            int nc, int cst, int csz,
-                            int nb, int bst, int bsz,
-                            int na, int ast, int asz,
+                            int cglobal, int cstart, int clocal,
+                            int bglobal, int bstart, int blocal,
+                            int aglobal, int astart, int alocal,
                             int ncomponents);
 
 int esio_vfield_read_double(esio_state s,
                             const char* name,
                             double *field,
-                            int nc, int cst, int csz,
-                            int nb, int bst, int bsz,
-                            int na, int ast, int asz,
+                            int cglobal, int cstart, int clocal,
+                            int bglobal, int bstart, int blocal,
+                            int aglobal, int astart, int alocal,
                             int ncomponents);
 int esio_vfield_read_float(esio_state s,
                            const char* name,
                            float *field,
-                           int nc, int cst, int csz,
-                           int nb, int bst, int bsz,
-                           int na, int ast, int asz,
+                           int cglobal, int cstart, int clocal,
+                           int bglobal, int bstart, int blocal,
+                           int aglobal, int astart, int alocal,
                            int ncomponents);
 
 

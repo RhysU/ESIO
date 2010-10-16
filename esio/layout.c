@@ -46,9 +46,9 @@
 // LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
 // **************************************************************
 
-hid_t esio_layout0_filespace_creator(int nc, int nb, int na)
+hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
 {
-    const hsize_t dims[2] = { nc * nb, na };
+    const hsize_t dims[2] = { cglobal * bglobal, aglobal };
     return H5Screate_simple(2, dims, NULL);
 }
 
@@ -56,13 +56,13 @@ hid_t esio_layout0_filespace_creator(int nc, int nb, int na)
 // qualifier.  Define a macro that we'll use to implement both operations.
 #define GEN_LAYOUT0_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)                  \
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
-                 int nc, int cst, int csz,                                   \
-                 int nb, int bst, int bsz,                                   \
-                 int na, int ast, int asz,                                   \
+                 int cglobal, int cstart, int clocal,                        \
+                 int bglobal, int bstart, int blocal,                        \
+                 int aglobal, int astart, int alocal,                        \
                  hid_t type_id)                                              \
 {                                                                            \
-    (void) nc; /* Unused but present for API consistency */                  \
-    (void) na; /* Unused but present for API consistency */                  \
+    (void) cglobal; /* Unused but present for API consistency */             \
+    (void) aglobal; /* Unused but present for API consistency */             \
                                                                              \
     /* Create property list for collective operation */                      \
     const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);                      \
@@ -75,7 +75,7 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
     /* Establish one-time operation details */                               \
     const size_t  type_size = H5Tget_size(type_id);                          \
     const hsize_t stride[2] = { 1, 1 };                                      \
-    const hsize_t count[2]  = { 1, asz };                                    \
+    const hsize_t count[2]  = { 1, alocal };                                 \
     const hid_t   memspace  = H5Screate_simple(2, count, NULL);              \
     const hid_t   filespace = H5Dget_space(dset_id);                         \
                                                                              \
@@ -85,19 +85,19 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
     assert(filespace >= 0);                                                  \
                                                                              \
     hsize_t offset[2];                                                       \
-    for (int i = 0; i < csz; ++i)                                            \
+    for (int i = 0; i < clocal; ++i)                                         \
     {                                                                        \
-        for (int j = 0; j < bsz; ++j)                                        \
+        for (int j = 0; j < blocal; ++j)                                     \
         {                                                                    \
             /* Select hyperslab in the file */                               \
-            offset[0] = (j + bst) + (i + cst) * nb;                          \
-            offset[1] = ast;                                                 \
+            offset[0] = (j + bstart) + (i + cstart) * bglobal;               \
+            offset[1] = astart;                                              \
             H5Sselect_hyperslab(filespace, H5S_SELECT_SET,                   \
                                 offset, stride, count, NULL);                \
                                                                              \
             /* Compute in-memory offset to hyperslab's data */               \
             /* Note use of type_size when adding to (void *) field */        \
-            const size_t moffset = j*asz + i*asz*bsz;                        \
+            const size_t moffset = j*alocal + i*alocal*blocal;               \
             QUALIFIER void *p_field = field + (type_size * moffset);         \
                                                                              \
             /* Transfer hyperslab to or from memory */                       \
