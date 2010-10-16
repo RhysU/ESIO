@@ -22,7 +22,7 @@
  *
  *--------------------------------------------------------------------------
  *
- * field_realvalued.c: real-valued unit test template for ESIO
+ * field_template.c: unit test template for ESIO field read/write operations
  *
  * $Id$
  *--------------------------------------------------------------------------

@@ -777,11 +777,11 @@ int esio_field_ ## OP ## _ ## TYPE (esio_state s,              \
                                           H5TYPE);             \
 }
 
-GEN_ESIO_FIELD_OP(write,const,double,H5T_NATIVE_DOUBLE)
-GEN_ESIO_FIELD_OP(read,/*mutable*/,double,H5T_NATIVE_DOUBLE)
+GEN_ESIO_FIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_ESIO_FIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
-GEN_ESIO_FIELD_OP(write,const,float,H5T_NATIVE_FLOAT)
-GEN_ESIO_FIELD_OP(read,/*mutable*/,float,H5T_NATIVE_FLOAT)
+GEN_ESIO_FIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_ESIO_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 
 #define GEN_ESIO_VFIELD_OP(OP,QUAL,TYPE,H5TYPE)                           \
@@ -803,8 +803,8 @@ int esio_vfield_ ## OP ## _ ## TYPE(esio_state s,                         \
     return retval;                                                        \
 }
 
-GEN_ESIO_VFIELD_OP(write,const,double,H5T_NATIVE_DOUBLE)
-GEN_ESIO_VFIELD_OP(read,/*mutable*/,double,H5T_NATIVE_DOUBLE)
+GEN_ESIO_VFIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_ESIO_VFIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
-GEN_ESIO_VFIELD_OP(write,const,float,H5T_NATIVE_FLOAT)
-GEN_ESIO_VFIELD_OP(read,/*mutable*/,float,H5T_NATIVE_FLOAT)
+GEN_ESIO_VFIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_ESIO_VFIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)

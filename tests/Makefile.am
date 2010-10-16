@@ -10,7 +10,7 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
-EXTRA_DIST      = field_realvalued.c
+EXTRA_DIST      = field_template.c
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -41,7 +41,7 @@ EXTRA_DIST           += field_double.sh    # NB Wrapper script
 check_PROGRAMS       += field_double
 field_double_SOURCES  = field_double.c
 field_double_LDADD    = ../esio/libesio.la
-field_double.o: field_double.c field_realvalued.c
+field_double.o: field_double.c field_template.c
 
 ## Single precision fields from C
 TESTS                += field_float.sh          # NB Wrapper script
@@ -49,7 +49,7 @@ EXTRA_DIST           += field_float.sh          # NB Wrapper script
 check_PROGRAMS       += field_float
 field_float_SOURCES   = field_float.c
 field_float_LDADD     = ../esio/libesio.la
-field_float.o: field_float.c field_realvalued.c
+field_float.o: field_float.c field_template.c
 
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field

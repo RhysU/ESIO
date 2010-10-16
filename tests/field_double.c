@@ -33,4 +33,4 @@
 #define TEST_ESIO_FIELD_READ  esio_field_read_double
 #define TEST_H5LTREAD_DATASET H5LTread_dataset_double
 
-#include "field_realvalued.c"
+#include "field_template.c"
