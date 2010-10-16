@@ -86,18 +86,18 @@ static
 int esio_field_write_internal(esio_state s,
                               const char* name,
                               const void *field,
-                              int cglobal, int cstart, int clocal,
-                              int bglobal, int bstart, int blocal,
-                              int aglobal, int astart, int alocal,
+                              int cglobal, int cstart, int clocal, int cstride,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
                               hid_t type_id);
 
 static
 int esio_field_read_internal(esio_state s,
                              const char* name,
                              void *field,
-                             int cglobal, int cstart, int clocal,
-                             int bglobal, int bstart, int blocal,
-                             int aglobal, int astart, int alocal,
+                             int cglobal, int cstart, int clocal, int cstride,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
                              hid_t type_id);
 
 //*********************************************************************
@@ -582,12 +582,13 @@ static
 int esio_field_write_internal(esio_state s,
                               const char* name,
                               const void *field,
-                              int cglobal, int cstart, int clocal,
-                              int bglobal, int bstart, int blocal,
-                              int aglobal, int astart, int alocal,
+                              int cglobal, int cstart, int clocal, int cstride,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
                               hid_t type_id)
 {
     // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
@@ -595,13 +596,21 @@ int esio_field_write_internal(esio_state s,
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
     if (cstart < 0)       ESIO_ERROR("cstart < 0",             ESIO_EINVAL);
     if (clocal < 1)       ESIO_ERROR("clocal < 1",             ESIO_EINVAL);
+    if (cstride < 0)      ESIO_ERROR("cstride < 0",            ESIO_EINVAL);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
     if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
     if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
+    if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
     if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
     if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide stride defaults whenever the user supplied zero strides
+    if (astride == 0) astride = 1;
+    if (bstride == 0) bstride = astride * alocal;
+    if (cstride == 0) cstride = bstride * blocal;
 
     // Attempt to read metadata for the field (which may or may not exist)
     int layout_tag;
@@ -622,9 +631,9 @@ int esio_field_write_internal(esio_state s,
             = esio_field_create(s, cglobal, bglobal, aglobal, name, type_id);
         const int wstat = (esio_layout[s->layout_tag].field_writer)(
                 dset_id, field,
-                cglobal, cstart, clocal,
-                bglobal, bstart, blocal,
-                aglobal, astart, alocal,
+                cglobal, cstart, clocal, cstride,
+                bglobal, bstart, blocal, bstride,
+                aglobal, astart, alocal, astride,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
@@ -675,9 +684,9 @@ int esio_field_write_internal(esio_state s,
         // Overwrite existing data using layout routines per metadata
         const int wstat = (esio_layout[layout_tag].field_writer)(
                 dset_id, field,
-                cglobal, cstart, clocal,
-                bglobal, bstart, blocal,
-                aglobal, astart, alocal,
+                cglobal, cstart, clocal, cstride,
+                bglobal, bstart, blocal, bstride,
+                aglobal, astart, alocal, astride,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
@@ -694,12 +703,13 @@ static
 int esio_field_read_internal(esio_state s,
                              const char* name,
                              void *field,
-                             int cglobal, int cstart, int clocal,
-                             int bglobal, int bstart, int blocal,
-                             int aglobal, int astart, int alocal,
+                             int cglobal, int cstart, int clocal, int cstride,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
                              hid_t type_id)
 {
     // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
@@ -707,13 +717,21 @@ int esio_field_read_internal(esio_state s,
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
     if (cstart < 0)       ESIO_ERROR("cstart < 0",             ESIO_EINVAL);
     if (clocal < 1)       ESIO_ERROR("clocal < 1",             ESIO_EINVAL);
+    if (cstride < 0)      ESIO_ERROR("cstride < 0",            ESIO_EINVAL);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
     if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
     if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
+    if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
     if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
     if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide stride defaults whenever the user supplied zero strides
+    if (astride == 0) astride = 1;
+    if (bstride == 0) bstride = astride * alocal;
+    if (cstride == 0) cstride = bstride * blocal;
 
     // Read metadata for the field
     int layout_tag;
@@ -768,9 +786,9 @@ int esio_field_read_internal(esio_state s,
     // Note that this means we can read any layout ESIO understands
     // Note that reading does not change the chosen field write layout_tag
     (esio_layout[layout_tag].field_reader)(dset_id, field,
-                                           cglobal, cstart, clocal,
-                                           bglobal, bstart, blocal,
-                                           aglobal, astart, alocal,
+                                           cglobal, cstart, clocal, cstride,
+                                           bglobal, bstart, blocal, bstride,
+                                           aglobal, astart, alocal, astride,
                                            type_id);
 
     // Close dataset
@@ -779,20 +797,20 @@ int esio_field_read_internal(esio_state s,
     return ESIO_SUCCESS;
 }
 
-#define GEN_ESIO_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                      \
-int esio_field_ ## OP ## _ ## TYPE (                                \
-        esio_state s,                                               \
-        const char* name,                                           \
-        QUAL TYPE *field,                                           \
-        int cglobal, int cstart, int clocal,                        \
-        int bglobal, int bstart, int blocal,                        \
-        int aglobal, int astart, int alocal)                        \
-{                                                                   \
-    return esio_field_ ## OP ## _internal(s, name, field,           \
-                                          cglobal, cstart, clocal,  \
-                                          bglobal, bstart, blocal,  \
-                                          aglobal, astart, alocal,  \
-                                          H5TYPE);                  \
+#define GEN_ESIO_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                              \
+int esio_field_ ## OP ## _ ## TYPE (                                        \
+        esio_state s,                                                       \
+        const char* name,                                                   \
+        QUAL TYPE *field,                                                   \
+        int cglobal, int cstart, int clocal, int cstride,                   \
+        int bglobal, int bstart, int blocal, int bstride,                   \
+        int aglobal, int astart, int alocal, int astride)                   \
+{                                                                           \
+    return esio_field_ ## OP ## _internal(s, name, field,                   \
+                                          cglobal, cstart, clocal, cstride, \
+                                          bglobal, bstart, blocal, bstride, \
+                                          aglobal, astart, alocal, astride, \
+                                          H5TYPE);                          \
 }
 
 GEN_ESIO_FIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE)
@@ -807,17 +825,17 @@ int esio_vfield_ ## OP ## _ ## TYPE(                                      \
         esio_state s,                                                     \
         const char* name,                                                 \
         QUAL TYPE *field,                                                 \
-        int cglobal, int cstart, int clocal,                              \
-        int bglobal, int bstart, int blocal,                              \
-        int aglobal, int astart, int alocal,                              \
+        int cglobal, int cstart, int clocal, int cstride,                 \
+        int bglobal, int bstart, int blocal, int bstride,                 \
+        int aglobal, int astart, int alocal, int astride,                 \
         int ncomponents)                                                  \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
     const int retval = esio_field_ ## OP ## _internal(                    \
             s, name, field,                                               \
-            cglobal, cstart, clocal,                                      \
-            bglobal, bstart, blocal,                                      \
-            aglobal, astart, alocal,                                      \
+            cglobal, cstart, clocal, cstride,                             \
+            bglobal, bstart, blocal, bstride,                             \
+            aglobal, astart, alocal, astride,                             \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \

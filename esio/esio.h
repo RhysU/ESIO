@@ -51,57 +51,57 @@ int esio_field_size(esio_state s,
 int esio_field_write_double(esio_state s,
                             const char* name,
                             const double *field,
-                            int cglobal, int cstart, int clocal,
-                            int bglobal, int bstart, int blocal,
-                            int aglobal, int astart, int alocal);
+                            int cglobal, int cstart, int clocal, int cstride,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride);
 int esio_field_write_float(esio_state s,
                            const char* name,
                            const float *field,
-                           int cglobal, int cstart, int clocal,
-                           int bglobal, int bstart, int blocal,
-                           int aglobal, int astart, int alocal);
+                           int cglobal, int cstart, int clocal, int cstride,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride);
 
 int esio_field_read_double(esio_state s,
                            const char* name,
                            double *field,
-                           int cglobal, int cstart, int clocal,
-                           int bglobal, int bstart, int blocal,
-                           int aglobal, int astart, int alocal);
+                           int cglobal, int cstart, int clocal, int cstride,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride);
 int esio_field_read_float(esio_state s,
                           const char* name,
                           float *field,
-                          int cglobal, int cstart, int clocal,
-                          int bglobal, int bstart, int blocal,
-                          int aglobal, int astart, int alocal);
+                          int cglobal, int cstart, int clocal, int cstride,
+                          int bglobal, int bstart, int blocal, int bstride,
+                          int aglobal, int astart, int alocal, int astride);
 
 int esio_vfield_write_double(esio_state s,
                              const char* name,
                              const double *field,
-                             int cglobal, int cstart, int clocal,
-                             int bglobal, int bstart, int blocal,
-                             int aglobal, int astart, int alocal,
+                             int cglobal, int cstart, int clocal, int cstride,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
                              int ncomponents);
 int esio_vfield_write_float(esio_state s,
                             const char* name,
                             const float *field,
-                            int cglobal, int cstart, int clocal,
-                            int bglobal, int bstart, int blocal,
-                            int aglobal, int astart, int alocal,
+                            int cglobal, int cstart, int clocal, int cstride,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride,
                             int ncomponents);
 
 int esio_vfield_read_double(esio_state s,
                             const char* name,
                             double *field,
-                            int cglobal, int cstart, int clocal,
-                            int bglobal, int bstart, int blocal,
-                            int aglobal, int astart, int alocal,
+                            int cglobal, int cstart, int clocal, int cstride,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride,
                             int ncomponents);
 int esio_vfield_read_float(esio_state s,
                            const char* name,
                            float *field,
-                           int cglobal, int cstart, int clocal,
-                           int bglobal, int bstart, int blocal,
-                           int aglobal, int astart, int alocal,
+                           int cglobal, int cstart, int clocal, int cstride,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride,
                            int ncomponents);
 
 

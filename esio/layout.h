@@ -40,15 +40,15 @@
 typedef hid_t (*esio_filespace_creator_t)(int, int, int);
 
 typedef int   (*esio_field_writer_t)     (hid_t, const void *,
-                                          int, int, int,
-                                          int, int, int,
-                                          int, int, int,
+                                          int, int, int, int,
+                                          int, int, int, int,
+                                          int, int, int, int,
                                           hid_t);
 
 typedef int   (*esio_field_reader_t)     (hid_t, void *,
-                                          int, int, int,
-                                          int, int, int,
-                                          int, int, int,
+                                          int, int, int, int,
+                                          int, int, int, int,
+                                          int, int, int, int,
                                           hid_t);
 
 //******************************************************************
@@ -58,15 +58,15 @@ typedef int   (*esio_field_reader_t)     (hid_t, void *,
 hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal);
 
 int esio_layout0_field_writer(hid_t dset_id, const void *field,
-                              int cglobal, int cstart, int clocal,
-                              int bglobal, int bstart, int blocal,
-                              int aglobal, int astart, int alocal,
+                              int cglobal, int cstart, int clocal, int cstride,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
                               hid_t type_id);
 
 int esio_layout0_field_reader(hid_t dset_id, void *field,
-                              int cglobal, int cstart, int clocal,
-                              int bglobal, int bstart, int blocal,
-                              int aglobal, int astart, int alocal,
+                              int cglobal, int cstart, int clocal, int cstride,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
                               hid_t type_id);
 
 #endif /* __ESIO_LAYOUT_H */

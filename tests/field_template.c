@@ -223,9 +223,9 @@ FCT_BGN()
                 // Write all zeros to disk
                 int status = TEST_ESIO_FIELD_WRITE(
                         state, "field", field,
-                        cglobal, cstart, clocal,
-                        bglobal, bstart, blocal,
-                        aglobal, astart, alocal);
+                        cglobal, cstart, clocal, 0,
+                        bglobal, bstart, blocal, 0,
+                        aglobal, astart, alocal, 0);
                 fct_req(status == 0);
 
                 { // Populate local field with test data
@@ -243,9 +243,9 @@ FCT_BGN()
                 // Overwrite zeros on disk with test data
                 status = TEST_ESIO_FIELD_WRITE(
                         state, "field", field,
-                        cglobal, cstart, clocal,
-                        bglobal, bstart, blocal,
-                        aglobal, astart, alocal);
+                        cglobal, cstart, clocal, 0,
+                        bglobal, bstart, blocal, 0,
+                        aglobal, astart, alocal, 0);
                 fct_req(status == 0);
 
                 // Ensure the global size was written correctly
@@ -301,9 +301,9 @@ FCT_BGN()
                 fct_req(0 == esio_file_open(state, filename, 0));
                 status = TEST_ESIO_FIELD_READ(
                         state, "field", field,
-                        cglobal, cstart, clocal,
-                        bglobal, bstart, blocal,
-                        aglobal, astart, alocal);
+                        cglobal, cstart, clocal, 0,
+                        bglobal, bstart, blocal, 0,
+                        aglobal, astart, alocal, 0);
                 fct_req(status == 0);
                 {
                     TEST_REAL * p_field = field;
