@@ -74,6 +74,11 @@ int esio_field_read_float(esio_state s,
                           int bglobal, int bstart, int blocal, int bstride,
                           int aglobal, int astart, int alocal, int astride);
 
+int esio_vfield_size(esio_state s,
+                     const char* name,
+                     int *cglobal, int *bglobal, int *aglobal,
+                     int *ncomponents);
+
 int esio_vfield_write_double(esio_state s,
                              const char* name,
                              const double *field,

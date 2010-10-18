@@ -561,16 +561,27 @@ int esio_field_size(esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal)
 {
+    int ncomponents;
+    const int status
+        = esio_vfield_size(s, name, cglobal, bglobal, aglobal, &ncomponents);
+    if (ncomponents != 1) {
+        ESIO_ERROR("Named location must be treated as a vfield", ESIO_EINVAL);
+    }
+    return status;
+}
+
+int esio_vfield_size(esio_state s,
+                     const char* name,
+                     int *cglobal, int *bglobal, int *aglobal,
+                     int *ncomponents)
+{
     // Sanity check incoming arguments
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (cglobal == NULL)  ESIO_ERROR("cglobal == NULL",        ESIO_EINVAL);
-    if (bglobal == NULL)  ESIO_ERROR("bglobal == NULL",        ESIO_EINVAL);
-    if (aglobal == NULL)  ESIO_ERROR("aglobal == NULL",        ESIO_EINVAL);
 
     const herr_t status = esio_field_metadata_read(
-            s->file_id, name, NULL, cglobal, bglobal, aglobal, NULL);
+            s->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
     if (status < 0) {
         ESIO_ERROR("Unable to open field's ESIO metadata", ESIO_EFAILED);
     }
