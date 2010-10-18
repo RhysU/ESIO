@@ -28,9 +28,11 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define TEST_REAL float
-#define TEST_ESIO_FIELD_WRITE esio_field_write_float
-#define TEST_ESIO_FIELD_READ  esio_field_read_float
-#define TEST_H5LTREAD_DATASET H5LTread_dataset_float
+#define TEST_REAL              float
+#define TEST_ESIO_FIELD_WRITE  esio_field_write_float
+#define TEST_ESIO_FIELD_READ   esio_field_read_float
+#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_float
+#define TEST_ESIO_VFIELD_READ  esio_vfield_read_float
+#define TEST_H5T               H5T_NATIVE_FLOAT
 
 #include "field_template.c"

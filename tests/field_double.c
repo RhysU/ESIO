@@ -28,9 +28,11 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define TEST_REAL double
-#define TEST_ESIO_FIELD_WRITE esio_field_write_double
-#define TEST_ESIO_FIELD_READ  esio_field_read_double
-#define TEST_H5LTREAD_DATASET H5LTread_dataset_double
+#define TEST_REAL              double
+#define TEST_ESIO_FIELD_WRITE  esio_field_write_double
+#define TEST_ESIO_FIELD_READ   esio_field_read_double
+#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_double
+#define TEST_ESIO_VFIELD_READ  esio_vfield_read_double
+#define TEST_H5T               H5T_NATIVE_DOUBLE
 
 #include "field_template.c"

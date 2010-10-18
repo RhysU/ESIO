@@ -81,6 +81,12 @@ static fctcl_init_t my_cl_options[] = {
         "Sets size of directions which are not partitioned"
     },
     {
+        "--ncomponents",
+        "-n",
+        FCTCL_STORE_VALUE,
+        "Sets the number of components used in vfield test"
+    },
+    {
         "--preserve",
         "-t",
         FCTCL_STORE_TRUE,
@@ -116,6 +122,12 @@ FCT_BGN()
         fctcl_val2("--unpartitioned-size","2"), (char **) NULL, 10);
     if (unpartitioned_size < 1) {
         fprintf(stderr, "\n--unpartitioned-size=%d < 1\n", unpartitioned_size);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+    const int ncomponents = (int) strtol(
+        fctcl_val2("--ncomponents","2"), (char **) NULL, 10);
+    if (ncomponents < 1) {
+        fprintf(stderr, "\n--ncomponents=%d < 1\n", ncomponents);
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
@@ -214,13 +226,14 @@ FCT_BGN()
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
-                if (!preserve) fct_req(0 == unlink(filename));
+                if (!preserve) unlink(filename);
             }
             if (filename) free(filename);
         }
         FCT_TEARDOWN_END();
 
-        FCT_TEST_BGN(uniform_split)
+        // Test scalar-valued fields, including overwrite details
+        FCT_TEST_BGN(field)
         {
             TEST_REAL *field, *p_field;
 
@@ -279,7 +292,8 @@ FCT_BGN()
                 fct_req(field);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                fct_req(0 <= TEST_H5LTREAD_DATASET(file_id, "field", field));
+                fct_req(0 <= H5LTread_dataset(file_id, "field",
+                                              TEST_H5T, field));
 
                 p_field = field;
                 for (int k = 0; k < cglobal; ++k) {
@@ -313,6 +327,122 @@ FCT_BGN()
                         fct_chk_eq_dbl(
                             value,
                             (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
+                    }
+                }
+            }
+            free(field);
+            fct_req(0 == esio_file_close(state));
+        }
+        FCT_TEST_END();
+
+        // Test vector-valued fields
+        FCT_TEST_BGN(vfield)
+        {
+            TEST_REAL *field, *p_field;
+
+            // Open file
+            fct_req(0 == esio_file_create(state, filename, 1));
+
+            // Determine local rank's portion of global field
+            const size_t nelem = alocal * blocal * clocal * ncomponents;
+            field = calloc(nelem, sizeof(TEST_REAL));
+            fct_req(field);
+
+            // Populate local field with test data
+            p_field = field;
+            for (int k = cstart; k < cstart + clocal; ++k) {
+                for (int j = bstart; j < bstart + blocal; ++j) {
+                    for (int i = astart; i < astart + alocal; ++i) {
+                        for (int h = 0; h < ncomponents; h++) {
+                            *p_field++ = (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13)
+                                                     - h;
+                        }
+                    }
+                }
+            }
+
+            // Write field to file
+            fct_req(0 == TEST_ESIO_VFIELD_WRITE(state, "vfield", field,
+                                                cglobal, cstart, clocal, 0,
+                                                bglobal, bstart, blocal, 0,
+                                                aglobal, astart, alocal, 0,
+                                                ncomponents));
+
+            { // Ensure the global size was written correctly
+                int tmp_aglobal, tmp_bglobal, tmp_cglobal, tmp_ncomponents;
+                fct_req(0 == esio_vfield_size(state, "vfield",
+                                              &tmp_cglobal,
+                                              &tmp_bglobal,
+                                              &tmp_aglobal,
+                                              &tmp_ncomponents));
+
+                fct_chk_eq_int(cglobal,     tmp_cglobal);
+                fct_chk_eq_int(bglobal,     tmp_bglobal);
+                fct_chk_eq_int(aglobal,     tmp_aglobal);
+                fct_chk_eq_int(ncomponents, tmp_ncomponents);
+            }
+
+            // Close the file
+            fct_req(0 == esio_file_close(state));
+
+            // Free the field
+            free(field);
+
+            // Reopen the file using normal HDF5 APIs on root processor
+            // Examine the contents to ensure it matches
+            if (world_rank == 0) {
+                field = calloc(cglobal * bglobal * aglobal * ncomponents,
+                               sizeof(TEST_REAL));
+                fct_req(field);
+                const hid_t file_id
+                    = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+                hid_t type_id = TEST_H5T;
+                if (ncomponents > 1) {
+                    const hsize_t dims[1] = { ncomponents };
+                    type_id = H5Tarray_create2(TEST_H5T, 1, dims);
+                    fct_req(type_id >= 0);
+                }
+                fct_req(0 <= H5LTread_dataset(file_id, "vfield",
+                                              type_id, field));
+                if (ncomponents > 1) H5Tclose(type_id);
+
+                p_field = field;
+                for (int k = 0; k < cglobal; ++k) {
+                    for (int j = 0; j < bglobal; ++j) {
+                        for (int i = 0; i < aglobal; ++i) {
+                            for (int h = 0; h < ncomponents; ++h) {
+                                const TEST_REAL value = *p_field++;
+                                fct_chk_eq_dbl(
+                                    value,
+                                    (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13)-h);
+                            }
+                        }
+                    }
+                }
+
+                fct_req(0 <= H5Fclose(file_id));
+                free(field);
+            }
+
+            // Re-read the file in a distributed manner and verify contents
+            field = calloc(nelem, sizeof(TEST_REAL));
+            fct_req(field);
+            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == TEST_ESIO_VFIELD_READ(state, "vfield", field,
+                                               cglobal, cstart, clocal, 0,
+                                               bglobal, bstart, blocal, 0,
+                                               aglobal, astart, alocal, 0,
+                                               ncomponents));
+            p_field = field;
+            for (int k = cstart; k < cstart + clocal; ++k) {
+                for (int j = bstart; j < bstart + blocal; ++j) {
+                    for (int i = astart; i < astart + alocal; ++i) {
+                        for (int h = 0; h < ncomponents; ++h) {
+                            const TEST_REAL value = *p_field++;
+                            fct_chk_eq_dbl(
+                                value,
+                                (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13) - h);
+                        }
                     }
                 }
             }
