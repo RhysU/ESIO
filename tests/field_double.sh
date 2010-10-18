@@ -19,6 +19,10 @@ for cmd in "mpiexec -np 1 ./field_double -p 11 -u 13" \
            "mpiexec -np 2 ./field_double -p  5 -u  7" \
            "mpiexec -np 3 ./field_double -p  7 -u  5"
 do
-    echo $cmd
-    $cmd
+    for dir in "C" "B" "A"
+    do
+        echo -n "Distribute $dir: "
+        echo $cmd -d $dir
+        $cmd -d $dir
+    done
 done

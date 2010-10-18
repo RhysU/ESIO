@@ -41,6 +41,7 @@
 #endif
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -61,6 +62,12 @@
 
 // Add command line options
 static fctcl_init_t my_cl_options[] = {
+    {
+        "--distribute",
+        "-d",
+        FCTCL_STORE_VALUE,
+        "Choose which direction (one of c, b, or a) is distributed"
+    },
     {
         "--partitioned-size",
         "-p",
@@ -97,7 +104,7 @@ FCT_BGN()
     // Install the command line options defined above.
     fctcl_install(my_cl_options);
 
-    // Retrieve and sanity check command line options
+    // Retrieve and sanity check problem size options
     preserve = fctcl_is("--preserve");
     const int partitioned_size = (int) strtol(
         fctcl_val2("--partitioned-size","3"), (char **) NULL, 10);
@@ -109,6 +116,43 @@ FCT_BGN()
         fctcl_val2("--unpartitioned-size","2"), (char **) NULL, 10);
     if (unpartitioned_size < 1) {
         fprintf(stderr, "\n--unpartitioned-size=%d < 1\n", unpartitioned_size);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    // Retrieve and process parallel distribution options
+    int cglobal, cstart, clocal;
+    int bglobal, bstart, blocal;
+    int aglobal, astart, alocal;
+    const char *distribute = fctcl_val2("--distribute", "a");
+    if (fctstr_ieq(distribute,"c")) {
+        // Data uniformly partitioned in the slow index
+        clocal = partitioned_size;
+        cglobal  = clocal * world_size;
+        cstart = clocal * world_rank;
+
+        aglobal  = alocal = unpartitioned_size;
+        bglobal  = blocal = unpartitioned_size;
+        astart = bstart = 0;
+    } else if (fctstr_ieq(distribute,"b")) {
+        // Data uniformly partitioned in the medium index
+        blocal = partitioned_size;
+        bglobal = blocal * world_size;
+        bstart = blocal * world_rank;
+
+        aglobal = alocal = unpartitioned_size;
+        cglobal = clocal = unpartitioned_size;
+        astart = cstart = 0;
+    } else if (fctstr_ieq(distribute,"a")) {
+        // Data uniformly partitioned in the fastest index
+        alocal = partitioned_size;
+        aglobal = alocal * world_size;
+        astart = alocal * world_rank;
+
+        bglobal = blocal = unpartitioned_size;
+        cglobal = clocal = unpartitioned_size;
+        bstart = cstart = 0;
+    } else {
+        fprintf(stderr, "\n--distribute=%s not recognized\n", distribute);
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
@@ -124,6 +168,8 @@ FCT_BGN()
     // Fixture-related details
     const char * const input_dir  = getenv("ESIO_TEST_INPUT_DIR");
     const char * const output_dir = getenv("ESIO_TEST_OUTPUT_DIR");
+    (void) input_dir;  // Possibly unused
+    (void) output_dir; // Possibly unused
     char * filename = NULL;
     esio_state state;
 
@@ -131,10 +177,31 @@ FCT_BGN()
     {
         FCT_SETUP_BGN()
         {
-            (void) input_dir; // Unused
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+
+            // Restore HDF5/ESIO default error handling
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
             esio_set_error_handler(esio_handler);
 
+            // Rank 0 generates a unique filename and broadcasts it
+            int filenamelen;
+            if (world_rank == 0) {
+                filename = tempnam(output_dir, "l00t");
+                if (preserve) {
+                    printf("\nfilename: %s\n", filename);
+                }
+                filenamelen = strlen(filename);
+            }
+            ESIO_MPICHKR(MPI_Bcast(&filenamelen, 1, MPI_INT,
+                                   0, MPI_COMM_WORLD));
+            if (world_rank > 0) {
+                filename = calloc(filenamelen + 1, sizeof(char));
+            }
+            ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
+                                    0, MPI_COMM_WORLD));
+            assert(filename);
+
+            // Initialize ESIO state
             state = esio_init(MPI_COMM_WORLD);
             assert(state);
         }
@@ -142,192 +209,115 @@ FCT_BGN()
 
         FCT_TEARDOWN_BGN()
         {
+            // Finalize ESIO state
             esio_finalize(state);
-            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
+
+            // Clean up the unique file and filename
+            if (world_rank == 0) {
+                if (!preserve) fct_req(0 == unlink(filename));
+            }
+            if (filename) free(filename);
         }
         FCT_TEARDOWN_END();
 
-        FCT_TEST_BGN(uniform_directionally_split)
+        FCT_TEST_BGN(uniform_split)
         {
-            int cglobal, cstart, clocal;
-            int bglobal, bstart, blocal;
-            int aglobal, astart, alocal;
+            TEST_REAL *field, *p_field;
 
-            for (int casenum = 0; casenum < 3; ++casenum) {
+            // Open file
+            fct_req(0 == esio_file_create(state, filename, 1));
 
-                ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Barrier
+            // Determine local rank's portion of global field
+            const size_t nelem = alocal * blocal * clocal;
+            field = calloc(nelem, sizeof(TEST_REAL));
+            fct_req(field);
 
-                aglobal = astart = alocal = -1;
-                bglobal = bstart = blocal = -1;
-                cglobal = cstart = clocal = -1;
-                switch (casenum) {
-                    case 0: // Data uniformly partitioned in the fastest index
-                        alocal = partitioned_size;
-                        aglobal  = alocal * world_size;
-                        astart = alocal * world_rank;
+            // Write all zeros to disk
+            fct_req(0 == TEST_ESIO_FIELD_WRITE(state, "field", field,
+                                               cglobal, cstart, clocal, 0,
+                                               bglobal, bstart, blocal, 0,
+                                               aglobal, astart, alocal, 0));
 
-                        bglobal  = blocal = unpartitioned_size;
-                        cglobal  = clocal = unpartitioned_size;
-                        bstart = cstart = 0;
-                        break;
-
-                    case 1: // Data uniformly partitioned in the medium index
-                        blocal = partitioned_size;
-                        bglobal  = blocal * world_size;
-                        bstart = blocal * world_rank;
-
-                        aglobal  = alocal = unpartitioned_size;
-                        cglobal  = clocal = unpartitioned_size;
-                        astart = cstart = 0;
-                        break;
-
-                    case 2: // Data uniformly partitioned in the slow index
-                        clocal = partitioned_size;
-                        cglobal  = clocal * world_size;
-                        cstart = clocal * world_rank;
-
-                        aglobal  = alocal = unpartitioned_size;
-                        bglobal  = blocal = unpartitioned_size;
-                        astart = bstart = 0;
-                        break;
-                    default:
-                        fct_req(0); // Sanity failure
-                }
-
-                // Rank 0 generates a unique filename and broadcasts it
-                int filenamelen;
-                if (world_rank == 0) {
-                    filename = tempnam(output_dir, "l00t");
-                    if (preserve) {
-                        printf("\ncase %d filename: %s\n", casenum, filename);
-                    }
-                    filenamelen = strlen(filename);
-                }
-                ESIO_MPICHKR(MPI_Bcast(&filenamelen, 1, MPI_INT,
-                                       0, MPI_COMM_WORLD));
-                if (world_rank > 0) {
-                    filename = calloc(filenamelen + 1, sizeof(char));
-                }
-                ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
-                                       0, MPI_COMM_WORLD));
-                assert(filename);
-
-                // Open unique file
-                fct_req(0 == esio_file_create(state, filename, 1));
-
-                // Determine local rank's portion of global field
-                const size_t nelem = alocal * blocal * clocal;
-                TEST_REAL * field  = calloc(nelem, sizeof(TEST_REAL));
-                fct_req(field);
-
-                // Write all zeros to disk
-                int status = TEST_ESIO_FIELD_WRITE(
-                        state, "field", field,
-                        cglobal, cstart, clocal, 0,
-                        bglobal, bstart, blocal, 0,
-                        aglobal, astart, alocal, 0);
-                fct_req(status == 0);
-
-                { // Populate local field with test data
-                    TEST_REAL * p_field = field;
-                    for (int k = cstart; k < cstart + clocal; ++k) {
-                        for (int j = bstart; j < bstart + blocal; ++j) {
-                            for (int i = astart; i < astart + alocal; ++i) {
-                                *p_field++
-                                    = (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13);
-                            }
-                        }
+            // Populate local field with test data
+            p_field = field;
+            for (int k = cstart; k < cstart + clocal; ++k) {
+                for (int j = bstart; j < bstart + blocal; ++j) {
+                    for (int i = astart; i < astart + alocal; ++i) {
+                        *p_field++ = (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13);
                     }
                 }
-
-                // Overwrite zeros on disk with test data
-                status = TEST_ESIO_FIELD_WRITE(
-                        state, "field", field,
-                        cglobal, cstart, clocal, 0,
-                        bglobal, bstart, blocal, 0,
-                        aglobal, astart, alocal, 0);
-                fct_req(status == 0);
-
-                // Ensure the global size was written correctly
-                {
-                    int tmp_aglobal, tmp_bglobal, tmp_cglobal;
-                    fct_req(0 == esio_field_size(state, "field",
-                                                 &tmp_cglobal,
-                                                 &tmp_bglobal,
-                                                 &tmp_aglobal));
-                    fct_chk_eq_int(cglobal, tmp_cglobal);
-                    fct_chk_eq_int(bglobal, tmp_bglobal);
-                    fct_chk_eq_int(aglobal, tmp_aglobal);
-                }
-
-                // Close the file
-                fct_req(0 == esio_file_close(state));
-
-                // Free the field
-                free(field);
-
-                // Reopen the file using normal HDF5 APIs on root processor
-                // Examine the contents to ensure it matches
-                if (world_rank == 0) {
-                    field = calloc(cglobal * bglobal * aglobal,
-                                   sizeof(TEST_REAL));
-                    fct_req(field);
-                    const hid_t file_id
-                        = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                    const herr_t status1
-                        = TEST_H5LTREAD_DATASET(file_id, "field", field);
-                    fct_req(status1 >= 0);
-
-                    TEST_REAL * p_field = field;
-                    for (int k = 0; k < cglobal; ++k) {
-                        for (int j = 0; j < bglobal; ++j) {
-                            for (int i = 0; i < aglobal; ++i) {
-                                const TEST_REAL value = *p_field++;
-                                fct_chk_eq_dbl(
-                                        value,
-                                        (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
-                            }
-                        }
-                    }
-
-                    const herr_t status2 = H5Fclose(file_id);
-                    fct_req(status2 >= 0);
-                    free(field);
-                }
-
-                // Re-read the file in a distributed manner and verify contents
-                field = calloc(nelem, sizeof(TEST_REAL));
-                fct_req(field);
-                fct_req(0 == esio_file_open(state, filename, 0));
-                status = TEST_ESIO_FIELD_READ(
-                        state, "field", field,
-                        cglobal, cstart, clocal, 0,
-                        bglobal, bstart, blocal, 0,
-                        aglobal, astart, alocal, 0);
-                fct_req(status == 0);
-                {
-                    TEST_REAL * p_field = field;
-                    for (int k = cstart; k < cstart + clocal; ++k) {
-                        for (int j = bstart; j < bstart + blocal; ++j) {
-                            for (int i = astart; i < astart + alocal; ++i) {
-                                const TEST_REAL value = *p_field++;
-                                fct_chk_eq_dbl(
-                                    value,
-                                    (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
-                            }
-                        }
-                    }
-                }
-                free(field);
-                fct_req(0 == esio_file_close(state));
-
-                // Clean up
-                if (world_rank == 0) {
-                    if (!preserve) fct_req(0 == unlink(filename));
-                }
-                if (filename) free(filename);
             }
 
+            // Overwrite zeros on disk with test data
+            fct_req(0 == TEST_ESIO_FIELD_WRITE(state, "field", field,
+                                               cglobal, cstart, clocal, 0,
+                                               bglobal, bstart, blocal, 0,
+                                               aglobal, astart, alocal, 0));
+
+            { // Ensure the global size was written correctly
+                int tmp_aglobal, tmp_bglobal, tmp_cglobal;
+                fct_req(0 == esio_field_size(state, "field",
+                                             &tmp_cglobal,
+                                             &tmp_bglobal,
+                                             &tmp_aglobal));
+                fct_chk_eq_int(cglobal, tmp_cglobal);
+                fct_chk_eq_int(bglobal, tmp_bglobal);
+                fct_chk_eq_int(aglobal, tmp_aglobal);
+            }
+
+            // Close the file
+            fct_req(0 == esio_file_close(state));
+
+            // Free the field
+            free(field);
+
+            // Reopen the file using normal HDF5 APIs on root processor
+            // Examine the contents to ensure it matches
+            if (world_rank == 0) {
+                field = calloc(cglobal * bglobal * aglobal,
+                               sizeof(TEST_REAL));
+                fct_req(field);
+                const hid_t file_id
+                    = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+                fct_req(0 <= TEST_H5LTREAD_DATASET(file_id, "field", field));
+
+                p_field = field;
+                for (int k = 0; k < cglobal; ++k) {
+                    for (int j = 0; j < bglobal; ++j) {
+                        for (int i = 0; i < aglobal; ++i) {
+                            const TEST_REAL value = *p_field++;
+                            fct_chk_eq_dbl(
+                                    value,
+                                    (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
+                        }
+                    }
+                }
+
+                fct_req(0 <= H5Fclose(file_id));
+                free(field);
+            }
+
+            // Re-read the file in a distributed manner and verify contents
+            field = calloc(nelem, sizeof(TEST_REAL));
+            fct_req(field);
+            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == TEST_ESIO_FIELD_READ(state, "field", field,
+                                              cglobal, cstart, clocal, 0,
+                                              bglobal, bstart, blocal, 0,
+                                              aglobal, astart, alocal, 0));
+            p_field = field;
+            for (int k = cstart; k < cstart + clocal; ++k) {
+                for (int j = bstart; j < bstart + blocal; ++j) {
+                    for (int i = astart; i < astart + alocal; ++i) {
+                        const TEST_REAL value = *p_field++;
+                        fct_chk_eq_dbl(
+                            value,
+                            (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13));
+                    }
+                }
+            }
+            free(field);
+            fct_req(0 == esio_file_close(state));
         }
         FCT_TEST_END();
 
