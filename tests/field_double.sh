@@ -15,14 +15,20 @@ if ! which mpiexec > /dev/null ; then
 fi
 
 set -e # Fail on first error
-for cmd in "mpiexec -np 1 ./field_double -p 11 -u 13" \
-           "mpiexec -np 2 ./field_double -p  5 -u  7" \
-           "mpiexec -np 3 ./field_double -p  7 -u  5"
+for auxstride in ""                #\ FIXME Enable
+#                "--auxstride-c=3" \
+#                "--auxstride-b=5" \
+#                "--auxstride-a=7"
 do
-    for dir in "C" "B" "A"
+    for cmd in "mpiexec -np 1 ./field_double -p 11 -u 13" \
+               "mpiexec -np 2 ./field_double -p  5 -u  7" \
+               "mpiexec -np 3 ./field_double -p  7 -u  5"
     do
-        echo -n "Distribute $dir: "
-        echo $cmd -d $dir
-        $cmd -d $dir
+        for dir in "C" "B" "A"
+        do
+            echo -n "Distribute $dir: "
+            echo $cmd -d $dir $auxstride
+            $cmd -d $dir $auxstride
+        done
     done
 done
