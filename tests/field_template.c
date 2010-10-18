@@ -233,7 +233,7 @@ FCT_BGN()
         FCT_TEARDOWN_END();
 
         // Test scalar-valued fields, including overwrite details
-        FCT_TEST_BGN(field)
+        FCT_TEST_BGN(field_contiguous)
         {
             TEST_REAL *field, *p_field;
 
@@ -336,7 +336,7 @@ FCT_BGN()
         FCT_TEST_END();
 
         // Test vector-valued fields
-        FCT_TEST_BGN(vfield)
+        FCT_TEST_BGN(vfield_contiguous)
         {
             TEST_REAL *field, *p_field;
 
