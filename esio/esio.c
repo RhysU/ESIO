@@ -925,6 +925,9 @@ GEN_FIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 GEN_FIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
+GEN_FIELD_OP(write, const,       int, H5T_NATIVE_INT)
+GEN_FIELD_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
+
 
 #define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_field_ ## OP ## v_ ## TYPE(                                      \
@@ -971,6 +974,9 @@ GEN_FIELD_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
 GEN_FIELD_OPV(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_FIELD_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+GEN_FIELD_OPV(write, const,       int, H5T_NATIVE_INT)
+GEN_FIELD_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 // *******************************************************************
 // PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE
@@ -1179,6 +1185,8 @@ GEN_PLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 GEN_PLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_PLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
+GEN_PLANE_OP(write, const,       int, H5T_NATIVE_INT)
+GEN_PLANE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 #define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_plane_ ## OP ## v_ ## TYPE(                                      \
@@ -1218,6 +1226,9 @@ GEN_PLANE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
 GEN_PLANE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_PLANE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+GEN_PLANE_OPV(write, const,       int, H5T_NATIVE_INT)
+GEN_PLANE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 // *******************************************************************
 // LINE READ WRITE LINE READ WRITE LINE READ WRITE LINE READ WRITE
@@ -1399,6 +1410,8 @@ GEN_LINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 GEN_LINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_LINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
+GEN_LINE_OP(write, const,       int, H5T_NATIVE_INT)
+GEN_LINE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 #define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE)                                 \
 int esio_line_ ## OP ## v_ ## TYPE(                                       \
@@ -1431,3 +1444,6 @@ GEN_LINE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
 GEN_LINE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_LINE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+GEN_LINE_OPV(write, const,       int, H5T_NATIVE_INT)
+GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)

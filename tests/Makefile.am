@@ -51,6 +51,14 @@ layout0_float_SOURCES   = layout0_float.c
 layout0_float_LDADD     = ../esio/libesio.la
 layout0_float.o: layout0_float.c layout_template.c
 
+## Layout 0 integer tests in C
+TESTS                += layout0_int.sh          # NB Wrapper script
+EXTRA_DIST           += layout0_int.sh          # NB Wrapper script
+check_PROGRAMS       += layout0_int
+layout0_int_SOURCES   = layout0_int.c
+layout0_int_LDADD     = ../esio/libesio.la
+layout0_int.o: layout0_int.c layout_template.c
+
 ## Layout 1 double precision tests in C
 TESTS                  += layout1_double.sh    # NB Wrapper script
 EXTRA_DIST             += layout1_double.sh    # NB Wrapper script
@@ -66,6 +74,14 @@ check_PROGRAMS         += layout1_float
 layout1_float_SOURCES   = layout1_float.c
 layout1_float_LDADD     = ../esio/libesio.la
 layout1_float.o: layout1_float.c layout_template.c
+
+## Layout 1 integer tests in C
+TESTS                += layout1_int.sh          # NB Wrapper script
+EXTRA_DIST           += layout1_int.sh          # NB Wrapper script
+check_PROGRAMS       += layout1_int
+layout1_int_SOURCES   = layout1_int.c
+layout1_int_LDADD     = ../esio/libesio.la
+layout1_int.o: layout1_int.c layout_template.c
 
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field

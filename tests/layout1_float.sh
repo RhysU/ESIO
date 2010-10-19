@@ -15,20 +15,15 @@ if ! which mpiexec > /dev/null ; then
 fi
 
 set -e # Fail on first error
-for auxstride in ""                \
-                 "--auxstride-c=3" \
-                 "--auxstride-b=5" \
-                 "--auxstride-a=7"
+for auxstride in "auxstride-c=3 --auxstride-b=5 --auxstride-a=7"
 do
-    for cmd in "mpiexec -np 1 ./layout1_float -p 11 -u 13" \
-               "mpiexec -np 2 ./layout1_float -p  5 -u  7" \
-               "mpiexec -np 3 ./layout1_float -p  7 -u  5"
+    for cmd in "mpiexec -np 3 ./layout1_float -p  11 -u  13"
     do
         for dir in "C" "B" "A"
         do
-            echo -n "Distribute $dir: "
-            echo $cmd -d $dir $auxstride
-            $cmd -d $dir $auxstride
+                echo -n "Distribute $dir:"
+                echo $cmd -d $dir $auxstride
+                $cmd -d $dir $auxstride
         done
     done
 done
