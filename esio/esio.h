@@ -37,21 +37,50 @@
 
 typedef struct esio_state_s *esio_state;
 
+/**
+ * \defgroup Init Setup and teardown
+ */
+/*\@{*/
 esio_state esio_init(MPI_Comm comm);
 int esio_finalize(esio_state s);
+/*\@}*/
 
+/**
+ * \defgroup Layout Field layout control
+ */
+/*\@{*/
 int esio_layout_count();
 int esio_layout_get(const esio_state s);
 int esio_layout_set(esio_state s, int layout_tag);
 
+/*\@}*/
+
+/**
+ * \defgroup File Opening and closing files
+ */
+/*\@{*/
 int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
 int esio_file_close(esio_state s);
+/*\@}*/
 
+/**
+ * \defgroup Size Querying data extents
+ */
+/*\@{*/
 int esio_field_size(const esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal);
+int esio_vfield_size(const esio_state s,
+                     const char* name,
+                     int *cglobal, int *bglobal, int *aglobal,
+                     int *ncomponents);
+/*\@}*/
 
+/**
+ * \defgroup Field Manipulating real-valued fields 
+ */
+/*\@{*/
 int esio_field_write_double(const esio_state s,
                             const char* name,
                             const double *field,
@@ -64,7 +93,6 @@ int esio_field_write_float(const esio_state s,
                            int cglobal, int cstart, int clocal, int cstride,
                            int bglobal, int bstart, int blocal, int bstride,
                            int aglobal, int astart, int alocal, int astride);
-
 int esio_field_read_double(const esio_state s,
                            const char* name,
                            double *field,
@@ -77,12 +105,12 @@ int esio_field_read_float(const esio_state s,
                           int cglobal, int cstart, int clocal, int cstride,
                           int bglobal, int bstart, int blocal, int bstride,
                           int aglobal, int astart, int alocal, int astride);
+/*\@}*/
 
-int esio_vfield_size(const esio_state s,
-                     const char* name,
-                     int *cglobal, int *bglobal, int *aglobal,
-                     int *ncomponents);
-
+/**
+ * \defgroup VField Manipulating real-valued vector fields 
+ */
+/*\@{*/
 int esio_vfield_write_double(const esio_state s,
                              const char* name,
                              const double *field,
@@ -97,7 +125,6 @@ int esio_vfield_write_float(const esio_state s,
                             int bglobal, int bstart, int blocal, int bstride,
                             int aglobal, int astart, int alocal, int astride,
                             int ncomponents);
-
 int esio_vfield_read_double(const esio_state s,
                             const char* name,
                             double *field,
@@ -112,5 +139,6 @@ int esio_vfield_read_float(const esio_state s,
                            int bglobal, int bstart, int blocal, int bstride,
                            int aglobal, int astart, int alocal, int astride,
                            int ncomponents);
+/*\@}*/
 
 #endif /* __ESIO_ESIO_H */
