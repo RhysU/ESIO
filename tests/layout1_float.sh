@@ -26,9 +26,9 @@ do
     do
         for dir in "C" "B" "A"
         do
-                echo -n "Distribute $dir:"
-                echo $cmd -d $dir $auxstride
-                $cmd -d $dir $auxstride
+            echo -n "Distribute $dir: "
+            echo $cmd -d $dir $auxstride
+            $cmd -d $dir $auxstride
         done
     done
 done

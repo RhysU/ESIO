@@ -175,8 +175,7 @@ static const struct {
         &esio_layout1_field_reader
     },
 };
-const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
-
+static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
 
 static
 MPI_Comm
