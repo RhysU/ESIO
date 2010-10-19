@@ -38,6 +38,58 @@
 #include "error.h"
 #include "layout.h"
 
+// *******************************************************************
+// PLANE LINE POINT PLANE LINE POINT PLANE LINE POINT PLANE LINE POINT
+// *******************************************************************
+
+#define METHODNAME esio_plane_writer
+#define OPFUNC     H5Dwrite
+#define QUALIFIER  const
+#include "plane.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER
+
+#define METHODNAME esio_plane_reader
+#define OPFUNC     H5Dread
+#define QUALIFIER  /* mutable */
+#include "plane.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER
+
+#define METHODNAME esio_line_writer
+#define OPFUNC     H5Dwrite
+#define QUALIFIER  const
+#include "line.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER
+
+#define METHODNAME esio_line_reader
+#define OPFUNC     H5Dread
+#define QUALIFIER  /* mutable */
+#include "line.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER
+
+// FIXME: Enable
+// #define METHODNAME esio_point_writer
+// #define OPFUNC     H5Dwrite
+// #define QUALIFIER  const
+// #include "point.c"
+// #undef METHODNAME
+// #undef OPFUNC
+// #undef QUALIFIER
+// 
+// #define METHODNAME esio_point_reader
+// #define OPFUNC     H5Dread
+// #define QUALIFIER  /* mutable */
+// #include "point.c"
+// #undef METHODNAME
+// #undef OPFUNC
+// #undef QUALIFIER
 
 // ***********************************************************************
 // LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0

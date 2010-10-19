@@ -76,4 +76,34 @@ int esio_layout ## NUM ##_field_reader(                    \
 ESIO_LAYOUT_DECLARATIONS(0)
 ESIO_LAYOUT_DECLARATIONS(1)
 
+int esio_plane_writer(
+        hid_t dset_id, const void *plane,
+        int bglobal, int bstart, int blocal, int bstride,
+        int aglobal, int astart, int alocal, int astride,
+        hid_t type_id);
+
+int esio_plane_reader(
+        hid_t dset_id, void *plane,
+        int bglobal, int bstart, int blocal, int bstride,
+        int aglobal, int astart, int alocal, int astride,
+        hid_t type_id);
+
+int esio_line_writer(
+        hid_t dset_id, const void *line,
+        int aglobal, int astart, int alocal, int astride,
+        hid_t type_id);
+
+int esio_line_reader(
+        hid_t dset_id, void *line,
+        int aglobal, int astart, int alocal, int astride,
+        hid_t type_id);
+
+int esio_point_writer(
+        hid_t dset_id, const void *point,
+        hid_t type_id);
+
+int esio_point_reader(
+        hid_t dset_id, void *point,
+        hid_t type_id);
+
 #endif /* __ESIO_LAYOUT_H */

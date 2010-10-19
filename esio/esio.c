@@ -71,8 +71,38 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
                                 int *cglobal, int *bglobal, int *aglobal,
                                 int *ncomponents);
 
-// See esio_field_metadata_write and esio_field_metadata_read
+static
+herr_t esio_plane_metadata_write(hid_t loc_id, const char *name,
+                                 int bglobal, int aglobal,
+                                 int ncomponents);
+
+static
+herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
+                                int *bglobal, int *aglobal,
+                                int *ncomponents);
+
+static
+herr_t esio_line_metadata_write(hid_t loc_id, const char *name,
+                                int aglobal,
+                                int ncomponents);
+
+static
+herr_t esio_line_metadata_read(hid_t loc_id, const char *name,
+                               int *aglobal,
+                               int *ncomponents);
+
+static
+herr_t esio_point_metadata_write(hid_t loc_id, const char *name,
+                                 int ncomponents);
+
+static
+herr_t esio_point_metadata_read(hid_t loc_id, const char *name,
+                                int *ncomponents);
+
 #define ESIO_FIELD_METADATA_SIZE (8)
+#define ESIO_PLANE_METADATA_SIZE (6)
+#define ESIO_LINE_METADATA_SIZE  (5)
+#define ESIO_POINT_METADATA_SIZE (4)
 
 static
 hid_t esio_field_create(const esio_state s,
@@ -80,7 +110,23 @@ hid_t esio_field_create(const esio_state s,
                         const char* name, hid_t type_id);
 
 static
+hid_t esio_plane_create(const esio_state s,
+                        int bglobal, int aglobal,
+                        const char* name, hid_t type_id);
+
+static
+hid_t esio_line_create(const esio_state s,
+                       int aglobal,
+                       const char* name, hid_t type_id);
+
+static
 int esio_field_close(hid_t dataset_id);
+
+static
+int esio_plane_close(hid_t dataset_id);
+
+static
+int esio_line_close(hid_t dataset_id);
 
 static
 int esio_field_write_internal(const esio_state s,
@@ -98,6 +144,48 @@ int esio_field_read_internal(const esio_state s,
                              int cglobal, int cstart, int clocal, int cstride,
                              int bglobal, int bstart, int blocal, int bstride,
                              int aglobal, int astart, int alocal, int astride,
+                             hid_t type_id);
+
+static
+int esio_plane_write_internal(const esio_state s,
+                              const char* name,
+                              const void *plane,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
+                              hid_t type_id);
+
+static
+int esio_plane_read_internal(const esio_state s,
+                             const char* name,
+                             void *plane,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
+                             hid_t type_id);
+
+static
+int esio_line_write_internal(const esio_state s,
+                             const char* name,
+                             const void *line,
+                             int aglobal, int astart, int alocal, int astride,
+                             hid_t type_id);
+
+static
+int esio_line_read_internal(const esio_state s,
+                            const char* name,
+                            void *line,
+                            int aglobal, int astart, int alocal, int astride,
+                            hid_t type_id);
+
+static
+int esio_point_write_internal(const esio_state s,
+                              const char* name,
+                              const void *point,
+                              hid_t type_id);
+
+static
+int esio_point_read_internal(const esio_state s,
+                             const char* name,
+                             void *point,
                              hid_t type_id);
 
 //*********************************************************************
@@ -546,6 +634,190 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
 }
 
 static
+herr_t esio_plane_metadata_write(hid_t loc_id, const char *name,
+                                 int bglobal, int aglobal,
+                                 hid_t type_id)
+{
+    const int ncomponents = esio_type_ncomponents(type_id);
+    const int metadata[ESIO_PLANE_METADATA_SIZE] = {
+        ESIO_MAJOR_VERSION,
+        ESIO_MINOR_VERSION,
+        ESIO_POINT_VERSION,
+        bglobal,
+        aglobal,
+        ncomponents
+    };
+    return H5LTset_attribute_int(loc_id, name, "esio_plane_metadata",
+                                 metadata, ESIO_PLANE_METADATA_SIZE);
+}
+
+static
+herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
+                                int *bglobal, int *aglobal,
+                                int *ncomponents)
+{
+    // This routine should not invoke any ESIO error handling--
+    // It is sometimes used to query for the existence of a plane.
+
+    // Obtain current HDF5 error handler
+    H5E_auto2_t hdf5_handler;
+    void *hdf5_client_data;
+    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data);
+
+    // Disable HDF5 error handler during metadata read
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    // Local scratch space into which we read the metadata
+    // Employ a sentinel to balk if/when we accidentally blow out the buffer
+    int metadata[ESIO_PLANE_METADATA_SIZE + 1];
+    const int sentinel = INT_MIN + 999983;
+    metadata[ESIO_PLANE_METADATA_SIZE] = sentinel;
+
+    // Read the metadata into the buffer
+    const herr_t err = H5LTget_attribute_int(
+            loc_id, name, "esio_plane_metadata", metadata);
+
+    // Re-enable the HDF5 error handler
+    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
+
+    // Check that our sentinel survived the read process
+    if (metadata[ESIO_PLANE_METADATA_SIZE] != sentinel) {
+        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+    }
+
+    // On success...
+    if (err >= 0) {
+        // ... populate all requested, outgoing arguments
+        if (bglobal)     *bglobal     = metadata[3];
+        if (aglobal)     *aglobal     = metadata[4];
+        if (ncomponents) *ncomponents = metadata[5];
+    }
+
+    // Return the H5LTget_attribute_int error code
+    return err;
+}
+
+static
+herr_t esio_line_metadata_write(hid_t loc_id, const char *name,
+                                int aglobal,
+                                hid_t type_id)
+{
+    const int ncomponents = esio_type_ncomponents(type_id);
+    const int metadata[ESIO_LINE_METADATA_SIZE] = {
+        ESIO_MAJOR_VERSION,
+        ESIO_MINOR_VERSION,
+        ESIO_POINT_VERSION,
+        aglobal,
+        ncomponents
+    };
+    return H5LTset_attribute_int(loc_id, name, "esio_line_metadata",
+                                 metadata, ESIO_LINE_METADATA_SIZE);
+}
+
+static
+herr_t esio_line_metadata_read(hid_t loc_id, const char *name,
+                               int *aglobal,
+                               int *ncomponents)
+{
+    // This routine should not invoke any ESIO error handling--
+    // It is sometimes used to query for the existence of a line.
+
+    // Obtain current HDF5 error handler
+    H5E_auto2_t hdf5_handler;
+    void *hdf5_client_data;
+    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data);
+
+    // Disable HDF5 error handler during metadata read
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    // Local scratch space into which we read the metadata
+    // Employ a sentinel to balk if/when we accidentally blow out the buffer
+    int metadata[ESIO_LINE_METADATA_SIZE + 1];
+    const int sentinel = INT_MIN + 999983;
+    metadata[ESIO_LINE_METADATA_SIZE] = sentinel;
+
+    // Read the metadata into the buffer
+    const herr_t err = H5LTget_attribute_int(
+            loc_id, name, "esio_line_metadata", metadata);
+
+    // Re-enable the HDF5 error handler
+    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
+
+    // Check that our sentinel survived the read process
+    if (metadata[ESIO_LINE_METADATA_SIZE] != sentinel) {
+        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+    }
+
+    // On success...
+    if (err >= 0) {
+        // ... populate all requested, outgoing arguments
+        if (aglobal)     *aglobal     = metadata[3];
+        if (ncomponents) *ncomponents = metadata[4];
+    }
+
+    // Return the H5LTget_attribute_int error code
+    return err;
+}
+
+static
+herr_t esio_point_metadata_write(hid_t loc_id, const char *name,
+                                 hid_t type_id)
+{
+    const int ncomponents = esio_type_ncomponents(type_id);
+    const int metadata[ESIO_POINT_METADATA_SIZE] = {
+        ESIO_MAJOR_VERSION,
+        ESIO_MINOR_VERSION,
+        ESIO_POINT_VERSION,
+        ncomponents
+    };
+    return H5LTset_attribute_int(loc_id, name, "esio_point_metadata",
+                                 metadata, ESIO_POINT_METADATA_SIZE);
+}
+
+static
+herr_t esio_point_metadata_read(hid_t loc_id, const char *name,
+                                int *ncomponents)
+{
+    // This routine should not invoke any ESIO error handling--
+    // It is sometimes used to query for the existence of a point.
+
+    // Obtain current HDF5 error handler
+    H5E_auto2_t hdf5_handler;
+    void *hdf5_client_data;
+    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data);
+
+    // Disable HDF5 error handler during metadata read
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    // Local scratch space into which we read the metadata
+    // Employ a sentinel to balk if/when we accidentally blow out the buffer
+    int metadata[ESIO_POINT_METADATA_SIZE + 1];
+    const int sentinel = INT_MIN + 999983;
+    metadata[ESIO_POINT_METADATA_SIZE] = sentinel;
+
+    // Read the metadata into the buffer
+    const herr_t err = H5LTget_attribute_int(
+            loc_id, name, "esio_point_metadata", metadata);
+
+    // Re-enable the HDF5 error handler
+    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
+
+    // Check that our sentinel survived the read process
+    if (metadata[ESIO_POINT_METADATA_SIZE] != sentinel) {
+        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+    }
+
+    // On success...
+    if (err >= 0) {
+        // ... populate all requested, outgoing arguments
+        if (ncomponents) *ncomponents = metadata[3];
+    }
+
+    // Return the H5LTget_attribute_int error code
+    return err;
+}
+
+static
 hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
                         const char* name, hid_t type_id)
@@ -587,10 +859,96 @@ hid_t esio_field_create(const esio_state s,
 }
 
 static
+hid_t esio_plane_create(const esio_state s,
+                        int bglobal, int aglobal,
+                        const char* name, hid_t type_id)
+{
+    // Create the filespace
+    const hsize_t dims[2] = { bglobal, aglobal };
+    const hid_t filespace = H5Screate_simple(2, dims, NULL);
+    if (filespace < 0) {
+        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+    }
+
+    // Create the dataspace
+    const hid_t dset_id
+        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+    }
+
+    // Stash plane's metadata
+    const herr_t status = esio_plane_metadata_write(s->file_id, name,
+                                                    bglobal, aglobal,
+                                                    type_id);
+    if (status < 0) {
+        ESIO_ERROR("Unable to save plane's ESIO metadata", ESIO_EFAILED);
+    }
+
+    // Clean up temporary resources
+    H5Sclose(filespace);
+
+    return dset_id;
+}
+
+static
+hid_t esio_line_create(const esio_state s,
+                       int aglobal,
+                       const char* name, hid_t type_id)
+{
+    // Create the filespace
+    const hsize_t dims[1] = { aglobal };
+    const hid_t filespace = H5Screate_simple(1, dims, NULL);
+    if (filespace < 0) {
+        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+    }
+
+    // Create the dataspace
+    const hid_t dset_id
+        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+    }
+
+    // Stash line's metadata
+    const herr_t status = esio_line_metadata_write(s->file_id, name,
+                                                   aglobal,
+                                                   type_id);
+    if (status < 0) {
+        ESIO_ERROR("Unable to save line's ESIO metadata", ESIO_EFAILED);
+    }
+
+    // Clean up temporary resources
+    H5Sclose(filespace);
+
+    return dset_id;
+}
+
+static
 int esio_field_close(hid_t dataset_id)
 {
     if (H5Dclose(dataset_id) < 0) {
         ESIO_ERROR("Error closing field", ESIO_EFAILED);
+    }
+
+    return ESIO_SUCCESS;
+}
+
+static
+int esio_plane_close(hid_t dataset_id)
+{
+    if (H5Dclose(dataset_id) < 0) {
+        ESIO_ERROR("Error closing plane", ESIO_EFAILED);
+    }
+
+    return ESIO_SUCCESS;
+}
+
+static
+int esio_line_close(hid_t dataset_id)
+{
+    if (H5Dclose(dataset_id) < 0) {
+        ESIO_ERROR("Error closing line", ESIO_EFAILED);
     }
 
     return ESIO_SUCCESS;
@@ -627,6 +985,73 @@ int esio_vfield_size(const esio_state s,
 
     return ESIO_SUCCESS;
 }
+
+int esio_plane_size(const esio_state s,
+                    const char* name,
+                    int *bglobal, int *aglobal)
+{
+    int ncomponents;
+    const int status
+        = esio_vplane_size(s, name, bglobal, aglobal, &ncomponents);
+    if (ncomponents != 1) {
+        ESIO_ERROR("Named location must be treated as a vplane", ESIO_EINVAL);
+    }
+    return status;
+}
+
+int esio_vplane_size(const esio_state s,
+                     const char* name,
+                     int *bglobal, int *aglobal,
+                     int *ncomponents)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+
+    const herr_t status = esio_plane_metadata_read(
+            s->file_id, name, bglobal, aglobal, ncomponents);
+    if (status < 0) {
+        ESIO_ERROR("Unable to open plane's ESIO metadata", ESIO_EFAILED);
+    }
+
+    return ESIO_SUCCESS;
+}
+
+int esio_line_size(const esio_state s,
+                    const char* name,
+                    int *aglobal)
+{
+    int ncomponents;
+    const int status = esio_vline_size(s, name, aglobal, &ncomponents);
+    if (ncomponents != 1) {
+        ESIO_ERROR("Named location must be treated as a vline", ESIO_EINVAL);
+    }
+    return status;
+}
+
+int esio_vline_size(const esio_state s,
+                    const char* name,
+                    int *aglobal,
+                    int *ncomponents)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+
+    const herr_t status = esio_line_metadata_read(
+            s->file_id, name, aglobal, ncomponents);
+    if (status < 0) {
+        ESIO_ERROR("Unable to open line's ESIO metadata", ESIO_EFAILED);
+    }
+
+    return ESIO_SUCCESS;
+}
+
+// *******************************************************************
+// FIELD READ WRITE FIELD READ WRITE FIELD READ WRITE FIELD READ WRITE
+// *******************************************************************
 
 static
 int esio_field_write_internal(const esio_state s,
@@ -727,6 +1152,7 @@ int esio_field_write_internal(const esio_state s,
         const H5T_conv_t converter = H5Tfind(type_id, field_type_id, &pcdata);
         if (converter == NULL) {
             H5Tclose(field_type_id);
+            H5Dclose(dset_id);
             ESIO_ERROR("request type not convertible to existing field type",
                        ESIO_EINVAL);
         }
@@ -741,7 +1167,7 @@ int esio_field_write_internal(const esio_state s,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
-            ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
+            ESIO_ERROR_VAL("Error writing overwriting field", ESIO_EFAILED, wstat);
         }
         esio_field_close(dset_id);
 
@@ -828,6 +1254,7 @@ int esio_field_read_internal(const esio_state s,
     H5T_cdata_t *pcdata;
     const H5T_conv_t converter = H5Tfind(type_id, field_type_id, &pcdata);
     if (converter == NULL) {
+        H5Dclose(dset_id);
         H5Tclose(field_type_id);
         ESIO_ERROR("request type not convertible to existing field type",
                     ESIO_EINVAL);
@@ -917,3 +1344,463 @@ GEN_VFIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
 GEN_VFIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_VFIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+// *******************************************************************
+// PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE
+// *******************************************************************
+
+static
+int esio_plane_write_internal(const esio_state s,
+                              const char* name,
+                              const void *plane,
+                              int bglobal, int bstart, int blocal, int bstride,
+                              int aglobal, int astart, int alocal, int astride,
+                              hid_t type_id)
+{
+    // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EINVAL);
+    if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
+    if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
+    if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
+    if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
+    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
+    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
+    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
+    if (astride == 0) astride = 1;
+    if (bstride == 0) bstride = astride * alocal;
+
+    // Attempt to read metadata for the plane (which may or may not exist)
+    int plane_bglobal, plane_aglobal;
+    int plane_ncomponents;
+    const herr_t mstat = esio_plane_metadata_read(s->file_id, name,
+                                                  &plane_bglobal,
+                                                  &plane_aglobal,
+                                                  &plane_ncomponents);
+
+    hid_t dset_id;
+    if (mstat < 0) {
+        // Plane did not exist so create it
+        dset_id = esio_plane_create(s, bglobal, aglobal, name, type_id);
+        if (dset_id < 0) {
+            ESIO_ERROR("Error creating new plane", ESIO_EFAILED);
+        }
+    } else {
+        // Plane already existed
+
+        // Ensure caller gave correct size information
+        if (bglobal != plane_bglobal) {
+            ESIO_ERROR("request bglobal mismatch with existing plane",
+                       ESIO_EINVAL);
+        }
+        if (aglobal != plane_aglobal) {
+            ESIO_ERROR("request aglobal mismatch with existing plane",
+                       ESIO_EINVAL);
+        }
+
+        // Ensure caller gave type with correct component count
+        if (esio_type_ncomponents(type_id) != plane_ncomponents) {
+            ESIO_ERROR("request ncomponents mismatch with existing plane",
+                       ESIO_EINVAL);
+        }
+
+        // Open the existing plane's dataset
+        dset_id = H5Dopen1(s->file_id, name);
+        if (dset_id < 0) {
+            ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
+        }
+
+        // Check if supplied type can be converted to the plane's type
+        const hid_t plane_type_id = H5Dget_type(dset_id);
+        H5T_cdata_t *pcdata;
+        const H5T_conv_t converter = H5Tfind(type_id, plane_type_id, &pcdata);
+        if (converter == NULL) {
+            H5Tclose(plane_type_id);
+            H5Dclose(dset_id);
+            ESIO_ERROR("request type not convertible to existing plane type",
+                       ESIO_EINVAL);
+        }
+        H5Tclose(plane_type_id);
+    }
+
+    // Write field
+    const int wstat = esio_plane_writer(dset_id, plane,
+                                        bglobal, bstart, blocal, bstride,
+                                        aglobal, astart, alocal, astride,
+                                        type_id);
+    if (wstat != ESIO_SUCCESS) {
+        esio_plane_close(dset_id);
+        ESIO_ERROR_VAL("Error writing plane", ESIO_EFAILED, wstat);
+    }
+    esio_plane_close(dset_id);
+
+    return ESIO_SUCCESS;
+}
+
+static
+int esio_plane_read_internal(const esio_state s,
+                             const char* name,
+                             void *plane,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
+                             hid_t type_id)
+{
+    // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EINVAL);
+    if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
+    if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
+    if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
+    if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
+    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
+    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
+    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
+    if (astride == 0) astride = 1;
+    if (bstride == 0) bstride = astride * alocal;
+
+    // Read metadata for the plane
+    int plane_bglobal, plane_aglobal;
+    int plane_ncomponents;
+    const herr_t status = esio_plane_metadata_read(s->file_id, name,
+                                                   &plane_bglobal,
+                                                   &plane_aglobal,
+                                                   &plane_ncomponents);
+    if (status < 0) {
+        ESIO_ERROR("Unable to read plane's ESIO metadata", ESIO_EFAILED);
+    }
+
+    // Ensure caller gave correct size information
+    if (bglobal != plane_bglobal) {
+        ESIO_ERROR("plane read request has incorrect bglobal", ESIO_EINVAL);
+    }
+    if (aglobal != plane_aglobal) {
+        ESIO_ERROR("plane read request has incorrect aglobal", ESIO_EINVAL);
+    }
+
+    // Ensure caller gave type with correct component count
+    if (esio_type_ncomponents(type_id) != plane_ncomponents) {
+        ESIO_ERROR("request ncomponents mismatch with existing plane",
+                    ESIO_EINVAL);
+    }
+
+    // Open existing dataset
+    const hid_t dapl_id = H5P_DEFAULT;
+    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
+    }
+
+    // Check if supplied type can be converted to the plane's type
+    const hid_t plane_type_id = H5Dget_type(dset_id);
+    H5T_cdata_t *pcdata;
+    const H5T_conv_t converter = H5Tfind(type_id, plane_type_id, &pcdata);
+    if (converter == NULL) {
+        H5Tclose(plane_type_id);
+        H5Dclose(dset_id);
+        ESIO_ERROR("request type not convertible to existing plane type",
+                    ESIO_EINVAL);
+    }
+    H5Tclose(plane_type_id);
+
+    // Read plane
+    const int rstat = esio_plane_reader(dset_id, plane,
+                                        bglobal, bstart, blocal, bstride,
+                                        aglobal, astart, alocal, astride,
+                                        type_id);
+    if (rstat != ESIO_SUCCESS) {
+        esio_plane_close(dset_id);
+        ESIO_ERROR_VAL("Error reading plane", ESIO_EFAILED, rstat);
+    }
+    esio_plane_close(dset_id);
+
+    return ESIO_SUCCESS;
+}
+
+#define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                                   \
+int esio_plane_ ## OP ## _ ## TYPE (                                        \
+        const esio_state s,                                                 \
+        const char* name,                                                   \
+        QUAL TYPE *plane,                                                   \
+        int bglobal, int bstart, int blocal, int bstride,                   \
+        int aglobal, int astart, int alocal, int astride)                   \
+{                                                                           \
+    return esio_plane_ ## OP ## _internal(s, name, plane,                   \
+                                          bglobal, bstart, blocal, bstride, \
+                                          aglobal, astart, alocal, astride, \
+                                          H5TYPE);                          \
+}
+
+GEN_PLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_PLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+
+GEN_PLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_PLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+
+#define GEN_VPLANE_OP(OP,QUAL,TYPE,H5TYPE)                                \
+int esio_vplane_ ## OP ## _ ## TYPE(                                      \
+        const esio_state s,                                               \
+        const char* name,                                                 \
+        QUAL TYPE *plane,                                                 \
+        int bglobal, int bstart, int blocal, int bstride,                 \
+        int aglobal, int astart, int alocal, int astride,                 \
+        int ncomponents)                                                  \
+{                                                                         \
+    const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
+                                                                          \
+    /* Input strides are in units of sizeof(TYPE). HDF5 requires slab */  \
+    /* selection using sizeof(array_type_id) and cannot use "partial" */  \
+    /* offsets in this selection process.  Check strides conform.     */  \
+    if (bstride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("bstride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
+    if (astride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("astride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
+    const int retval = esio_plane_ ## OP ## _internal(                    \
+            s, name, plane,                                               \
+            bglobal, bstart, blocal, (bstride / ncomponents),             \
+            aglobal, astart, alocal, (astride / ncomponents),             \
+            array_type_id);                                               \
+    H5Tclose(array_type_id);                                              \
+    return retval;                                                        \
+}
+
+GEN_VPLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_VPLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+
+GEN_VPLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_VPLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+// *******************************************************************
+// LINE READ WRITE LINE READ WRITE LINE READ WRITE LINE READ WRITE
+// *******************************************************************
+
+static
+int esio_line_write_internal(const esio_state s,
+                             const char* name,
+                             const void *line,
+                             int aglobal, int astart, int alocal, int astride,
+                             hid_t type_id)
+{
+    // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EINVAL);
+    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
+    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
+    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
+    if (astride == 0) astride = 1;
+
+    // Attempt to read metadata for the line (which may or may not exist)
+    int line_aglobal, line_ncomponents;
+    const herr_t mstat = esio_line_metadata_read(s->file_id, name,
+                                                 &line_aglobal,
+                                                 &line_ncomponents);
+
+    hid_t dset_id;
+    if (mstat < 0) {
+        // Line did not exist so create it
+        dset_id = esio_line_create(s, aglobal, name, type_id);
+        if (dset_id < 0) {
+            ESIO_ERROR("Error creating new line", ESIO_EFAILED);
+        }
+    } else {
+        // Line already existed
+
+        // Ensure caller gave correct size information
+        if (aglobal != line_aglobal) {
+            ESIO_ERROR("request aglobal mismatch with existing line",
+                       ESIO_EINVAL);
+        }
+
+        // Ensure caller gave type with correct component count
+        if (esio_type_ncomponents(type_id) != line_ncomponents) {
+            ESIO_ERROR("request ncomponents mismatch with existing line",
+                       ESIO_EINVAL);
+        }
+
+        // Open the existing line's dataset
+        dset_id = H5Dopen1(s->file_id, name);
+        if (dset_id < 0) {
+            ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
+        }
+
+        // Check if supplied type can be converted to the line's type
+        const hid_t line_type_id = H5Dget_type(dset_id);
+        H5T_cdata_t *pcdata;
+        const H5T_conv_t converter = H5Tfind(type_id, line_type_id, &pcdata);
+        if (converter == NULL) {
+            H5Tclose(line_type_id);
+            H5Dclose(dset_id);
+            ESIO_ERROR("request type not convertible to existing line type",
+                       ESIO_EINVAL);
+        }
+        H5Tclose(line_type_id);
+    }
+
+    // Write field
+    const int wstat = esio_line_writer(dset_id, line,
+                                       aglobal, astart, alocal, astride,
+                                       type_id);
+    if (wstat != ESIO_SUCCESS) {
+        esio_line_close(dset_id);
+        ESIO_ERROR_VAL("Error writing line", ESIO_EFAILED, wstat);
+    }
+    esio_line_close(dset_id);
+
+    return ESIO_SUCCESS;
+}
+
+static
+int esio_line_read_internal(const esio_state s,
+                            const char* name,
+                            void *line,
+                            int aglobal, int astart, int alocal, int astride,
+                            hid_t type_id)
+{
+    // Sanity check incoming arguments
+    // Strides must be nonnegative because hsize_t is unsigned
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EINVAL);
+    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
+    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
+    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
+    if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
+    if (astride == 0) astride = 1;
+
+    // Read metadata for the line
+    int line_aglobal, line_ncomponents;
+    const herr_t status = esio_line_metadata_read(s->file_id, name,
+                                                  &line_aglobal,
+                                                  &line_ncomponents);
+    if (status < 0) {
+        ESIO_ERROR("Unable to read line's ESIO metadata", ESIO_EFAILED);
+    }
+
+    // Ensure caller gave correct size information
+    if (aglobal != line_aglobal) {
+        ESIO_ERROR("line read request has incorrect aglobal", ESIO_EINVAL);
+    }
+
+    // Ensure caller gave type with correct component count
+    if (esio_type_ncomponents(type_id) != line_ncomponents) {
+        ESIO_ERROR("request ncomponents mismatch with existing line",
+                    ESIO_EINVAL);
+    }
+
+    // Open existing dataset
+    const hid_t dapl_id = H5P_DEFAULT;
+    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
+    }
+
+    // Check if supplied type can be converted to the line's type
+    const hid_t line_type_id = H5Dget_type(dset_id);
+    H5T_cdata_t *pcdata;
+    const H5T_conv_t converter = H5Tfind(type_id, line_type_id, &pcdata);
+    if (converter == NULL) {
+        H5Tclose(line_type_id);
+        H5Dclose(dset_id);
+        ESIO_ERROR("request type not convertible to existing line type",
+                    ESIO_EINVAL);
+    }
+    H5Tclose(line_type_id);
+
+    // Read line
+    const int rstat = esio_line_reader(dset_id, line,
+                                       aglobal, astart, alocal, astride,
+                                       type_id);
+    if (rstat != ESIO_SUCCESS) {
+        esio_line_close(dset_id);
+        ESIO_ERROR_VAL("Error reading line", ESIO_EFAILED, rstat);
+    }
+    esio_line_close(dset_id);
+
+    return ESIO_SUCCESS;
+}
+
+#define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                                    \
+int esio_line_ ## OP ## _ ## TYPE (                                         \
+        const esio_state s,                                                 \
+        const char* name,                                                   \
+        QUAL TYPE *line,                                                    \
+        int aglobal, int astart, int alocal, int astride)                   \
+{                                                                           \
+    return esio_line_ ## OP ## _internal(s, name, line,                     \
+                                          aglobal, astart, alocal, astride, \
+                                          H5TYPE);                          \
+}
+
+GEN_LINE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_LINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+
+GEN_LINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_LINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+
+
+#define GEN_VLINE_OP(OP,QUAL,TYPE,H5TYPE)                                 \
+int esio_vline_ ## OP ## _ ## TYPE(                                       \
+        const esio_state s,                                               \
+        const char* name,                                                 \
+        QUAL TYPE *line,                                                  \
+        int aglobal, int astart, int alocal, int astride,                 \
+        int ncomponents)                                                  \
+{                                                                         \
+    const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
+                                                                          \
+    /* Input strides are in units of sizeof(TYPE). HDF5 requires slab */  \
+    /* selection using sizeof(array_type_id) and cannot use "partial" */  \
+    /* offsets in this selection process.  Check strides conform.     */  \
+    if (astride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("astride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
+    const int retval = esio_line_ ## OP ## _internal(                     \
+            s, name, line,                                                \
+            aglobal, astart, alocal, (astride / ncomponents),             \
+            array_type_id);                                               \
+    H5Tclose(array_type_id);                                              \
+    return retval;                                                        \
+}
+
+GEN_VLINE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_VLINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+
+GEN_VLINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_VLINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
