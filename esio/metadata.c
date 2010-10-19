@@ -41,7 +41,6 @@
 #define ESIO_FIELD_METADATA_SIZE (8)
 #define ESIO_PLANE_METADATA_SIZE (6)
 #define ESIO_LINE_METADATA_SIZE  (5)
-#define ESIO_POINT_METADATA_SIZE (4)
 
 // Macro to save and disable current HDF5 error handler
 #define DISABLE_HDF5_ERROR_HANDLER                               \
@@ -294,45 +293,37 @@ herr_t esio_line_metadata_read(hid_t loc_id, const char *name,
 herr_t esio_point_metadata_write(hid_t loc_id, const char *name,
                                  hid_t type_id)
 {
-    const int ncomponents = esio_type_ncomponents(type_id);
-    const int metadata[ESIO_POINT_METADATA_SIZE] = {
-        ESIO_MAJOR_VERSION,
-        ESIO_MINOR_VERSION,
-        ESIO_POINT_VERSION,
-        ncomponents
-    };
-    return H5LTset_attribute_int(loc_id, name, "esio_point_metadata",
-                                 metadata, ESIO_POINT_METADATA_SIZE);
+    // Points have trivial metadata
+    return 0;
 }
 
 herr_t esio_point_metadata_read(hid_t loc_id, const char *name,
                                 int *ncomponents)
 {
-    // This routine should not invoke any ESIO error handling--
-    // It is sometimes used to query for the existence of a point.
+    // Points have trivial metadata; lookup ncomponents from type
 
-    // Local scratch space into which we read the metadata
-    // Employ a sentinel to balk if/when we accidentally blow out the buffer
-    int metadata[ESIO_POINT_METADATA_SIZE + 1];
-    const int sentinel = INT_MIN + 999983;
-    metadata[ESIO_POINT_METADATA_SIZE] = sentinel;
-
-    // Read the metadata into the buffer
-    DISABLE_HDF5_ERROR_HANDLER
-    const herr_t err = H5LTget_attribute_int(
-            loc_id, name, "esio_point_metadata", metadata);
-    ENABLE_HDF5_ERROR_HANDLER
-
-    // Check that our sentinel survived the read process
-    if (metadata[ESIO_POINT_METADATA_SIZE] != sentinel) {
-        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+    const hid_t dset_id = H5Dopen1(loc_id, name);
+    if (dset_id < 0) {
+        ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
 
-    // On success populate all requested, outgoing arguments
-    if (err >= 0) {
-        if (ncomponents) *ncomponents = metadata[3];
+    const hid_t type_id = H5Dget_type(dset_id);
+    if (type_id < 0) {
+        H5Dclose(dset_id);
+        ESIO_ERROR("Unable to get datatype", ESIO_EFAILED);
     }
 
-    // Return the H5LTget_attribute_int error code
-    return err;
+    const int tmp_ncomponents = esio_type_ncomponents(type_id);
+    if (tmp_ncomponents < 1) {
+        H5Dclose(type_id);
+        H5Dclose(dset_id);
+        ESIO_ERROR("Unable to get datatype ncomponents", ESIO_EFAILED);
+    }
+
+    if (ncomponents) *ncomponents = tmp_ncomponents;
+
+    H5Dclose(type_id);
+    H5Dclose(dset_id);
+
+    return 0;
 }
