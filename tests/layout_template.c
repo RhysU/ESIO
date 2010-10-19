@@ -275,6 +275,7 @@ FCT_BGN()
         // Test scalar-valued fields, including overwrite details
         FCT_TEST_BGN(field)
         {
+            fct_req(LAYOUT_TAG < esio_layout_count());
             fct_req(LAYOUT_TAG == esio_layout_get(state));
 
             TEST_REAL *field;
@@ -414,6 +415,7 @@ FCT_BGN()
         // Test vector-valued fields
         FCT_TEST_BGN(vfield)
         {
+            fct_req(LAYOUT_TAG < esio_layout_count());
             fct_req(LAYOUT_TAG == esio_layout_get(state));
 
             TEST_REAL *vfield;

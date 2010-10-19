@@ -252,6 +252,11 @@ esio_finalize(esio_state s)
     return ESIO_SUCCESS;
 }
 
+int esio_layout_count()
+{
+    return esio_nlayout;
+}
+
 int
 esio_layout_get(const esio_state s)
 {

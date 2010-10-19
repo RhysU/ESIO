@@ -55,7 +55,7 @@ module esio
 
 ! Public API
   public :: esio_init, esio_finalize
-  public :: esio_layout_get, esio_layout_set
+  public :: esio_layout_count, esio_layout_get, esio_layout_set
   public :: esio_file_create, esio_file_open, esio_file_close
   public :: esio_field_size
   public :: esio_field_write_double, esio_field_write_single
@@ -112,6 +112,21 @@ contains
     esio_finalize = impl(state)
 
   end function esio_finalize
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  integer function esio_layout_count ()
+
+    interface
+      function impl () bind (C, name="esio_layout_count")
+        import
+        integer(c_int) :: impl
+      end function impl
+    end interface
+
+    esio_layout_count = impl()
+
+  end function esio_layout_count
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

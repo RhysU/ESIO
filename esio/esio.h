@@ -40,6 +40,7 @@ typedef struct esio_state_s *esio_state;
 esio_state esio_init(MPI_Comm comm);
 int esio_finalize(esio_state s);
 
+int esio_layout_count();
 int esio_layout_get(const esio_state s);
 int esio_layout_set(esio_state s, int layout_tag);
 
