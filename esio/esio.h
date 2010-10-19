@@ -70,27 +70,27 @@ int esio_file_close(esio_state s);
 /*\@{*/
 int esio_point_size(const esio_state s,
                     const char* name);
-int esio_vpoint_size(const esio_state s,
+int esio_point_sizev(const esio_state s,
                      const char* name,
                      int *ncomponents);
 int esio_line_size(const esio_state s,
                    const char* name,
                    int *aglobal);
-int esio_vline_size(const esio_state s,
+int esio_line_sizev(const esio_state s,
                     const char* name,
                     int *aglobal,
                     int *ncomponents);
 int esio_plane_size(const esio_state s,
                     const char* name,
                     int *bglobal, int *aglobal);
-int esio_vplane_size(const esio_state s,
+int esio_plane_sizev(const esio_state s,
                      const char* name,
                      int *bglobal, int *aglobal,
                      int *ncomponents);
 int esio_field_size(const esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal);
-int esio_vfield_size(const esio_state s,
+int esio_field_sizev(const esio_state s,
                      const char* name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);

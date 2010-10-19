@@ -470,7 +470,7 @@ FCT_BGN()
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_bglobal, tmp_cglobal, tmp_ncomponents;
-                fct_req(0 == esio_vfield_size(state, "vfield",
+                fct_req(0 == esio_field_sizev(state, "vfield",
                                               &tmp_cglobal,
                                               &tmp_bglobal,
                                               &tmp_aglobal,

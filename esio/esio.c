@@ -587,14 +587,14 @@ int esio_field_size(const esio_state s,
 {
     int ncomponents;
     const int status
-        = esio_vfield_size(s, name, cglobal, bglobal, aglobal, &ncomponents);
+        = esio_field_sizev(s, name, cglobal, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Named location must be treated as a vfield", ESIO_EINVAL);
     }
     return status;
 }
 
-int esio_vfield_size(const esio_state s,
+int esio_field_sizev(const esio_state s,
                      const char* name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents)
@@ -619,14 +619,14 @@ int esio_plane_size(const esio_state s,
 {
     int ncomponents;
     const int status
-        = esio_vplane_size(s, name, bglobal, aglobal, &ncomponents);
+        = esio_plane_sizev(s, name, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Named location must be treated as a vplane", ESIO_EINVAL);
     }
     return status;
 }
 
-int esio_vplane_size(const esio_state s,
+int esio_plane_sizev(const esio_state s,
                      const char* name,
                      int *bglobal, int *aglobal,
                      int *ncomponents)
@@ -650,14 +650,14 @@ int esio_line_size(const esio_state s,
                     int *aglobal)
 {
     int ncomponents;
-    const int status = esio_vline_size(s, name, aglobal, &ncomponents);
+    const int status = esio_line_sizev(s, name, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Named location must be treated as a vline", ESIO_EINVAL);
     }
     return status;
 }
 
-int esio_vline_size(const esio_state s,
+int esio_line_sizev(const esio_state s,
                     const char* name,
                     int *aglobal,
                     int *ncomponents)
