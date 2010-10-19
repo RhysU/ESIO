@@ -23,6 +23,7 @@ pkginclude_HEADERS += esio.h
 pkginclude_HEADERS += version.h
 # Headers internal to the library
 noinst_HEADERS += layout.h
+noinst_HEADERS += metadata.h
 
 # Public ESIO library containing C and Fortran interfaces
 # Need distinct C and Fortran sublibraries for libtool --tag purposes
@@ -36,7 +37,8 @@ noinst_LTLIBRARIES   += libesio_c.la
 libesio_c_la_SOURCES  = error.c
 libesio_c_la_SOURCES += esio.c
 libesio_c_la_SOURCES += layout.c
-layout.o: layout.c layout0.c layout1.c
+libesio_c_la_SOURCES += metadata.c
+layout.o: plane.c line.c layout.c layout0.c layout1.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
