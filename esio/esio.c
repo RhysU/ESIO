@@ -75,7 +75,7 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
 #define ESIO_FIELD_METADATA_SIZE (8)
 
 static
-hid_t esio_field_create(esio_state s,
+hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
                         const char* name, hid_t type_id);
 
@@ -83,7 +83,7 @@ static
 int esio_field_close(hid_t dataset_id);
 
 static
-int esio_field_write_internal(esio_state s,
+int esio_field_write_internal(const esio_state s,
                               const char* name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
@@ -92,7 +92,7 @@ int esio_field_write_internal(esio_state s,
                               hid_t type_id);
 
 static
-int esio_field_read_internal(esio_state s,
+int esio_field_read_internal(const esio_state s,
                              const char* name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
@@ -507,7 +507,7 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
 }
 
 static
-hid_t esio_field_create(esio_state s,
+hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
                         const char* name, hid_t type_id)
 {
@@ -557,7 +557,7 @@ int esio_field_close(hid_t dataset_id)
     return ESIO_SUCCESS;
 }
 
-int esio_field_size(esio_state s,
+int esio_field_size(const esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal)
 {
@@ -570,7 +570,7 @@ int esio_field_size(esio_state s,
     return status;
 }
 
-int esio_vfield_size(esio_state s,
+int esio_vfield_size(const esio_state s,
                      const char* name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents)
@@ -590,7 +590,7 @@ int esio_vfield_size(esio_state s,
 }
 
 static
-int esio_field_write_internal(esio_state s,
+int esio_field_write_internal(const esio_state s,
                               const char* name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
@@ -712,7 +712,7 @@ int esio_field_write_internal(esio_state s,
 }
 
 static
-int esio_field_read_internal(esio_state s,
+int esio_field_read_internal(const esio_state s,
                              const char* name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
@@ -812,7 +812,7 @@ int esio_field_read_internal(esio_state s,
 
 #define GEN_ESIO_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                              \
 int esio_field_ ## OP ## _ ## TYPE (                                        \
-        esio_state s,                                                       \
+        const esio_state s,                                                 \
         const char* name,                                                   \
         QUAL TYPE *field,                                                   \
         int cglobal, int cstart, int clocal, int cstride,                   \
@@ -835,7 +835,7 @@ GEN_ESIO_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 #define GEN_ESIO_VFIELD_OP(OP,QUAL,TYPE,H5TYPE)                           \
 int esio_vfield_ ## OP ## _ ## TYPE(                                      \
-        esio_state s,                                                     \
+        const esio_state s,                                               \
         const char* name,                                                 \
         QUAL TYPE *field,                                                 \
         int cglobal, int cstart, int clocal, int cstride,                 \

@@ -44,49 +44,49 @@ int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
 int esio_file_close(esio_state s);
 
-int esio_field_size(esio_state s,
+int esio_field_size(const esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal);
 
-int esio_field_write_double(esio_state s,
+int esio_field_write_double(const esio_state s,
                             const char* name,
                             const double *field,
                             int cglobal, int cstart, int clocal, int cstride,
                             int bglobal, int bstart, int blocal, int bstride,
                             int aglobal, int astart, int alocal, int astride);
-int esio_field_write_float(esio_state s,
+int esio_field_write_float(const esio_state s,
                            const char* name,
                            const float *field,
                            int cglobal, int cstart, int clocal, int cstride,
                            int bglobal, int bstart, int blocal, int bstride,
                            int aglobal, int astart, int alocal, int astride);
 
-int esio_field_read_double(esio_state s,
+int esio_field_read_double(const esio_state s,
                            const char* name,
                            double *field,
                            int cglobal, int cstart, int clocal, int cstride,
                            int bglobal, int bstart, int blocal, int bstride,
                            int aglobal, int astart, int alocal, int astride);
-int esio_field_read_float(esio_state s,
+int esio_field_read_float(const esio_state s,
                           const char* name,
                           float *field,
                           int cglobal, int cstart, int clocal, int cstride,
                           int bglobal, int bstart, int blocal, int bstride,
                           int aglobal, int astart, int alocal, int astride);
 
-int esio_vfield_size(esio_state s,
+int esio_vfield_size(const esio_state s,
                      const char* name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);
 
-int esio_vfield_write_double(esio_state s,
+int esio_vfield_write_double(const esio_state s,
                              const char* name,
                              const double *field,
                              int cglobal, int cstart, int clocal, int cstride,
                              int bglobal, int bstart, int blocal, int bstride,
                              int aglobal, int astart, int alocal, int astride,
                              int ncomponents);
-int esio_vfield_write_float(esio_state s,
+int esio_vfield_write_float(const esio_state s,
                             const char* name,
                             const float *field,
                             int cglobal, int cstart, int clocal, int cstride,
@@ -94,20 +94,19 @@ int esio_vfield_write_float(esio_state s,
                             int aglobal, int astart, int alocal, int astride,
                             int ncomponents);
 
-int esio_vfield_read_double(esio_state s,
+int esio_vfield_read_double(const esio_state s,
                             const char* name,
                             double *field,
                             int cglobal, int cstart, int clocal, int cstride,
                             int bglobal, int bstart, int blocal, int bstride,
                             int aglobal, int astart, int alocal, int astride,
                             int ncomponents);
-int esio_vfield_read_float(esio_state s,
+int esio_vfield_read_float(const esio_state s,
                            const char* name,
                            float *field,
                            int cglobal, int cstart, int clocal, int cstride,
                            int bglobal, int bstart, int blocal, int bstride,
                            int aglobal, int astart, int alocal, int astride,
                            int ncomponents);
-
 
 #endif /* __ESIO_ESIO_H */
