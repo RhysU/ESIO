@@ -40,6 +40,9 @@ typedef struct esio_state_s *esio_state;
 esio_state esio_init(MPI_Comm comm);
 int esio_finalize(esio_state s);
 
+int esio_layout_get(const esio_state s);
+int esio_layout_set(esio_state s, int layout_tag);
+
 int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
 int esio_file_close(esio_state s);

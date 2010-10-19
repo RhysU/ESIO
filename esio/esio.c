@@ -247,6 +247,34 @@ esio_finalize(esio_state s)
 }
 
 int
+esio_layout_get(const esio_state s)
+{
+    if (s == NULL) {
+        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+    }
+
+    return s->layout_tag;
+}
+
+int
+esio_layout_set(esio_state s, int layout_tag)
+{
+    if (s == NULL) {
+        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+    }
+    if (layout_tag < 0) {
+        ESIO_ERROR("layout_tag < 0", ESIO_EINVAL);
+    }
+    if (layout_tag >= esio_nlayout) {
+        ESIO_ERROR("layout_tag >= esio_nlayout", ESIO_EINVAL);
+    }
+
+    s->layout_tag = layout_tag;
+
+    return ESIO_SUCCESS;
+}
+
+int
 esio_file_create(esio_state s, const char *file, int overwrite)
 {
     // Sanity check incoming arguments

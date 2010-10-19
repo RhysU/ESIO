@@ -55,18 +55,24 @@ typedef int   (*esio_field_reader_t)     (hid_t, void *,
 // INTERNAL DECLARATIONS INTERNAL DECLARATIONS INTERNAL DECLARATIONS
 //******************************************************************
 
-hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal);
+#define ESIO_LAYOUT_DECLARATIONS(NUM)                      \
+hid_t esio_layout ## NUM ## _filespace_creator(            \
+        int cglobal, int bglobal, int aglobal);            \
+                                                           \
+int esio_layout ## NUM ## _field_writer(                   \
+        hid_t dset_id, const void *field,                  \
+        int cglobal, int cstart, int clocal, int cstride,  \
+        int bglobal, int bstart, int blocal, int bstride,  \
+        int aglobal, int astart, int alocal, int astride,  \
+        hid_t type_id);                                    \
+                                                           \
+int esio_layout ## NUM ##_field_reader(                    \
+        hid_t dset_id, void *field,                        \
+        int cglobal, int cstart, int clocal, int cstride,  \
+        int bglobal, int bstart, int blocal, int bstride,  \
+        int aglobal, int astart, int alocal, int astride,  \
+        hid_t type_id);
 
-int esio_layout0_field_writer(hid_t dset_id, const void *field,
-                              int cglobal, int cstart, int clocal, int cstride,
-                              int bglobal, int bstart, int blocal, int bstride,
-                              int aglobal, int astart, int alocal, int astride,
-                              hid_t type_id);
-
-int esio_layout0_field_reader(hid_t dset_id, void *field,
-                              int cglobal, int cstart, int clocal, int cstride,
-                              int bglobal, int bstart, int blocal, int bstride,
-                              int aglobal, int astart, int alocal, int astride,
-                              hid_t type_id);
+ESIO_LAYOUT_DECLARATIONS(0)
 
 #endif /* __ESIO_LAYOUT_H */
