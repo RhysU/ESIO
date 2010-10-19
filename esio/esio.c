@@ -122,18 +122,6 @@ int esio_line_read_internal(const esio_state s,
                             int aglobal, int astart, int alocal, int astride,
                             hid_t type_id);
 
-static
-int esio_point_write_internal(const esio_state s,
-                              const char* name,
-                              const void *point,
-                              hid_t type_id);
-
-static
-int esio_point_read_internal(const esio_state s,
-                             const char* name,
-                             void *point,
-                             hid_t type_id);
-
 //*********************************************************************
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
