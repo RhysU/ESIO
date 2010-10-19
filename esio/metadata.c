@@ -301,20 +301,23 @@ herr_t esio_point_metadata_read(hid_t loc_id, const char *name,
                                 int *ncomponents)
 {
     // Points have trivial metadata; lookup ncomponents from type
-
+    DISABLE_HDF5_ERROR_HANDLER
     const hid_t dset_id = H5Dopen1(loc_id, name);
     if (dset_id < 0) {
+        ENABLE_HDF5_ERROR_HANDLER
         ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
 
     const hid_t type_id = H5Dget_type(dset_id);
     if (type_id < 0) {
+        ENABLE_HDF5_ERROR_HANDLER
         H5Dclose(dset_id);
         ESIO_ERROR("Unable to get datatype", ESIO_EFAILED);
     }
 
     const int tmp_ncomponents = esio_type_ncomponents(type_id);
     if (tmp_ncomponents < 1) {
+        ENABLE_HDF5_ERROR_HANDLER
         H5Dclose(type_id);
         H5Dclose(dset_id);
         ESIO_ERROR("Unable to get datatype ncomponents", ESIO_EFAILED);
@@ -324,6 +327,7 @@ herr_t esio_point_metadata_read(hid_t loc_id, const char *name,
 
     H5Dclose(type_id);
     H5Dclose(dset_id);
+    ENABLE_HDF5_ERROR_HANDLER
 
     return 0;
 }
