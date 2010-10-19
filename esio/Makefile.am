@@ -11,6 +11,7 @@ lib_LTLIBRARIES    = # Append below
 noinst_HEADERS     = # Append below
 noinst_LTLIBRARIES = # Append below
 pkginclude_HEADERS = # Append below
+BUILT_SOURCES      = # Append below
 CLEANFILES         = # Append below
 
 # Use parallel HDF5 compiler wrappers per configure.ac
@@ -48,6 +49,9 @@ libesio_f_la_LIBTOOLFLAGS  = --tag=FC
 # Extra things to clean up
 clean-local:
 	rm -f *.mod *.gcno
+
+# License updates
+include $(top_srcdir)/license.am
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

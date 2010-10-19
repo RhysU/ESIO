@@ -10,6 +10,8 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
+BUILT_SOURCES   = # Append below
+CLEANFILES      = # Append below
 EXTRA_DIST      = layout_template.c plane_template.c line_template.c
 
 TESTS              = # Append below
@@ -157,6 +159,9 @@ layout1_int.o: layout1_int.c layout_template.c
 # Build test programs without running 'make check'
 .PHONY: check-programs
 check-programs: $(check_PROGRAMS)
+
+# License updates
+include $(top_srcdir)/license.am
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

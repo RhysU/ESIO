@@ -6,8 +6,9 @@ AM_FCFLAGS    = -I$(top_srcdir) -I$(top_builddir)
 AM_FCFLAGS   += -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_LDFLAGS    =
 bin_PROGRAMS  =
-BUILT_SOURCES =
 BUILT_DOCS    =
+BUILT_SOURCES =
+CLEANFILES    =
 EXTRA_DIST    =
 
 # Required for AX_AM_MACROS

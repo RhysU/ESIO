@@ -23,10 +23,3 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
-
-#define REAL              int
-#define REAL_H5T          H5T_NATIVE_INT
-#define AFFIX(name)       name ## _int
-#define LAYOUT_TAG        (0)
-
-#include "layout_template.c"

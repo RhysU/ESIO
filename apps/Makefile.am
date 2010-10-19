@@ -7,8 +7,9 @@ AM_FCFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_FCFLAGS    += -I$(top_srcdir)/esio -I$(top_builddir)/esio
 AM_LDFLAGS     =
 bin_PROGRAMS   =
-BUILT_SOURCES  =
 BUILT_DOCS     =
+BUILT_SOURCES  =
+CLEANFILES     =
 EXTRA_DIST     =
 
 # Use parallel HDF5 compiler wrappers per configure.ac
@@ -37,7 +38,10 @@ main_LIBTOOLFLAGS  = --tag=FC
 main.o: header.f90 main.f90
 
 # Clean up Fortran modules on 'make clean'
-CLEANFILES = header.mod
+CLEANFILES += header.mod
+
+# License updates
+include $(top_srcdir)/license.am
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

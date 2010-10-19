@@ -15,9 +15,10 @@ dist-hook:
 	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
 
 # Tools in the auxillary directory
-AUX_DIST = build-aux/install-sh    \
-           build-aux/mkinstalldirs \
-           build-aux/missing
+AUX_DIST = build-aux/install-sh        \
+           build-aux/mkinstalldirs     \
+           build-aux/missing           \
+           build-aux/update_license.pl
 
 # Support for pkgconfig
 pkgconfigdir   = $(libdir)/pkgconfig
@@ -81,6 +82,12 @@ endif
 # Make sure that libtool is up to date
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+
+# Push license updates into appropriate subdirectories
+.license.stamp:
+	cd esio  && $(MAKE) $(AM_MAKEFLAGS) .license.stamp
+	cd tests && $(MAKE) $(AM_MAKEFLAGS) .license.stamp
+	cd apps  && $(MAKE) $(AM_MAKEFLAGS) .license.stamp
 
 # Required for AX_PROG_DOXYGEN
 include doxygen.am
