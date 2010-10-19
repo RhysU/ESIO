@@ -4,13 +4,13 @@
 # always use mpiexec on some login nodes.  Better to warn the user that a test
 # was skipped then worry them when make check fails as a result.
 
-if ! [ -x field_double ]; then
-    echo "field_double binary not found or not executable"
+if ! [ -x layout0_double ]; then
+    echo "layout0_double binary not found or not executable"
     exit 1
 fi
 
 if ! which mpiexec > /dev/null ; then
-    echo "WARNING: Unable to find mpiexec; skipping field_double"
+    echo "WARNING: Unable to find mpiexec; skipping layout0_double"
     exit 0
 fi
 
@@ -20,9 +20,9 @@ for auxstride in ""                \
                  "--auxstride-b=5" \
                  "--auxstride-a=7"
 do
-    for cmd in "mpiexec -np 1 ./field_double -p 11 -u 13" \
-               "mpiexec -np 2 ./field_double -p  5 -u  7" \
-               "mpiexec -np 3 ./field_double -p  7 -u  5"
+    for cmd in "mpiexec -np 1 ./layout0_double -p 11 -u 13" \
+               "mpiexec -np 2 ./layout0_double -p  5 -u  7" \
+               "mpiexec -np 3 ./layout0_double -p  7 -u  5"
     do
         for dir in "C" "B" "A"
         do

@@ -10,7 +10,7 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
-EXTRA_DIST      = field_template.c
+EXTRA_DIST      = layout_template.c
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -36,20 +36,20 @@ basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
 
 ## Double precision fields from C
-TESTS                += field_double.sh    # NB Wrapper script
-EXTRA_DIST           += field_double.sh    # NB Wrapper script
-check_PROGRAMS       += field_double
-field_double_SOURCES  = field_double.c
-field_double_LDADD    = ../esio/libesio.la
-field_double.o: field_double.c field_template.c
+TESTS                  += layout0_double.sh    # NB Wrapper script
+EXTRA_DIST             += layout0_double.sh    # NB Wrapper script
+check_PROGRAMS         += layout0_double
+layout0_double_SOURCES  = layout0_double.c
+layout0_double_LDADD    = ../esio/libesio.la
+layout0_double.o: layout0_double.c layout_template.c
 
 ## Single precision fields from C
-TESTS                += field_float.sh          # NB Wrapper script
-EXTRA_DIST           += field_float.sh          # NB Wrapper script
-check_PROGRAMS       += field_float
-field_float_SOURCES   = field_float.c
-field_float_LDADD     = ../esio/libesio.la
-field_float.o: field_float.c field_template.c
+TESTS                  += layout0_float.sh          # NB Wrapper script
+EXTRA_DIST             += layout0_float.sh          # NB Wrapper script
+check_PROGRAMS         += layout0_float
+layout0_float_SOURCES   = layout0_float.c
+layout0_float_LDADD     = ../esio/libesio.la
+layout0_float.o: layout0_float.c layout_template.c
 
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field

@@ -22,17 +22,18 @@
  *
  *--------------------------------------------------------------------------
  *
- * field_float.c: single precision unit tests for ESIO
+ * layout0_double.c: double precision unit tests for ESIO
  *
  * $Id$
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define TEST_REAL              float
-#define TEST_ESIO_FIELD_WRITE  esio_field_write_float
-#define TEST_ESIO_FIELD_READ   esio_field_read_float
-#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_float
-#define TEST_ESIO_VFIELD_READ  esio_vfield_read_float
-#define TEST_H5T               H5T_NATIVE_FLOAT
+#define TEST_REAL              double
+#define TEST_ESIO_FIELD_WRITE  esio_field_write_double
+#define TEST_ESIO_FIELD_READ   esio_field_read_double
+#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_double
+#define TEST_ESIO_VFIELD_READ  esio_vfield_read_double
+#define TEST_H5T               H5T_NATIVE_DOUBLE
+#define LAYOUT_TAG             (0)
 
-#include "field_template.c"
+#include "layout_template.c"

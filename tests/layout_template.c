@@ -22,7 +22,7 @@
  *
  *--------------------------------------------------------------------------
  *
- * field_template.c: unit test template for ESIO field read/write operations
+ * layout_template.c: unit test template for ESIO field/vfield operations
  *
  * $Id$
  *--------------------------------------------------------------------------
@@ -254,6 +254,8 @@ FCT_BGN()
             // Initialize ESIO state
             state = esio_init(MPI_COMM_WORLD);
             assert(state);
+
+            esio_layout_set(state, LAYOUT_TAG);
         }
         FCT_SETUP_END();
 
@@ -273,6 +275,8 @@ FCT_BGN()
         // Test scalar-valued fields, including overwrite details
         FCT_TEST_BGN(field)
         {
+            fct_req(LAYOUT_TAG == esio_layout_get(state));
+
             TEST_REAL *field;
 
             // Compute stride information for each direction;
@@ -410,6 +414,8 @@ FCT_BGN()
         // Test vector-valued fields
         FCT_TEST_BGN(vfield)
         {
+            fct_req(LAYOUT_TAG == esio_layout_get(state));
+
             TEST_REAL *vfield;
 
             // Compute stride information for each direction;
