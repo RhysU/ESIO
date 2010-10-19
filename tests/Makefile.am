@@ -10,7 +10,7 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
-EXTRA_DIST      = layout_template.c plane_template.c
+EXTRA_DIST      = layout_template.c plane_template.c line_template.c
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -34,6 +34,34 @@ TESTS          += basic
 check_PROGRAMS += basic
 basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
+
+###########################################################################
+## LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE ##
+###########################################################################
+
+## Line double precision tests in C
+TESTS               += line_double.sh    # NB Wrapper script
+EXTRA_DIST          += line_double.sh    # NB Wrapper script
+check_PROGRAMS      += line_double
+line_double_SOURCES  = line_double.c
+line_double_LDADD    = ../esio/libesio.la
+line_double.o: line_double.c line_template.c
+
+## Line single precision tests in C
+TESTS               += line_float.sh          # NB Wrapper script
+EXTRA_DIST          += line_float.sh          # NB Wrapper script
+check_PROGRAMS      += line_float
+line_float_SOURCES   = line_float.c
+line_float_LDADD     = ../esio/libesio.la
+line_float.o: line_float.c line_template.c
+
+## Line integer tests in C
+TESTS             += line_int.sh          # NB Wrapper script
+EXTRA_DIST        += line_int.sh          # NB Wrapper script
+check_PROGRAMS    += line_int
+line_int_SOURCES   = line_int.c
+line_int_LDADD     = ../esio/libesio.la
+line_int.o: line_int.c line_template.c
 
 #############################################################################
 ## PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE ##

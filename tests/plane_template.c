@@ -67,7 +67,7 @@ static const fctcl_init_t my_cl_options[] = {
         "--distribute",
         "-d",
         FCTCL_STORE_VALUE,
-        "Choose which direction (one of c, b, or a) is distributed"
+        "Choose which direction (b or a) is distributed"
     },
     {
         "--partitioned-size",
