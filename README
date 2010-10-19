@@ -1,10 +1,10 @@
-                        esio Build Procedure
+                        ESIO Build Procedure
                     =============================
 
 0. Introduction
 ---------------
 
-This document describes how to build esio from source code on
+This document describes how to build ESIO from source code on
 Unix-like systems.
 
 
@@ -14,8 +14,8 @@ Unix-like systems.
 The code depends upon the following libraries:
 
     1) A working MPI stack present in your path
-    2) The Groovy Toolkit (GRVY)
-    3) HDF5
+    2) HDF5 built with MPI parallel capabilities
+    3) (OPTIONAL) GRVY, The Groovy Toolkit
 
 
 2. Configuration
@@ -32,10 +32,10 @@ provide more parameters.  Run `./configure --help' for details.
 3. Compilation
 --------------
 
-To compile esio after it has been configured, simply type 'make'.
+To compile ESIO after it has been configured, simply type 'make'.
 
 After the compilation one or more ready-to-use executables should reside
-in the apps directory.  The library is built within the esio directory.
+in the apps directory.  The library is built within the ESIO directory.
 Related documentation will be built in the doc
 subdirectory.
 
@@ -43,10 +43,12 @@ subdirectory.
 4. Testing
 --------------
 
-Unit tests can be compiled and run using 'make check'.
+Unit tests can be compiled and run using 'make check'.  Note that many
+unit test are parallel in nature and depend on the availability of
+'mpiexec'.
 
 
 5. API documentation
 --------------
 
-API documentation can be produced in docs by running 'make doxygen-doc'.
+API documentation can be produced in docs by running 'make docs'.
