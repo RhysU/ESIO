@@ -618,7 +618,8 @@ int esio_field_write_internal(esio_state s,
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
 
-    // Provide stride defaults whenever the user supplied zero strides
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
     if (astride == 0) astride = 1;
     if (bstride == 0) bstride = astride * alocal;
     if (cstride == 0) cstride = bstride * blocal;
@@ -739,7 +740,8 @@ int esio_field_read_internal(esio_state s,
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
 
-    // Provide stride defaults whenever the user supplied zero strides
+    // Provide contiguous defaults whenever the user supplied zero strides.
+    // Strides are given in units of type_id; hence astride = 1 is contiguous.
     if (astride == 0) astride = 1;
     if (bstride == 0) bstride = astride * alocal;
     if (cstride == 0) cstride = bstride * blocal;
@@ -842,11 +844,30 @@ int esio_vfield_ ## OP ## _ ## TYPE(                                      \
         int ncomponents)                                                  \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
+                                                                          \
+    /* Input strides are in units of sizeof(TYPE). HDF5 requires slab */  \
+    /* selection using sizeof(array_type_id) and cannot use "partial" */  \
+    /* offsets in this selection process.  Check strides conform.     */  \
+    if (cstride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("cstride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
+    if (bstride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("bstride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
+    if (astride % ncomponents) {                                          \
+        H5Tclose(array_type_id);                                          \
+        ESIO_ERROR("astride must be an integer multiple of ncomponents",  \
+                   ESIO_EINVAL);                                          \
+    }                                                                     \
     const int retval = esio_field_ ## OP ## _internal(                    \
             s, name, field,                                               \
-            cglobal, cstart, clocal, cstride,                             \
-            bglobal, bstart, blocal, bstride,                             \
-            aglobal, astart, alocal, astride,                             \
+            cglobal, cstart, clocal, (cstride / ncomponents),             \
+            bglobal, bstart, blocal, (bstride / ncomponents),             \
+            aglobal, astart, alocal, (astride / ncomponents),             \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \

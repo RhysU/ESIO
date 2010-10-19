@@ -275,10 +275,11 @@ FCT_BGN()
         {
             TEST_REAL *field;
 
-            // Compute stride information for each direction
-            const int astride  = 1 + auxstride_a;
-            const int bstride  = alocal * astride + auxstride_b;
-            const int cstride  = blocal * bstride + auxstride_c;
+            // Compute stride information for each direction;
+            // strides expressed in sizeof(TEST_REAL) which happens to be 1.
+            const int astride  = 1                + auxstride_a * 1;
+            const int bstride  = alocal * astride + auxstride_b * 1;
+            const int cstride  = blocal * bstride + auxstride_c * 1;
             const size_t nelem = clocal * cstride;
 
             // Allocate storage for local portion of global field
@@ -411,10 +412,11 @@ FCT_BGN()
         {
             TEST_REAL *vfield;
 
-            // Compute stride information for each direction
-            const int astride  = ncomponents + auxstride_a;
-            const int bstride  = alocal * astride + auxstride_b;
-            const int cstride  = blocal * bstride + auxstride_c;
+            // Compute stride information for each direction;
+            // strides expressed in sizeof(TEST_REAL).
+            const int astride  = ncomponents      + auxstride_a * ncomponents;
+            const int bstride  = alocal * astride + auxstride_b * ncomponents;
+            const int cstride  = blocal * bstride + auxstride_c * ncomponents;
             const size_t nelem = clocal * cstride;
 
             // Allocate storage for local portion of global vfield
