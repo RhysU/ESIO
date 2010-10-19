@@ -192,6 +192,7 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
     return err;
 }
 
+static
 int esio_hdf5metadata_read(hid_t loc_id,
                            const char *name,
                            const int rank,
