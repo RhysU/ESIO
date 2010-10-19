@@ -28,6 +28,11 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
+// Designed to be #included from layout.c
+#if !defined(METHODNAME) || !defined(OPFUNC) || !defined(QUALIFIER)
+#error "One or METHODNAME, OPFUN, or QUALIFIER not defined"
+#endif
+
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,
                  int cglobal, int cstart, int clocal, int cstride,
                  int bglobal, int bstart, int blocal, int bstride,
