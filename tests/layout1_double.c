@@ -28,12 +28,9 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define TEST_REAL              double
-#define TEST_ESIO_FIELD_WRITE  esio_field_write_double
-#define TEST_ESIO_FIELD_READ   esio_field_read_double
-#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_double
-#define TEST_ESIO_VFIELD_READ  esio_vfield_read_double
-#define TEST_H5T               H5T_NATIVE_DOUBLE
-#define LAYOUT_TAG             (1)
+#define REAL              double
+#define REAL_H5T          H5T_NATIVE_DOUBLE
+#define AFFIX(name)       name ## _double
+#define LAYOUT_TAG        (1)
 
 #include "layout_template.c"

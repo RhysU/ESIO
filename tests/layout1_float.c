@@ -28,12 +28,9 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define TEST_REAL              float
-#define TEST_ESIO_FIELD_WRITE  esio_field_write_float
-#define TEST_ESIO_FIELD_READ   esio_field_read_float
-#define TEST_ESIO_VFIELD_WRITE esio_vfield_write_float
-#define TEST_ESIO_VFIELD_READ  esio_vfield_read_float
-#define TEST_H5T               H5T_NATIVE_FLOAT
-#define LAYOUT_TAG             (1)
+#define REAL              float
+#define REAL_H5T          H5T_NATIVE_FLOAT
+#define AFFIX(name)       name ## _float
+#define LAYOUT_TAG        (1)
 
 #include "layout_template.c"

@@ -926,8 +926,8 @@ GEN_FIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 
-#define GEN_VFIELD_OP(OP,QUAL,TYPE,H5TYPE)                                \
-int esio_vfield_ ## OP ## _ ## TYPE(                                      \
+#define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE)                                \
+int esio_field_ ## OP ## v_ ## TYPE(                                      \
         const esio_state s,                                               \
         const char* name,                                                 \
         QUAL TYPE *field,                                                 \
@@ -966,11 +966,11 @@ int esio_vfield_ ## OP ## _ ## TYPE(                                      \
     return retval;                                                        \
 }
 
-GEN_VFIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_VFIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_FIELD_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_FIELD_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
-GEN_VFIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_VFIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_FIELD_OPV(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_FIELD_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 // *******************************************************************
 // PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE
@@ -1180,8 +1180,8 @@ GEN_PLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_PLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 
-#define GEN_VPLANE_OP(OP,QUAL,TYPE,H5TYPE)                                \
-int esio_vplane_ ## OP ## _ ## TYPE(                                      \
+#define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE)                                \
+int esio_plane_ ## OP ## v_ ## TYPE(                                      \
         const esio_state s,                                               \
         const char* name,                                                 \
         QUAL TYPE *plane,                                                 \
@@ -1213,11 +1213,11 @@ int esio_vplane_ ## OP ## _ ## TYPE(                                      \
     return retval;                                                        \
 }
 
-GEN_VPLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_VPLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_PLANE_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_PLANE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
-GEN_VPLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_VPLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_PLANE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_PLANE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 // *******************************************************************
 // LINE READ WRITE LINE READ WRITE LINE READ WRITE LINE READ WRITE
@@ -1400,8 +1400,8 @@ GEN_LINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
 GEN_LINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 
-#define GEN_VLINE_OP(OP,QUAL,TYPE,H5TYPE)                                 \
-int esio_vline_ ## OP ## _ ## TYPE(                                       \
+#define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE)                                 \
+int esio_line_ ## OP ## v_ ## TYPE(                                       \
         const esio_state s,                                               \
         const char* name,                                                 \
         QUAL TYPE *line,                                                  \
@@ -1426,8 +1426,8 @@ int esio_vline_ ## OP ## _ ## TYPE(                                       \
     return retval;                                                        \
 }
 
-GEN_VLINE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_VLINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_LINE_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
+GEN_LINE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
 
-GEN_VLINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_VLINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_LINE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
+GEN_LINE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)

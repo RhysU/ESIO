@@ -28,9 +28,11 @@
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#ifndef TEST_REAL
-// You probably wanted to compile field_double.c or field_float.c
-#error Need to #define TEST_REAL prior to compiling field_realvalued.c
+#if    !defined(REAL) \
+    || !defined(REAL_H5T) \
+    || !defined(LAYOUT_TAG) \
+    || !defined(AFFIX)
+#error "layout_template.c should be #included after appropriate #defines"
 #endif
 
 // See 'feature_test_macros(7) for details'
@@ -278,24 +280,24 @@ FCT_BGN()
             fct_req(LAYOUT_TAG < esio_layout_count());
             fct_req(LAYOUT_TAG == esio_layout_get(state));
 
-            TEST_REAL *field;
+            REAL *field;
 
             // Compute stride information for each direction;
-            // strides expressed in sizeof(TEST_REAL) which happens to be 1.
+            // strides expressed in sizeof(REAL) which happens to be 1.
             const int astride  = 1                + auxstride_a * 1;
             const int bstride  = alocal * astride + auxstride_b * 1;
             const int cstride  = blocal * bstride + auxstride_c * 1;
             const size_t nelem = clocal * cstride;
 
             // Allocate storage for local portion of global field
-            field = calloc(nelem, sizeof(TEST_REAL));
+            field = calloc(nelem, sizeof(REAL));
             fct_req(field);
 
             // Open file
             fct_req(0 == esio_file_create(state, filename, 1));
 
             // Write all zeros to disk
-            fct_req(0 == TEST_ESIO_FIELD_WRITE(
+            fct_req(0 == AFFIX(esio_field_write)(
                                 state, "field", field,
                                 cglobal, cstart, clocal, cstride,
                                 bglobal, bstart, blocal, bstride,
@@ -305,9 +307,9 @@ FCT_BGN()
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
-                        const TEST_REAL value = 11*((k + cstart) + 13)
-                                              +  5*((j + bstart) +  7)
-                                              +  2*((i + astart) +  3);
+                        const REAL value = 11*((k + cstart) + 13)
+                                         +  5*((j + bstart) +  7)
+                                         +  2*((i + astart) +  3);
                         field[k*cstride + j*bstride + i*astride] = value;
                     }
                 }
@@ -316,14 +318,14 @@ FCT_BGN()
             // Overwrite zeros on disk with test data
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
-                fct_req(0 == TEST_ESIO_FIELD_WRITE(
+                fct_req(0 == AFFIX(esio_field_write)(
                                     state, "field", field,
                                     cglobal, cstart, clocal, cstride,
                                     bglobal, bstart, blocal, bstride,
                                     aglobal, astart, alocal, astride));
             } else {
                 // Contiguous; exercise default stride arguments
-                fct_req(0 == TEST_ESIO_FIELD_WRITE(
+                fct_req(0 == AFFIX(esio_field_write)(
                                     state, "field", field,
                                     cglobal, cstart, clocal, 0,
                                     bglobal, bstart, blocal, 0,
@@ -351,21 +353,19 @@ FCT_BGN()
             // Examine the contents (contiguously) to ensure it matches
             if (world_rank == 0) {
                 field = calloc(cglobal * bglobal * aglobal,
-                               sizeof(TEST_REAL));
+                               sizeof(REAL));
                 fct_req(field);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
                 fct_req(0 <= H5LTread_dataset(file_id, "field",
-                                              TEST_H5T, field));
+                                              REAL_H5T, field));
 
-                TEST_REAL *p_field = field;
+                REAL *p_field = field;
                 for (int k = 0; k < cglobal; ++k) {
                     for (int j = 0; j < bglobal; ++j) {
                         for (int i = 0; i < aglobal; ++i) {
-                            const TEST_REAL expected
-                                    = 2*(i+3)+5*(j+7)+11*(k+13);
-                            const TEST_REAL value
-                                    = *p_field++;
+                            const REAL expected = 2*(i+3)+5*(j+7)+11*(k+13);
+                            const REAL value    = *p_field++;
                             fct_chk_eq_dbl(value, expected);
                         }
                     }
@@ -377,19 +377,19 @@ FCT_BGN()
 
             // Re-read the file in a distributed manner and verify contents
             // TODO Ensure non-referenced memory locations remain unmodified
-            field = calloc(nelem, sizeof(TEST_REAL));
+            field = calloc(nelem, sizeof(REAL));
             fct_req(field);
             fct_req(0 == esio_file_open(state, filename, 0));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
-                fct_req(0 == TEST_ESIO_FIELD_READ(
+                fct_req(0 == AFFIX(esio_field_read)(
                                     state, "field", field,
                                     cglobal, cstart, clocal, cstride,
                                     bglobal, bstart, blocal, bstride,
                                     aglobal, astart, alocal, astride));
             } else {
                 // Contiguous; exercise default stride arguments
-                fct_req(0 == TEST_ESIO_FIELD_READ(
+                fct_req(0 == AFFIX(esio_field_read)(
                                     state, "field", field,
                                     cglobal, cstart, clocal, 0,
                                     bglobal, bstart, blocal, 0,
@@ -398,10 +398,10 @@ FCT_BGN()
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
-                        const TEST_REAL expected = 11*((k + cstart) + 13)
-                                                 +  5*((j + bstart) +  7)
-                                                 +  2*((i + astart) +  3);
-                        const TEST_REAL value
+                        const REAL expected = 11*((k + cstart) + 13)
+                                            +  5*((j + bstart) +  7)
+                                            +  2*((i + astart) +  3);
+                        const REAL value
                                 = field[k*cstride + j*bstride + i*astride];
                         fct_chk_eq_dbl(value, expected);
                     }
@@ -418,17 +418,17 @@ FCT_BGN()
             fct_req(LAYOUT_TAG < esio_layout_count());
             fct_req(LAYOUT_TAG == esio_layout_get(state));
 
-            TEST_REAL *vfield;
+            REAL *vfield;
 
             // Compute stride information for each direction;
-            // strides expressed in sizeof(TEST_REAL).
+            // strides expressed in sizeof(REAL).
             const int astride  = ncomponents      + auxstride_a * ncomponents;
             const int bstride  = alocal * astride + auxstride_b * ncomponents;
             const int cstride  = blocal * bstride + auxstride_c * ncomponents;
             const size_t nelem = clocal * cstride;
 
             // Allocate storage for local portion of global vfield
-            vfield = calloc(nelem, sizeof(TEST_REAL));
+            vfield = calloc(nelem, sizeof(REAL));
             fct_req(vfield);
 
             // Open file
@@ -452,7 +452,7 @@ FCT_BGN()
             // Write vfield to file
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
-                fct_req(0 == TEST_ESIO_VFIELD_WRITE(
+                fct_req(0 == AFFIX(esio_field_writev)(
                                     state, "vfield", vfield,
                                     cglobal, cstart, clocal, cstride,
                                     bglobal, bstart, blocal, bstride,
@@ -460,7 +460,7 @@ FCT_BGN()
                                     ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
-                fct_req(0 == TEST_ESIO_VFIELD_WRITE(
+                fct_req(0 == AFFIX(esio_field_writev)(
                                     state, "vfield", vfield,
                                     cglobal, cstart, clocal, 0,
                                     bglobal, bstart, blocal, 0,
@@ -492,29 +492,29 @@ FCT_BGN()
             // Examine the contents to ensure it matches
             if (world_rank == 0) {
                 vfield = calloc(cglobal * bglobal * aglobal * ncomponents,
-                                sizeof(TEST_REAL));
+                                sizeof(REAL));
                 fct_req(vfield);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                hid_t type_id = TEST_H5T;
+                hid_t type_id = REAL_H5T;
                 if (ncomponents > 1) {
                     const hsize_t dims[1] = { ncomponents };
-                    type_id = H5Tarray_create2(TEST_H5T, 1, dims);
+                    type_id = H5Tarray_create2(REAL_H5T, 1, dims);
                     fct_req(type_id >= 0);
                 }
                 fct_req(0 <= H5LTread_dataset(file_id, "vfield",
                                               type_id, vfield));
                 if (ncomponents > 1) H5Tclose(type_id);
 
-                TEST_REAL *p_field = vfield;
+                REAL *p_field = vfield;
                 for (int k = 0; k < cglobal; ++k) {
                     for (int j = 0; j < bglobal; ++j) {
                         for (int i = 0; i < aglobal; ++i) {
                             for (int h = 0; h < ncomponents; ++h) {
-                                const TEST_REAL value = *p_field++;
+                                const REAL value = *p_field++;
                                 fct_chk_eq_dbl(
                                     value,
-                                    (TEST_REAL) 2*(i+3)+5*(j+7)+11*(k+13)-h);
+                                    (REAL) 2*(i+3)+5*(j+7)+11*(k+13)-h);
                             }
                         }
                     }
@@ -526,12 +526,12 @@ FCT_BGN()
 
             // Re-read the file in a distributed manner and verify contents
             // TODO Ensure non-referenced memory locations remain unmodified
-            vfield = calloc(nelem, sizeof(TEST_REAL));
+            vfield = calloc(nelem, sizeof(REAL));
             fct_req(vfield);
             fct_req(0 == esio_file_open(state, filename, 0));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
-                fct_req(0 == TEST_ESIO_VFIELD_READ(
+                fct_req(0 == AFFIX(esio_field_readv)(
                                     state, "vfield", vfield,
                                     cglobal, cstart, clocal, cstride,
                                     bglobal, bstart, blocal, bstride,
@@ -539,7 +539,7 @@ FCT_BGN()
                                     ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
-                fct_req(0 == TEST_ESIO_VFIELD_READ(
+                fct_req(0 == AFFIX(esio_field_readv)(
                                     state, "vfield", vfield,
                                     cglobal, cstart, clocal, 0,
                                     bglobal, bstart, blocal, 0,
@@ -550,11 +550,11 @@ FCT_BGN()
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
                         for (int h = 0; h < ncomponents; ++h) {
-                            const TEST_REAL expected = 11*((k + cstart) + 13)
-                                                     +  5*((j + bstart) +  7)
-                                                     +  2*((i + astart) +  3)
-                                                     - h;
-                            const TEST_REAL value = vfield[
+                            const REAL expected = 11*((k + cstart) + 13)
+                                                +  5*((j + bstart) +  7)
+                                                +  2*((i + astart) +  3)
+                                                - h;
+                            const REAL value = vfield[
                                     k*cstride + j*bstride + i*astride + h];
                             fct_chk_eq_dbl(value, expected);
                         }
