@@ -22,15 +22,14 @@
  *
  *--------------------------------------------------------------------------
  *
- * layout0_float.c: single precision field unit tests for ESIO
+ * plane_int.c: integer plane unit tests for ESIO
  *
  * $Id$
  *--------------------------------------------------------------------------
  *-------------------------------------------------------------------------- */
 
-#define REAL              float
-#define REAL_H5T          H5T_NATIVE_FLOAT
-#define AFFIX(name)       name ## _float
-#define LAYOUT_TAG        (0)
+#define REAL              int
+#define REAL_H5T          H5T_NATIVE_INT
+#define AFFIX(name)       name ## _int
 
-#include "layout_template.c"
+#include "plane_template.c"

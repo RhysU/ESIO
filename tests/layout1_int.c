@@ -22,7 +22,7 @@
  *
  *--------------------------------------------------------------------------
  *
- * layout1_int.c: single precision unit tests for ESIO
+ * layout1_int.c: integer field unit tests for ESIO
  *
  * $Id$
  *--------------------------------------------------------------------------

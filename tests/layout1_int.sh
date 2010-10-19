@@ -15,7 +15,7 @@ if ! which mpiexec > /dev/null ; then
 fi
 
 set -e # Fail on first error
-for auxstride in "auxstride-c=7 --auxstride-b=5 --auxstride-a=3"
+for auxstride in "--auxstride-c=7 --auxstride-b=5 --auxstride-a=3"
 do
     for cmd in "mpiexec -np 3 ./layout1_int -p  11 -u  13"
     do

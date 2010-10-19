@@ -10,7 +10,7 @@ bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
-EXTRA_DIST      = layout_template.c
+EXTRA_DIST      = layout_template.c plane_template.c
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -35,6 +35,38 @@ check_PROGRAMS += basic
 basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
 
+#############################################################################
+## PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE ##
+#############################################################################
+
+## Plane double precision tests in C
+TESTS                += plane_double.sh    # NB Wrapper script
+EXTRA_DIST           += plane_double.sh    # NB Wrapper script
+check_PROGRAMS       += plane_double
+plane_double_SOURCES  = plane_double.c
+plane_double_LDADD    = ../esio/libesio.la
+plane_double.o: plane_double.c plane_template.c
+
+## Plane single precision tests in C
+TESTS                += plane_float.sh          # NB Wrapper script
+EXTRA_DIST           += plane_float.sh          # NB Wrapper script
+check_PROGRAMS       += plane_float
+plane_float_SOURCES   = plane_float.c
+plane_float_LDADD     = ../esio/libesio.la
+plane_float.o: plane_float.c plane_template.c
+
+## Plane integer tests in C
+TESTS              += plane_int.sh          # NB Wrapper script
+EXTRA_DIST         += plane_int.sh          # NB Wrapper script
+check_PROGRAMS     += plane_int
+plane_int_SOURCES   = plane_int.c
+plane_int_LDADD     = ../esio/libesio.la
+plane_int.o: plane_int.c plane_template.c
+
+#############################################################################
+## LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 ##
+#############################################################################
+
 ## Layout 0 double precision tests in C
 TESTS                  += layout0_double.sh    # NB Wrapper script
 EXTRA_DIST             += layout0_double.sh    # NB Wrapper script
@@ -58,6 +90,10 @@ check_PROGRAMS       += layout0_int
 layout0_int_SOURCES   = layout0_int.c
 layout0_int_LDADD     = ../esio/libesio.la
 layout0_int.o: layout0_int.c layout_template.c
+
+#############################################################################
+## LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 ##
+#############################################################################
 
 ## Layout 1 double precision tests in C
 TESTS                  += layout1_double.sh    # NB Wrapper script

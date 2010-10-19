@@ -4,22 +4,22 @@
 # always use mpiexec on some login nodes.  Better to warn the user that a test
 # was skipped then worry them when make check fails as a result.
 
-if ! [ -x layout0_int ]; then
-    echo "layout0_int binary not found or not executable"
+if ! [ -x plane_int ]; then
+    echo "plane_int binary not found or not executable"
     exit 1
 fi
 
 if ! which mpiexec > /dev/null ; then
-    echo "WARNING: Unable to find mpiexec; skipping layout0_int"
+    echo "WARNING: Unable to find mpiexec; skipping plane_int"
     exit 0
 fi
 
 set -e # Fail on first error
-for auxstride in "--auxstride-c=7 --auxstride-b=5 --auxstride-a=3"
+for auxstride in "--auxstride-b=5 --auxstride-a=3"
 do
-    for cmd in "mpiexec -np 3 ./layout0_int -p  11 -u  13"
+    for cmd in "mpiexec -np 3 ./plane_int -p  11 -u  13"
     do
-        for dir in "C" "B" "A"
+        for dir in "B" "A"
         do
                 echo -n "Distribute $dir:"
                 echo $cmd -d $dir $auxstride

@@ -22,7 +22,7 @@
  *
  *--------------------------------------------------------------------------
  *
- * layout1_double.c: double precision unit tests for ESIO
+ * layout1_double.c: double precision field unit tests for ESIO
  *
  * $Id$
  *--------------------------------------------------------------------------
