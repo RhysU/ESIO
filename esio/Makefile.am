@@ -35,8 +35,8 @@ libesio_la_LIBADD    = libesio_c.la libesio_f.la
 noinst_LTLIBRARIES   += libesio_c.la
 libesio_c_la_SOURCES  = error.c
 libesio_c_la_SOURCES += esio.c
-libesio_c_la_SOURCES += layout0.c
-libesio_c_la_SOURCES += layout1.c
+libesio_c_la_SOURCES += layout.c
+layout.o: layout.c layout0.c layout1.c
 
 # Fortran sources to place into the public library
 noinst_LTLIBRARIES        += libesio_f.la
