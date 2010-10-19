@@ -486,7 +486,7 @@ herr_t esio_field_metadata_write(hid_t loc_id, const char *name,
         aglobal,
         ncomponents
     };
-    return H5LTset_attribute_int(loc_id, name, "esio_metadata",
+    return H5LTset_attribute_int(loc_id, name, "esio_field_metadata",
                                  metadata, ESIO_FIELD_METADATA_SIZE);
 }
 
@@ -515,7 +515,7 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
 
     // Read the metadata into the buffer
     const herr_t err = H5LTget_attribute_int(
-            loc_id, name, "esio_metadata", metadata);
+            loc_id, name, "esio_field_metadata", metadata);
 
     // Re-enable the HDF5 error handler
     H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);

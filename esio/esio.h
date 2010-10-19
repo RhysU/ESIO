@@ -68,6 +68,25 @@ int esio_file_close(esio_state s);
  * \defgroup Size Querying data extents
  */
 /*\@{*/
+int esio_point_size(const esio_state s,
+                    const char* name);
+int esio_vpoint_size(const esio_state s,
+                     const char* name,
+                     int *ncomponents);
+int esio_line_size(const esio_state s,
+                   const char* name,
+                   int *aglobal);
+int esio_vline_size(const esio_state s,
+                    const char* name,
+                    int *aglobal,
+                    int *ncomponents);
+int esio_plane_size(const esio_state s,
+                    const char* name,
+                    int *bglobal, int *aglobal);
+int esio_vplane_size(const esio_state s,
+                     const char* name,
+                     int *bglobal, int *aglobal,
+                     int *ncomponents);
 int esio_field_size(const esio_state s,
                     const char* name,
                     int *cglobal, int *bglobal, int *aglobal);
@@ -75,6 +94,150 @@ int esio_vfield_size(const esio_state s,
                      const char* name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);
+/*\@}*/
+
+/**
+ * \defgroup Point Manipulating real-valued points 
+ */
+/*\@{*/
+int esio_point_write_double(const esio_state s,
+                            const char* name,
+                            const double *point);
+int esio_point_write_float(const esio_state s,
+                           const char* name,
+                           const float *point);
+int esio_point_read_double(const esio_state s,
+                           const char* name,
+                           double *point);
+int esio_point_read_float(const esio_state s,
+                          const char* name,
+                          float *point);
+/*\@}*/
+
+/**
+ * \defgroup VPoint Manipulating real-valued vector points 
+ */
+/*\@{*/
+int esio_vpoint_write_double(const esio_state s,
+                             const char* name,
+                             const double *point,
+                             int ncomponents);
+int esio_vpoint_write_float(const esio_state s,
+                            const char* name,
+                            const float *point,
+                            int ncomponents);
+int esio_vpoint_read_double(const esio_state s,
+                            const char* name,
+                            double *point,
+                            int ncomponents);
+int esio_vpoint_read_float(const esio_state s,
+                           const char* name,
+                           float *point,
+                           int ncomponents);
+/*\@}*/
+
+/**
+ * \defgroup Line Manipulating real-valued lines 
+ */
+/*\@{*/
+int esio_line_write_double(const esio_state s,
+                           const char* name,
+                           const double *line,
+                           int aglobal, int astart, int alocal, int astride);
+int esio_line_write_float(const esio_state s,
+                          const char* name,
+                          const float *line,
+                          int aglobal, int astart, int alocal, int astride);
+int esio_line_read_double(const esio_state s,
+                          const char* name,
+                          double *line,
+                          int aglobal, int astart, int alocal, int astride);
+int esio_line_read_float(const esio_state s,
+                         const char* name,
+                         float *line,
+                         int aglobal, int astart, int alocal, int astride);
+/*\@}*/
+
+/**
+ * \defgroup VLine Manipulating real-valued vector lines 
+ */
+/*\@{*/
+int esio_vline_write_double(const esio_state s,
+                            const char* name,
+                            const double *line,
+                            int aglobal, int astart, int alocal, int astride,
+                            int ncomponents);
+int esio_vline_write_float(const esio_state s,
+                           const char* name,
+                           const float *line,
+                           int aglobal, int astart, int alocal, int astride,
+                           int ncomponents);
+int esio_vline_read_double(const esio_state s,
+                           const char* name,
+                           double *line,
+                           int aglobal, int astart, int alocal, int astride,
+                           int ncomponents);
+int esio_vline_read_float(const esio_state s,
+                          const char* name,
+                          float *line,
+                          int aglobal, int astart, int alocal, int astride,
+                          int ncomponents);
+/*\@}*/
+
+/**
+ * \defgroup Plane Manipulating real-valued planes 
+ */
+/*\@{*/
+int esio_plane_write_double(const esio_state s,
+                            const char* name,
+                            const double *plane,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride);
+int esio_plane_write_float(const esio_state s,
+                           const char* name,
+                           const float *plane,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride);
+int esio_plane_read_double(const esio_state s,
+                           const char* name,
+                           double *plane,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride);
+int esio_plane_read_float(const esio_state s,
+                          const char* name,
+                          float *plane,
+                          int bglobal, int bstart, int blocal, int bstride,
+                          int aglobal, int astart, int alocal, int astride);
+/*\@}*/
+
+/**
+ * \defgroup VPlane Manipulating real-valued vector planes 
+ */
+/*\@{*/
+int esio_vplane_write_double(const esio_state s,
+                             const char* name,
+                             const double *plane,
+                             int bglobal, int bstart, int blocal, int bstride,
+                             int aglobal, int astart, int alocal, int astride,
+                             int ncomponents);
+int esio_vplane_write_float(const esio_state s,
+                            const char* name,
+                            const float *plane,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride,
+                            int ncomponents);
+int esio_vplane_read_double(const esio_state s,
+                            const char* name,
+                            double *plane,
+                            int bglobal, int bstart, int blocal, int bstride,
+                            int aglobal, int astart, int alocal, int astride,
+                            int ncomponents);
+int esio_vplane_read_float(const esio_state s,
+                           const char* name,
+                           float *plane,
+                           int bglobal, int bstart, int blocal, int bstride,
+                           int aglobal, int astart, int alocal, int astride,
+                           int ncomponents);
 /*\@}*/
 
 /**
