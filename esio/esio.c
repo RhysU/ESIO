@@ -794,7 +794,7 @@ int esio_field_write_internal(const esio_state s,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
-            ESIO_ERROR_VAL("Error writing overwriting field", ESIO_EFAILED, wstat);
+            ESIO_ERROR_VAL("Error overwriting field", ESIO_EFAILED, wstat);
         }
         esio_field_close(dset_id);
 
