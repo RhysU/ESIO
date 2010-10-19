@@ -129,7 +129,13 @@ static const struct {
         &esio_layout0_filespace_creator,
         &esio_layout0_field_writer,
         &esio_layout0_field_reader
-    }
+    },
+    {
+        1,
+        &esio_layout1_filespace_creator,
+        &esio_layout1_field_writer,
+        &esio_layout1_field_reader
+    },
 };
 static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
 

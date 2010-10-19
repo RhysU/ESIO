@@ -22,7 +22,7 @@
  *
  *--------------------------------------------------------------------------
  *
- * layout.c: Implementations of various field layout options
+ * layout1.c: Implementations of field/vfield layout 1
  *
  * $Id$
  *--------------------------------------------------------------------------
@@ -38,11 +38,7 @@
 #include "error.h"
 #include "layout.h"
 
-// **************************************************************
-// LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
-// **************************************************************
-
-hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
+hid_t esio_layout1_filespace_creator(int cglobal, int bglobal, int aglobal)
 {
     const hsize_t dims[2] = { cglobal * bglobal, aglobal };
     return H5Screate_simple(2, dims, NULL);
@@ -50,7 +46,7 @@ hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
 
 // Reading and writing differ only by an HDF5 operation name and a const
 // qualifier.  Define a macro that we'll use to implement both operations.
-#define GEN_LAYOUT0_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)                  \
+#define GEN_LAYOUT1_TRANSFER(METHODNAME, OPFUNC, QUALIFIER)                  \
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
                  int cglobal, int cstart, int clocal, int cstride,           \
                  int bglobal, int bstart, int blocal, int bstride,           \
@@ -144,10 +140,10 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,                       \
 #endif
 
 // Routine to transfer data from const buffer to storage
-GEN_LAYOUT0_TRANSFER(esio_layout0_field_writer, H5Dwrite, const)
+GEN_LAYOUT1_TRANSFER(esio_layout1_field_writer, H5Dwrite, const)
 
 // Routine to transfer data from storage to mutable buffer
-GEN_LAYOUT0_TRANSFER(esio_layout0_field_reader, H5Dread, /* mutable */)
+GEN_LAYOUT1_TRANSFER(esio_layout1_field_reader, H5Dread, /* mutable */)
 
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)

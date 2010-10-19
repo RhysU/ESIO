@@ -35,7 +35,7 @@ check_PROGRAMS += basic
 basic_SOURCES   = basic.c
 basic_LDADD     = ../esio/libesio.la
 
-## Double precision fields from C
+## Layout 0 double precision tests in C
 TESTS                  += layout0_double.sh    # NB Wrapper script
 EXTRA_DIST             += layout0_double.sh    # NB Wrapper script
 check_PROGRAMS         += layout0_double
@@ -43,13 +43,29 @@ layout0_double_SOURCES  = layout0_double.c
 layout0_double_LDADD    = ../esio/libesio.la
 layout0_double.o: layout0_double.c layout_template.c
 
-## Single precision fields from C
+## Layout 0 single precision tests in C
 TESTS                  += layout0_float.sh          # NB Wrapper script
 EXTRA_DIST             += layout0_float.sh          # NB Wrapper script
 check_PROGRAMS         += layout0_float
 layout0_float_SOURCES   = layout0_float.c
 layout0_float_LDADD     = ../esio/libesio.la
 layout0_float.o: layout0_float.c layout_template.c
+
+## Layout 1 double precision tests in C
+TESTS                  += layout1_double.sh    # NB Wrapper script
+EXTRA_DIST             += layout1_double.sh    # NB Wrapper script
+check_PROGRAMS         += layout1_double
+layout1_double_SOURCES  = layout1_double.c
+layout1_double_LDADD    = ../esio/libesio.la
+layout1_double.o: layout1_double.c layout_template.c
+
+## Layout 1 single precision tests in C
+TESTS                  += layout1_float.sh          # NB Wrapper script
+EXTRA_DIST             += layout1_float.sh          # NB Wrapper script
+check_PROGRAMS         += layout1_float
+layout1_float_SOURCES   = layout1_float.c
+layout1_float_LDADD     = ../esio/libesio.la
+layout1_float.o: layout1_float.c layout_template.c
 
 # FIXME Disabled Fortran test
 ## Fortran test program to read/write a field

@@ -74,5 +74,6 @@ int esio_layout ## NUM ##_field_reader(                    \
         hid_t type_id);
 
 ESIO_LAYOUT_DECLARATIONS(0)
+ESIO_LAYOUT_DECLARATIONS(1)
 
 #endif /* __ESIO_LAYOUT_H */
