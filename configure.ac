@@ -23,13 +23,6 @@ AC_SUBST([AX_POINT_VERSION])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
-dnl Look for HDF5 installation and compiler wrappers
-dnl ------------------------------------------------
-AC_LANG([C])
-AX_LIB_HDF5([parallel])
-AC_CACHE_SAVE
-
-dnl ------------------------------------------------
 dnl Manipulate C compiler settings
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
@@ -42,6 +35,13 @@ AX_PATH_GRVY_NEW([0.27],[no])
 AX_CFLAGS_WARN_ALL
 AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 AC_LANG_POP([C])
+AC_CACHE_SAVE
+
+dnl ------------------------------------------------
+dnl Look for HDF5 installation and compiler wrappers
+dnl ------------------------------------------------
+AC_LANG([C])
+AX_LIB_HDF5([parallel])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
