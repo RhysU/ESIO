@@ -13,10 +13,10 @@ mpifc=@MPIFC_LOCATION@
 hdf5_fflags=@HDF5_FFLAGS@
 hdf5_flibs=@HDF5_FLIBS@
 
-Name: @PACKAGE_NAME@
+Name: @PACKAGE_NAME@-hdf5
 Description: @PACKAGE_DESCRIPTION@
 URL: @PACKAGE_URL@
 Requires:
 Version: @VERSION@
-Libs: -L${libdir} -l@PACKAGE_NAME@
-Cflags: -I${includedir}
+Libs: -L${libdir} -l@PACKAGE_NAME@ @HDF5_LDFLAGS@
+Cflags: @HDF5_CFLAGS@ @HDF5_CPPFLAGS@ -I${includedir}

@@ -1,8 +1,10 @@
 dnl ----------------------------------------------------
-dnl Package name and release number
+dnl Package name, release number, and description
 dnl ---------------------------------------------------
 AC_INIT(esio, [0.0.1], [rhys@ices.utexas.edu])
 AC_REVISION([$Id$])
+PACKAGE_DESCRIPTION="ExaScale IO library for turbulence simulation restart files"
+AC_SUBST([PACKAGE_DESCRIPTION])
 
 dnl ------------------------------------------------
 dnl Initialization macros
@@ -35,6 +37,8 @@ AX_PATH_GRVY_NEW([0.27],[no])
 AX_CFLAGS_WARN_ALL
 AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for C, e.g. mpicc.))
+MPICC_LOCATION=$(eval command -v $MPICC)
+AC_SUBST([MPICC_LOCATION])
 AX_MPIP()
 AX_LIB_HDF5([parallel])
 AC_LANG_POP([C])
@@ -51,7 +55,10 @@ fi
 AC_FC_WRAPPERS
 AX_FCFLAGS_WARN_ALL
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpf90.))
+MPIFC_LOCATION=$(eval command -v $MPIFC)
+AC_SUBST([MPIFC_LOCATION])
 if test "x$with_hdf5_fortran" != "xyes"; then
+    dnl TODO Build C-only portions when Fortran not detected
     AC_MSG_WARN([Did not detect HDF5 Fortran support!])
 fi
 AC_LANG_POP([Fortran])
@@ -96,6 +103,7 @@ AC_CONFIG_FILES([
     esio/version.h
     tests/Makefile
     esio.pc
+    esio-hdf5.pc
 ])
 
 AC_OUTPUT()

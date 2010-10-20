@@ -22,7 +22,7 @@ AUX_DIST = build-aux/install-sh        \
 
 # Support for pkgconfig
 pkgconfigdir   = $(libdir)/pkgconfig
-pkgconfig_DATA = esio.pc
+pkgconfig_DATA = esio.pc esio-hdf5.pc
 
 # Files to be deleted by make clean variants
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
