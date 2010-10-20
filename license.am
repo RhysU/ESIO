@@ -5,11 +5,11 @@
 CLEANFILES    += .license.stamp
 BUILT_SOURCES += .license.stamp
 
-.license.stamp: $(top_srcdir)/LICENSE
+.license.stamp: $(top_builddir)/LICENSE
 	rm -f .license.stamp
 	for file in $(srcdir)/*.h $(srcdir)/*.c ; do \
-		$(top_srcdir)/build-aux/update_license.pl $(top_srcdir)/LICENSE $$file | tee -a $@ ;\
+		$(top_srcdir)/build-aux/update_license.pl $(top_builddir)/LICENSE $$file | tee -a $@ ;\
 	done
 	for file in $(srcdir)/*.f90 ; do \
-		$(top_srcdir)/build-aux/update_license.pl --c2f_comment $(top_srcdir)/LICENSE $$file | tee -a $@ ;\
+		$(top_srcdir)/build-aux/update_license.pl --c2f_comment $(top_builddir)/LICENSE $$file | tee -a $@ ;\
 	done

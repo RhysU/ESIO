@@ -96,6 +96,7 @@ dnl ------------------------------------------------
 dnl Generate Makefiles
 dnl ------------------------------------------------
 AC_CONFIG_FILES([
+    LICENSE
     Makefile
     apps/Makefile
     lib/Makefile

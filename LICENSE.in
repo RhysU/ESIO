@@ -1,10 +1,8 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO - ExaScale IO library
-//
-// ESIO is a restart file library for HPC exascale IO geared especially for
-// turbulence applications.
+// @PACKAGE_STRING@: @PACKAGE_DESCRIPTION@
+// @PACKAGE_URL@
 //
 // Copyright (C) 2010 The PECOS Development Team
 //
