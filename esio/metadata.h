@@ -21,6 +21,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
+// $Id$
 
 #ifndef __ESIO_METADATA_H
 #define __ESIO_METADATA_H

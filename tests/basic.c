@@ -21,6 +21,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
+// $Id$
 
 // See 'feature_test_macros(7) for details'
 #define _GNU_SOURCE

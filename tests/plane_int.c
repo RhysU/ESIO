@@ -21,6 +21,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
+// $Id$
 
 #define REAL              int
 #define REAL_H5T          H5T_NATIVE_INT

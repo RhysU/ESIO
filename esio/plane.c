@@ -21,6 +21,7 @@
 // Boston, MA  02110-1301  USA
 //
 //-----------------------------------------------------------------------el-
+// $Id$
 
 // Designed to be #included from layout.c
 #if !defined(METHODNAME) || !defined(OPFUNC) || !defined(QUALIFIER)

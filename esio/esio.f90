@@ -21,6 +21,7 @@
 !! Boston, MA  02110-1301  USA
 !!
 !!-----------------------------------------------------------------------el-
+!! $Id$
 
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid state before other failure
