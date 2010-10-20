@@ -41,25 +41,25 @@ int esio_field_metadata_write(hid_t loc_id, const char *name,
                               int cglobal, int bglobal, int aglobal,
                               int ncomponents);
 
-herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
-                                int *layout_tag,
-                                int *cglobal, int *bglobal, int *aglobal,
-                                int *ncomponents);
+int esio_field_metadata_read(hid_t loc_id, const char *name,
+                             int *layout_tag,
+                             int *cglobal, int *bglobal, int *aglobal,
+                             int *ncomponents);
 
 int esio_plane_metadata_write(hid_t loc_id, const char *name,
                               int bglobal, int aglobal,
                               int ncomponents);
 
-herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
-                                int *bglobal, int *aglobal,
-                                int *ncomponents);
+int esio_plane_metadata_read(hid_t loc_id, const char *name,
+                             int *bglobal, int *aglobal,
+                             int *ncomponents);
 
 int esio_line_metadata_write(hid_t loc_id, const char *name,
                              int aglobal,
                              int ncomponents);
 
-herr_t esio_line_metadata_read(hid_t loc_id, const char *name,
-                               int *aglobal,
-                               int *ncomponents);
+int esio_line_metadata_read(hid_t loc_id, const char *name,
+                            int *aglobal,
+                            int *ncomponents);
 
 #endif /* __ESIO_METADATA_H */

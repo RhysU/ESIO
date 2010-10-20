@@ -2,7 +2,7 @@
 //--------------------------------------------------------------------------
 //
 // esio 0.0.1: ExaScale IO library for turbulence simulation restart files
-// 
+//
 //
 // Copyright (C) 2010 The PECOS Development Team
 //
@@ -462,7 +462,7 @@ hid_t esio_field_create(const esio_state s,
                                                   type_id)) {
         H5Sclose(filespace);
         H5Sclose(dset_id);
-        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
+        ESIO_ERROR_VAL("Unable to save field metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
@@ -497,7 +497,7 @@ hid_t esio_plane_create(const esio_state s,
                                                   type_id)) {
         H5Sclose(filespace);
         H5Dclose(dset_id);
-        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
+        ESIO_ERROR_VAL("Unable to save plane metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
@@ -531,7 +531,7 @@ hid_t esio_line_create(const esio_state s,
                                                  aglobal, type_id)) {
         H5Sclose(filespace);
         H5Dclose(dset_id);
-        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
+        ESIO_ERROR_VAL("Unable to save line metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
@@ -578,7 +578,8 @@ int esio_field_size(const esio_state s,
     const int status
         = esio_field_sizev(s, name, cglobal, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
-        ESIO_ERROR("Named location must be treated as a vfield", ESIO_EINVAL);
+        ESIO_ERROR("Must retrieve location size using esio_field_sizev",
+                   ESIO_EINVAL);
     }
     return status;
 }
@@ -593,10 +594,10 @@ int esio_field_sizev(const esio_state s,
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
 
-    const herr_t status = esio_field_metadata_read(
+    const int status = esio_field_metadata_read(
             s->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to open field's ESIO metadata", ESIO_EFAILED);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read field metadata", status);
     }
 
     return ESIO_SUCCESS;
@@ -610,7 +611,8 @@ int esio_plane_size(const esio_state s,
     const int status
         = esio_plane_sizev(s, name, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
-        ESIO_ERROR("Named location must be treated as a vplane", ESIO_EINVAL);
+        ESIO_ERROR("Must retrieve location size using esio_plane_sizev",
+                   ESIO_EINVAL);
     }
     return status;
 }
@@ -625,23 +627,24 @@ int esio_plane_sizev(const esio_state s,
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
 
-    const herr_t status = esio_plane_metadata_read(
+    const int status = esio_plane_metadata_read(
             s->file_id, name, bglobal, aglobal, ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to open plane's ESIO metadata", ESIO_EFAILED);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read plane metadata", status);
     }
 
     return ESIO_SUCCESS;
 }
 
 int esio_line_size(const esio_state s,
-                    const char* name,
-                    int *aglobal)
+                   const char* name,
+                   int *aglobal)
 {
     int ncomponents;
     const int status = esio_line_sizev(s, name, aglobal, &ncomponents);
     if (ncomponents != 1) {
-        ESIO_ERROR("Named location must be treated as a vline", ESIO_EINVAL);
+        ESIO_ERROR("Must retrieve location size using esio_line_sizev",
+                   ESIO_EINVAL);
     }
     return status;
 }
@@ -656,10 +659,10 @@ int esio_line_sizev(const esio_state s,
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
 
-    const herr_t status = esio_line_metadata_read(
+    const int status = esio_line_metadata_read(
             s->file_id, name, aglobal, ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to open line's ESIO metadata", ESIO_EFAILED);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read line metadata", ESIO_EFAILED);
     }
 
     return ESIO_SUCCESS;
@@ -708,14 +711,14 @@ int esio_field_write_internal(const esio_state s,
     int layout_tag;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
-    const herr_t mstat = esio_field_metadata_read(s->file_id, name,
-                                                  &layout_tag,
-                                                  &field_cglobal,
-                                                  &field_bglobal,
-                                                  &field_aglobal,
-                                                  &field_ncomponents);
+    const int mstat = esio_field_metadata_read(s->file_id, name,
+                                               &layout_tag,
+                                               &field_cglobal,
+                                               &field_bglobal,
+                                               &field_aglobal,
+                                               &field_ncomponents);
 
-    if (mstat < 0) {
+    if (mstat != ESIO_SUCCESS) {
         // Field did not exist
 
         // Create dataset and write it with the active field layout
@@ -831,14 +834,14 @@ int esio_field_read_internal(const esio_state s,
     int layout_tag;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
-    const herr_t status = esio_field_metadata_read(s->file_id, name,
-                                                   &layout_tag,
-                                                   &field_cglobal,
-                                                   &field_bglobal,
-                                                   &field_aglobal,
-                                                   &field_ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to read field's ESIO metadata", ESIO_EFAILED);
+    const int status = esio_field_metadata_read(s->file_id, name,
+                                                &layout_tag,
+                                                &field_cglobal,
+                                                &field_bglobal,
+                                                &field_aglobal,
+                                                &field_ncomponents);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read field's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information
@@ -1003,13 +1006,13 @@ int esio_plane_write_internal(const esio_state s,
     // Attempt to read metadata for the plane (which may or may not exist)
     int plane_bglobal, plane_aglobal;
     int plane_ncomponents;
-    const herr_t mstat = esio_plane_metadata_read(s->file_id, name,
-                                                  &plane_bglobal,
-                                                  &plane_aglobal,
-                                                  &plane_ncomponents);
+    const int mstat = esio_plane_metadata_read(s->file_id, name,
+                                               &plane_bglobal,
+                                               &plane_aglobal,
+                                               &plane_ncomponents);
 
     hid_t dset_id;
-    if (mstat < 0) {
+    if (mstat != ESIO_SUCCESS) {
         // Plane did not exist so create it
         dset_id = esio_plane_create(s, bglobal, aglobal, name, type_id);
         if (dset_id < 0) {
@@ -1099,12 +1102,12 @@ int esio_plane_read_internal(const esio_state s,
     // Read metadata for the plane
     int plane_bglobal, plane_aglobal;
     int plane_ncomponents;
-    const herr_t status = esio_plane_metadata_read(s->file_id, name,
-                                                   &plane_bglobal,
-                                                   &plane_aglobal,
-                                                   &plane_ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to read plane's ESIO metadata", ESIO_EFAILED);
+    const int status = esio_plane_metadata_read(s->file_id, name,
+                                                &plane_bglobal,
+                                                &plane_aglobal,
+                                                &plane_ncomponents);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read plane's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information
@@ -1248,18 +1251,18 @@ int esio_line_write_internal(const esio_state s,
 
     // Attempt to read metadata for the line (which may or may not exist)
     int line_aglobal, line_ncomponents;
-    const herr_t mstat = esio_line_metadata_read(s->file_id, name,
-                                                 &line_aglobal,
-                                                 &line_ncomponents);
+    const int mstat = esio_line_metadata_read(s->file_id, name,
+                                              &line_aglobal,
+                                              &line_ncomponents);
 
     hid_t dset_id;
-    if (mstat < 0) {
+    if (mstat == ESIO_EINVAL) {
         // Line did not exist so create it
         dset_id = esio_line_create(s, aglobal, name, type_id);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new line", ESIO_EFAILED);
         }
-    } else {
+    } else if (mstat == ESIO_SUCCESS) {
         // Line already existed
 
         // Ensure caller gave correct size information
@@ -1291,6 +1294,8 @@ int esio_line_write_internal(const esio_state s,
                        ESIO_EINVAL);
         }
         H5Tclose(line_type_id);
+    } else {
+        ESIO_ERROR("Unrecoverable error attempting to write line", mstat);
     }
 
     // Write field
@@ -1331,11 +1336,11 @@ int esio_line_read_internal(const esio_state s,
 
     // Read metadata for the line
     int line_aglobal, line_ncomponents;
-    const herr_t status = esio_line_metadata_read(s->file_id, name,
-                                                  &line_aglobal,
-                                                  &line_ncomponents);
-    if (status < 0) {
-        ESIO_ERROR("Unable to read line's ESIO metadata", ESIO_EFAILED);
+    const int status = esio_line_metadata_read(s->file_id, name,
+                                               &line_aglobal,
+                                               &line_ncomponents);
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to read line's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information

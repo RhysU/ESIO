@@ -96,7 +96,8 @@ FCT_BGN()
 
         FCT_TEST_BGN(success_code)
         {
-            fct_chk_eq_int(0, ESIO_SUCCESS);
+            fct_chk_eq_int(0, ESIO_SUCCESS); // Success is zero
+            fct_chk(!ESIO_SUCCESS);          // Not success is true
         }
         FCT_TEST_END();
 

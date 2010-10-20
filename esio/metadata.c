@@ -37,6 +37,8 @@
 #include "version.h"
 #include "metadata.h"
 
+// TODO Have esio_XXX_metadata_read detect different sorts of errors
+
 #define ESIO_FIELD_METADATA_SIZE (8)
 
 static
@@ -138,21 +140,14 @@ int esio_field_metadata_write(hid_t loc_id, const char *name,
     return (status >= 0) ? ESIO_SUCCESS : ESIO_EFAILED;
 }
 
-herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
-                                int *layout_tag,
-                                int *cglobal, int *bglobal, int *aglobal,
-                                int *ncomponents)
+int esio_field_metadata_read(hid_t loc_id, const char *name,
+                             int *layout_tag,
+                             int *cglobal, int *bglobal, int *aglobal,
+                             int *ncomponents)
 {
-    // This routine should not invoke any ESIO error handling--
-    // It is sometimes used to query for the existence of a field.
-
-    // Obtain current HDF5 error handler
-    H5E_auto2_t hdf5_handler;
-    void *hdf5_client_data;
-    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data);
-
-    // Disable HDF5 error handler during metadata read
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    // This routine should not (generally) invoke any ESIO error handling
+    // unless Very Bad Things (TM) happen.  It is sometimes used to query for
+    // the existence of a field.
 
     // Local scratch space into which we read the metadata
     // Employ a sentinel to balk if/when we accidentally blow out the buffer
@@ -161,35 +156,35 @@ herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
     metadata[ESIO_FIELD_METADATA_SIZE] = sentinel;
 
     // Read the metadata into the buffer
+    DISABLE_HDF5_ERROR_HANDLER
     const herr_t err = H5LTget_attribute_int(
             loc_id, name, "esio_field_metadata", metadata);
+    ENABLE_HDF5_ERROR_HANDLER
 
-    // Re-enable the HDF5 error handler
-    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
-
-    // Check that our sentinel survived the read process
+    // Check that our sentinel survived the read process (Very Bad (TM))
     if (metadata[ESIO_FIELD_METADATA_SIZE] != sentinel) {
-        ESIO_ERROR_VAL("detected metadata buffer overflow", ESIO_ESANITY, err);
+        ESIO_ERROR("detected metadata buffer overflow", ESIO_ESANITY);
     }
 
-    // On success...
-    if (err >= 0) {
-        // ... populate all requested, outgoing arguments
+    if (err < 0) {
+        // On error, report "soft" failure to the caller
+        return ESIO_EFAILED;
+    } else {
+        // On success, sanity check layout_tag's value...
+        if (metadata[3] < 0 || metadata[3] >= esio_layout_count()) {
+            ESIO_ERROR("ESIO metadata contains unknown layout_tag",
+                       ESIO_ESANITY); // Very Bad (TM)
+        }
+
+        // ...and populate all requested, outgoing arguments.
         if (layout_tag)  *layout_tag  = metadata[3];
         if (cglobal)     *cglobal     = metadata[4];
         if (bglobal)     *bglobal     = metadata[5];
         if (aglobal)     *aglobal     = metadata[6];
         if (ncomponents) *ncomponents = metadata[7];
 
-        // ... sanity check layout_tag's value
-        if (metadata[3] < 0 || metadata[3] >= esio_layout_count()) {
-            ESIO_ERROR_VAL("ESIO metadata contains unknown layout_tag",
-                           ESIO_ESANITY, err);
-        }
+        return ESIO_SUCCESS;
     }
-
-    // Return the H5LTget_attribute_int error code
-    return err;
 }
 
 static
@@ -201,7 +196,7 @@ int esio_hdf5metadata_read(hid_t loc_id,
 {
     // Extract metadata using HDF5's introspection utilities
 
-    // Open dataset which may or may not fail
+    // Open dataset with "soft" failure: ESIO_ERROR not invoked
     DISABLE_HDF5_ERROR_HANDLER
     const hid_t dset_id = H5Dopen1(loc_id, name);
     ENABLE_HDF5_ERROR_HANDLER
@@ -242,10 +237,8 @@ int esio_hdf5metadata_read(hid_t loc_id,
         ESIO_ERROR("Incorrect rank supplied for data", ESIO_EINVAL);
     }
 
-    // Close dataspace
+    // Close resources
     H5Sclose(space_id);
-
-    // Close dataset
     H5Dclose(dset_id);
 
     // Successfully retrieved all information; mutate arguments
@@ -265,9 +258,9 @@ int esio_plane_metadata_write(hid_t loc_id, const char *name,
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }
 
-herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
-                                int *bglobal, int *aglobal,
-                                int *ncomponents)
+int esio_plane_metadata_read(hid_t loc_id, const char *name,
+                             int *bglobal, int *aglobal,
+                             int *ncomponents)
 {
     int global[2];
     const int status
@@ -276,10 +269,8 @@ herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
         if (bglobal) *bglobal = global[0];
         if (aglobal) *aglobal = global[1];
         // ncomponents modified in esio_hdf5metatadata_read
-        return 0;
-    } else {
-        return -1;
     }
+    return status;
 }
 
 int esio_line_metadata_write(hid_t loc_id, const char *name,
@@ -289,12 +280,9 @@ int esio_line_metadata_write(hid_t loc_id, const char *name,
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }
 
-herr_t esio_line_metadata_read(hid_t loc_id, const char *name,
-                               int *aglobal,
-                               int *ncomponents)
+int esio_line_metadata_read(hid_t loc_id, const char *name,
+                            int *aglobal,
+                            int *ncomponents)
 {
-    const int status
-        = esio_hdf5metadata_read(loc_id, name, 1, aglobal, ncomponents);
-
-    return (status == ESIO_SUCCESS) ? 0 : -1;
+    return esio_hdf5metadata_read(loc_id, name, 1, aglobal, ncomponents);
 }
