@@ -34,17 +34,18 @@ libesio_la_LIBADD    = libesio_c.la libesio_f.la
 
 # C sources to place into the public library
 noinst_LTLIBRARIES    += libesio_c.la
-libesio_c_la_CFLAGS    = $(HDF5_CFLAGS)
-libesio_c_la_CPPFLAGS  = $(HDF5_CPPFLAGS)
+libesio_c_la_CFLAGS    = $(AM_CFLAGS) $(HDF5_CFLAGS)
+libesio_c_la_CPPFLAGS  = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 libesio_c_la_SOURCES   = error.c
 libesio_c_la_SOURCES  += esio.c
 libesio_c_la_SOURCES  += layout.c
 libesio_c_la_SOURCES  += metadata.c
 
 # Fortran sources to place into the public library
-noinst_LTLIBRARIES   += libesio_f.la
-libesio_f_la_FCFLAGS  = $(AM_FCFLAGS) $(HDF5_FFLAGS)
-libesio_f_la_SOURCES  = esio.f90
+noinst_LTLIBRARIES        += libesio_f.la
+libesio_f_la_FCFLAGS       = $(AM_FCFLAGS) $(HDF5_FFLAGS)
+libesio_f_la_SOURCES       = esio.f90
+libesio_f_la_LIBTOOLFLAGS  = --tag=FC
 
 # Extra things to clean up
 clean-local:
