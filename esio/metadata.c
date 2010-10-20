@@ -116,10 +116,10 @@ hid_t esio_type_arrayify(hid_t type_id, int ncomponents)
     return retval;
 }
 
-herr_t esio_field_metadata_write(hid_t loc_id, const char *name,
-                                 int layout_tag,
-                                 int cglobal, int bglobal, int aglobal,
-                                 hid_t type_id)
+int esio_field_metadata_write(hid_t loc_id, const char *name,
+                              int layout_tag,
+                              int cglobal, int bglobal, int aglobal,
+                              hid_t type_id)
 {
     // Meant to be opaque but the cool kids will figure it out. :P
     const int ncomponents = esio_type_ncomponents(type_id);
@@ -133,8 +133,9 @@ herr_t esio_field_metadata_write(hid_t loc_id, const char *name,
         aglobal,
         ncomponents
     };
-    return H5LTset_attribute_int(loc_id, name, "esio_field_metadata",
-                                 metadata, ESIO_FIELD_METADATA_SIZE);
+    const herr_t status = H5LTset_attribute_int(loc_id, name,
+            "esio_field_metadata", metadata, ESIO_FIELD_METADATA_SIZE);
+    return (status >= 0) ? ESIO_SUCCESS : ESIO_EFAILED;
 }
 
 herr_t esio_field_metadata_read(hid_t loc_id, const char *name,
@@ -257,9 +258,9 @@ int esio_hdf5metadata_read(hid_t loc_id,
     return ESIO_SUCCESS;
 }
 
-herr_t esio_plane_metadata_write(hid_t loc_id, const char *name,
-                                 int bglobal, int aglobal,
-                                 hid_t type_id)
+int esio_plane_metadata_write(hid_t loc_id, const char *name,
+                              int bglobal, int aglobal,
+                              hid_t type_id)
 {
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }
@@ -281,9 +282,9 @@ herr_t esio_plane_metadata_read(hid_t loc_id, const char *name,
     }
 }
 
-herr_t esio_line_metadata_write(hid_t loc_id, const char *name,
-                                int aglobal,
-                                hid_t type_id)
+int esio_line_metadata_write(hid_t loc_id, const char *name,
+                             int aglobal,
+                             hid_t type_id)
 {
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }

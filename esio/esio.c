@@ -434,7 +434,8 @@ hid_t esio_field_create(const esio_state s,
 {
     // Sanity check that the state's layout_tag matches our internal table
     if (esio_layout[s->layout_tag].tag != s->layout_tag) {
-        ESIO_ERROR("SEVERE: Consistency error in esio_layout", ESIO_ESANITY);
+        ESIO_ERROR_VAL("SEVERE: Consistency error in esio_layout",
+                ESIO_ESANITY, -1);
     }
 
     // Create the filespace using current layout within state
@@ -443,23 +444,25 @@ hid_t esio_field_create(const esio_state s,
                                                          bglobal,
                                                          aglobal);
     if (filespace < 0) {
-        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+        ESIO_ERROR_VAL("Unable to create filespace", ESIO_ESANITY, -1);
     }
 
     // Create the dataspace
     const hid_t dset_id
         = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
-        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+        H5Sclose(filespace);
+        ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash field's metadata
-    const herr_t status = esio_field_metadata_write(s->file_id, name,
-                                                    s->layout_tag,
-                                                    cglobal, bglobal, aglobal,
-                                                    type_id);
-    if (status < 0) {
-        ESIO_ERROR("Unable to save field's ESIO metadata", ESIO_EFAILED);
+    if (ESIO_SUCCESS != esio_field_metadata_write(s->file_id, name,
+                                                  s->layout_tag,
+                                                  cglobal, bglobal, aglobal,
+                                                  type_id)) {
+        H5Sclose(filespace);
+        H5Sclose(dset_id);
+        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
@@ -477,22 +480,24 @@ hid_t esio_plane_create(const esio_state s,
     const hsize_t dims[2] = { bglobal, aglobal };
     const hid_t filespace = H5Screate_simple(2, dims, NULL);
     if (filespace < 0) {
-        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+        ESIO_ERROR_VAL("Unable to create filespace", ESIO_ESANITY, -1);
     }
 
     // Create the dataspace
     const hid_t dset_id
         = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
-        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+        H5Sclose(filespace);
+        ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash plane's metadata
-    const herr_t status = esio_plane_metadata_write(s->file_id, name,
-                                                    bglobal, aglobal,
-                                                    type_id);
-    if (status < 0) {
-        ESIO_ERROR("Unable to save plane's ESIO metadata", ESIO_EFAILED);
+    if (ESIO_SUCCESS != esio_plane_metadata_write(s->file_id, name,
+                                                  bglobal, aglobal,
+                                                  type_id)) {
+        H5Sclose(filespace);
+        H5Dclose(dset_id);
+        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
@@ -510,22 +515,23 @@ hid_t esio_line_create(const esio_state s,
     const hsize_t dims[1] = { aglobal };
     const hid_t filespace = H5Screate_simple(1, dims, NULL);
     if (filespace < 0) {
-        ESIO_ERROR("Unable to create filespace", ESIO_ESANITY);
+        ESIO_ERROR_VAL("Unable to create filespace", ESIO_ESANITY, -1);
     }
 
     // Create the dataspace
     const hid_t dset_id
         = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
-        ESIO_ERROR("Unable to create dataspace", ESIO_ESANITY);
+        H5Sclose(filespace);
+        ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash line's metadata
-    const herr_t status = esio_line_metadata_write(s->file_id, name,
-                                                   aglobal,
-                                                   type_id);
-    if (status < 0) {
-        ESIO_ERROR("Unable to save line's ESIO metadata", ESIO_EFAILED);
+    if (ESIO_SUCCESS != esio_line_metadata_write(s->file_id, name,
+                                                 aglobal, type_id)) {
+        H5Sclose(filespace);
+        H5Dclose(dset_id);
+        ESIO_ERROR_VAL("Unable to save ESIO metadata", ESIO_EFAILED, -1);
     }
 
     // Clean up temporary resources
