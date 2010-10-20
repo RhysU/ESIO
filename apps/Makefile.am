@@ -1,25 +1,30 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS      = -I$(top_srcdir) -I$(top_builddir)
-AM_CFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS     = -I$(top_srcdir) -I$(top_builddir)
+AM_CFLAGS      =
+AM_CPPFLAGS    = -I$(top_srcdir)     -I$(top_builddir)
+AM_CPPFLAGS   += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS     = -I$(top_srcdir)     -I$(top_builddir)
 AM_FCFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS    += -I$(top_srcdir)/esio -I$(top_builddir)/esio
-AM_LDFLAGS     =
-bin_PROGRAMS   =
-BUILT_DOCS     =
-BUILT_SOURCES  =
-CLEANFILES     =
-EXTRA_DIST     =
+AM_FCFLAGS    += -I$(top_builddir)/esio
+AM_LDFLAGS     = -L$(top_builddir)/lib
+bin_PROGRAMS   = # Append below
+BUILT_DOCS     = # Append below
+BUILT_SOURCES  = # Append below
+CLEANFILES     = # Append below
+EXTRA_DIST     = # Append below
 
-# Use parallel HDF5 compiler wrappers per configure.ac
-CC=@H5CC@
-FC=@H5FC@
+# Use MPI compiler wrappers since HDF5 wrappers break autodependencies.
+CC=@MPICC@
+FC=@MPIFC@
 
-## Pick up GRVY library installation
+## Pick up HDF5 library includes
+AM_CFLAGS   += $(HDF5_CFLAGS)
+AM_CPPFLAGS += $(HDF5_CPPFLAGS)
+AM_FCFLAGS  += $(HDF5_FFLAGS)
+
+## Pick up GRVY library includes
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
-AM_LDFLAGS += $(GRVY_LIBS)
 
 # Sample progams
 bin_PROGRAMS       += hellompi_c
@@ -31,11 +36,10 @@ hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 
 # PSDNS iokernel test program
 bin_PROGRAMS      += main
-main_SOURCES       = header.f90 main.f90
-main_LDADD         = ../esio/libesio.la
+main_SOURCES       = header.f90
+main_SOURCES      += main.f90
+main_LDADD         = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS) $(FCLIBS)
 main_LIBTOOLFLAGS  = --tag=FC
-# Fortran module dependencies
-main.o: header.f90 main.f90
 
 # Clean up Fortran modules on 'make clean'
 CLEANFILES += header.mod
