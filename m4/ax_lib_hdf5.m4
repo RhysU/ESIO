@@ -28,8 +28,9 @@
 #     AC_SUBST(HDF5_VERSION)
 #     AC_SUBST(HDF5_CFLAGS)
 #     AC_SUBST(HDF5_CPPFLAGS)
-#     AC_SUBST(HDF5_FFLAGS)
 #     AC_SUBST(HDF5_LDFLAGS)
+#     AC_SUBST(HDF5_FFLAGS)
+#     AC_SUBST(HDF5_FLIBS)
 #     AC_DEFINE(HAVE_HDF5)
 #
 #   and sets with_hdf5="yes".  Additionally, the macro sets
@@ -41,8 +42,9 @@
 #   If HDF5 is disabled or not found, this macros sets with_hdf5="no" and
 #   with_hdf5_fortran="no".
 #
-#   Your configuration script can test $with_hdf to take any further
-#   actions.
+#   Your configuration script can test $with_hdf to take any further actions.
+#   HDF5_{C,CPP,LD}FLAGS may be used when building with C or C++.
+#   HDF5_F{FLAGS,LIBS} should be used when building Fortran applications.
 #
 #   To use the macro, one would code one of the following in "configure.ac"
 #   before AC_OUTPUT:
@@ -70,7 +72,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 3
+#serial 4
 
 AC_DEFUN([AX_LIB_HDF5], [
 
@@ -117,8 +119,9 @@ dnl Set defaults to blank
 HDF5_VERSION=""
 HDF5_CFLAGS=""
 HDF5_CPPFLAGS=""
-HDF5_FFLAGS=""
 HDF5_LDFLAGS=""
+HDF5_FFLAGS=""
+HDF5_FLIBS=""
 
 dnl Try and find hdf5 compiler tools and options.
 if test "$with_hdf5" = "yes"; then
@@ -280,12 +283,31 @@ dnl
             AC_SUBST([H5FC])
 
             dnl Again, pry any remaining -Idir/-Ldir from compiler wrapper
-            dnl Both are required for FFLAGS to capture F90 modules
             for arg in `$H5FC -show`
             do
               case "$arg" in #(
-                -I*|-L*) echo $HDF5_FFLAGS | $GREP -e "$arg" 2>&1 >/dev/null \
+                -I*) echo $HDF5_FFLAGS | $GREP -e "$arg" >/dev/null \
                       || HDF5_FFLAGS="$arg $HDF5_FFLAGS"
+                  ;;#(
+                -L*) echo $HDF5_FFLAGS | $GREP -e "$arg" >/dev/null \
+                      || HDF5_FFLAGS="$arg $HDF5_FFLAGS"
+                     dnl HDF5 installs .mod files in with libraries,
+                     dnl but some compilers need to find them with -I
+                     echo $HDF5_FFLAGS | $GREP -e "-I${arg#-L}" >/dev/null \
+                      || HDF5_FFLAGS="-I${arg#-L} $HDF5_FFLAGS"
+                  ;;
+              esac
+            done
+
+            dnl Make Fortran link line by inserting Fortran libraries
+            for arg in $HDF5_LDFLAGS
+            do
+              case "$arg" in #(
+                -lhdf5_hl) HDF5_FLIBS="$HDF5_FLIBS -lhdf5hl_fortran $arg"
+                  ;; #(
+                -lhdf5)    HDF5_FLIBS="$HDF5_FLIBS -lhdf5_fortran $arg"
+                  ;; #(
+                *) HDF5_FLIBS="$HDF5_FLIBS $arg"
                   ;;
               esac
             done
@@ -298,8 +320,9 @@ dnl
     AC_SUBST([HDF5_VERSION])
     AC_SUBST([HDF5_CFLAGS])
     AC_SUBST([HDF5_CPPFLAGS])
-    AC_SUBST([HDF5_FFLAGS])
     AC_SUBST([HDF5_LDFLAGS])
+    AC_SUBST([HDF5_FFLAGS])
+    AC_SUBST([HDF5_FLIBS])
     AC_DEFINE([HAVE_HDF5], [1], [Defined if you have HDF5 support])
 fi
 
