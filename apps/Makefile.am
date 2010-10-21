@@ -1,17 +1,18 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS      =
-AM_CPPFLAGS    = -I$(top_srcdir)     -I$(top_builddir)
-AM_CPPFLAGS   += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS     = -I$(top_srcdir)     -I$(top_builddir)
-AM_FCFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS    += -I$(top_builddir)/esio
-AM_LDFLAGS     = -L$(top_builddir)/lib
-bin_PROGRAMS   = # Append below
-BUILT_DOCS     = # Append below
-BUILT_SOURCES  = # Append below
-CLEANFILES     = # Append below
-EXTRA_DIST     = # Append below
+AM_CFLAGS       =
+AM_CPPFLAGS     = -I$(top_srcdir)     -I$(top_builddir)
+AM_CPPFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS      = -I$(top_srcdir)     -I$(top_builddir)
+AM_FCFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_FCFLAGS     += -I$(top_builddir)/esio
+AM_LDFLAGS      = -L$(top_builddir)/lib
+bin_PROGRAMS    = # Append below
+noinst_PROGRAMS = # Append below
+BUILT_DOCS      = # Append below
+BUILT_SOURCES   = # Append below
+CLEANFILES      = # Append below
+EXTRA_DIST      = # Append below
 
 # Use MPI compiler wrappers since HDF5 wrappers break autodependencies.
 CC=@MPICC@
@@ -35,11 +36,11 @@ hellompi_f90_SOURCES       = hellompi_f90.f90
 hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 
 # PSDNS iokernel test program
-bin_PROGRAMS      += main
-main_SOURCES       = header.f90
-main_SOURCES      += main.f90
-main_LDADD         = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS) $(FCLIBS)
+noinst_PROGRAMS   += main
+main_SOURCES       = header.f90 main.f90
+main_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 main_LIBTOOLFLAGS  = --tag=FC
+main.f90: header.o                       # Explicit module dependence
 
 # Clean up Fortran modules on 'make clean'
 CLEANFILES += header.mod
