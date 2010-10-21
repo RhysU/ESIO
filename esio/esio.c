@@ -52,17 +52,17 @@ MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
 static
 hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
-                        const char* name, hid_t type_id);
+                        const char *name, hid_t type_id);
 
 static
 hid_t esio_plane_create(const esio_state s,
                         int bglobal, int aglobal,
-                        const char* name, hid_t type_id);
+                        const char *name, hid_t type_id);
 
 static
 hid_t esio_line_create(const esio_state s,
                        int aglobal,
-                       const char* name, hid_t type_id);
+                       const char *name, hid_t type_id);
 
 static
 int esio_field_close(hid_t dataset_id);
@@ -75,7 +75,7 @@ int esio_line_close(hid_t dataset_id);
 
 static
 int esio_field_write_internal(const esio_state s,
-                              const char* name,
+                              const char *name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
                               int bglobal, int bstart, int blocal, int bstride,
@@ -84,7 +84,7 @@ int esio_field_write_internal(const esio_state s,
 
 static
 int esio_field_read_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
                              int bglobal, int bstart, int blocal, int bstride,
@@ -93,7 +93,7 @@ int esio_field_read_internal(const esio_state s,
 
 static
 int esio_plane_write_internal(const esio_state s,
-                              const char* name,
+                              const char *name,
                               const void *plane,
                               int bglobal, int bstart, int blocal, int bstride,
                               int aglobal, int astart, int alocal, int astride,
@@ -101,7 +101,7 @@ int esio_plane_write_internal(const esio_state s,
 
 static
 int esio_plane_read_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              void *plane,
                              int bglobal, int bstart, int blocal, int bstride,
                              int aglobal, int astart, int alocal, int astride,
@@ -109,14 +109,14 @@ int esio_plane_read_internal(const esio_state s,
 
 static
 int esio_line_write_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              const void *line,
                              int aglobal, int astart, int alocal, int astride,
                              hid_t type_id);
 
 static
 int esio_line_read_internal(const esio_state s,
-                            const char* name,
+                            const char *name,
                             void *line,
                             int aglobal, int astart, int alocal, int astride,
                             hid_t type_id);
@@ -430,7 +430,7 @@ int esio_file_close(esio_state s)
 static
 hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
-                        const char* name, hid_t type_id)
+                        const char *name, hid_t type_id)
 {
     // Sanity check that the state's layout_tag matches our internal table
     if (esio_layout[s->layout_tag].tag != s->layout_tag) {
@@ -474,7 +474,7 @@ hid_t esio_field_create(const esio_state s,
 static
 hid_t esio_plane_create(const esio_state s,
                         int bglobal, int aglobal,
-                        const char* name, hid_t type_id)
+                        const char *name, hid_t type_id)
 {
     // Create the filespace
     const hsize_t dims[2] = { bglobal, aglobal };
@@ -509,7 +509,7 @@ hid_t esio_plane_create(const esio_state s,
 static
 hid_t esio_line_create(const esio_state s,
                        int aglobal,
-                       const char* name, hid_t type_id)
+                       const char *name, hid_t type_id)
 {
     // Create the filespace
     const hsize_t dims[1] = { aglobal };
@@ -571,7 +571,7 @@ int esio_line_close(hid_t dataset_id)
 }
 
 int esio_field_size(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *cglobal, int *bglobal, int *aglobal)
 {
     int ncomponents;
@@ -585,7 +585,7 @@ int esio_field_size(const esio_state s,
 }
 
 int esio_field_sizev(const esio_state s,
-                     const char* name,
+                     const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents)
 {
@@ -604,7 +604,7 @@ int esio_field_sizev(const esio_state s,
 }
 
 int esio_plane_size(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *bglobal, int *aglobal)
 {
     int ncomponents;
@@ -618,7 +618,7 @@ int esio_plane_size(const esio_state s,
 }
 
 int esio_plane_sizev(const esio_state s,
-                     const char* name,
+                     const char *name,
                      int *bglobal, int *aglobal,
                      int *ncomponents)
 {
@@ -637,7 +637,7 @@ int esio_plane_sizev(const esio_state s,
 }
 
 int esio_line_size(const esio_state s,
-                   const char* name,
+                   const char *name,
                    int *aglobal)
 {
     int ncomponents;
@@ -650,7 +650,7 @@ int esio_line_size(const esio_state s,
 }
 
 int esio_line_sizev(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *aglobal,
                     int *ncomponents)
 {
@@ -674,7 +674,7 @@ int esio_line_sizev(const esio_state s,
 
 static
 int esio_field_write_internal(const esio_state s,
-                              const char* name,
+                              const char *name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
                               int bglobal, int bstart, int blocal, int bstride,
@@ -797,7 +797,7 @@ int esio_field_write_internal(const esio_state s,
 
 static
 int esio_field_read_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
                              int bglobal, int bstart, int blocal, int bstride,
@@ -898,7 +898,7 @@ int esio_field_read_internal(const esio_state s,
 #define GEN_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                                   \
 int esio_field_ ## OP ## _ ## TYPE (                                        \
         const esio_state s,                                                 \
-        const char* name,                                                   \
+        const char *name,                                                   \
         QUAL TYPE *field,                                                   \
         int cglobal, int cstart, int clocal, int cstride,                   \
         int bglobal, int bstart, int blocal, int bstride,                   \
@@ -924,7 +924,7 @@ GEN_FIELD_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 #define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_field_ ## OP ## v_ ## TYPE(                                      \
         const esio_state s,                                               \
-        const char* name,                                                 \
+        const char *name,                                                 \
         QUAL TYPE *field,                                                 \
         int cglobal, int cstart, int clocal, int cstride,                 \
         int bglobal, int bstart, int blocal, int bstride,                 \
@@ -976,7 +976,7 @@ GEN_FIELD_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 static
 int esio_plane_write_internal(const esio_state s,
-                              const char* name,
+                              const char *name,
                               const void *plane,
                               int bglobal, int bstart, int blocal, int bstride,
                               int aglobal, int astart, int alocal, int astride,
@@ -1072,7 +1072,7 @@ int esio_plane_write_internal(const esio_state s,
 
 static
 int esio_plane_read_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              void *plane,
                              int bglobal, int bstart, int blocal, int bstride,
                              int aglobal, int astart, int alocal, int astride,
@@ -1160,7 +1160,7 @@ int esio_plane_read_internal(const esio_state s,
 #define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                                   \
 int esio_plane_ ## OP ## _ ## TYPE (                                        \
         const esio_state s,                                                 \
-        const char* name,                                                   \
+        const char *name,                                                   \
         QUAL TYPE *plane,                                                   \
         int bglobal, int bstart, int blocal, int bstride,                   \
         int aglobal, int astart, int alocal, int astride)                   \
@@ -1183,7 +1183,7 @@ GEN_PLANE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 #define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_plane_ ## OP ## v_ ## TYPE(                                      \
         const esio_state s,                                               \
-        const char* name,                                                 \
+        const char *name,                                                 \
         QUAL TYPE *plane,                                                 \
         int bglobal, int bstart, int blocal, int bstride,                 \
         int aglobal, int astart, int alocal, int astride,                 \
@@ -1228,7 +1228,7 @@ GEN_PLANE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 static
 int esio_line_write_internal(const esio_state s,
-                             const char* name,
+                             const char *name,
                              const void *line,
                              int aglobal, int astart, int alocal, int astride,
                              hid_t type_id)
@@ -1313,7 +1313,7 @@ int esio_line_write_internal(const esio_state s,
 
 static
 int esio_line_read_internal(const esio_state s,
-                            const char* name,
+                            const char *name,
                             void *line,
                             int aglobal, int astart, int alocal, int astride,
                             hid_t type_id)
@@ -1389,7 +1389,7 @@ int esio_line_read_internal(const esio_state s,
 #define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                                    \
 int esio_line_ ## OP ## _ ## TYPE (                                         \
         const esio_state s,                                                 \
-        const char* name,                                                   \
+        const char *name,                                                   \
         QUAL TYPE *line,                                                    \
         int aglobal, int astart, int alocal, int astride)                   \
 {                                                                           \
@@ -1410,7 +1410,7 @@ GEN_LINE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 #define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE)                                 \
 int esio_line_ ## OP ## v_ ## TYPE(                                       \
         const esio_state s,                                               \
-        const char* name,                                                 \
+        const char *name,                                                 \
         QUAL TYPE *line,                                                  \
         int aglobal, int astart, int alocal, int astride,                 \
         int ncomponents)                                                  \

@@ -2,7 +2,7 @@
 //--------------------------------------------------------------------------
 //
 // esio 0.0.1: ExaScale IO library for turbulence simulation restart files
-// 
+//
 //
 // Copyright (C) 2010 The PECOS Development Team
 //
@@ -60,82 +60,93 @@ int esio_file_close(esio_state s);
 /*\@}*/
 
 /**
- * \defgroup Size Querying data extents
+ * \defgroup Attribute Manipulating simple attributes
  */
 /*\@{*/
-int esio_point_size(const esio_state s,
-                    const char* name);
-int esio_point_sizev(const esio_state s,
-                     const char* name,
-                     int *ncomponents);
+int esio_attribute_sizev(const esio_state s,
+                         const char *name,
+                         int *ncomponents);
+
+#define ESIO_ATTRIBUTE_GEN(TYPE)                     \
+int esio_attribute_write_##TYPE(const esio_state s,  \
+                                const char *name,    \
+                                const TYPE *value);  \
+int esio_attribute_writev_##TYPE(const esio_state s, \
+                                 const char *name,   \
+                                 const TYPE *value,  \
+                                 int ncomponents);   \
+int esio_attribute_read_##TYPE(const esio_state s,   \
+                               const char *name,     \
+                               TYPE *value);         \
+int esio_attribute_readv_##TYPE(const esio_state s,  \
+                                const char *name,    \
+                                TYPE *value,         \
+                                int ncomponents);
+ESIO_ATTRIBUTE_GEN(double)
+ESIO_ATTRIBUTE_GEN(float)
+ESIO_ATTRIBUTE_GEN(int)
+#undef ESIO_ATTRIBUTE_GEN
+/*\@}*/
+
+/**
+ * \defgroup String Manipulating strings
+ */
+/*\@{*/
+int esio_string_set(const esio_state s,
+                    const char *name,
+                    const char *value);
+char* esio_string_get(const esio_state s,
+                      const char *name);
+/*\@}*/
+
+/**
+ * \defgroup Size Querying distributed data extents
+ */
+/*\@{*/
 int esio_line_size(const esio_state s,
-                   const char* name,
+                   const char *name,
                    int *aglobal);
 int esio_line_sizev(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *aglobal,
                     int *ncomponents);
 int esio_plane_size(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *bglobal, int *aglobal);
 int esio_plane_sizev(const esio_state s,
-                     const char* name,
+                     const char *name,
                      int *bglobal, int *aglobal,
                      int *ncomponents);
 int esio_field_size(const esio_state s,
-                    const char* name,
+                    const char *name,
                     int *cglobal, int *bglobal, int *aglobal);
 int esio_field_sizev(const esio_state s,
-                     const char* name,
+                     const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);
 /*\@}*/
 
-/**
- * \defgroup Point Manipulating real-valued points
- */
-/*\@{*/
-#define ESIO_POINT_GEN(TYPE)                     \
-int esio_point_write_##TYPE(const esio_state s,  \
-                            const char* name,    \
-                            const TYPE *point);  \
-int esio_point_writev_##TYPE(const esio_state s, \
-                             const char* name,   \
-                             const TYPE *point,  \
-                             int ncomponents);   \
-int esio_point_read_##TYPE(const esio_state s,   \
-                           const char* name,     \
-                           TYPE *point);         \
-int esio_point_readv_##TYPE(const esio_state s,  \
-                            const char* name,    \
-                            TYPE *point,         \
-                            int ncomponents);
-ESIO_POINT_GEN(double)
-ESIO_POINT_GEN(float)
-ESIO_POINT_GEN(int)
-#undef ESIO_POINT_GEN
-/*\@}*/
 
 /**
- * \defgroup Line Manipulating real-valued lines
+ * \defgroup Line Manipulating distributed 1D lines
  */
 /*\@{*/
 #define ESIO_LINE_GEN(TYPE)                                                   \
 int esio_line_write_##TYPE(const esio_state s,                                \
-                           const char* name,                                  \
+                           const char *name,                                  \
                            const TYPE *line,                                  \
                            int aglobal, int astart, int alocal, int astride); \
 int esio_line_writev_##TYPE(const esio_state s,                               \
-                            const char* name,                                 \
+                            const char *name,                                 \
                             const TYPE *line,                                 \
                             int aglobal, int astart, int alocal, int astride, \
                             int ncomponents);                                 \
 int esio_line_read_##TYPE(const esio_state s,                                 \
-                          const char* name,                                   \
+                          const char *name,                                   \
                           TYPE *line,                                         \
                           int aglobal, int astart, int alocal, int astride);  \
 int esio_line_readv_##TYPE(const esio_state s,                                \
-                           const char* name,                                  \
+                           const char *name,                                  \
                            TYPE *line,                                        \
                            int aglobal, int astart, int alocal, int astride,  \
                            int ncomponents);
@@ -146,28 +157,28 @@ ESIO_LINE_GEN(int)
 /*\@}*/
 
 /**
- * \defgroup Plane Manipulating real-valued planes
+ * \defgroup Plane Manipulating distributed 2D planes
  */
 /*\@{*/
 #define ESIO_PLANE_GEN(TYPE)                                                  \
 int esio_plane_write_##TYPE(const esio_state s,                               \
-                            const char* name,                                 \
+                            const char *name,                                 \
                             const TYPE *plane,                                \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride);\
 int esio_plane_writev_##TYPE(const esio_state s,                              \
-                             const char* name,                                \
+                             const char *name,                                \
                              const TYPE *plane,                               \
                              int bglobal, int bstart, int blocal, int bstride,\
                              int aglobal, int astart, int alocal, int astride,\
                              int ncomponents);                                \
 int esio_plane_read_##TYPE(const esio_state s,                                \
-                           const char* name,                                  \
+                           const char *name,                                  \
                            TYPE *plane,                                       \
                            int bglobal, int bstart, int blocal, int bstride,  \
                            int aglobal, int astart, int alocal, int astride); \
 int esio_plane_readv_##TYPE(const esio_state s,                               \
-                            const char* name,                                 \
+                            const char *name,                                 \
                             TYPE *plane,                                      \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride, \
@@ -179,31 +190,31 @@ ESIO_PLANE_GEN(int)
 /*\@}*/
 
 /**
- * \defgroup Field Manipulating real-valued fields
+ * \defgroup Field Manipulating distributed 3D fields
  */
 /*\@{*/
 #define ESIO_FIELD_GEN(TYPE)                                                  \
 int esio_field_write_##TYPE(const esio_state s,                               \
-                            const char* name,                                 \
+                            const char *name,                                 \
                             const TYPE *field,                                \
                             int cglobal, int cstart, int clocal, int cstride, \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride);\
 int esio_field_writev_##TYPE(const esio_state s,                              \
-                             const char* name,                                \
+                             const char *name,                                \
                              const TYPE *field,                               \
                              int cglobal, int cstart, int clocal, int cstride,\
                              int bglobal, int bstart, int blocal, int bstride,\
                              int aglobal, int astart, int alocal, int astride,\
                              int ncomponents);                                \
 int esio_field_read_##TYPE(const esio_state s,                                \
-                           const char* name,                                  \
+                           const char *name,                                  \
                            TYPE *field,                                       \
                            int cglobal, int cstart, int clocal, int cstride,  \
                            int bglobal, int bstart, int blocal, int bstride,  \
                            int aglobal, int astart, int alocal, int astride); \
 int esio_field_readv_##TYPE(const esio_state s,                               \
-                            const char* name,                                 \
+                            const char *name,                                 \
                             TYPE *field,                                      \
                             int cglobal, int cstart, int clocal, int cstride, \
                             int bglobal, int bstart, int blocal, int bstride, \
