@@ -22,6 +22,8 @@ AX_SPLIT_VERSION
 AC_SUBST([AX_MAJOR_VERSION])
 AC_SUBST([AX_MINOR_VERSION])
 AC_SUBST([AX_POINT_VERSION])
+AC_PATH_PROG([PERL],[perl],[no])
+AM_CONDITIONAL([HAVE_PERL],[test x$PERL != xno])
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------

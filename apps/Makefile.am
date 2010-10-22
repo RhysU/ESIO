@@ -42,11 +42,14 @@ main_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 main_LIBTOOLFLAGS  = --tag=FC
 main.f90: header.o                       # Explicit module dependence
 
-# Clean up Fortran modules on 'make clean'
-CLEANFILES += header.mod
+# Additional files to clean
+CLEANFILES += *.mod *.gcno
 
 # License updates
 include $(top_srcdir)/license.am
+
+# Automatic dependency generation for Fortran
+include $(top_srcdir)/sfmakedepend.am
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@

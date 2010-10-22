@@ -157,5 +157,8 @@ check-programs: $(check_PROGRAMS)
 # License updates
 include $(top_srcdir)/license.am
 
+# Automatic dependency generation for Fortran
+include $(top_srcdir)/sfmakedepend.am
+
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
