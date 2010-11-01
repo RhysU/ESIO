@@ -45,7 +45,8 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
     const hsize_t nelems = alocal * astride;
     const hid_t memspace = H5Screate_simple(1, &nelems, NULL);
     assert(memspace > 0);
-    {
+    if (astride != 1) {
+        /* Strided memspace; additional hyperslab selection necessary */
         const hsize_t start  = 0;
         const hsize_t stride = astride;
         const hsize_t count  = alocal;

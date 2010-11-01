@@ -49,21 +49,27 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *field,
     const hsize_t nelems = clocal * cstride;
     const hid_t memspace = H5Screate_simple(1, &nelems, NULL);
     assert(memspace > 0);
-    if (H5Sselect_none(memspace) < 0) {
-        H5Pclose(plist_id);
-        H5Sclose(memspace);
-        ESIO_ERROR("Resetting memory hyperslab failed", ESIO_EFAILED);
-    }
-    for (int k = 0; k < clocal; ++k) {
-        for (int j = 0; j < blocal; ++j) {
-            const hsize_t start  = k*cstride + j*bstride;
-            const hsize_t stride = astride;
-            const hsize_t count  = alocal;
-            if (H5Sselect_hyperslab(memspace, H5S_SELECT_OR,
-                                    &start, &stride, &count, NULL) < 0) {
-                H5Pclose(plist_id);
-                H5Sclose(memspace);
-                ESIO_ERROR("Selecting memory hyperslab failed", ESIO_EFAILED);
+    if (   astride != 1
+        || bstride != astride * alocal
+        || cstride != bstride * blocal) {
+        /* Strided memspace; additional hyperslab selection necessary */
+        if (H5Sselect_none(memspace) < 0) {
+            H5Pclose(plist_id);
+            H5Sclose(memspace);
+            ESIO_ERROR("Resetting memory hyperslab failed", ESIO_EFAILED);
+        }
+        for (int k = 0; k < clocal; ++k) {
+            for (int j = 0; j < blocal; ++j) {
+                const hsize_t start  = k*cstride + j*bstride;
+                const hsize_t stride = astride;
+                const hsize_t count  = alocal;
+                if (H5Sselect_hyperslab(memspace, H5S_SELECT_OR,
+                                        &start, &stride, &count, NULL) < 0) {
+                    H5Pclose(plist_id);
+                    H5Sclose(memspace);
+                    ESIO_ERROR("Selecting memory hyperslab failed",
+                               ESIO_EFAILED);
+                }
             }
         }
     }
