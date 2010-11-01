@@ -38,6 +38,7 @@
 
 #include "error.h"
 #include "esio.h"
+#include "h5utils.h"
 #include "layout.h"
 #include "metadata.h"
 #include "version.h"
@@ -1441,3 +1442,52 @@ GEN_LINE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
 
 GEN_LINE_OPV(write, const,       int, H5T_NATIVE_INT)
 GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
+
+// *********************************************************************
+// ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE
+// *********************************************************************
+
+int esio_attribute_sizev(const esio_state s,
+                         const char *name,
+                         int *ncomponents)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+
+    // Attempt to retrieve dimensionality of the named attribute
+    // We only support rank == 1 attributes via ESIO
+    int rank;
+    {
+        DISABLE_HDF5_ERROR_HANDLER
+        const herr_t err = H5LTget_attribute_ndims(s->file_id, "/", name,
+                                                   &rank);
+        ENABLE_HDF5_ERROR_HANDLER
+
+        if (err  <  0) ESIO_ERROR("No such attribute found", ESIO_EINVAL);
+        if (rank != 1) ESIO_ERROR("Attribute rank != 1",     ESIO_EINVAL);
+    }
+
+    // Retrieve the attribute's size
+    hsize_t dims[rank];
+    H5T_class_t type_class;
+    size_t type_size;
+    DISABLE_HDF5_ERROR_HANDLER
+    const herr_t err = H5LTget_attribute_info(s->file_id, "/", name,
+                                              dims, &type_class, &type_size);
+    ENABLE_HDF5_ERROR_HANDLER
+    if (err < 0) {
+        ESIO_ERROR("Unable to retrieve attribute information", ESIO_EFAILED);
+    }
+
+    // Ensure we won't overflow the return value type
+    if (dims[0] > INT_MAX) {
+        ESIO_ERROR("Attribute size > INT_MAX", ESIO_ESANITY);
+    }
+
+    // Return requested information to the caller
+    if (ncomponents) *ncomponents = dims[0];
+
+    return ESIO_SUCCESS;
+}

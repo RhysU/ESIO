@@ -36,6 +36,7 @@ include_HEADERS += esio.h
 include_HEADERS += version.h
 
 # Headers internal to the library
+noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h
 

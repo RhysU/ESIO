@@ -34,8 +34,9 @@
 
 #include "error.h"
 #include "esio.h"
-#include "version.h"
+#include "h5utils.h"
 #include "metadata.h"
+#include "version.h"
 
 // TODO Have esio_XXX_metadata_read detect different sorts of errors
 
@@ -47,17 +48,6 @@ int esio_hdf5metadata_read(hid_t loc_id,
                            const int rank,
                            int *global,
                            int *ncomponents);
-
-// Macro to save and disable current HDF5 error handler
-#define DISABLE_HDF5_ERROR_HANDLER                               \
-    H5E_auto2_t hdf5_handler;                                    \
-    void *hdf5_client_data;                                      \
-    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data); \
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-// Macro to restore previously saved HDF5 error handler
-#define ENABLE_HDF5_ERROR_HANDLER                               \
-    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
 
 int esio_type_ncomponents(hid_t type_id)
 {
