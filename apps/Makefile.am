@@ -7,7 +7,6 @@ AM_FCFLAGS      = -I$(top_srcdir)     -I$(top_builddir)
 AM_FCFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = -L$(top_builddir)/lib
-bin_PROGRAMS    = # Append below
 noinst_PROGRAMS = # Append below
 BUILT_DOCS      = # Append below
 BUILT_SOURCES   = # Append below
@@ -28,10 +27,10 @@ AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
 # Sample progams
-bin_PROGRAMS       += hellompi_c
+noinst_PROGRAMS    += hellompi_c
 hellompi_c_SOURCES  = hellompi_c.c
 
-bin_PROGRAMS              += hellompi_f90
+noinst_PROGRAMS           += hellompi_f90
 hellompi_f90_SOURCES       = hellompi_f90.f90
 hellompi_f90_LIBTOOLFLAGS  = --tag=FC
 

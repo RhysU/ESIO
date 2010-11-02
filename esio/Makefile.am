@@ -4,7 +4,6 @@ AM_CFLAGS          =
 AM_CPPFLAGS        = -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_FCFLAGS         = -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_LDFLAGS         = -L$(top_builddir)/lib
-bin_PROGRAMS       = # Append below
 BUILT_SOURCES      = # Append below
 check_PROGRAMS     = # Append below
 CLEANFILES         = # Append below
@@ -24,7 +23,7 @@ AM_CPPFLAGS += $(HDF5_CPPFLAGS)
 AM_FCFLAGS  += $(HDF5_FFLAGS)
 
 # Public C library
-noinst_LTLIBRARIES  += libesio.la
+lib_LTLIBRARIES     += libesio.la
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_SOURCES   = error.c
 libesio_la_SOURCES  += esio.c
@@ -33,20 +32,21 @@ libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 
 # Headers shipped with the library
-include_HEADERS += error.h
-include_HEADERS += esio.h
-include_HEADERS += version.h
+esio_includedir       = $(includedir)/esio
+esio_include_HEADERS  = error.h
+esio_include_HEADERS += esio.h
+esio_include_HEADERS += version.h
 
 # Headers internal to the library
 noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h
 
-# Templated implementation files which must ship too
+# Templated implementation files necessary for building the library
 EXTRA_DIST += layout0.c
 EXTRA_DIST += layout1.c
-EXTRA_DIST += plane.c
 EXTRA_DIST += line.c
+EXTRA_DIST += plane.c
 
 # Public Fortran library is a superset of libesio.la
 noinst_LTLIBRARIES       += libesiof.la

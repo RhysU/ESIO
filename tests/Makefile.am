@@ -7,7 +7,6 @@ AM_FCFLAGS      = -I$(top_srcdir)     -I$(top_builddir)
 AM_FCFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = -L$(top_builddir)/lib
-bin_PROGRAMS    = # Append below
 check_PROGRAMS  = # Append below
 noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
