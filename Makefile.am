@@ -92,7 +92,7 @@ libtool: $(LIBTOOL_DEPS)
 	cd apps  && $(MAKE) $(AM_MAKEFLAGS) .license.stamp
 
 # Required for AX_PROG_DOXYGEN
-include doxygen.am
+include doxygen/doxygen.am
 
 # Required for AX_AM_MACROS
 @INC_AMINCLUDE@
