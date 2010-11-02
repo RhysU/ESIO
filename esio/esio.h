@@ -30,6 +30,14 @@
 
 #include <mpi.h>
 
+/** @file
+ * Provides ESIO's C-based public API.
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct esio_state_s *esio_state;
 
 
@@ -264,5 +272,9 @@ int esio_layout_count();
 int esio_layout_get(const esio_state s);
 int esio_layout_set(esio_state s, int layout_tag);
 /*\@}*/
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* __ESIO_ESIO_H */

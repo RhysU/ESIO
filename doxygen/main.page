@@ -1,7 +1,7 @@
 /*! \mainpage The ESIO Library
 
-<b>Version \version</b>
 <!-- FIXME Build information disabled   -->
+<!-- <b>Version \version</b>            -->
 <!-- , Build Date: \builddate           -->
 <!-- Built by: \builduser on \buildhost -->
 <!-- <hr> -->
@@ -32,10 +32,11 @@ further divided into the following subsections:
 <ul>
   <li> \subpage installation </li>
   <li> \subpage linkage </li>
-  <li> \subpage apiC "C/C++ Interface" </li>
-  <li> \subpage apiF "Fortran Interface" </li>
-  <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/doc/html/lcov/build/src/index.html">Buildbot Coverage</a> </li> <!-- FIXME Make linke work -->
-  <li> \subpage examples </li>
+  <li> \subpage apiC   "C/C++ Interface" (see esio.h and version.h for now) </li>
+  <li> \subpage errorC "C/C++ Error Handling" (see error.h for now) </li>
+  <li> \subpage apiF   "Fortran Interface" (see esio.f90 for now)</li>
+  <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/doc/html/lcov/build/src/index.html">Buildbot Coverage</a> </li> <!-- FIXME Make link work -->
+  <li> \subpage examples "Examples" </li>
 </ul>
 
 \section bugs Reporting Bugs
@@ -58,103 +59,7 @@ Copyright (C) 2010 The PECOS Development Team
 \section acknowledgements Acknowledgments
 \copydoc Acknowledgments
 
-\section pecos-center More Information About PECOS
+\section pecos-center More Information about PECOS
 \copydoc About
-
-*/
-
-
-/*! \page installation Installation
-
-ESIO uses the GNU autotools suite (autoconf, automake, and libtool)
-for its development build system.  This system is popular among the
-Linux development community and provides a familiar build environment
-for end users.
-
-To build ESIO starting from a release distribution, untar the distribution
-and enter the top-level directory.
-
-<div class="fragment"><pre class="fragment">
- > tar xvfz esio-$(VERSION).tar.gz
- > cd esio-$(VERSION)/            
-</pre></div>
-
-<h2>Configuration Requirements</h2>
-
-<b>HDF5 dependency</b>: ESIO requires that the <a
-href="http://www.hdfgroup.org/HDF5/">HDF5</a> library be
-available locally.  HDF5 must have been configured with both
-Fortran and MPI parallel support (<code>--enable-fortran</code> and
-<code>--enable-parallel</code>, respectively).  The same MPI stack and
-Fortran compiler used to compile HDF5 should be used to build ESIO.
-
-ESIO's configuration script should detect the appropriate information
-if HDF5's <code>h5pcc</code> compiler wrapper is in your path.
-If your HDF5 installation is not detected correctly, you may use ESIO's
-<code>--with-hdf5</code> option to specify a location.
-
-<b>Installation Directory</b>: Use the <tt>--prefix</tt> option to
-specify your desired top-level installation directory for ESIO.
-
-<h2> Library Build </h2>
-
-Once configured, issue a <tt>make</tt> to build the software. If
-successful, this will build the ESIO library (static and dynamic versions)
-and several examples.
-
-\code > make \endcode
-
-<b>Verifying the build:</b> To verify that the software is working properly, a
-test option is provided to run a short suite of functionality tests against the
-local build.  To run, issue a <tt>make check</tt> to run the tests.  Many of
-the tests require your MPI installation's <code>mpiexec</code> command to be
-available.
-
-<h2> Installation </h2>
-
-After the build is complete, issue a <tt>make install</tt> to install
-the library.  The installation will consist of two top-level
-directories housing the library and include files.
-
-*/
-
-
-/*! \page linkage Linkage
-
-<b>FIXME: Update linkage information</b>
-<b>FIXME: Add pkg-config information</b>
-
-To link an external C/C++ or Fortran application with the library, the
-\c include directory must be added to the compilers include search
-path in order to access the grvy.h header file (or for Fortran, the \c
-lib directory should be added to access the pre-compiled
-grvy F90 module).  The \c lib directory should also be added
-to the linker search path along with a request to link against the
-libGRVY library.  Several example link steps are provided below.  These
-examples assume that the libGRVY library has been successfully built and
-installed previously in the users's ~/bin/grvy directory:
-
-<h3>C/C++ Example</h3>
-
-\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib -lgrvy \endcode
-
-<h3>Fortran Example</h3>
-
-\code > $(FC) -I$HOME/bin/grvy/lib app.f90 -L$HOME/bin/grvy/lib -lgrvy \endcode
-
-To embed the dynamic library search path for the libGRVY library
-directly into the application executable, use an additional linker
-option as follows:
-
-<h3>C/C++ Example</h3>
-
-\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib \
-         -Wl,-rpath,$HOME/bin/grvy/lib -lgrvy \endcode
-
-
-<b>Important Note:</b> F90 module file formats are not consistent
-across multiple compilers. Therefore, a Fortran application and the libGRVY
-F90 interface \em must be built with the same Fortran compiler family to ensure
-compatibility.
 
 */

@@ -1,0 +1,39 @@
+/*! \page linkage Linkage
+
+<b>FIXME: Update linkage information</b>
+<b>FIXME: Add pkg-config information</b>
+
+To link an external C/C++ or Fortran application with the library, the
+\c include directory must be added to the compilers include search
+path in order to access the grvy.h header file (or for Fortran, the \c
+lib directory should be added to access the pre-compiled
+grvy F90 module).  The \c lib directory should also be added
+to the linker search path along with a request to link against the
+libGRVY library.  Several example link steps are provided below.  These
+examples assume that the libGRVY library has been successfully built and
+installed previously in the users's ~/bin/grvy directory:
+
+<h3>C/C++ Example</h3>
+
+\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib -lgrvy \endcode
+
+<h3>Fortran Example</h3>
+
+\code > $(FC) -I$HOME/bin/grvy/lib app.f90 -L$HOME/bin/grvy/lib -lgrvy \endcode
+
+To embed the dynamic library search path for the libGRVY library
+directly into the application executable, use an additional linker
+option as follows:
+
+<h3>C/C++ Example</h3>
+
+\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib \
+         -Wl,-rpath,$HOME/bin/grvy/lib -lgrvy \endcode
+
+
+<b>Important Note:</b> F90 module file formats are not consistent
+across multiple compilers. Therefore, a Fortran application and the libGRVY
+F90 interface \em must be built with the same Fortran compiler family to ensure
+compatibility.
+
+*/

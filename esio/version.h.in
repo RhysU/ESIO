@@ -26,6 +26,10 @@
 #ifndef __ESIO_VERSION_H__
 #define __ESIO_VERSION_H__
 
+/** @file
+ * Provides ESIO version information.
+ */
+
 #define ESIO_MAJOR_VERSION @AX_MAJOR_VERSION@
 #define ESIO_MINOR_VERSION @AX_MINOR_VERSION@
 #define ESIO_POINT_VERSION @AX_POINT_VERSION@
