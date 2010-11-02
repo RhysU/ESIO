@@ -8,17 +8,19 @@ SUBDIRS = lib esio tests apps
 
 # Distribute these items:
 DIST_SUBDIRS = lib esio tests apps
-EXTRA_DIST= bootstrap $(DX_CONFIG)
+EXTRA_DIST  = bootstrap
+EXTRA_DIST += $(DX_CONFIG)
+EXTRA_DIST += build-aux/sfmakedepend.pl
+EXTRA_DIST += build-aux/update_license.pl
 
 # Eliminate .svn directories in dist tarball
 dist-hook:
 	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
 
 # Tools in the auxillary directory
-AUX_DIST = build-aux/install-sh        \
-           build-aux/mkinstalldirs     \
-           build-aux/missing           \
-           build-aux/update_license.pl
+AUX_DIST  = build-aux/install-sh
+AUX_DIST += build-aux/mkinstalldirs
+AUX_DIST += build-aux/missing
 
 # Support for pkgconfig
 pkgconfigdir   = $(libdir)/pkgconfig
