@@ -248,7 +248,7 @@ FILE * esio_set_stream(FILE * new_stream);
        esio_error (reason, __FILE__, __LINE__, esio_errno) ; \
        } while (0)
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** \cond INTERNAL */
 /* Internal helper macro for implementing ESIO_MPICHKx macros */
 #define ESIO_MPICHKx_TEMPLATE(esio_error_macro,stmt) \
     do { \
@@ -266,7 +266,7 @@ FILE * esio_set_stream(FILE * new_stream);
             esio_error_macro(_chk_reason, ESIO_EFAILED); \
         } \
     } while(0)
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+/** \endcond */
 
 /**
  * Executes \c stmt once handling any resulting MPI error per \c
