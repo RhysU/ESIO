@@ -35,7 +35,7 @@ further divided into the following subsections:
   <li> \subpage apiC   "C/C++ Interface" (see esio.h and version.h for now) </li>
   <li> \subpage errorC "C/C++ Error Handling" (see error.h for now) </li>
   <li> \subpage apiF   "Fortran Interface" (see esio.f90 for now)</li>
-  <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/doc/html/lcov/build/src/index.html">Buildbot Coverage</a> </li> <!-- FIXME Make link work -->
+  <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot Coverage</a> </li>
   <li> \subpage examples "Examples" </li>
 </ul>
 
