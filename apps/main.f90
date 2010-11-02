@@ -55,7 +55,7 @@ program main
   call mpi_comm_size(mpi_comm_world, numprocs, ierr)
 
   if (myid.eq.0) write(*,*) "initializing esio"
-  state = esio_init(mpi_comm_world)
+  state = esio_initialize(mpi_comm_world)
   ierr  = esio_file_create(state, filename, .TRUE.)
 
   if (myid.eq.0) write(*,*) "initializing problem"

@@ -50,7 +50,7 @@ module esio
   public :: esio_state
 
 ! Public API
-  public :: esio_init, esio_finalize
+  public :: esio_initialize, esio_finalize
   public :: esio_layout_count, esio_layout_get, esio_layout_set
   public :: esio_file_create, esio_file_open, esio_file_close
   public :: esio_field_size
@@ -74,22 +74,22 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  type(esio_state) function esio_init (comm)
+  type(esio_state) function esio_initialize (comm)
 
     integer, intent(in) :: comm
 
-    ! See C routine esio_init_fortran re: MPI communicator interoperation
+    ! See C routine esio_initialize_fortran re: MPI communicator interoperation
     interface
-      function impl (comm) bind (C, name="esio_init_fortran")
+      function impl (comm) bind (C, name="esio_initialize_fortran")
         import
         type(esio_state)           :: impl
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
       end function impl
     end interface
 
-    esio_init = impl(comm)
+    esio_initialize = impl(comm)
 
-  end function esio_init
+  end function esio_initialize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

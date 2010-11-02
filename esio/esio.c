@@ -200,7 +200,7 @@ esio_MPI_Comm_dup_with_name(MPI_Comm comm)
 }
 
 esio_state
-esio_init(MPI_Comm comm)
+esio_initialize(MPI_Comm comm)
 {
     // Sanity check incoming arguments
     if (comm == MPI_COMM_NULL) {
@@ -238,15 +238,15 @@ esio_init(MPI_Comm comm)
 }
 
 #ifdef __INTEL_COMPILER
-// remark #1418: external function definition with no prior declaration
+// remark #1418: external function definitializeion with no prior declaration
 #pragma warning(push,disable:1418)
 #endif
 esio_state
-esio_init_fortran(MPI_Fint fcomm)
+esio_initialize_fortran(MPI_Fint fcomm)
 {
     // Converting MPI communicators from Fortran to C requires MPI_Comm_f2c
     // See section 16.3.4 of the MPI 2.2 Standard for details
-    return esio_init(MPI_Comm_f2c(fcomm));
+    return esio_initialize(MPI_Comm_f2c(fcomm));
 }
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)

@@ -249,7 +249,7 @@ FCT_BGN()
             assert(filename);
 
             // Initialize ESIO state
-            state = esio_init(MPI_COMM_WORLD);
+            state = esio_initialize(MPI_COMM_WORLD);
             assert(state);
 
             esio_layout_set(state, LAYOUT_TAG);

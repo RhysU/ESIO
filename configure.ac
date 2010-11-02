@@ -103,13 +103,14 @@ dnl ------------------------------------------------
 AC_CONFIG_FILES([
     LICENSE
     Makefile
-    apps/Makefile
-    lib/Makefile
-    esio/Makefile
-    esio/version.h
-    tests/Makefile
     esio.pc
     esio-hdf5.pc
+    apps/Makefile
+    doxygen/Makefile
+    esio/Makefile
+    esio/version.h
+    lib/Makefile
+    tests/Makefile
 ])
 
 AC_OUTPUT()
