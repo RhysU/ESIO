@@ -41,4 +41,13 @@
 #define ENABLE_HDF5_ERROR_HANDLER                               \
     H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
 
+herr_t
+esio_H5LTget_attribute_ndims_info(hid_t loc_id,
+                                  const char *obj_name,
+                                  const char *attr_name,
+                                  int *rank,
+                                  hsize_t *dims,
+                                  H5T_class_t *type_class,
+                                  size_t *type_size);
+
 #endif /* __ESIO_H5UTILS_H */

@@ -1456,30 +1456,19 @@ int esio_attribute_sizev(const esio_state s,
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
 
-    // Attempt to retrieve dimensionality of the named attribute
-    // We only support rank == 1 attributes via ESIO
+    // Attempt to retrieve information on the attribute
     int rank;
-    {
-        DISABLE_HDF5_ERROR_HANDLER
-        const herr_t err = H5LTget_attribute_ndims(s->file_id, "/", name,
-                                                   &rank);
-        ENABLE_HDF5_ERROR_HANDLER
-
-        if (err  <  0) ESIO_ERROR("No such attribute found", ESIO_EINVAL);
-        if (rank != 1) ESIO_ERROR("Attribute rank != 1",     ESIO_EINVAL);
-    }
-
-    // Retrieve the attribute's size
-    hsize_t dims[rank];
+    hsize_t dims[H5S_MAX_RANK]; // Oversized to protect smashing the stack
     H5T_class_t type_class;
     size_t type_size;
     DISABLE_HDF5_ERROR_HANDLER
-    const herr_t err = H5LTget_attribute_info(s->file_id, "/", name,
-                                              dims, &type_class, &type_size);
+    const herr_t err = esio_H5LTget_attribute_ndims_info(s->file_id, "/", name,
+                                                         &rank, dims,
+                                                         &type_class,
+                                                         &type_size);
     ENABLE_HDF5_ERROR_HANDLER
-    if (err < 0) {
-        ESIO_ERROR("Unable to retrieve attribute information", ESIO_EFAILED);
-    }
+    if (err  <  0) ESIO_ERROR("No such attribute found",         ESIO_EINVAL);
+    if (rank != 1) ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EINVAL);
 
     // Ensure we won't overflow the return value type
     if (dims[0] > INT_MAX) {
@@ -1491,3 +1480,37 @@ int esio_attribute_sizev(const esio_state s,
 
     return ESIO_SUCCESS;
 }
+
+#define GEN_ATTRIBUTE_WRITEV(TYPE)                                           \
+int esio_attribute_writev_##TYPE(const esio_state s,                         \
+                                 const char *name,                           \
+                                 const TYPE *value,                          \
+                                 int ncomponents)                            \
+{                                                                            \
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL); \
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL); \
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL); \
+    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EINVAL); \
+    if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL); \
+                                                                             \
+    const herr_t err = H5LTset_attribute_##TYPE(                             \
+            s->file_id, "/", name, value, ncomponents);                      \
+                                                                             \
+    return (err < 0) ? ESIO_EFAILED : ESIO_SUCCESS;                          \
+}
+
+GEN_ATTRIBUTE_WRITEV(double)
+GEN_ATTRIBUTE_WRITEV(float)
+GEN_ATTRIBUTE_WRITEV(int)
+
+#define GEN_ATTRIBUTE_WRITE(TYPE)                                            \
+int esio_attribute_write_##TYPE(const esio_state s,                          \
+                                const char *name,                            \
+                                const TYPE *value)                           \
+{                                                                            \
+    return esio_attribute_writev_##TYPE(s, name, value, 1);                  \
+}
+
+GEN_ATTRIBUTE_WRITE(double)
+GEN_ATTRIBUTE_WRITE(float)
+GEN_ATTRIBUTE_WRITE(int)

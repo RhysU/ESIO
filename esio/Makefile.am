@@ -27,6 +27,7 @@ noinst_LTLIBRARIES  += libesio.la
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_SOURCES   = error.c
 libesio_la_SOURCES  += esio.c
+libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 
