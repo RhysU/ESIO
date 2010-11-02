@@ -23,11 +23,6 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#if    !defined(TYPE) \
-    || !defined(AFFIX)
-#error "attribute_template.c should be #included after appropriate #defines"
-#endif
-
 // See 'feature_test_macros(7) for details'
 #define _GNU_SOURCE
 
@@ -39,6 +34,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <mpi.h>
 #include <hdf5.h>
@@ -58,12 +54,6 @@
 // Add command line options
 static const fctcl_init_t my_cl_options[] = {
     {
-        "--ncomponents",
-        "-n",
-        FCTCL_STORE_VALUE,
-        "Sets the number of components used in vline test"
-    },
-    {
         "--preserve",
         "-t",
         FCTCL_STORE_TRUE,
@@ -71,7 +61,6 @@ static const fctcl_init_t my_cl_options[] = {
     },
     FCTCL_INIT_NULL /* Sentinel */
 };
-
 
 FCT_BGN()
 {
@@ -89,12 +78,6 @@ FCT_BGN()
 
     // Retrieve and sanity check problem size options
     preserve = fctcl_is("--preserve");
-    const int ncomponents = (int) strtol(
-        fctcl_val2("--ncomponents","2"), (char **) NULL, 10);
-    if (ncomponents < 1) {
-        fprintf(stderr, "\n--ncomponents=%d < 1\n", ncomponents);
-        MPI_Abort(MPI_COMM_WORLD, 1);
-    }
 
     // Obtain default HDF5 error handler
     H5E_auto2_t hdf5_handler;
@@ -160,32 +143,40 @@ FCT_BGN()
         }
         FCT_TEARDOWN_END();
 
-        // Test scalar-valued attributes, including overwrite details
-        FCT_TEST_BGN(attribute)
+        // Test scalar-valued lines, including overwrite details
+        FCT_TEST_BGN(strings)
         {
-            TYPE value;
+            const char * msg1 = "Tra la la";
+            const char * msg2 = "The quick brown fox jumps over the lazy dog";
 
             // Open file
             fct_req(0 == esio_file_create(state, filename, 1));
 
-            // Write zero to disk
-            value = 0;
-            fct_req(0 == AFFIX(esio_attribute_write)(state, "attribute", &value));
+            // Write empty message to disk
+            fct_req(0 == esio_string_set(state, "msg1", ""));
 
-            // Populate value with non-zero data
-            // TODO Vary this based on the rank?
-            value = 5678;
+            // Overwrite message with test data
+            fct_req(0 == esio_string_set(state, "msg1", msg1));
 
-            // Overwrite zeros on disk with test data
-            fct_req(0 == AFFIX(esio_attribute_write)(state, "attribute", &value));
+            // Write a second message to disk
+            fct_req(0 == esio_string_set(state, "msg2", msg2));
 
-            // Clear storage in memory
-            value = 0;
+            // Retrieve the first and ensure it comes back cleanly
+            {
+                char *retrieved1 = esio_string_get(state, "msg1");
+                fct_req(retrieved1);
+                fct_chk_eq_str(retrieved1, msg1);
+                fct_chk(retrieved1 != msg1);
+                free(retrieved1);
+            }
 
-            { // Ensure we can retrieve the size correctly
-                int count;
-                fct_req(0 == esio_attribute_sizev(state, "attribute", &count));
-                fct_chk_eq_int(count, 1);
+            // Retrieve the first and ensure it comes back cleanly
+            {
+                char *retrieved2 = esio_string_get(state, "msg2");
+                fct_req(retrieved2);
+                fct_chk_eq_str(retrieved2, msg2);
+                fct_chk(retrieved2 != msg2);
+                free(retrieved2);
             }
 
             // Close the file
@@ -194,89 +185,18 @@ FCT_BGN()
             // Reopen the file using normal HDF5 APIs on root processor
             // Ensure we can retrieve the data by other means
             if (world_rank == 0) {
-                TYPE data;
+                char *retrieved1 = malloc((strlen(msg1) + 1));
+                fct_req(retrieved1);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                fct_req(0 <= AFFIX(H5LTget_attribute)(file_id, "/",
-                                                      "attribute",
-                                                      &data));
-
-                fct_chk(data == 5678);
-
+                fct_req(0 <= H5LTget_attribute_string(file_id, "/",
+                                                      "msg1", retrieved1));
+                fct_chk_eq_str(retrieved1, msg1);
+                free(retrieved1);
                 fct_req(0 <= H5Fclose(file_id));
             }
-
-            // Re-read the file in a distributed manner and verify contents
-            fct_req(0 == esio_file_open(state, filename, 0));
-            fct_req(0 == AFFIX(esio_attribute_read)(state, "attribute", &value));
-            fct_chk(value == 5678);
-            fct_req(0 == esio_file_close(state));
         }
         FCT_TEST_END();
-
-        // Test vector-like attributes
-        FCT_TEST_BGN(vattribute)
-        {
-            TYPE *value;
-
-            // Allocate storage
-            value = calloc(ncomponents, sizeof(TYPE));
-            fct_req(value);
-
-            // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
-
-            // Populate test data
-            for (int i = 0; i < ncomponents; ++i) {
-                value[i] = i + 5678;
-            }
-
-            // Write attribute to file
-            fct_req(0 == AFFIX(esio_attribute_writev)(state, "attribute",
-                                                      value, ncomponents));
-
-            { // Ensure we can retrieve the size correctly
-                int count;
-                fct_req(0 == esio_attribute_sizev(state, "attribute", &count));
-                fct_chk_eq_int(count, ncomponents);
-            }
-
-            // Close the file
-            fct_req(0 == esio_file_close(state));
-
-            // Free the temporary
-            free(value);
-
-            // Reopen the file using normal HDF5 APIs on root processor
-            // Examine the contents to ensure it matches
-            if (world_rank == 0) {
-                value = calloc(ncomponents, sizeof(TYPE));
-                fct_req(value);
-                const hid_t file_id
-                    = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-                fct_req(0 <= AFFIX(H5LTget_attribute)(file_id, "/",
-                                                      "attribute", value));
-                for (int i = 0; i < ncomponents; ++i) {
-                    fct_chk(i + 5678 == value[i]);
-                }
-                fct_req(0 <= H5Fclose(file_id));
-                free(value);
-            }
-
-            // Re-read the file in a distributed manner and verify contents
-            value = calloc(ncomponents, sizeof(TYPE));
-            fct_req(value);
-            fct_req(0 == esio_file_open(state, filename, 0));
-            fct_req(0 == AFFIX(esio_attribute_readv)(state, "attribute",
-                                                     value, ncomponents));
-            for (int i = 0; i < ncomponents; ++i) {
-                fct_chk(i + 5678 == value[i]);
-            }
-            free(value);
-            fct_req(0 == esio_file_close(state));
-        }
-        FCT_TEST_END();
-
     }
     FCT_FIXTURE_SUITE_END();
 }

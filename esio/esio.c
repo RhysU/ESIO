@@ -1609,39 +1609,66 @@ char* esio_string_get(const esio_state s,
     if (name == NULL)
         ESIO_ERROR_NULL("name == NULL",           ESIO_EINVAL);
 
-    // Attempt to retrieve information on the attribute
-    int rank;
-    hsize_t dims[H5S_MAX_RANK]; // Oversized to protects the stack
-    H5T_class_t type_class;
-    size_t type_size;
+    // Silence HDF5 errors while querying the attribute
     DISABLE_HDF5_ERROR_HANDLER
-    const herr_t err1 = esio_H5LTget_attribute_ndims_info(
-            s->file_id, "/", name, &rank, dims, &type_class, &type_size);
-    ENABLE_HDF5_ERROR_HANDLER
-    if (err1 < 0) {
+
+    // Attempt to open the requested attribute
+    const hid_t aid = H5Aopen_by_name(
+            s->file_id, "/", name, H5P_DEFAULT, H5P_DEFAULT);
+    if (aid < 0) {
+        ENABLE_HDF5_ERROR_HANDLER
         ESIO_ERROR_NULL("unable to interrogate requested attribute",
                         ESIO_EINVAL);
     }
 
-    // TODO Ensure we are truly retrieving a string
+    // Open type associated with the attribute
+    const hid_t tid = H5Aget_type(aid);
+    if (tid < 0) {
+        ENABLE_HDF5_ERROR_HANDLER
+        H5Aclose(aid);
+        ESIO_ERROR_NULL("unable to interrogate attribute type", ESIO_EINVAL);
+    }
+
+    // Check that we're dealing with a string
+    if (H5T_STRING != H5Tget_class(tid)) {
+        ENABLE_HDF5_ERROR_HANDLER
+        H5Tclose(tid);
+        H5Aclose(aid);
+        ESIO_ERROR_NULL("requested attribute is not a string", ESIO_EINVAL);
+    }
+
+    // Below here HDF5 calls should be succeeding
+    ENABLE_HDF5_ERROR_HANDLER
+
+    // Retrieve the string length
+    const size_t size = H5Tget_size(tid);
+    if (size == 0) {
+        H5Tclose(tid);
+        H5Aclose(aid);
+        ESIO_ERROR_NULL("unable to obtain request string length", ESIO_EINVAL);
+    }
 
     // Allocate storage for the string (already includes null termination)
-    char * retval = malloc(dims[0] * sizeof(char));
+    char * retval = malloc(size);
     if (retval == NULL) {
-        ESIO_ERROR_NULL("Unable to allocate storage for string",
-                        ESIO_EFAILED);
+        H5Tclose(tid);
+        H5Aclose(aid);
+        ESIO_ERROR_NULL("Unable to allocate storage for string", ESIO_EFAILED);
     }
 
-    // Read the attribute's data
-    const herr_t err2 = H5LTget_attribute_string(
-            s->file_id, "/", name, retval);
-    if (err2 < 0) {
-        ESIO_ERROR_NULL("unable to retrieve requested attribute",
-                        ESIO_EFAILED);
+    // Read the string's data
+    const herr_t err = H5Aread(aid, tid, retval);
+    if (err < 0) {
+        H5Tclose(tid);
+        H5Aclose(aid);
+        ESIO_ERROR_NULL("unable to retrieve requested string", ESIO_EFAILED);
     }
 
-    // Be sure our return value is null terminated
-    retval[dims[0] - 1] = 0;
+    // Close the attribute type and the attribute
+    H5Tclose(tid);
+    H5Aclose(aid);
 
-    return ESIO_SUCCESS;
+    // Return the newly allocated string.
+    // The caller MUST free the memory.
+    return retval;
 }

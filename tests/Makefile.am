@@ -43,6 +43,17 @@ basic_LDADD     = ../esio/libesio.la
 basic_LDADD    += $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ###########################################################################
+## STRING STRING STRING STRING STRING STRING STRING STRING STRING STRING ##
+###########################################################################
+
+## String tests in C
+TESTS          += string.sh    # NB Wrapper script
+EXTRA_DIST     += string.sh    # NB Wrapper script
+check_PROGRAMS += string
+string_SOURCES  = string.c
+string_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+###########################################################################
 ## ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ##
 ###########################################################################
 
