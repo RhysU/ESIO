@@ -12,6 +12,7 @@ include_HEADERS    = # Append below
 lib_LTLIBRARIES    = # Append below
 noinst_HEADERS     = # Append below
 noinst_LTLIBRARIES = # Append below
+EXTRA_DIST         = # Append below
 
 # Use MPI compiler wrappers since HDF5 wrappers break autodependencies.
 CC=@MPICC@
@@ -40,6 +41,12 @@ include_HEADERS += version.h
 noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h
+
+# Templated implementation files which must ship too
+EXTRA_DIST += layout0.c
+EXTRA_DIST += layout1.c
+EXTRA_DIST += plane.c
+EXTRA_DIST += line.c
 
 # Public Fortran library is a superset of libesio.la
 noinst_LTLIBRARIES       += libesiof.la
