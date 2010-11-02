@@ -1487,6 +1487,7 @@ int esio_attribute_writev_##TYPE(const esio_state s,                          \
                                  const TYPE *value,                           \
                                  int ncomponents)                             \
 {                                                                             \
+    /* Sanity check incoming arguments */                                     \
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);  \
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);  \
@@ -1495,8 +1496,11 @@ int esio_attribute_writev_##TYPE(const esio_state s,                          \
                                                                               \
     const herr_t err = H5LTset_attribute_##TYPE(                              \
             s->file_id, "/", name, value, ncomponents);                       \
+    if (err < 0) {                                                            \
+        ESIO_ERROR("unable to write attribute", ESIO_EFAILED);                \
+    }                                                                         \
                                                                               \
-    return (err < 0) ? ESIO_EFAILED : ESIO_SUCCESS;                           \
+    return ESIO_SUCCESS;                                                      \
 }
 
 #define GEN_ATTRIBUTE_READV(TYPE)                                             \
@@ -1505,6 +1509,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
                                 TYPE *value,                                  \
                                 int ncomponents)                              \
 {                                                                             \
+    /* Sanity check incoming arguments */                                     \
     if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);  \
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);  \
@@ -1521,7 +1526,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
             s->file_id, "/", name, &rank, dims, &type_class, &type_size);     \
     ENABLE_HDF5_ERROR_HANDLER                                                 \
     if (err1 < 0) {                                                           \
-        ESIO_ERROR("unable to retrieve requested attribute", ESIO_EINVAL);    \
+        ESIO_ERROR("unable to interrogate requested attribute", ESIO_EINVAL); \
     }                                                                         \
                                                                               \
     /* Ensure the user is getting what he/she requested */                    \
@@ -1533,8 +1538,11 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
     /* Read the attribute's data */                                           \
     const herr_t err2 = H5LTget_attribute_##TYPE(                             \
             s->file_id, "/", name, value);                                    \
+    if (err2 < 0) {                                                           \
+        ESIO_ERROR("unable to retrieve requested attribute", ESIO_EFAILED);   \
+    }                                                                         \
                                                                               \
-    return (err2 < 0) ? ESIO_EFAILED : ESIO_SUCCESS;                          \
+    return ESIO_SUCCESS;                                                      \
 }
 
 #define GEN_ATTRIBUTE_WRITE(TYPE)                                             \
@@ -1567,3 +1575,73 @@ GEN_ATTRIBUTE_WRITEV(int)
 GEN_ATTRIBUTE_WRITE(int)
 GEN_ATTRIBUTE_READV(int)
 GEN_ATTRIBUTE_READ(int)
+
+// *********************************************************************
+// STRING STRING STRING STRING STRING STRING STRING STRING STRING STRING
+// *********************************************************************
+
+int esio_string_set(const esio_state s,
+                    const char *name,
+                    const char *value)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EINVAL);
+
+    const herr_t err = H5LTset_attribute_string(s->file_id, "/", name, value);
+    if (err < 0) {
+        ESIO_ERROR("unable to write attribute", ESIO_EFAILED);
+    }
+
+    return ESIO_SUCCESS;
+}
+
+char* esio_string_get(const esio_state s,
+                      const char *name)
+{
+    // Sanity check incoming arguments
+    if (s == NULL)
+        ESIO_ERROR_NULL("s == NULL",              ESIO_EINVAL);
+    if (s->file_id == -1)
+        ESIO_ERROR_NULL("No file currently open", ESIO_EINVAL);
+    if (name == NULL)
+        ESIO_ERROR_NULL("name == NULL",           ESIO_EINVAL);
+
+    // Attempt to retrieve information on the attribute
+    int rank;
+    hsize_t dims[H5S_MAX_RANK]; // Oversized to protects the stack
+    H5T_class_t type_class;
+    size_t type_size;
+    DISABLE_HDF5_ERROR_HANDLER
+    const herr_t err1 = esio_H5LTget_attribute_ndims_info(
+            s->file_id, "/", name, &rank, dims, &type_class, &type_size);
+    ENABLE_HDF5_ERROR_HANDLER
+    if (err1 < 0) {
+        ESIO_ERROR_NULL("unable to interrogate requested attribute",
+                        ESIO_EINVAL);
+    }
+
+    // TODO Ensure we are truly retrieving a string
+
+    // Allocate storage for the string (already includes null termination)
+    char * retval = malloc(dims[0] * sizeof(char));
+    if (retval == NULL) {
+        ESIO_ERROR_NULL("Unable to allocate storage for string",
+                        ESIO_EFAILED);
+    }
+
+    // Read the attribute's data
+    const herr_t err2 = H5LTget_attribute_string(
+            s->file_id, "/", name, retval);
+    if (err2 < 0) {
+        ESIO_ERROR_NULL("unable to retrieve requested attribute",
+                        ESIO_EFAILED);
+    }
+
+    // Be sure our return value is null terminated
+    retval[dims[0] - 1] = 0;
+
+    return ESIO_SUCCESS;
+}
