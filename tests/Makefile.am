@@ -13,7 +13,10 @@ noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
 BUILT_SOURCES   = # Append below
 CLEANFILES      = # Append below
-EXTRA_DIST      = layout_template.c plane_template.c line_template.c
+EXTRA_DIST      = layout_template.c \
+                  plane_template.c  \
+                  line_template.c   \
+                  attribute_template.c
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -40,6 +43,31 @@ basic_LDADD     = ../esio/libesio.la
 basic_LDADD    += $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ###########################################################################
+## ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ##
+###########################################################################
+
+## Attribute double precision tests in C
+TESTS                    += attribute_double.sh    # NB Wrapper script
+EXTRA_DIST               += attribute_double.sh    # NB Wrapper script
+check_PROGRAMS           += attribute_double
+attribute_double_SOURCES  = attribute_double.c
+attribute_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## Attribute single precision tests in C
+TESTS                   += attribute_float.sh     # NB Wrapper script
+EXTRA_DIST              += attribute_float.sh     # NB Wrapper script
+check_PROGRAMS          += attribute_float
+attribute_float_SOURCES  = attribute_float.c
+attribute_float_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## Attribute integer tests in C
+TESTS                 += attribute_int.sh         # NB Wrapper script
+EXTRA_DIST            += attribute_int.sh         # NB Wrapper script
+check_PROGRAMS        += attribute_int
+attribute_int_SOURCES  = attribute_int.c
+attribute_int_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+###########################################################################
 ## LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE ##
 ###########################################################################
 
@@ -51,15 +79,15 @@ line_double_SOURCES  = line_double.c
 line_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Line single precision tests in C
-TESTS               += line_float.sh          # NB Wrapper script
-EXTRA_DIST          += line_float.sh          # NB Wrapper script
+TESTS               += line_float.sh     # NB Wrapper script
+EXTRA_DIST          += line_float.sh     # NB Wrapper script
 check_PROGRAMS      += line_float
 line_float_SOURCES   = line_float.c
 line_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Line integer tests in C
-TESTS             += line_int.sh          # NB Wrapper script
-EXTRA_DIST        += line_int.sh          # NB Wrapper script
+TESTS             += line_int.sh         # NB Wrapper script
+EXTRA_DIST        += line_int.sh         # NB Wrapper script
 check_PROGRAMS    += line_int
 line_int_SOURCES   = line_int.c
 line_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
@@ -76,15 +104,15 @@ plane_double_SOURCES  = plane_double.c
 plane_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Plane single precision tests in C
-TESTS                += plane_float.sh          # NB Wrapper script
-EXTRA_DIST           += plane_float.sh          # NB Wrapper script
+TESTS                += plane_float.sh     # NB Wrapper script
+EXTRA_DIST           += plane_float.sh     # NB Wrapper script
 check_PROGRAMS       += plane_float
 plane_float_SOURCES   = plane_float.c
 plane_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Plane integer tests in C
-TESTS              += plane_int.sh          # NB Wrapper script
-EXTRA_DIST         += plane_int.sh          # NB Wrapper script
+TESTS              += plane_int.sh         # NB Wrapper script
+EXTRA_DIST         += plane_int.sh         # NB Wrapper script
 check_PROGRAMS     += plane_int
 plane_int_SOURCES   = plane_int.c
 plane_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
@@ -101,15 +129,15 @@ layout0_double_SOURCES  = layout0_double.c
 layout0_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Layout 0 single precision tests in C
-TESTS                  += layout0_float.sh          # NB Wrapper script
-EXTRA_DIST             += layout0_float.sh          # NB Wrapper script
+TESTS                  += layout0_float.sh     # NB Wrapper script
+EXTRA_DIST             += layout0_float.sh     # NB Wrapper script
 check_PROGRAMS         += layout0_float
 layout0_float_SOURCES   = layout0_float.c
 layout0_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Layout 0 integer tests in C
-TESTS                += layout0_int.sh          # NB Wrapper script
-EXTRA_DIST           += layout0_int.sh          # NB Wrapper script
+TESTS                += layout0_int.sh         # NB Wrapper script
+EXTRA_DIST           += layout0_int.sh         # NB Wrapper script
 check_PROGRAMS       += layout0_int
 layout0_int_SOURCES   = layout0_int.c
 layout0_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
@@ -126,15 +154,15 @@ layout1_double_SOURCES  = layout1_double.c
 layout1_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Layout 1 single precision tests in C
-TESTS                  += layout1_float.sh          # NB Wrapper script
-EXTRA_DIST             += layout1_float.sh          # NB Wrapper script
+TESTS                  += layout1_float.sh     # NB Wrapper script
+EXTRA_DIST             += layout1_float.sh     # NB Wrapper script
 check_PROGRAMS         += layout1_float
 layout1_float_SOURCES   = layout1_float.c
 layout1_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Layout 1 integer tests in C
-TESTS                += layout1_int.sh          # NB Wrapper script
-EXTRA_DIST           += layout1_int.sh          # NB Wrapper script
+TESTS                += layout1_int.sh         # NB Wrapper script
+EXTRA_DIST           += layout1_int.sh         # NB Wrapper script
 check_PROGRAMS       += layout1_int
 layout1_int_SOURCES   = layout1_int.c
 layout1_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
