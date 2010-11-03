@@ -51,7 +51,7 @@ To the extent allowed by your MPI stack and the parallel HDF5
 implementation, ESIO is thread safe provided that a single \c esio_state
 handle is not used concurrently by more than one thread.
 
-\section conceptsfiles Data files
+\section conceptsfiles Files
 
 ESIO data files are, for all intents and purposes, simply <a
 href="http://www.hdfgroup.org/HDF5/">HDF5</a> files usable by any
