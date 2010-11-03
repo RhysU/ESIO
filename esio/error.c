@@ -134,8 +134,6 @@ const char *
 esio_strerror(const int esio_errno)
 {
     switch (esio_errno) {
-    case ESIO_FAILURE:
-        return "failure" ;
     case ESIO_SUCCESS:
         return "success" ;
     case ESIO_EFAULT:

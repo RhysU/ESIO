@@ -50,7 +50,6 @@ extern "C" {
  * GSL's error codes</a>.
  */
 enum esio_error_status {
-    ESIO_FAILURE  = -1, /**< Failure */
     ESIO_SUCCESS  =  0, /**< Success */
     ESIO_EFAULT   =  3, /**< Invalid pointer */
     ESIO_EINVAL   =  4, /**< Invalid argument supplied by user */
