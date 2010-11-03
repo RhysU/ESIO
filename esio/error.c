@@ -148,8 +148,6 @@ esio_strerror(const int esio_errno)
         return "sanity check failed - shouldn't happen" ;
     case ESIO_ENOMEM:
         return "malloc failed" ;
-    case ESIO_EZERODIV:
-        return "tried to divide by zero" ;
     default:
         return "unknown error code" ;
     }
