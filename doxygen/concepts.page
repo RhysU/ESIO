@@ -142,21 +142,24 @@ pointer arithmetic contexts.  Unfortunately, due to a limitation in HDF5,
 
 ESIO can read or write distributed two-dimensional, numeric data (termed
 "planes").  Such operations can be thought of as a tensor product of
-two \ref conceptslines "line" operations in all senses.  In addition
-to a line's \c aglobal, \c astart, etc., a plane contains \c bglobal,
-\c bstart, etc.  The "A" direction is the faster index and appears after
-the "B" direction in all C API calls.  Existing plane data may be queried
-using esio_plane_size() or esio_plane_sizev().
+two \ref conceptslines "line" operations in all senses.  In addition to
+a line's \c aglobal, \c astart, etc., a plane contains \c bglobal, \c
+bstart, etc.  The "A" direction is the faster index in files and appears
+after the "B" direction in all C API calls.  Typically the "A" direction
+should be the faster direction in memory as well.  Existing plane data
+may be queried using esio_plane_size() or esio_plane_sizev().
 
 \section conceptsfields Fields
 
-ESIO can read or write distributed three-dimensional, numeric data (termed
-"fields").  Field methods add \c cglobal, \c cstart, etc. arguments
-beyond those found for a \ref conceptsplanes "plane".  The "A"
-direction is the fastest index and appears rightmost in all C API calls.
-Sample field routines are esio_field_write_int(), esio_field_read_int(),
-esio_field_writev_int(), and esio_field_readv_int().  Existing field
-data may be queried using esio_field_size() or esio_field_sizev().
+ESIO can read or write distributed three-dimensional, numeric
+data (termed "fields").  Field methods add \c cglobal, \c cstart,
+etc. arguments beyond those found for a \ref conceptsplanes "plane".
+The "A" direction is the fastest index in files and appears rightmost
+in all C API calls.  Typically the "A" direction should be the
+fastest direction in memory as well.  Sample field routines are
+esio_field_write_int(), esio_field_read_int(), esio_field_writev_int(),
+and esio_field_readv_int().  Existing field data may be queried using
+esio_field_size() or esio_field_sizev().
 
 \section conceptslayouts Layouts
 

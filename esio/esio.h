@@ -303,7 +303,7 @@ ESIO_ATTRIBUTE_READV_GEN(int)
 
 /**
  * Query the number of components in a numeric attribute.
- * Scalar-valued attributes have <code>ncomponents == 1</code>.
+ * Scalar-valued attributes have <code>*ncomponents == 1</code>.
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
@@ -364,8 +364,9 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
  * \param name Null-terminated attribute name.
  * \param line Buffer containing scalars to write.
  * \param aglobal Global number of scalars within the line.
- * \param astart  Global offset (zero-indexed) to write locally by this MPI rank.
- * \param alocal  Number of scalars to write locally by this MPI rank.
+ * \param astart  Global starting offset (zero-indexed) handled
+ *                locally by this MPI rank.
+ * \param alocal  Number of scalars this MPI rank should write.
  * \param astride Stride between adjacent values in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
@@ -394,8 +395,9 @@ ESIO_LINE_WRITE_GEN(int)
  * \param name Null-terminated attribute name.
  * \param line Buffer containing the read values.
  * \param aglobal Global number of scalars within the line.
- * \param astart  Global offset (zero-indexed) to read locally by this MPI rank.
- * \param alocal  Number of scalars to read locally by this MPI rank.
+ * \param astart  Global starting offset (zero-indexed) handled
+ *                locally by this MPI rank.
+ * \param alocal  Number of scalars this MPI rank should read.
  * \param astride Stride between adjacent values in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
@@ -445,8 +447,9 @@ int esio_line_size(const esio_state s,
  * \param name Null-terminated attribute name.
  * \param line Buffer containing vectors to write.
  * \param aglobal Global number of vectors within the line.
- * \param astart  Global offset (zero-indexed) to write locally by this MPI rank.
- * \param alocal  Number of vectors to write locally by this MPI rank.
+ * \param astart  Global starting offset (zero-indexed) handled
+ *                locally by this MPI rank.
+ * \param alocal  Number of vectors this MPI rank should write.
  * \param astride Stride between adjacent vectors in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                It must be an integer multiple of \c ncomponents.
@@ -477,8 +480,9 @@ ESIO_LINE_WRITEV_GEN(int)
  * \param name Null-terminated attribute name.
  * \param line Buffer to contain the read values.
  * \param aglobal Global number of vectors within the line.
- * \param astart  Global offset (zero-indexed) to read locally by this MPI rank.
- * \param alocal  Number of vectors to read locally by this MPI rank.
+ * \param astart  Global starting offset (zero-indexed) handled
+ *                locally by this MPI rank.
+ * \param alocal  Number of vectors this MPI rank should read.
  * \param astride Stride between adjacent vectors in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                It must be an integer multiple of \c ncomponents.
@@ -504,10 +508,10 @@ ESIO_LINE_READV_GEN(int)
 
 /**
  * Query the global number of vectors and components within a line.
- * Scalar-valued lines have <code>ncomponents == 1</code>.
+ * Scalar-valued lines have <code>*ncomponents == 1</code>.
  *
  * \param s Handle to use.
- * \param name Null-terminated attribute name.
+ * \param name Null-terminated line name.
  * \param aglobal Buffer to contain the number of vectors within the line.
  * \param ncomponents Buffer to contain the number of component in
  *                    each vector.
@@ -564,12 +568,96 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
  * See \ref conceptsplanes "plane concepts" for more details.
  */
 /*\@{*/
+
+/**
+ * Write a scalar-valued <code>double</code> plane.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param plane Buffer containing scalars to write.
+ * \param bglobal Global number of scalars in the slower "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of scalars in "B" this MPI rank should write.
+ * \param bstride Stride between adjacent scalars in "B"
+ *                within buffer \c plane.
+ * \param aglobal Global number of scalars in the faster "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of scalars in "A" this MPI rank should write.
+ * \param astride Stride between adjacent scalars in "A"
+ *                within buffer \c plane.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 ESIO_PLANE_WRITE_GEN(double)
+
+/**
+ * Write a scalar-valued <code>float</code> plane.
+ * \copydetails esio_plane_write_double
+ */
 ESIO_PLANE_WRITE_GEN(float)
+
+/**
+ * Write a scalar-valued <code>int</code> plane.
+ * \copydetails esio_plane_write_double
+ */
 ESIO_PLANE_WRITE_GEN(int)
+
+/**
+ * Read a scalar-valued <code>double</code> plane.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param plane Buffer containing the read values
+ * \param bglobal Global number of scalars in the slower "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of scalars in "B" this MPI rank should read.
+ * \param bstride Stride between adjacent scalars in "B"
+ *                within buffer \c plane.
+ * \param aglobal Global number of scalars in the faster "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of scalars in "A" this MPI rank should read.
+ * \param astride Stride between adjacent scalars in "A"
+ *                within buffer \c plane.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 ESIO_PLANE_READ_GEN(double)
+
+/**
+ * Read a scalar-valued <code>float</code> plane.
+ * \copydetails esio_plane_read_double
+ */
 ESIO_PLANE_READ_GEN(float)
+
+/**
+ * Read a scalar-valued <code>int</code> plane.
+ * \copydetails esio_plane_read_double
+ */
 ESIO_PLANE_READ_GEN(int)
+
+/**
+ * Query the global number of scalars within a plane.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param bglobal Buffer to contain the number of scalars in the slower
+ *                "B" direction.
+ * \param aglobal Buffer to contain the number of scalars in the faster
+ *                "A" direction.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_plane_size(const esio_state s,
                     const char *name,
                     int *bglobal, int *aglobal);
@@ -580,12 +668,103 @@ int esio_plane_size(const esio_state s,
  * See \ref conceptsplanes "plane concepts" for more details.
  */
 /*\@{*/
+
+/**
+ * Write a vector-valued <code>double</code> plane.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param plane Buffer containing vectors to write.
+ * \param bglobal Global number of vectors in the slower "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of vectors in "B" this MPI rank should write.
+ * \param bstride Stride between adjacent vectors in "B"
+ *                within buffer \c plane.
+ * \param aglobal Global number of vectors in the faster "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of vectors in "A" this MPI rank should write.
+ * \param astride Stride between adjacent vectors in "A"
+ *                within buffer \c plane.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 ESIO_PLANE_WRITEV_GEN(double)
+
+/**
+ * Write a vector-valued <code>float</code> plane.
+ * \copydetails esio_plane_writev_double
+ */
 ESIO_PLANE_WRITEV_GEN(float)
+
+/**
+ * Write a vector-valued <code>int</code> plane.
+ * \copydetails esio_plane_writev_double
+ */
 ESIO_PLANE_WRITEV_GEN(int)
+
+/**
+ * Read a vector-valued <code>double</code> plane.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param plane Buffer to contain the read values
+ * \param bglobal Global number of vectors in the slower "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of vectors in "B" this MPI rank should read.
+ * \param bstride Stride between adjacent vectors in "B"
+ *                within buffer \c plane.
+ * \param aglobal Global number of vectors in the faster "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of vectors in "A" this MPI rank should read.
+ * \param astride Stride between adjacent vectors in "A"
+ *                within buffer \c plane.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 ESIO_PLANE_READV_GEN(double)
+
+/**
+ * Read a vector-valued <code>float</code> plane.
+ * \copydetails esio_plane_readv_double
+ */
 ESIO_PLANE_READV_GEN(float)
+
+/**
+ * Read a vector-valued <code>int</code> plane.
+ * \copydetails esio_plane_readv_double
+ */
 ESIO_PLANE_READV_GEN(int)
+
+/**
+ * Query the global number of vectors and components within a plane.
+ * Scalar-valued planes have <code>*ncomponents == 1</code>.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated plane name.
+ * \param bglobal Buffer to contain the number of vectors in the slower
+ *                "B" direction.
+ * \param aglobal Buffer to contain the number of vectors in the faster
+ *                "A" direction.
+ * \param ncomponents Buffer to contain the number of component in
+ *                    each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_plane_sizev(const esio_state s,
                      const char *name,
                      int *bglobal, int *aglobal,
@@ -645,6 +824,22 @@ ESIO_FIELD_WRITE_GEN(int)
 ESIO_FIELD_READ_GEN(double)
 ESIO_FIELD_READ_GEN(float)
 ESIO_FIELD_READ_GEN(int)
+
+/**
+ * Query the global number of scalars within a field.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param cglobal Buffer to contain the number of scalars in the slowest
+ *                "C" direction.
+ * \param bglobal Buffer to contain the number of scalars in the
+ *                "B" direction.
+ * \param aglobal Buffer to contain the number of scalars in the fastest
+ *                "A" direction.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_field_size(const esio_state s,
                     const char *name,
                     int *cglobal, int *bglobal, int *aglobal);
@@ -662,6 +857,25 @@ ESIO_FIELD_WRITEV_GEN(int)
 ESIO_FIELD_READV_GEN(double)
 ESIO_FIELD_READV_GEN(float)
 ESIO_FIELD_READV_GEN(int)
+
+/**
+ * Query the global number of vectors and components within a field.
+ * Scalar-valued fields have <code>*ncomponents == 1</code>.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param cglobal Buffer to contain the number of vectors in the slowest
+ *                "C" direction.
+ * \param bglobal Buffer to contain the number of vectors in the
+ *                "B" direction.
+ * \param aglobal Buffer to contain the number of vectors in the fastest
+ *                "A" direction.
+ * \param ncomponents Buffer to contain the number of component in
+ *                    each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_field_sizev(const esio_state s,
                      const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
