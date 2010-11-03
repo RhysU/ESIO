@@ -48,8 +48,11 @@ extern "C" {
  * Where possible these codes are numerically equivalent to
  * <a href="http://www.gnu.org/software/gsl/manual/html_node/Error-Codes.html">
  * GSL's error codes</a>.
+ *
+ * Note that \ref ESIO_SUCCESS is zero to allow code like
+ * <code>if (!status) { some_error_handling() }</code>.
  */
-enum esio_error_status {
+enum esio_status {
     ESIO_SUCCESS  =  0, /**< Success */
     ESIO_EFAULT   =  3, /**< Invalid pointer */
     ESIO_EINVAL   =  4, /**< Invalid argument supplied by user */
@@ -71,7 +74,7 @@ enum esio_error_status {
  * @param file File in which the error was reported.
  * @param line Line at which the error was reported.
  * @param esio_errno Error code to report.  Should be one of
- *      esio_error_status if at all possible.
+ *      esio_status if at all possible.
  *
  * @see Most clients should not use this function directly; instead use one of
  *      the convenience macros: ESIO_ERROR, ESIO_ERROR_VAL,

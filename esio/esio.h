@@ -64,8 +64,8 @@ esio_state esio_initialize(MPI_Comm comm);
  * Finalizing a handle automatically closes any associated file.
  *
  * \param s Handle to finalize.  May be \c NULL.
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_finalize(esio_state s);
 /*\@}*/
@@ -82,8 +82,8 @@ int esio_finalize(esio_state s);
  * \param overwrite If zero, fail if an existing file is detected.
  *                  If nonzero, clobber any existing file.
  *
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_file_create(esio_state s, const char *file, int overwrite);
 
@@ -95,8 +95,8 @@ int esio_file_create(esio_state s, const char *file, int overwrite);
  * \param readwrite If zero, open the file in read-only mode.
  *                  If nonzero, open the file in read-write mode.
  *
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_file_open(esio_state s, const char *file, int readwrite);
 
@@ -105,8 +105,8 @@ int esio_file_open(esio_state s, const char *file, int readwrite);
  *
  * \param s Handle to use.
  *
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_file_flush(esio_state s);
 
@@ -116,8 +116,8 @@ int esio_file_flush(esio_state s);
  *
  * \param s Handle to use.
  *
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_file_close(esio_state s);
 /*\@}*/
@@ -134,8 +134,8 @@ int esio_file_close(esio_state s);
  * @param name Null-terminated attribute name.
  * @param value Null-terminated attribute value.
  *
- * \return ESIO_SUCCESS \c (0) on success or
- *         one of ::esio_error_status on failure.
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
  */
 int esio_string_set(const esio_state s,
                     const char *name,
