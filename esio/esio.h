@@ -127,12 +127,12 @@ int esio_file_close(esio_state s);
 /*\@{*/
 
 /**
- * Set the attribute \c name to be \c value.
+ * Set a string-valued attribute.
  * Any existing attribute will be overwritten.
  *
- * @param s Handle to use.
- * @param name Null-terminated attribute name.
- * @param value Null-terminated attribute value.
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param value Null-terminated attribute value to set.
  *
  * \return ESIO_SUCCESS \c (0) on success or another
  *         one of ::esio_status on failure.
@@ -142,15 +142,16 @@ int esio_string_set(const esio_state s,
                     const char *value);
 
 /**
- * Get the null-terminated string associated with attribute \c name.  The
- * routine allocates sufficient storage to hold the string and returns it.  The
- * caller must <tt>free</tt> the memory to avoid resource leaks.
+ * Get a string-valued attribute.
+ * The routine allocates sufficient storage to hold the string and returns
+ * it.  The caller <i>must</i> <code>free</code> the memory to avoid
+ * resource leaks.
  *
- * @param s Handle to use.
- * @param name Null-terminated attribute name.
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
  *
- * @return A newly allocated buffer containing the value on success.
- *         \c NULL on failure.
+ * \return A newly allocated buffer containing the null-terminated string
+ *         on success.  \c NULL on failure.
  */
 char* esio_string_get(const esio_state s,
                       const char *name);
@@ -158,19 +159,23 @@ char* esio_string_get(const esio_state s,
 
 
 /** @cond INTERNAL */
-#define ESIO_ATTRIBUTE_GEN(TYPE)                     \
+#define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)               \
 int esio_attribute_write_##TYPE(const esio_state s,  \
                                 const char *name,    \
-                                const TYPE *value);  \
+                                const TYPE *value);
+
+#define ESIO_ATTRIBUTE_READ_GEN(TYPE)                \
 int esio_attribute_read_##TYPE(const esio_state s,   \
                                const char *name,     \
                                TYPE *value);
 
-#define ESIO_ATTRIBUTE_GENV(TYPE)                    \
+#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)              \
 int esio_attribute_writev_##TYPE(const esio_state s, \
                                  const char *name,   \
                                  const TYPE *value,  \
-                                 int ncomponents);   \
+                                 int ncomponents);
+
+#define ESIO_ATTRIBUTE_READV_GEN(TYPE)               \
 int esio_attribute_readv_##TYPE(const esio_state s,  \
                                 const char *name,    \
                                 TYPE *value,         \
@@ -179,23 +184,131 @@ int esio_attribute_readv_##TYPE(const esio_state s,  \
 
 /** \name Manipulating scalar-valued attributes */
 /*\@{*/
-ESIO_ATTRIBUTE_GEN(double)
-ESIO_ATTRIBUTE_GEN(float)
-ESIO_ATTRIBUTE_GEN(int)
+
+/**
+ * Write a scalar-valued <code>double</code> attribute.
+ * Any existing attribute value will be overwritten.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param value Buffer containing value to write.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_ATTRIBUTE_WRITE_GEN(double)
+
+/**
+ * Write a scalar-valued <code>float</code> attribute.
+ * \copydetails esio_attribute_write_double
+ */
+ESIO_ATTRIBUTE_WRITE_GEN(float)
+
+/**
+ * Write an scalar-valued <code>int</code> attribute.
+ * \copydetails esio_attribute_write_double
+ */
+ESIO_ATTRIBUTE_WRITE_GEN(int)
+
+/**
+ * Read a scalar-valued <code>double</code> attribute.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param value Buffer to contain the read value.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_ATTRIBUTE_READ_GEN(double)
+
+/**
+ * Read a scalar-valued <code>float</code> attribute.
+ * \copydetails esio_attribute_read_double
+ */
+ESIO_ATTRIBUTE_READ_GEN(float)
+
+/**
+ * Read a scalar-valued <code>int</code> attribute.
+ * \copydetails esio_attribute_read_double
+ */
+ESIO_ATTRIBUTE_READ_GEN(int)
 /*\@}*/
 
 /** \name Manipulating vector-valued attributes */
 /*\@{*/
-ESIO_ATTRIBUTE_GENV(double)
-ESIO_ATTRIBUTE_GENV(float)
-ESIO_ATTRIBUTE_GENV(int)
+
+/**
+ * Write a vector-valued <code>double</code> attribute.
+ * Any existing attribute value will be overwritten.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param value Buffer containing value to write.
+ * \param ncomponents Number of vector components.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_ATTRIBUTE_WRITEV_GEN(double)
+
+/**
+ * Write a vector-valued <code>float</code> attribute.
+ * \copydetails esio_attribute_writev_double
+ */
+ESIO_ATTRIBUTE_WRITEV_GEN(float)
+
+/**
+ * Write a vector-valued <code>int</code> attribute.
+ * \copydetails esio_attribute_writev_double
+ */
+ESIO_ATTRIBUTE_WRITEV_GEN(int)
+
+/**
+ * Read a vector-valued <code>double</code> attribute.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param value Buffer to contain the read value.
+ * \param ncomponents Number of vector components.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_ATTRIBUTE_READV_GEN(double)
+
+/**
+ * Read a vector-valued <code>float</code> attribute.
+ * \copydetails esio_attribute_readv_double
+ */
+ESIO_ATTRIBUTE_READV_GEN(float)
+
+/**
+ * Read a vector-valued <code>int</code> attribute.
+ * \copydetails esio_attribute_readv_double
+ */
+ESIO_ATTRIBUTE_READV_GEN(int)
+
+/**
+ * Query the number of components in a numeric attribute.
+ * Scalar-valued attributes have <code>ncomponents == 1</code>.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param ncomponents Buffer to contain the number of components.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_attribute_sizev(const esio_state s,
                          const char *name,
                          int *ncomponents);
 /*\@}*/
 
-#undef ESIO_ATTRIBUTE_GEN
-#undef ESIO_ATTRIBUTE_GENV
+#undef ESIO_ATTRIBUTE_WRITE_GEN
+#undef ESIO_ATTRIBUTE_READ_GEN
+#undef ESIO_ATTRIBUTE_WRITEV_GEN
+#undef ESIO_ATTRIBUTE_READV_GEN
 
 
 /** @cond INTERNAL */
