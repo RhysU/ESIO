@@ -27,6 +27,11 @@
 ! TODO Allow Fortran to detect invalid state before other failure
 ! TODO Allow Fortran to use customizable error handling
 
+!> \file
+!! Provides ESIO's Fortran-based public API following the library's
+!! \ref concepts "usage concepts".  All methods in this header
+!! invoke ESIO's \ref error.h "error handling mechanisms" on failure.
+
 module esio
 
 ! Use ISO_C_BINDING for interoperation with ESIO's C implementation.

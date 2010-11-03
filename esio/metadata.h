@@ -37,12 +37,12 @@ int esio_type_ncomponents(hid_t type_id);
 hid_t esio_type_arrayify(hid_t type_id, int ncomponents);
 
 int esio_field_metadata_write(hid_t loc_id, const char *name,
-                              int layout_tag,
+                              int layout_index,
                               int cglobal, int bglobal, int aglobal,
                               int ncomponents);
 
 int esio_field_metadata_read(hid_t loc_id, const char *name,
-                             int *layout_tag,
+                             int *layout_index,
                              int *cglobal, int *bglobal, int *aglobal,
                              int *ncomponents);
 

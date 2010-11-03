@@ -109,7 +109,7 @@ hid_t esio_type_arrayify(hid_t type_id, int ncomponents)
 }
 
 int esio_field_metadata_write(hid_t loc_id, const char *name,
-                              int layout_tag,
+                              int layout_index,
                               int cglobal, int bglobal, int aglobal,
                               hid_t type_id)
 {
@@ -119,7 +119,7 @@ int esio_field_metadata_write(hid_t loc_id, const char *name,
         ESIO_MAJOR_VERSION,
         ESIO_MINOR_VERSION,
         ESIO_POINT_VERSION,
-        layout_tag,
+        layout_index,
         cglobal,
         bglobal,
         aglobal,
@@ -131,7 +131,7 @@ int esio_field_metadata_write(hid_t loc_id, const char *name,
 }
 
 int esio_field_metadata_read(hid_t loc_id, const char *name,
-                             int *layout_tag,
+                             int *layout_index,
                              int *cglobal, int *bglobal, int *aglobal,
                              int *ncomponents)
 {
@@ -160,18 +160,18 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
         // On error, report "soft" failure to the caller
         return ESIO_EFAILED;
     } else {
-        // On success, sanity check layout_tag's value...
+        // On success, sanity check layout_index's value...
         if (metadata[3] < 0 || metadata[3] >= esio_layout_count()) {
-            ESIO_ERROR("ESIO metadata contains unknown layout_tag",
+            ESIO_ERROR("ESIO metadata contains unknown layout_index",
                        ESIO_ESANITY); // Very Bad (TM)
         }
 
         // ...and populate all requested, outgoing arguments.
-        if (layout_tag)  *layout_tag  = metadata[3];
-        if (cglobal)     *cglobal     = metadata[4];
-        if (bglobal)     *bglobal     = metadata[5];
-        if (aglobal)     *aglobal     = metadata[6];
-        if (ncomponents) *ncomponents = metadata[7];
+        if (layout_index) *layout_index = metadata[3];
+        if (cglobal)      *cglobal      = metadata[4];
+        if (bglobal)      *bglobal      = metadata[5];
+        if (aglobal)      *aglobal      = metadata[6];
+        if (ncomponents)  *ncomponents  = metadata[7];
 
         return ESIO_SUCCESS;
     }

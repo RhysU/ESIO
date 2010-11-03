@@ -127,12 +127,12 @@ int esio_line_read_internal(const esio_state s,
 //*********************************************************************
 
 struct esio_state_s {
-    MPI_Comm  comm;       //< Communicator used for collective calls
-    int       comm_rank;  //< Process rank within in MPI communicator
-    int       comm_size;  //< Number of ranks within MPI communicator
-    MPI_Info  info;       //< Info object used for collective calls
-    hid_t     file_id;    //< Active HDF file identifier
-    int       layout_tag; //< Active field layout_tag within HDF5 file
+    MPI_Comm  comm;         //< Communicator used for collective calls
+    int       comm_rank;    //< Process rank within in MPI communicator
+    int       comm_size;    //< Number of ranks within MPI communicator
+    MPI_Info  info;         //< Info object used for collective calls
+    hid_t     file_id;      //< Active HDF file identifier
+    int       layout_index; //< Active field layout_index within HDF5 file
 };
 
 //***************************************************************************
@@ -141,7 +141,7 @@ struct esio_state_s {
 
 // Lookup table of all the different layout types we understand
 static const struct {
-    int                      tag;
+    int                      index;
     esio_filespace_creator_t filespace_creator;
     esio_field_writer_t      field_writer;
     esio_field_reader_t      field_reader;
@@ -222,12 +222,12 @@ esio_initialize(MPI_Comm comm)
     if (s == NULL) {
         ESIO_ERROR_NULL("failed to allocate space for state", ESIO_ENOMEM);
     }
-    s->comm        = esio_MPI_Comm_dup_with_name(comm);
-    s->comm_rank   = comm_rank;
-    s->comm_size   = comm_size;
-    s->info        = info;
-    s->file_id     = -1;
-    s->layout_tag  = 0;
+    s->comm         = esio_MPI_Comm_dup_with_name(comm);
+    s->comm_rank    = comm_rank;
+    s->comm_size    = comm_size;
+    s->info         = info;
+    s->file_id      = -1;
+    s->layout_index = 0;
 
     if (s->comm == MPI_COMM_NULL) {
         esio_finalize(s);
@@ -281,23 +281,23 @@ esio_layout_get(const esio_state s)
 {
     if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
 
-    return s->layout_tag;
+    return s->layout_index;
 }
 
 int
-esio_layout_set(esio_state s, int layout_tag)
+esio_layout_set(esio_state s, int layout_index)
 {
     if (s == NULL) {
         ESIO_ERROR("s == NULL", ESIO_EFAULT);
     }
-    if (layout_tag < 0) {
-        ESIO_ERROR("layout_tag < 0", ESIO_EINVAL);
+    if (layout_index < 0) {
+        ESIO_ERROR("layout_index < 0", ESIO_EINVAL);
     }
-    if (layout_tag >= esio_nlayout) {
-        ESIO_ERROR("layout_tag >= esio_nlayout", ESIO_EINVAL);
+    if (layout_index >= esio_nlayout) {
+        ESIO_ERROR("layout_index >= esio_nlayout", ESIO_EINVAL);
     }
 
-    s->layout_tag = layout_tag;
+    s->layout_index = layout_index;
 
     return ESIO_SUCCESS;
 }
@@ -443,15 +443,15 @@ hid_t esio_field_create(const esio_state s,
                         int cglobal, int bglobal, int aglobal,
                         const char *name, hid_t type_id)
 {
-    // Sanity check that the state's layout_tag matches our internal table
-    if (esio_layout[s->layout_tag].tag != s->layout_tag) {
+    // Sanity check that the state's layout_index matches our internal table
+    if (esio_layout[s->layout_index].index != s->layout_index) {
         ESIO_ERROR_VAL("SEVERE: Consistency error in esio_layout",
                 ESIO_ESANITY, -1);
     }
 
     // Create the filespace using current layout within state
     const hid_t filespace
-        = (esio_layout[s->layout_tag].filespace_creator)(cglobal,
+        = (esio_layout[s->layout_index].filespace_creator)(cglobal,
                                                          bglobal,
                                                          aglobal);
     if (filespace < 0) {
@@ -468,7 +468,7 @@ hid_t esio_field_create(const esio_state s,
 
     // Stash field's metadata
     if (ESIO_SUCCESS != esio_field_metadata_write(s->file_id, name,
-                                                  s->layout_tag,
+                                                  s->layout_index,
                                                   cglobal, bglobal, aglobal,
                                                   type_id)) {
         H5Sclose(filespace);
@@ -719,11 +719,11 @@ int esio_field_write_internal(const esio_state s,
     if (cstride == 0) cstride = bstride * blocal;
 
     // Attempt to read metadata for the field (which may or may not exist)
-    int layout_tag;
+    int layout_index;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
     const int mstat = esio_field_metadata_read(s->file_id, name,
-                                               &layout_tag,
+                                               &layout_index,
                                                &field_cglobal,
                                                &field_bglobal,
                                                &field_aglobal,
@@ -735,7 +735,7 @@ int esio_field_write_internal(const esio_state s,
         // Create dataset and write it with the active field layout
         const hid_t dset_id
             = esio_field_create(s, cglobal, bglobal, aglobal, name, type_id);
-        const int wstat = (esio_layout[s->layout_tag].field_writer)(
+        const int wstat = (esio_layout[s->layout_index].field_writer)(
                 dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
@@ -789,7 +789,7 @@ int esio_field_write_internal(const esio_state s,
         H5Tclose(field_type_id);
 
         // Overwrite existing data using layout routines per metadata
-        const int wstat = (esio_layout[layout_tag].field_writer)(
+        const int wstat = (esio_layout[layout_index].field_writer)(
                 dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
@@ -842,11 +842,11 @@ int esio_field_read_internal(const esio_state s,
     if (cstride == 0) cstride = bstride * blocal;
 
     // Read metadata for the field
-    int layout_tag;
+    int layout_index;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
     const int status = esio_field_metadata_read(s->file_id, name,
-                                                &layout_tag,
+                                                &layout_index,
                                                 &field_cglobal,
                                                 &field_bglobal,
                                                 &field_aglobal,
@@ -891,10 +891,10 @@ int esio_field_read_internal(const esio_state s,
     }
     H5Tclose(field_type_id);
 
-    // Read the field based on the metadata's layout_tag
+    // Read the field based on the metadata's layout_index
     // Note that this means we can read any layout ESIO understands
-    // Note that reading does not change the chosen field write layout_tag
-    (esio_layout[layout_tag].field_reader)(dset_id, field,
+    // Note that reading does not change the chosen field write layout_index
+    (esio_layout[layout_index].field_reader)(dset_id, field,
                                            cglobal, cstart, clocal, cstride,
                                            bglobal, bstart, blocal, bstride,
                                            aglobal, astart, alocal, astride,

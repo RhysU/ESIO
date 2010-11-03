@@ -13,7 +13,7 @@ input and output of Cartesian data sets using parallel <a
 href="http://www.hdfgroup.org/HDF5/">HDF5</a>.  ESIO is designed to
 support reading and writing turbulence simulation restart files but it
 may be useful in other contexts.  The library is written in C99 and may
-be used by C99 or C++ applications.  A Fortran API built atop
+be used by C89+ or C++ applications.  A Fortran API built atop
 the F2003 standard ISO_C_BINDING is also available.
 
 The ESIO library provides:
@@ -26,18 +26,19 @@ The ESIO library provides:
   <li>Storage within the widely used HDF5 file format</li>
 </ul>
 
-Thanks for your interest in ESIO. To aid in usage, this manual is
-further divided into the following subsections:
+The library's manual is divided into the following subsections:
 
 <ul>
   <li> \subpage installation </li>
-  <li> \subpage linkage </li>
+  <li> \subpage linkage <b>TODO</b></li>
   <li> \subpage concepts </li>
-  <li> \subpage apiC   "C/C++ Interface" (see esio.h and version.h for now) </li>
-  <li> \subpage errorC "C/C++ Error Handling" (see error.h for now) </li>
-  <li> \subpage apiF   "Fortran Interface" (see esio.f90 for now)</li>
+  <li> \ref esio.h "C/C++ interface"</li>
+  <li> \ref error.h "C/C++ error handling"</li>
+  <li> \ref esio.f90 "Fortran interface" <b>TODO</b></li>
   <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot Coverage</a> </li>
 </ul>
+
+Thank you for your interest in ESIO.
 
 \section bugs Reporting Bugs
 

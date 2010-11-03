@@ -28,10 +28,10 @@
 
 #include <mpi.h>
 
-/** @file
+/** \file
  * Provides ESIO's C-based public API following the library's
- * \ref concepts "usage concepts".  All methods in this file
- * invoke ESIO's \ref errorC "error handling" mechanisms on failure.
+ * \ref concepts "usage concepts".  All methods in this header
+ * invoke ESIO's \ref error.h "error handling mechanisms" on failure.
  */
 
 #ifdef __cplusplus
@@ -64,8 +64,7 @@ esio_state esio_initialize(MPI_Comm comm);
  * Finalizing a handle automatically closes any associated file.
  *
  * \param s Handle to finalize.  May be \c NULL.
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_finalize(esio_state s);
 /*\@}*/
@@ -85,8 +84,7 @@ int esio_finalize(esio_state s);
  * \param overwrite If zero, fail if an existing file is detected.
  *                  If nonzero, clobber any existing file.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_file_create(esio_state s, const char *file, int overwrite);
 
@@ -98,8 +96,7 @@ int esio_file_create(esio_state s, const char *file, int overwrite);
  * \param readwrite If zero, open the file in read-only mode.
  *                  If nonzero, open the file in read-write mode.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_file_open(esio_state s, const char *file, int readwrite);
 
@@ -108,8 +105,7 @@ int esio_file_open(esio_state s, const char *file, int readwrite);
  *
  * \param s Handle to use.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_file_flush(esio_state s);
 
@@ -119,8 +115,7 @@ int esio_file_flush(esio_state s);
  *
  * \param s Handle to use.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_file_close(esio_state s);
 /*\@}*/
@@ -140,8 +135,7 @@ int esio_file_close(esio_state s);
  * \param name Null-terminated attribute name.
  * \param value Null-terminated attribute value to set.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_string_set(const esio_state s,
                     const char *name,
@@ -164,7 +158,7 @@ char* esio_string_get(const esio_state s,
 /*\@}*/
 
 
-/** @cond INTERNAL */
+/** \cond INTERNAL */
 #define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)               \
 int esio_attribute_write_##TYPE(const esio_state s,  \
                                 const char *name,    \
@@ -186,7 +180,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,  \
                                 const char *name,    \
                                 TYPE *value,         \
                                 int ncomponents);
-/** @endcond */
+/** \endcond */
 
 /**
  * \name Manipulating scalar-valued attributes
@@ -200,10 +194,9 @@ int esio_attribute_readv_##TYPE(const esio_state s,  \
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param value Buffer containing value to write.
+ * \param value Buffer containing the scalar to write.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_ATTRIBUTE_WRITE_GEN(double)
 
@@ -226,8 +219,7 @@ ESIO_ATTRIBUTE_WRITE_GEN(int)
  * \param name Null-terminated attribute name.
  * \param value Buffer to contain the read value.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_ATTRIBUTE_READ_GEN(double)
 
@@ -256,11 +248,10 @@ ESIO_ATTRIBUTE_READ_GEN(int)
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param value Buffer containing value to write.
+ * \param value Buffer containing the scalar to write.
  * \param ncomponents Number of vector components.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_ATTRIBUTE_WRITEV_GEN(double)
 
@@ -284,8 +275,7 @@ ESIO_ATTRIBUTE_WRITEV_GEN(int)
  * \param value Buffer to contain the read value.
  * \param ncomponents Number of vector components.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_ATTRIBUTE_READV_GEN(double)
 
@@ -309,8 +299,7 @@ ESIO_ATTRIBUTE_READV_GEN(int)
  * \param name Null-terminated attribute name.
  * \param ncomponents Buffer to contain the number of components.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_attribute_sizev(const esio_state s,
                          const char *name,
@@ -323,7 +312,7 @@ int esio_attribute_sizev(const esio_state s,
 #undef ESIO_ATTRIBUTE_READV_GEN
 
 
-/** @cond INTERNAL */
+/** \cond INTERNAL */
 #define ESIO_LINE_WRITE_GEN(TYPE)                                             \
 int esio_line_write_##TYPE(const esio_state s,                                \
                            const char *name,                                  \
@@ -349,7 +338,7 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
                            TYPE *line,                                        \
                            int aglobal, int astart, int alocal, int astride,  \
                            int ncomponents);
-/** @endcond */
+/** \endcond */
 
 /**
  * \name Manipulating distributed, one-dimensional, scalar-valued data
@@ -362,7 +351,7 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param line Buffer containing scalars to write.
+ * \param line Buffer containing the scalars to write.
  * \param aglobal Global number of scalars within the line.
  * \param astart  Global starting offset (zero-indexed) handled
  *                locally by this MPI rank.
@@ -371,8 +360,7 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_LINE_WRITE_GEN(double)
 
@@ -393,7 +381,7 @@ ESIO_LINE_WRITE_GEN(int)
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param line Buffer containing the read values.
+ * \param line Buffer to contain the read scalars.
  * \param aglobal Global number of scalars within the line.
  * \param astart  Global starting offset (zero-indexed) handled
  *                locally by this MPI rank.
@@ -402,8 +390,7 @@ ESIO_LINE_WRITE_GEN(int)
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_LINE_READ_GEN(double)
 
@@ -426,8 +413,7 @@ ESIO_LINE_READ_GEN(int)
  * \param name Null-terminated attribute name.
  * \param aglobal Buffer to contain the number of scalars within the line.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_line_size(const esio_state s,
                    const char *name,
@@ -445,7 +431,7 @@ int esio_line_size(const esio_state s,
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param line Buffer containing vectors to write.
+ * \param line Buffer containing the vectors to write.
  * \param aglobal Global number of vectors within the line.
  * \param astart  Global starting offset (zero-indexed) handled
  *                locally by this MPI rank.
@@ -456,8 +442,7 @@ int esio_line_size(const esio_state s,
  *                Supplying zero indicates contiguous data.
  * \param ncomponents Number of scalar components within each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_LINE_WRITEV_GEN(double)
 
@@ -478,7 +463,7 @@ ESIO_LINE_WRITEV_GEN(int)
  *
  * \param s Handle to use.
  * \param name Null-terminated attribute name.
- * \param line Buffer to contain the read values.
+ * \param line Buffer to contain the read vectors.
  * \param aglobal Global number of vectors within the line.
  * \param astart  Global starting offset (zero-indexed) handled
  *                locally by this MPI rank.
@@ -489,8 +474,7 @@ ESIO_LINE_WRITEV_GEN(int)
  *                Supplying zero indicates contiguous data.
  * \param ncomponents Number of scalar components within each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_LINE_READV_GEN(double)
 
@@ -516,8 +500,7 @@ ESIO_LINE_READV_GEN(int)
  * \param ncomponents Buffer to contain the number of component in
  *                    each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_line_sizev(const esio_state s,
                     const char *name,
@@ -531,7 +514,7 @@ int esio_line_sizev(const esio_state s,
 #undef ESIO_LINE_READV_GEN
 
 
-/** @cond INTERNAL */
+/** \cond INTERNAL */
 #define ESIO_PLANE_WRITE_GEN(TYPE)                                            \
 int esio_plane_write_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
@@ -561,7 +544,7 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride, \
                             int ncomponents);
-/** @endcond */
+/** \endcond */
 
 /**
  * \name Manipulating distributed, two-dimensional, scalar-valued data
@@ -578,7 +561,7 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
  *
  * \param s Handle to use.
  * \param name Null-terminated plane name.
- * \param plane Buffer containing scalars to write.
+ * \param plane Buffer containing the scalars to write.
  * \param bglobal Global number of scalars in the slower "B" direction.
  * \param bstart  Global starting "B" offset.
  * \param blocal  Number of scalars in "B" this MPI rank should write.
@@ -590,8 +573,7 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c plane.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_PLANE_WRITE_GEN(double)
 
@@ -616,7 +598,7 @@ ESIO_PLANE_WRITE_GEN(int)
  *
  * \param s Handle to use.
  * \param name Null-terminated plane name.
- * \param plane Buffer containing the read values
+ * \param plane Buffer to contain the read scalars.
  * \param bglobal Global number of scalars in the slower "B" direction.
  * \param bstart  Global starting "B" offset.
  * \param blocal  Number of scalars in "B" this MPI rank should read.
@@ -628,8 +610,7 @@ ESIO_PLANE_WRITE_GEN(int)
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c plane.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_PLANE_READ_GEN(double)
 
@@ -655,8 +636,7 @@ ESIO_PLANE_READ_GEN(int)
  * \param aglobal Buffer to contain the number of scalars in the faster
  *                "A" direction.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_plane_size(const esio_state s,
                     const char *name,
@@ -679,7 +659,7 @@ int esio_plane_size(const esio_state s,
  *
  * \param s Handle to use.
  * \param name Null-terminated plane name.
- * \param plane Buffer containing vectors to write.
+ * \param plane Buffer containing the vectors to write.
  * \param bglobal Global number of vectors in the slower "B" direction.
  * \param bstart  Global starting "B" offset.
  * \param blocal  Number of vectors in "B" this MPI rank should write.
@@ -692,8 +672,7 @@ int esio_plane_size(const esio_state s,
  *                within buffer \c plane.
  * \param ncomponents Number of scalar components within each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_PLANE_WRITEV_GEN(double)
 
@@ -719,7 +698,7 @@ ESIO_PLANE_WRITEV_GEN(int)
  *
  * \param s Handle to use.
  * \param name Null-terminated plane name.
- * \param plane Buffer to contain the read values
+ * \param plane Buffer to contain the read vectors.
  * \param bglobal Global number of vectors in the slower "B" direction.
  * \param bstart  Global starting "B" offset.
  * \param blocal  Number of vectors in "B" this MPI rank should read.
@@ -732,8 +711,7 @@ ESIO_PLANE_WRITEV_GEN(int)
  *                within buffer \c plane.
  * \param ncomponents Number of scalar components within each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 ESIO_PLANE_READV_GEN(double)
 
@@ -762,8 +740,7 @@ ESIO_PLANE_READV_GEN(int)
  * \param ncomponents Buffer to contain the number of component in
  *                    each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_plane_sizev(const esio_state s,
                      const char *name,
@@ -777,7 +754,7 @@ int esio_plane_sizev(const esio_state s,
 #undef ESIO_PLANE_READV_GEN
 
 
-/** @cond INTERNAL */
+/** \cond INTERNAL */
 #define ESIO_FIELD_WRITE_GEN(TYPE)                                            \
 int esio_field_write_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
@@ -811,18 +788,96 @@ int esio_field_readv_##TYPE(const esio_state s,                               \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride, \
                             int ncomponents);
-/** @endcond */
+/** \endcond */
 
 /**
  * \name Manipulating distributed, three-dimensional, scalar-valued data
  * See \ref conceptsfields "field concepts" for more details.
  */
 /*\@{*/
+
+/**
+ * Write a scalar-valued <code>double</code> field.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param field Buffer containing the scalars to write.
+ * \param cglobal Global number of scalars in the "C" slowest direction.
+ * \param cstart  Global starting "C" offset.
+ * \param clocal  Number of scalars in "C" this MPI rank should write.
+ * \param cstride Stride between adjacent scalars in "C"
+ *                within buffer \c field.
+ * \param bglobal Global number of scalars in the "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of scalars in "B" this MPI rank should write.
+ * \param bstride Stride between adjacent scalars in "B"
+ *                within buffer \c field.
+ * \param aglobal Global number of scalars in the fastest "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of scalars in "A" this MPI rank should write.
+ * \param astride Stride between adjacent scalars in "A"
+ *                within buffer \c field.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
 ESIO_FIELD_WRITE_GEN(double)
+
+/**
+ * Write a scalar-valued <code>float</code> field.
+ * \copydetails esio_field_write_double
+ */
 ESIO_FIELD_WRITE_GEN(float)
+
+/**
+ * Write a scalar-valued <code>int</code> field.
+ * \copydetails esio_field_write_double
+ */
 ESIO_FIELD_WRITE_GEN(int)
+
+/**
+ * Read a scalar-valued <code>double</code> field.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param field Buffer to contain the read scalars.
+ * \param cglobal Global number of scalars in the "C" slowest direction.
+ * \param cstart  Global starting "C" offset.
+ * \param clocal  Number of scalars in "C" this MPI rank should read.
+ * \param cstride Stride between adjacent scalars in "C"
+ *                within buffer \c field.
+ * \param bglobal Global number of scalars in the "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of scalars in "B" this MPI rank should read.
+ * \param bstride Stride between adjacent scalars in "B"
+ *                within buffer \c field.
+ * \param aglobal Global number of scalars in the fastest "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of scalars in "A" this MPI rank should read.
+ * \param astride Stride between adjacent scalars in "A"
+ *                within buffer \c field.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
 ESIO_FIELD_READ_GEN(double)
+
+/**
+ * Read a scalar-valued <code>float</code> field.
+ * \copydetails esio_field_read_double
+ */
 ESIO_FIELD_READ_GEN(float)
+
+/**
+ * Read a scalar-valued <code>int</code> field.
+ * \copydetails esio_field_read_double
+ */
 ESIO_FIELD_READ_GEN(int)
 
 /**
@@ -837,8 +892,7 @@ ESIO_FIELD_READ_GEN(int)
  * \param aglobal Buffer to contain the number of scalars in the fastest
  *                "A" direction.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_field_size(const esio_state s,
                     const char *name,
@@ -851,11 +905,93 @@ int esio_field_size(const esio_state s,
  * See \ref conceptsfields "field concepts" for more details.
  */
 /*\@{*/
+
+/**
+ * Write a vector-valued <code>double</code> field.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param field Buffer containing the vectors to write.
+ * \param cglobal Global number of vectors in the "C" slowest direction.
+ * \param cstart  Global starting "C" offset.
+ * \param clocal  Number of vectors in "C" this MPI rank should write.
+ * \param cstride Stride between adjacent vectors in "C"
+ *                within buffer \c field.
+ * \param bglobal Global number of vectors in the "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of vectors in "B" this MPI rank should write.
+ * \param bstride Stride between adjacent vectors in "B"
+ *                within buffer \c field.
+ * \param aglobal Global number of vectors in the fastest "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of vectors in "A" this MPI rank should write.
+ * \param astride Stride between adjacent vectors in "A"
+ *                within buffer \c field.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
 ESIO_FIELD_WRITEV_GEN(double)
+
+/**
+ * Write a vector-valued <code>float</code> field.
+ * \copydetails esio_field_writev_double
+ */
 ESIO_FIELD_WRITEV_GEN(float)
+
+/**
+ * Write a vector-valued <code>int</code> field.
+ * \copydetails esio_field_writev_double
+ */
 ESIO_FIELD_WRITEV_GEN(int)
+
+/**
+ * Read a vector-valued <code>double</code> field.
+ *
+ * Global starting offsets are zero-indexed.  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated field name.
+ * \param field Buffer to contain the read vectors.
+ * \param cglobal Global number of vectors in the "C" slowest direction.
+ * \param cstart  Global starting "C" offset.
+ * \param clocal  Number of vectors in "C" this MPI rank should read.
+ * \param cstride Stride between adjacent vectors in "C"
+ *                within buffer \c field.
+ * \param bglobal Global number of vectors in the "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of vectors in "B" this MPI rank should read.
+ * \param bstride Stride between adjacent vectors in "B"
+ *                within buffer \c field.
+ * \param aglobal Global number of vectors in the fastest "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of vectors in "A" this MPI rank should read.
+ * \param astride Stride between adjacent vectors in "A"
+ *                within buffer \c field.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
 ESIO_FIELD_READV_GEN(double)
+
+/**
+ * Read a vector-valued <code>float</code> field.
+ * \copydetails esio_field_readv_double
+ */
 ESIO_FIELD_READV_GEN(float)
+
+/**
+ * Read a vector-valued <code>int</code> field.
+ * \copydetails esio_field_readv_double
+ */
 ESIO_FIELD_READV_GEN(int)
 
 /**
@@ -873,8 +1009,7 @@ ESIO_FIELD_READV_GEN(int)
  * \param ncomponents Buffer to contain the number of component in
  *                    each vector.
  *
- * \return ESIO_SUCCESS \c (0) on success or another
- *         one of ::esio_status on failure.
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_field_sizev(const esio_state s,
                      const char *name,
@@ -893,9 +1028,37 @@ int esio_field_sizev(const esio_state s,
  * See \ref conceptslayouts "layout concepts" for more details.
  */
 /*\@{*/
+
+/**
+ * Query the number of layouts available within ESIO.
+ * This is the maximum <code>layout_index + 1</code>.
+ *
+ * @return The number of layouts available within ESIO.
+ */
 int esio_layout_count();
+
+
+/**
+ * Get the default layout associated with the given handle.
+ * This layout will be used when writing any new fields.
+ *
+ * @param s Handle to use.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
 int esio_layout_get(const esio_state s);
-int esio_layout_set(esio_state s, int layout_tag);
+
+/**
+ * Set the default layout associated with the given handle.
+ * The supplied layout will be used when writing any new fields.
+ *
+ * @param s Handle to use.
+ * @param layout_index Layout index to set in the range
+ *                     <tt>[0, </tt>esio_layout_count()<tt>)</tt>.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
+int esio_layout_set(esio_state s, int layout_index);
 /*\@}*/
 
 #ifdef __cplusplus

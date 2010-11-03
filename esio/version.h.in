@@ -30,9 +30,19 @@
  * Provides ESIO version information.
  */
 
+/** Provides ESIO's major version number */
 #define ESIO_MAJOR_VERSION @AX_MAJOR_VERSION@
+
+/** Provides ESIO's minor version number */
 #define ESIO_MINOR_VERSION @AX_MINOR_VERSION@
+
+/** Provides ESIO's point version number */
 #define ESIO_POINT_VERSION @AX_POINT_VERSION@
+
+/**
+ * Provides a composite major.minor.point version number
+ * suitable for preprocessor integer comparison.
+ */
 #define ESIO_VERSION (  ESIO_MAJOR_VERSION * 100000  \
                       + ESIO_MINOR_VERSION *    100  \
                       + ESIO_POINT_VERSION *      1)
