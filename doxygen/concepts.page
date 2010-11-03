@@ -123,49 +123,49 @@ Example methods for scalar-valued lines are esio_line_write_float()
 and esio_line_read_float().  Information about the size of a line within
 a data file may be obtained using esio_line_size().
 
-Vector-valued lines may also be utilized.  These may be useful for storing
-complex numbers (as a two vector) or other "interleaved" data.  Vector
-components must be adjacent in memory.  Example methods for vector-valued
-lines are esio_line_writev_float() and esio_line_readv_float().
-Information about the size of a line within a data file, including
-the number of vector components it contains, may be obtained using
-esio_line_sizev().
+Vector-valued lines may also be utilized.  These may be useful
+for storing complex numbers (as a two-component vector) or other
+"interleaved" data.  Vector components must be adjacent in memory.
+Example methods for vector-valued lines are esio_line_writev_float() and
+esio_line_readv_float().  Information about the size of a line within
+a data file, including the number of vector components it contains,
+may be obtained using esio_line_sizev().
 
-Strides between vector-valued line data are expressed in terms of
-the size of a single component.  For example, strides for 5-vector double
-precision are expressed in terms of <tt>sizeof(double)</tt>.  This allows
-the same \c astride value provided to ESIO to be used in other pointer
-arithmetic contexts.  Unfortunately, due to a limitation in HDF5, \c
-astride must be an even multiple of the number of components in use.
+Strides between vector-valued line data are expressed in terms of the size
+of a single component.  For example, strides for a five-component vector
+in double precision are expressed in terms of <tt>sizeof(double)</tt>.
+This allows the same \c astride value provided to ESIO to be used in other
+pointer arithmetic contexts.  Unfortunately, due to a limitation in HDF5,
+\c astride must be an even multiple of the number of components in use.
 
 \section conceptsplanes Planes
 
 ESIO can read or write distributed two-dimensional, numeric data (termed
 "planes").  Such operations can be thought of as a tensor product of
-two line operations in all senses.  In addition to a line's \c aglobal,
-\c astart, etc., a plane contains \c bglobal, \c bstart, etc.  The "A"
-direction is the faster index and appears after the "B" direction in
-all C API calls.  Existing plane data may be queried using
-esio_plane_size() or esio_plane_sizev().
+two \ref conceptslines "line" operations in all senses.  In addition
+to a line's \c aglobal, \c astart, etc., a plane contains \c bglobal,
+\c bstart, etc.  The "A" direction is the faster index and appears after
+the "B" direction in all C API calls.  Existing plane data may be queried
+using esio_plane_size() or esio_plane_sizev().
 
 \section conceptsfields Fields
 
 ESIO can read or write distributed three-dimensional, numeric data (termed
-"fields").  Field methods add \c cglobal, \c cstart, etc. arguments beyond
-those found for a line.  The "A" direction is the fastest index and appears
-rightmost in all C API calls.  Sample field routines are
-esio_field_write_int(), esio_field_read_int(), esio_field_writev_int(), and
-esio_field_readv_int().  Existing field data may be queried using
-esio_field_size() or esio_field_sizev().
+"fields").  Field methods add \c cglobal, \c cstart, etc. arguments
+beyond those found for a \ref conceptsplanes "plane".  The "A"
+direction is the fastest index and appears rightmost in all C API calls.
+Sample field routines are esio_field_write_int(), esio_field_read_int(),
+esio_field_writev_int(), and esio_field_readv_int().  Existing field
+data may be queried using esio_field_size() or esio_field_sizev().
 
 \section conceptslayouts Layouts
 
-To provide flexibility and aid IO performance tuning for particular HPC
-platforms, fields may be laid out in HDF5 files in different manners
-(termed "layouts").  Fields are stored with sufficient metadata for
-ESIO to be able to determine which layout was used to write data to file.
-Further, operations on any existing field will always use the layout
-with which a field was initially created.
+To provide flexibility and aid IO performance tuning for particular
+HPC platforms, \ref conceptsfields "fields" may be laid out in HDF5
+files in different manners (termed "layouts").  Fields are stored with
+sufficient metadata for ESIO to be able to determine which layout was
+used to write data to file.  Further, operations on any existing field
+will always use the layout with which a field was initially created.
 
 The total number of field layouts available may be queried using
 esio_layout_count().  The default layout associated with a particular \ref

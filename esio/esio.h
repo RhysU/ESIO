@@ -71,7 +71,10 @@ int esio_finalize(esio_state s);
 /*\@}*/
 
 
-/** \name Opening and closing files */
+/**
+ * \name Opening and closing files
+ * See \ref conceptsfiles "file concepts" for more details.
+ */
 /*\@{*/
 
 /**
@@ -123,7 +126,10 @@ int esio_file_close(esio_state s);
 /*\@}*/
 
 
-/** \name Manipulating string-valued attributes */
+/**
+ * \name Manipulating string-valued attributes
+ * See \ref conceptsattributes "attributes concepts" for more details.
+ */
 /*\@{*/
 
 /**
@@ -182,7 +188,10 @@ int esio_attribute_readv_##TYPE(const esio_state s,  \
                                 int ncomponents);
 /** @endcond */
 
-/** \name Manipulating scalar-valued attributes */
+/**
+ * \name Manipulating scalar-valued attributes
+ * See \ref conceptsattributes "attribute concepts" for more details.
+ **/
 /*\@{*/
 
 /**
@@ -235,7 +244,10 @@ ESIO_ATTRIBUTE_READ_GEN(float)
 ESIO_ATTRIBUTE_READ_GEN(int)
 /*\@}*/
 
-/** \name Manipulating vector-valued attributes */
+/**
+ * \name Manipulating vector-valued attributes
+ * See \ref conceptsattributes "attributes concepts" for more details.
+ */
 /*\@{*/
 
 /**
@@ -312,22 +324,26 @@ int esio_attribute_sizev(const esio_state s,
 
 
 /** @cond INTERNAL */
-#define ESIO_LINE_GEN(TYPE)                                                   \
+#define ESIO_LINE_WRITE_GEN(TYPE)                                             \
 int esio_line_write_##TYPE(const esio_state s,                                \
                            const char *name,                                  \
                            const TYPE *line,                                  \
-                           int aglobal, int astart, int alocal, int astride); \
+                           int aglobal, int astart, int alocal, int astride);
+
+#define ESIO_LINE_READ_GEN(TYPE)                                              \
 int esio_line_read_##TYPE(const esio_state s,                                 \
                           const char *name,                                   \
                           TYPE *line,                                         \
                           int aglobal, int astart, int alocal, int astride);
 
-#define ESIO_LINE_GENV(TYPE)                                                  \
+#define ESIO_LINE_WRITEV_GEN(TYPE)                                            \
 int esio_line_writev_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
                             const TYPE *line,                                 \
                             int aglobal, int astart, int alocal, int astride, \
-                            int ncomponents);                                 \
+                            int ncomponents);
+
+#define ESIO_LINE_READV_GEN(TYPE)                                             \
 int esio_line_readv_##TYPE(const esio_state s,                                \
                            const char *name,                                  \
                            TYPE *line,                                        \
@@ -335,51 +351,206 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
                            int ncomponents);
 /** @endcond */
 
-/** \name Manipulating distributed, one-dimensional, scalar-valued data */
+/**
+ * \name Manipulating distributed, one-dimensional, scalar-valued data
+ * See \ref conceptslines "line concepts" for more details.
+ */
 /*\@{*/
-ESIO_LINE_GEN(double)
-ESIO_LINE_GEN(float)
-ESIO_LINE_GEN(int)
+
+/**
+ * Write a scalar-valued <code>double</code> line.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param line Buffer containing scalars to write.
+ * \param aglobal Global number of scalars within the line.
+ * \param astart  Global offset (zero-indexed) to write locally by this MPI rank.
+ * \param alocal  Number of scalars to write locally by this MPI rank.
+ * \param astride Stride between adjacent values in buffer \c line
+ *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ *                Supplying zero indicates contiguous data.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_LINE_WRITE_GEN(double)
+
+/**
+ * Write a scalar-valued <code>float</code> line.
+ * \copydetails esio_line_write_double
+ */
+ESIO_LINE_WRITE_GEN(float)
+
+/**
+ * Write a scalar-valued <code>int</code> line.
+ * \copydetails esio_line_write_double
+ */
+ESIO_LINE_WRITE_GEN(int)
+
+/**
+ * Read a scalar-valued <code>double</code> line.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param line Buffer containing the read values.
+ * \param aglobal Global number of scalars within the line.
+ * \param astart  Global offset (zero-indexed) to read locally by this MPI rank.
+ * \param alocal  Number of scalars to read locally by this MPI rank.
+ * \param astride Stride between adjacent values in buffer \c line
+ *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ *                Supplying zero indicates contiguous data.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_LINE_READ_GEN(double)
+
+/**
+ * Read a scalar-valued <code>float</code> line.
+ * \copydetails esio_line_read_double
+ */
+ESIO_LINE_READ_GEN(float)
+
+/**
+ * Read a scalar-valued <code>int</code> line.
+ * \copydetails esio_line_read_double
+ */
+ESIO_LINE_READ_GEN(int)
+
+/**
+ * Query the global number of scalars within a line.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param aglobal Buffer to contain the number of scalars within the line.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_line_size(const esio_state s,
                    const char *name,
                    int *aglobal);
 /*\@}*/
 
-/** \name Manipulating distributed, one-dimensional, vector-valued data */
+/**
+ * \name Manipulating distributed, one-dimensional, vector-valued data
+ * See \ref conceptslines "line concepts" for more details.
+ */
 /*\@{*/
-ESIO_LINE_GENV(double)
-ESIO_LINE_GENV(float)
-ESIO_LINE_GENV(int)
+
+/**
+ * Write a vector-valued <code>double</code> line.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param line Buffer containing vectors to write.
+ * \param aglobal Global number of vectors within the line.
+ * \param astart  Global offset (zero-indexed) to write locally by this MPI rank.
+ * \param alocal  Number of vectors to write locally by this MPI rank.
+ * \param astride Stride between adjacent vectors in buffer \c line
+ *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ *                It must be an integer multiple of \c ncomponents.
+ *                Supplying zero indicates contiguous data.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_LINE_WRITEV_GEN(double)
+
+/**
+ * Write a vector-valued <code>float</code> line.
+ * \copydetails esio_line_writev_double
+ **/
+ESIO_LINE_WRITEV_GEN(float)
+
+/**
+ * Write a vector-valued <code>int</code> line.
+ * \copydetails esio_line_writev_double
+ **/
+ESIO_LINE_WRITEV_GEN(int)
+
+/**
+ * Read a vector-valued <code>double</code> line.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param line Buffer to contain the read values.
+ * \param aglobal Global number of vectors within the line.
+ * \param astart  Global offset (zero-indexed) to read locally by this MPI rank.
+ * \param alocal  Number of vectors to read locally by this MPI rank.
+ * \param astride Stride between adjacent vectors in buffer \c line
+ *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ *                It must be an integer multiple of \c ncomponents.
+ *                Supplying zero indicates contiguous data.
+ * \param ncomponents Number of scalar components within each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
+ESIO_LINE_READV_GEN(double)
+
+/**
+ * Read a vector-valued <code>float</code> line.
+ * \copydetails esio_line_readv_double
+ **/
+ESIO_LINE_READV_GEN(float)
+
+/**
+ * Read a vector-valued <code>int</code> line.
+ * \copydetails esio_line_readv_double
+ **/
+ESIO_LINE_READV_GEN(int)
+
+/**
+ * Query the global number of vectors and components within a line.
+ * Scalar-valued lines have <code>ncomponents == 1</code>.
+ *
+ * \param s Handle to use.
+ * \param name Null-terminated attribute name.
+ * \param aglobal Buffer to contain the number of vectors within the line.
+ * \param ncomponents Buffer to contain the number of component in
+ *                    each vector.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or another
+ *         one of ::esio_status on failure.
+ */
 int esio_line_sizev(const esio_state s,
                     const char *name,
                     int *aglobal,
                     int *ncomponents);
 /*\@}*/
 
-#undef ESIO_LINE_GEN
-#undef ESIO_LINE_GENV
+#undef ESIO_LINE_WRITE_GEN
+#undef ESIO_LINE_READ_GEN
+#undef ESIO_LINE_WRITEV_GEN
+#undef ESIO_LINE_READV_GEN
 
 
 /** @cond INTERNAL */
-#define ESIO_PLANE_GEN(TYPE)                                                  \
+#define ESIO_PLANE_WRITE_GEN(TYPE)                                            \
 int esio_plane_write_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
                             const TYPE *plane,                                \
                             int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride);\
+                            int aglobal, int astart, int alocal, int astride);
+
+#define ESIO_PLANE_READ_GEN(TYPE)                                             \
 int esio_plane_read_##TYPE(const esio_state s,                                \
                            const char *name,                                  \
                            TYPE *plane,                                       \
                            int bglobal, int bstart, int blocal, int bstride,  \
                            int aglobal, int astart, int alocal, int astride);
 
-#define ESIO_PLANE_GENV(TYPE)                                                 \
+#define ESIO_PLANE_WRITEV_GEN(TYPE)                                           \
 int esio_plane_writev_##TYPE(const esio_state s,                              \
                              const char *name,                                \
                              const TYPE *plane,                               \
                              int bglobal, int bstart, int blocal, int bstride,\
                              int aglobal, int astart, int alocal, int astride,\
-                             int ncomponents);                                \
+                             int ncomponents);
+
+#define ESIO_PLANE_READV_GEN(TYPE)                                            \
 int esio_plane_readv_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
                             TYPE *plane,                                      \
@@ -388,38 +559,55 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
                             int ncomponents);
 /** @endcond */
 
-/** \name Manipulating distributed, two-dimensional, scalar-valued data */
+/**
+ * \name Manipulating distributed, two-dimensional, scalar-valued data
+ * See \ref conceptsplanes "plane concepts" for more details.
+ */
 /*\@{*/
-ESIO_PLANE_GEN(double)
-ESIO_PLANE_GEN(float)
-ESIO_PLANE_GEN(int)
+ESIO_PLANE_WRITE_GEN(double)
+ESIO_PLANE_WRITE_GEN(float)
+ESIO_PLANE_WRITE_GEN(int)
+ESIO_PLANE_READ_GEN(double)
+ESIO_PLANE_READ_GEN(float)
+ESIO_PLANE_READ_GEN(int)
 int esio_plane_size(const esio_state s,
                     const char *name,
                     int *bglobal, int *aglobal);
 /*\@}*/
 
-/** \name Manipulating distributed, two-dimensional, vector-valued data */
-ESIO_PLANE_GENV(double)
-ESIO_PLANE_GENV(float)
-ESIO_PLANE_GENV(int)
+/**
+ * \name Manipulating distributed, two-dimensional, vector-valued data
+ * See \ref conceptsplanes "plane concepts" for more details.
+ */
+/*\@{*/
+ESIO_PLANE_WRITEV_GEN(double)
+ESIO_PLANE_WRITEV_GEN(float)
+ESIO_PLANE_WRITEV_GEN(int)
+ESIO_PLANE_READV_GEN(double)
+ESIO_PLANE_READV_GEN(float)
+ESIO_PLANE_READV_GEN(int)
 int esio_plane_sizev(const esio_state s,
                      const char *name,
                      int *bglobal, int *aglobal,
                      int *ncomponents);
 /*\@}*/
 
-#undef ESIO_PLANE_GENV
-#undef ESIO_PLANE_GEN
+#undef ESIO_PLANE_WRITE_GEN
+#undef ESIO_PLANE_READ_GEN
+#undef ESIO_PLANE_WRITEV_GEN
+#undef ESIO_PLANE_READV_GEN
 
 
 /** @cond INTERNAL */
-#define ESIO_FIELD_GEN(TYPE)                                                  \
+#define ESIO_FIELD_WRITE_GEN(TYPE)                                            \
 int esio_field_write_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
                             const TYPE *field,                                \
                             int cglobal, int cstart, int clocal, int cstride, \
                             int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride);\
+                            int aglobal, int astart, int alocal, int astride);
+
+#define ESIO_FIELD_READ_GEN(TYPE)                                             \
 int esio_field_read_##TYPE(const esio_state s,                                \
                            const char *name,                                  \
                            TYPE *field,                                       \
@@ -427,14 +615,16 @@ int esio_field_read_##TYPE(const esio_state s,                                \
                            int bglobal, int bstart, int blocal, int bstride,  \
                            int aglobal, int astart, int alocal, int astride);
 
-#define ESIO_FIELD_GENV(TYPE)                                                 \
+#define ESIO_FIELD_WRITEV_GEN(TYPE)                                           \
 int esio_field_writev_##TYPE(const esio_state s,                              \
                              const char *name,                                \
                              const TYPE *field,                               \
                              int cglobal, int cstart, int clocal, int cstride,\
                              int bglobal, int bstart, int blocal, int bstride,\
                              int aglobal, int astart, int alocal, int astride,\
-                             int ncomponents);                                \
+                             int ncomponents);
+
+#define ESIO_FIELD_READV_GEN(TYPE)                                            \
 int esio_field_readv_##TYPE(const esio_state s,                               \
                             const char *name,                                 \
                             TYPE *field,                                      \
@@ -444,33 +634,50 @@ int esio_field_readv_##TYPE(const esio_state s,                               \
                             int ncomponents);
 /** @endcond */
 
-/** \name Manipulating distributed, three-dimensional, scalar-valued data */
+/**
+ * \name Manipulating distributed, three-dimensional, scalar-valued data
+ * See \ref conceptsfields "field concepts" for more details.
+ */
 /*\@{*/
-ESIO_FIELD_GEN(double)
-ESIO_FIELD_GEN(float)
-ESIO_FIELD_GEN(int)
+ESIO_FIELD_WRITE_GEN(double)
+ESIO_FIELD_WRITE_GEN(float)
+ESIO_FIELD_WRITE_GEN(int)
+ESIO_FIELD_READ_GEN(double)
+ESIO_FIELD_READ_GEN(float)
+ESIO_FIELD_READ_GEN(int)
 int esio_field_size(const esio_state s,
                     const char *name,
                     int *cglobal, int *bglobal, int *aglobal);
 /*\@}*/
 
 
-/** \name Manipulating distributed, three-dimensional, vector-valued data */
+/**
+ * \name Manipulating distributed, three-dimensional, vector-valued data
+ * See \ref conceptsfields "field concepts" for more details.
+ */
 /*\@{*/
-ESIO_FIELD_GENV(double)
-ESIO_FIELD_GENV(float)
-ESIO_FIELD_GENV(int)
+ESIO_FIELD_WRITEV_GEN(double)
+ESIO_FIELD_WRITEV_GEN(float)
+ESIO_FIELD_WRITEV_GEN(int)
+ESIO_FIELD_READV_GEN(double)
+ESIO_FIELD_READV_GEN(float)
+ESIO_FIELD_READV_GEN(int)
 int esio_field_sizev(const esio_state s,
                      const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);
 /*\@}*/
 
-#undef ESIO_FIELD_GEN
-#undef ESIO_FIELD_GENV
+#undef ESIO_FIELD_WRITE_GEN
+#undef ESIO_FIELD_READ_GEN
+#undef ESIO_FIELD_WRITEV_GEN
+#undef ESIO_FIELD_READV_GEN
 
 
-/** \name Querying and controlling field layout */
+/**
+ * \name Querying and controlling field layout
+ * See \ref conceptslayouts "layout concepts" for more details.
+ */
 /*\@{*/
 int esio_layout_count();
 int esio_layout_get(const esio_state s);
