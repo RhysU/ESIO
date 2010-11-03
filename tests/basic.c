@@ -106,13 +106,16 @@ FCT_BGN()
             // Create with overwrite should always work
             fct_req(0 == esio_file_create(state, filename, 1 /* overwrite */));
 
+            // Flush flush flush should always work
+            fct_req(0 == esio_file_flush(state));
+            fct_req(0 == esio_file_flush(state));
+            fct_req(0 == esio_file_flush(state));
+
             // Close the file
             fct_req(0 == esio_file_close(state));
 
-            // Double closure should fail
-            esio_set_error_handler_off();
-            fct_req(0 != esio_file_close(state));
-            esio_set_error_handler(esio_handler);
+            // Double closure should silently succeed
+            fct_req(0 == esio_file_close(state));
 
             // Create without overwrite should fail
             H5Eset_auto(H5E_DEFAULT, NULL, NULL);

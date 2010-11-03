@@ -145,7 +145,7 @@ FCT_BGN()
     char * filename = NULL;
     esio_state state;
 
-    FCT_FIXTURE_SUITE_BGN(line)
+    FCT_FIXTURE_SUITE_BGN(line_suite)
     {
         FCT_SETUP_BGN()
         {
@@ -209,10 +209,11 @@ FCT_BGN()
             // Open file
             fct_req(0 == esio_file_create(state, filename, 1));
 
-            // Write all zeros to disk
+            // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_line_write)(
                                state, "line", line,
                                aglobal, astart, alocal, astride));
+            fct_req(0 == esio_file_flush(state));
 
             // Populate local line with test data
             for (int i = 0; i < alocal; ++i) {

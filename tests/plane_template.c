@@ -195,7 +195,7 @@ FCT_BGN()
     char * filename = NULL;
     esio_state state;
 
-    FCT_FIXTURE_SUITE_BGN(plane)
+    FCT_FIXTURE_SUITE_BGN(plane_suite)
     {
         FCT_SETUP_BGN()
         {
@@ -260,11 +260,12 @@ FCT_BGN()
             // Open file
             fct_req(0 == esio_file_create(state, filename, 1));
 
-            // Write all zeros to disk
+            // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_plane_write)(
                                 state, "plane", plane,
                                 bglobal, bstart, blocal, bstride,
                                 aglobal, astart, alocal, astride));
+            fct_req(0 == esio_file_flush(state));
 
             // Populate local plane with test data
             for (int j = 0; j < blocal; ++j) {

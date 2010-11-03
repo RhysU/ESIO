@@ -61,6 +61,7 @@ esio_state esio_initialize(MPI_Comm comm);
 
 /**
  * Finalize a handle.
+ * Finalizing a handle automatically closes any associated file.
  *
  * \param s Handle to finalize.  May be \c NULL.
  * \return ESIO_SUCCESS \c (0) on success or
@@ -100,7 +101,18 @@ int esio_file_create(esio_state s, const char *file, int overwrite);
 int esio_file_open(esio_state s, const char *file, int readwrite);
 
 /**
- * Close the currently open file.
+ * Flush buffers associated with any currently open file.
+ *
+ * \param s Handle to use.
+ *
+ * \return ESIO_SUCCESS \c (0) on success or
+ *         one of ::esio_error_status on failure.
+ */
+int esio_file_flush(esio_state s);
+
+/**
+ * Close any currently open file.
+ * Closing a file automatically flushes all unwritten data.
  *
  * \param s Handle to use.
  *

@@ -113,7 +113,7 @@ FCT_BGN()
     char * filename = NULL;
     esio_state state;
 
-    FCT_FIXTURE_SUITE_BGN(line)
+    FCT_FIXTURE_SUITE_BGN(attribute_suite)
     {
         FCT_SETUP_BGN()
         {
@@ -168,9 +168,10 @@ FCT_BGN()
             // Open file
             fct_req(0 == esio_file_create(state, filename, 1));
 
-            // Write zero to disk
+            // Write zero to disk and flush the buffers
             value = 0;
             fct_req(0 == AFFIX(esio_attribute_write)(state, "attribute", &value));
+            fct_req(0 == esio_file_flush(state));
 
             // Populate value with non-zero data
             // TODO Vary this based on the rank?
@@ -215,7 +216,7 @@ FCT_BGN()
         FCT_TEST_END();
 
         // Test vector-like attributes
-        FCT_TEST_BGN(vattribute)
+        FCT_TEST_BGN(attribute)
         {
             TYPE *value;
 

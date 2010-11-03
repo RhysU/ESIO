@@ -60,9 +60,14 @@ HDF5 Group</a>'s specifications.
 
 At any time, a \ref esio_state handle may have an data file associated
 with it.  A file must be associated with a handle before any attributes
-or data may be read or written.  Existing files may be opened using 
+or data may be read or written.  Existing files may be opened using
 esio_file_open().  New files may be created using esio_file_create().
 When finished using a file, a user should call esio_file_close().
+
+Information written to a file is <i>always</i> buffered and should
+<i>not</i> be assumed to be on disk while a file is open.  Buffers are
+flushed when a file is closed.  Buffers may explicitly be flushed using
+esio_file_flush().
 
 \section conceptsattributes Attributes
 

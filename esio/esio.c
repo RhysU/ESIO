@@ -256,9 +256,7 @@ int
 esio_finalize(esio_state s)
 {
     if (s) {
-        if (s->file_id != -1) {
-            esio_file_close(s); // Force file closure
-        }
+        esio_file_close(s); // Close any open file
         if (s->comm != MPI_COMM_NULL) {
             ESIO_MPICHKR(MPI_Comm_free(&s->comm));
             s->comm = MPI_COMM_NULL;
@@ -405,23 +403,37 @@ esio_file_open(esio_state s, const char *file, int readwrite)
     return ESIO_SUCCESS;
 }
 
+int esio_file_flush(esio_state s)
+{
+    // Sanity check incoming arguments
+    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
+
+    // Flush any currently open file
+    if (s->file_id != -1) {
+        if (H5Fflush(s->file_id, H5F_SCOPE_GLOBAL) < 0) {
+            ESIO_ERROR("Unable to flush file", ESIO_EFAILED);
+        }
+    }
+
+    return ESIO_SUCCESS;
+
+}
+
 int esio_file_close(esio_state s)
 {
     // Sanity check incoming arguments
-    if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EFAULT);
-    }
-    if (s->file_id == -1) {
-        ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    }
+    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
 
-    // Close any open file
-    if (H5Fclose(s->file_id) < 0) {
-        ESIO_ERROR("Unable to close file", ESIO_EFAILED);
-    }
+    // Close any currently open file
+    if (s->file_id != -1) {
 
-    // File closing successful: update state
-    s->file_id = -1;
+        if (H5Fclose(s->file_id) < 0) {
+            ESIO_ERROR("Unable to close file", ESIO_EFAILED);
+        }
+
+        // Close successful: update state
+        s->file_id = -1;
+    }
 
     return ESIO_SUCCESS;
 }
