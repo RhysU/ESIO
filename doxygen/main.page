@@ -16,7 +16,7 @@ may be useful in other contexts.  The library is written in C99 and may
 be used by C99 or C++ applications.  A Fortran API built atop
 the F2003 standard ISO_C_BINDING is also available.
 
-The thread-safe ESIO library provides:
+The ESIO library provides:
 <ul>
   <li>Distributed IO of 1D lines, 2D planes, and 3D fields of data</li>
   <li>Support for scalar-, complex-, and vector-valued data</li>
@@ -32,11 +32,11 @@ further divided into the following subsections:
 <ul>
   <li> \subpage installation </li>
   <li> \subpage linkage </li>
+  <li> \subpage concepts </li>
   <li> \subpage apiC   "C/C++ Interface" (see esio.h and version.h for now) </li>
   <li> \subpage errorC "C/C++ Error Handling" (see error.h for now) </li>
   <li> \subpage apiF   "Fortran Interface" (see esio.f90 for now)</li>
   <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot Coverage</a> </li>
-  <li> \subpage examples "Examples" </li>
 </ul>
 
 \section bugs Reporting Bugs

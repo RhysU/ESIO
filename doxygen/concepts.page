@@ -1,0 +1,55 @@
+/*! \page concepts Usage concepts
+
+\section usageoverview Usage overview
+
+Using ESIO usually involves some variation on the following
+sequence of steps:
+<ol>
+  <li>Initialize an opaque \ref esio_state handle for a
+      particular MPI communicator.</li>
+  <li>Create or open a data file using the \c esio_state handle.</li>
+  <li>Write or read some metadata using the \c esio_state handle.</li>
+  <li>Write or read one or more distributed lines, planes, or fields
+      of data using the \c esio_state handle.</li>
+  <li>Close the data file using the \c esio_state handle.</li>
+  <li>Finalize the opaque \c esio_state handle.</li>
+</ol>
+
+A complete C-based MPI program using ESIO to write some (trivial) data
+might look like:
+\include concepts1.c
+
+\section usagehandle The esio_state handle
+
+ESIO maintains state within opaque \ref esio_state handles.  A user
+creates an \c esio_state handle by invoking \ref esio_initialize with
+an MPI communicator.  All subsequent calls to the ESIO API using that
+particular handle <i>must be made collectively</i> across the MPI
+communicator supplied at the handle's creation time.  When finished
+using a handle, a user calls \ref esio_finalize.
+
+Multiple \c esio_state handles may be created against the same or
+different MPI communicators.  For example, one handle may created against
+MPI_COMM_WORLD and another created against MPI_COMM_SELF.  ESIO calls
+using the first handle must be made collectively across all MPI ranks.
+In contrast, ESIO calls using the second handle may be made on only a
+single rank (that is, collectively across MPI_COMM_SELF).
+
+To the extent allowed by your MPI stack and the parallel HDF5
+implementation, ESIO is thread safe provided that a single \c esio_state
+handle is not used concurrently by more than one thread.
+
+\section usagefiles Data files
+
+ESIO data files are, for all intents and purposes, simply <a
+href="http://www.hdfgroup.org/HDF5/">HDF5</a> files usable by any
+application conforming to the <a href="http://www.hdfgroup.org/HDF5/">The
+HDF5 Group</a>'s specifications.
+
+At any time, a \ref esio_state handle may have an data file associated
+with it.  A file must be associated with a handle before any attributes
+or data may be read or written.  Existing files may be opened using \ref
+esio_file_open.  New files may be created using \ref esio_file_create.
+When finished using a file, a user should call \ref esio_file_close.
+
+*/

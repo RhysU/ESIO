@@ -31,7 +31,8 @@
 #include <mpi.h>
 
 /** @file
- * Provides ESIO's C-based public API.
+ * Provides ESIO's C-based public API following the library's
+ * \ref concepts "usage concepts".
  */
 
 #ifdef __cplusplus
@@ -40,9 +41,9 @@ extern "C" {
 
 typedef struct esio_state_s *esio_state;
 
-
 /** \name Initializing and finalizing a state handle */
 /*\@{*/
+
 esio_state esio_initialize(MPI_Comm comm);
 int esio_finalize(esio_state s);
 /*\@}*/

@@ -109,6 +109,7 @@ AC_CONFIG_FILES([
     doxygen/Makefile
     esio/Makefile
     esio/version.h
+    examples/Makefile
     lib/Makefile
     tests/Makefile
 ])

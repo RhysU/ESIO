@@ -4,10 +4,10 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 # Build in these directories:
-SUBDIRS = lib esio tests apps doxygen
+SUBDIRS = lib esio examples tests apps doxygen
 
 # Distribute these items:
-DIST_SUBDIRS = lib esio tests apps doxygen
+DIST_SUBDIRS = lib esio examples tests apps doxygen
 EXTRA_DIST  = bootstrap
 EXTRA_DIST += $(DX_CONFIG)
 EXTRA_DIST += build-aux/sfmakedepend.pl
