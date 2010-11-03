@@ -204,7 +204,7 @@ esio_initialize(MPI_Comm comm)
 {
     // Sanity check incoming arguments
     if (comm == MPI_COMM_NULL) {
-        ESIO_ERROR_NULL("comm == MPI_COMM_NULL required", ESIO_EINVAL);
+        ESIO_ERROR_NULL("comm == MPI_COMM_NULL", ESIO_EINVAL);
     }
 
     // Get number of processors and the local rank within the communicator
@@ -281,9 +281,7 @@ int esio_layout_count()
 int
 esio_layout_get(const esio_state s)
 {
-    if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EINVAL);
-    }
+    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
 
     return s->layout_tag;
 }
@@ -292,7 +290,7 @@ int
 esio_layout_set(esio_state s, int layout_tag)
 {
     if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+        ESIO_ERROR("s == NULL", ESIO_EFAULT);
     }
     if (layout_tag < 0) {
         ESIO_ERROR("layout_tag < 0", ESIO_EINVAL);
@@ -311,14 +309,14 @@ esio_file_create(esio_state s, const char *file, int overwrite)
 {
     // Sanity check incoming arguments
     if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+        ESIO_ERROR("s == NULL", ESIO_EFAULT);
     }
     if (s->file_id != -1) {
         ESIO_ERROR("Cannot create file because previous file not closed",
                    ESIO_EINVAL);
     }
     if (file == NULL) {
-        ESIO_ERROR("file == NULL", ESIO_EINVAL);
+        ESIO_ERROR("file == NULL", ESIO_EFAULT);
     }
 
     // Initialize file creation property list identifier
@@ -367,14 +365,14 @@ esio_file_open(esio_state s, const char *file, int readwrite)
 {
     // Sanity check incoming arguments
     if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+        ESIO_ERROR("s == NULL", ESIO_EFAULT);
     }
     if (s->file_id != -1) {
         ESIO_ERROR("Cannot open new file because previous file not closed",
                    ESIO_EINVAL);
     }
     if (file == NULL) {
-        ESIO_ERROR("file == NULL", ESIO_EINVAL);
+        ESIO_ERROR("file == NULL", ESIO_EFAULT);
     }
 
     // Initialize file access list property identifier
@@ -411,7 +409,7 @@ int esio_file_close(esio_state s)
 {
     // Sanity check incoming arguments
     if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EINVAL);
+        ESIO_ERROR("s == NULL", ESIO_EFAULT);
     }
     if (s->file_id == -1) {
         ESIO_ERROR("No file currently open", ESIO_EINVAL);
@@ -591,9 +589,9 @@ int esio_field_sizev(const esio_state s,
                      int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_field_metadata_read(
             s->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
@@ -624,9 +622,9 @@ int esio_plane_sizev(const esio_state s,
                      int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_plane_metadata_read(
             s->file_id, name, bglobal, aglobal, ncomponents);
@@ -656,9 +654,9 @@ int esio_line_sizev(const esio_state s,
                     int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_line_metadata_read(
             s->file_id, name, aglobal, ncomponents);
@@ -684,10 +682,10 @@ int esio_field_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
     if (cstart < 0)       ESIO_ERROR("cstart < 0",             ESIO_EINVAL);
     if (clocal < 1)       ESIO_ERROR("clocal < 1",             ESIO_EINVAL);
@@ -807,10 +805,10 @@ int esio_field_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
     if (cstart < 0)       ESIO_ERROR("cstart < 0",             ESIO_EINVAL);
     if (clocal < 1)       ESIO_ERROR("clocal < 1",             ESIO_EINVAL);
@@ -985,10 +983,10 @@ int esio_plane_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
     if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
     if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
@@ -1081,10 +1079,10 @@ int esio_plane_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
     if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
     if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
@@ -1236,10 +1234,10 @@ int esio_line_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
     if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
     if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
@@ -1321,10 +1319,10 @@ int esio_line_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
     if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
     if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
@@ -1452,9 +1450,9 @@ int esio_attribute_sizev(const esio_state s,
                          int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     // Attempt to retrieve information on the attribute
     int rank;
@@ -1488,10 +1486,10 @@ int esio_attribute_writev_##TYPE(const esio_state s,                          \
                                  int ncomponents)                             \
 {                                                                             \
     /* Sanity check incoming arguments */                                     \
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);  \
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);  \
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);  \
-    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EINVAL);  \
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
+    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
                                                                               \
     const herr_t err = H5LTset_attribute_##TYPE(                              \
@@ -1510,10 +1508,10 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
                                 int ncomponents)                              \
 {                                                                             \
     /* Sanity check incoming arguments */                                     \
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);  \
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);  \
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);  \
-    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EINVAL);  \
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
+    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
                                                                               \
     /* Attempt to retrieve information on the attribute */                    \
@@ -1585,10 +1583,10 @@ int esio_string_set(const esio_state s,
                     const char *value)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EINVAL);
+    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EINVAL);
-    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EINVAL);
+    if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
+    if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);
 
     const herr_t err = H5LTset_attribute_string(s->file_id, "/", name, value);
     if (err < 0) {
@@ -1603,11 +1601,11 @@ char* esio_string_get(const esio_state s,
 {
     // Sanity check incoming arguments
     if (s == NULL)
-        ESIO_ERROR_NULL("s == NULL",              ESIO_EINVAL);
+        ESIO_ERROR_NULL("s == NULL",              ESIO_EFAULT);
     if (s->file_id == -1)
         ESIO_ERROR_NULL("No file currently open", ESIO_EINVAL);
     if (name == NULL)
-        ESIO_ERROR_NULL("name == NULL",           ESIO_EINVAL);
+        ESIO_ERROR_NULL("name == NULL",           ESIO_EFAULT);
 
     // Silence HDF5 errors while querying the attribute
     DISABLE_HDF5_ERROR_HANDLER
@@ -1653,7 +1651,7 @@ char* esio_string_get(const esio_state s,
     if (retval == NULL) {
         H5Tclose(tid);
         H5Aclose(aid);
-        ESIO_ERROR_NULL("Unable to allocate storage for string", ESIO_EFAILED);
+        ESIO_ERROR_NULL("Unable to allocate storage for string", ESIO_ENOMEM);
     }
 
     // Read the string's data
