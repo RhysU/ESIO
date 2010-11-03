@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 /** An opaque type following ESIO's \ref conceptshandles "handle concept". */
-typedef struct esio_state_s *esio_state;
+typedef struct esio_handle_s *esio_handle;
 
 /**
  * \name Initializing and finalizing a state handle
@@ -57,16 +57,16 @@ typedef struct esio_state_s *esio_state;
  *             the handle must be made collectively on \c comm.
  * \return A new handle on success.  Otherwise \c NULL.
  */
-esio_state esio_initialize(MPI_Comm comm);
+esio_handle esio_initialize(MPI_Comm comm);
 
 /**
  * Finalize a handle.
  * Finalizing a handle automatically closes any associated file.
  *
- * \param s Handle to finalize.  May be \c NULL.
+ * \param h Handle to finalize.  May be \c NULL.
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_finalize(esio_state s);
+int esio_finalize(esio_handle h);
 /*\@}*/
 
 
@@ -79,45 +79,45 @@ int esio_finalize(esio_state s);
 /**
  * Create a new file or overwrite an existing one.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param file Name of the file to open.
  * \param overwrite If zero, fail if an existing file is detected.
  *                  If nonzero, clobber any existing file.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_create(esio_state s, const char *file, int overwrite);
+int esio_file_create(esio_handle h, const char *file, int overwrite);
 
 /**
  * Open an existing file.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param file Name of the file to open.
  * \param readwrite If zero, open the file in read-only mode.
  *                  If nonzero, open the file in read-write mode.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_open(esio_state s, const char *file, int readwrite);
+int esio_file_open(esio_handle h, const char *file, int readwrite);
 
 /**
  * Flush buffers associated with any currently open file.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_flush(esio_state s);
+int esio_file_flush(esio_handle h);
 
 /**
  * Close any currently open file.
  * Closing a file automatically flushes all unwritten data.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_close(esio_state s);
+int esio_file_close(esio_handle h);
 /*\@}*/
 
 
@@ -131,13 +131,13 @@ int esio_file_close(esio_state s);
  * Set a string-valued attribute.
  * Any existing attribute will be overwritten.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param value Null-terminated attribute value to set.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_string_set(const esio_state s,
+int esio_string_set(const esio_handle h,
                     const char *name,
                     const char *value);
 
@@ -147,38 +147,38 @@ int esio_string_set(const esio_state s,
  * it.  The caller <i>must</i> <code>free</code> the memory to avoid
  * resource leaks.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  *
  * \return A newly allocated buffer containing the null-terminated string
  *         on success.  \c NULL on failure.
  */
-char* esio_string_get(const esio_state s,
+char* esio_string_get(const esio_handle h,
                       const char *name);
 /*\@}*/
 
 
 /** \cond INTERNAL */
-#define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)               \
-int esio_attribute_write_##TYPE(const esio_state s,  \
-                                const char *name,    \
+#define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)                \
+int esio_attribute_write_##TYPE(const esio_handle h,  \
+                                const char *name,     \
                                 const TYPE *value);
 
-#define ESIO_ATTRIBUTE_READ_GEN(TYPE)                \
-int esio_attribute_read_##TYPE(const esio_state s,   \
-                               const char *name,     \
+#define ESIO_ATTRIBUTE_READ_GEN(TYPE)                 \
+int esio_attribute_read_##TYPE(const esio_handle h,   \
+                               const char *name,      \
                                TYPE *value);
 
-#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)              \
-int esio_attribute_writev_##TYPE(const esio_state s, \
-                                 const char *name,   \
-                                 const TYPE *value,  \
+#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)               \
+int esio_attribute_writev_##TYPE(const esio_handle h, \
+                                 const char *name,    \
+                                 const TYPE *value,   \
                                  int ncomponents);
 
-#define ESIO_ATTRIBUTE_READV_GEN(TYPE)               \
-int esio_attribute_readv_##TYPE(const esio_state s,  \
-                                const char *name,    \
-                                TYPE *value,         \
+#define ESIO_ATTRIBUTE_READV_GEN(TYPE)                \
+int esio_attribute_readv_##TYPE(const esio_handle h,  \
+                                const char *name,     \
+                                TYPE *value,          \
                                 int ncomponents);
 /** \endcond */
 
@@ -192,7 +192,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,  \
  * Write a scalar-valued <code>double</code> attribute.
  * Any existing attribute value will be overwritten.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param value Buffer containing the scalar to write.
  *
@@ -215,7 +215,7 @@ ESIO_ATTRIBUTE_WRITE_GEN(int)
 /**
  * Read a scalar-valued <code>double</code> attribute.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param value Buffer to contain the read value.
  *
@@ -246,7 +246,7 @@ ESIO_ATTRIBUTE_READ_GEN(int)
  * Write a vector-valued <code>double</code> attribute.
  * Any existing attribute value will be overwritten.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param value Buffer containing the scalar to write.
  * \param ncomponents Number of vector components.
@@ -270,7 +270,7 @@ ESIO_ATTRIBUTE_WRITEV_GEN(int)
 /**
  * Read a vector-valued <code>double</code> attribute.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param value Buffer to contain the read value.
  * \param ncomponents Number of vector components.
@@ -295,13 +295,13 @@ ESIO_ATTRIBUTE_READV_GEN(int)
  * Query the number of components in a numeric attribute.
  * Scalar-valued attributes have <code>*ncomponents == 1</code>.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param ncomponents Buffer to contain the number of components.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_attribute_sizev(const esio_state s,
+int esio_attribute_sizev(const esio_handle h,
                          const char *name,
                          int *ncomponents);
 /*\@}*/
@@ -314,26 +314,26 @@ int esio_attribute_sizev(const esio_state s,
 
 /** \cond INTERNAL */
 #define ESIO_LINE_WRITE_GEN(TYPE)                                             \
-int esio_line_write_##TYPE(const esio_state s,                                \
+int esio_line_write_##TYPE(const esio_handle h,                               \
                            const char *name,                                  \
                            const TYPE *line,                                  \
                            int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_LINE_READ_GEN(TYPE)                                              \
-int esio_line_read_##TYPE(const esio_state s,                                 \
+int esio_line_read_##TYPE(const esio_handle h,                                \
                           const char *name,                                   \
                           TYPE *line,                                         \
                           int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_LINE_WRITEV_GEN(TYPE)                                            \
-int esio_line_writev_##TYPE(const esio_state s,                               \
+int esio_line_writev_##TYPE(const esio_handle h,                              \
                             const char *name,                                 \
                             const TYPE *line,                                 \
                             int aglobal, int astart, int alocal, int astride, \
                             int ncomponents);
 
 #define ESIO_LINE_READV_GEN(TYPE)                                             \
-int esio_line_readv_##TYPE(const esio_state s,                                \
+int esio_line_readv_##TYPE(const esio_handle h,                               \
                            const char *name,                                  \
                            TYPE *line,                                        \
                            int aglobal, int astart, int alocal, int astride,  \
@@ -349,7 +349,7 @@ int esio_line_readv_##TYPE(const esio_state s,                                \
 /**
  * Write a scalar-valued <code>double</code> line.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer containing the scalars to write.
  * \param aglobal Global number of scalars within the line.
@@ -379,7 +379,7 @@ ESIO_LINE_WRITE_GEN(int)
 /**
  * Read a scalar-valued <code>double</code> line.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer to contain the read scalars.
  * \param aglobal Global number of scalars within the line.
@@ -409,13 +409,13 @@ ESIO_LINE_READ_GEN(int)
 /**
  * Query the global number of scalars within a line.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param aglobal Buffer to contain the number of scalars within the line.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_line_size(const esio_state s,
+int esio_line_size(const esio_handle h,
                    const char *name,
                    int *aglobal);
 /*\@}*/
@@ -429,7 +429,7 @@ int esio_line_size(const esio_state s,
 /**
  * Write a vector-valued <code>double</code> line.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer containing the vectors to write.
  * \param aglobal Global number of vectors within the line.
@@ -461,7 +461,7 @@ ESIO_LINE_WRITEV_GEN(int)
 /**
  * Read a vector-valued <code>double</code> line.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer to contain the read vectors.
  * \param aglobal Global number of vectors within the line.
@@ -494,7 +494,7 @@ ESIO_LINE_READV_GEN(int)
  * Query the global number of vectors and components within a line.
  * Scalar-valued lines have <code>*ncomponents == 1</code>.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated line name.
  * \param aglobal Buffer to contain the number of vectors within the line.
  * \param ncomponents Buffer to contain the number of component in
@@ -502,7 +502,7 @@ ESIO_LINE_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_line_sizev(const esio_state s,
+int esio_line_sizev(const esio_handle h,
                     const char *name,
                     int *aglobal,
                     int *ncomponents);
@@ -516,21 +516,21 @@ int esio_line_sizev(const esio_state s,
 
 /** \cond INTERNAL */
 #define ESIO_PLANE_WRITE_GEN(TYPE)                                            \
-int esio_plane_write_##TYPE(const esio_state s,                               \
+int esio_plane_write_##TYPE(const esio_handle h,                              \
                             const char *name,                                 \
                             const TYPE *plane,                                \
                             int bglobal, int bstart, int blocal, int bstride, \
                             int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_PLANE_READ_GEN(TYPE)                                             \
-int esio_plane_read_##TYPE(const esio_state s,                                \
+int esio_plane_read_##TYPE(const esio_handle h,                               \
                            const char *name,                                  \
                            TYPE *plane,                                       \
                            int bglobal, int bstart, int blocal, int bstride,  \
                            int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_PLANE_WRITEV_GEN(TYPE)                                           \
-int esio_plane_writev_##TYPE(const esio_state s,                              \
+int esio_plane_writev_##TYPE(const esio_handle h,                             \
                              const char *name,                                \
                              const TYPE *plane,                               \
                              int bglobal, int bstart, int blocal, int bstride,\
@@ -538,7 +538,7 @@ int esio_plane_writev_##TYPE(const esio_state s,                              \
                              int ncomponents);
 
 #define ESIO_PLANE_READV_GEN(TYPE)                                            \
-int esio_plane_readv_##TYPE(const esio_state s,                               \
+int esio_plane_readv_##TYPE(const esio_handle h,                              \
                             const char *name,                                 \
                             TYPE *plane,                                      \
                             int bglobal, int bstart, int blocal, int bstride, \
@@ -559,7 +559,7 @@ int esio_plane_readv_##TYPE(const esio_state s,                               \
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer containing the scalars to write.
  * \param bglobal Global number of scalars in the slower "B" direction.
@@ -596,7 +596,7 @@ ESIO_PLANE_WRITE_GEN(int)
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer to contain the read scalars.
  * \param bglobal Global number of scalars in the slower "B" direction.
@@ -629,7 +629,7 @@ ESIO_PLANE_READ_GEN(int)
 /**
  * Query the global number of scalars within a plane.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param bglobal Buffer to contain the number of scalars in the slower
  *                "B" direction.
@@ -638,7 +638,7 @@ ESIO_PLANE_READ_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_plane_size(const esio_state s,
+int esio_plane_size(const esio_handle h,
                     const char *name,
                     int *bglobal, int *aglobal);
 /*\@}*/
@@ -657,7 +657,7 @@ int esio_plane_size(const esio_state s,
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer containing the vectors to write.
  * \param bglobal Global number of vectors in the slower "B" direction.
@@ -696,7 +696,7 @@ ESIO_PLANE_WRITEV_GEN(int)
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer to contain the read vectors.
  * \param bglobal Global number of vectors in the slower "B" direction.
@@ -731,7 +731,7 @@ ESIO_PLANE_READV_GEN(int)
  * Query the global number of vectors and components within a plane.
  * Scalar-valued planes have <code>*ncomponents == 1</code>.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param bglobal Buffer to contain the number of vectors in the slower
  *                "B" direction.
@@ -742,7 +742,7 @@ ESIO_PLANE_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_plane_sizev(const esio_state s,
+int esio_plane_sizev(const esio_handle h,
                      const char *name,
                      int *bglobal, int *aglobal,
                      int *ncomponents);
@@ -756,7 +756,7 @@ int esio_plane_sizev(const esio_state s,
 
 /** \cond INTERNAL */
 #define ESIO_FIELD_WRITE_GEN(TYPE)                                            \
-int esio_field_write_##TYPE(const esio_state s,                               \
+int esio_field_write_##TYPE(const esio_handle h,                              \
                             const char *name,                                 \
                             const TYPE *field,                                \
                             int cglobal, int cstart, int clocal, int cstride, \
@@ -764,7 +764,7 @@ int esio_field_write_##TYPE(const esio_state s,                               \
                             int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_FIELD_READ_GEN(TYPE)                                             \
-int esio_field_read_##TYPE(const esio_state s,                                \
+int esio_field_read_##TYPE(const esio_handle h,                               \
                            const char *name,                                  \
                            TYPE *field,                                       \
                            int cglobal, int cstart, int clocal, int cstride,  \
@@ -772,7 +772,7 @@ int esio_field_read_##TYPE(const esio_state s,                                \
                            int aglobal, int astart, int alocal, int astride);
 
 #define ESIO_FIELD_WRITEV_GEN(TYPE)                                           \
-int esio_field_writev_##TYPE(const esio_state s,                              \
+int esio_field_writev_##TYPE(const esio_handle h,                             \
                              const char *name,                                \
                              const TYPE *field,                               \
                              int cglobal, int cstart, int clocal, int cstride,\
@@ -781,7 +781,7 @@ int esio_field_writev_##TYPE(const esio_state s,                              \
                              int ncomponents);
 
 #define ESIO_FIELD_READV_GEN(TYPE)                                            \
-int esio_field_readv_##TYPE(const esio_state s,                               \
+int esio_field_readv_##TYPE(const esio_handle h,                              \
                             const char *name,                                 \
                             TYPE *field,                                      \
                             int cglobal, int cstart, int clocal, int cstride, \
@@ -803,7 +803,7 @@ int esio_field_readv_##TYPE(const esio_state s,                               \
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer containing the scalars to write.
  * \param cglobal Global number of scalars in the "C" slowest direction.
@@ -845,7 +845,7 @@ ESIO_FIELD_WRITE_GEN(int)
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer to contain the read scalars.
  * \param cglobal Global number of scalars in the "C" slowest direction.
@@ -883,7 +883,7 @@ ESIO_FIELD_READ_GEN(int)
 /**
  * Query the global number of scalars within a field.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param cglobal Buffer to contain the number of scalars in the slowest
  *                "C" direction.
@@ -894,7 +894,7 @@ ESIO_FIELD_READ_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_field_size(const esio_state s,
+int esio_field_size(const esio_handle h,
                     const char *name,
                     int *cglobal, int *bglobal, int *aglobal);
 /*\@}*/
@@ -914,7 +914,7 @@ int esio_field_size(const esio_state s,
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer containing the vectors to write.
  * \param cglobal Global number of vectors in the "C" slowest direction.
@@ -958,7 +958,7 @@ ESIO_FIELD_WRITEV_GEN(int)
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer to contain the read vectors.
  * \param cglobal Global number of vectors in the "C" slowest direction.
@@ -998,7 +998,7 @@ ESIO_FIELD_READV_GEN(int)
  * Query the global number of vectors and components within a field.
  * Scalar-valued fields have <code>*ncomponents == 1</code>.
  *
- * \param s Handle to use.
+ * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param cglobal Buffer to contain the number of vectors in the slowest
  *                "C" direction.
@@ -1011,7 +1011,7 @@ ESIO_FIELD_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_field_sizev(const esio_state s,
+int esio_field_sizev(const esio_handle h,
                      const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents);
@@ -1042,23 +1042,23 @@ int esio_layout_count();
  * Get the default layout associated with the given handle.
  * This layout will be used when writing any new fields.
  *
- * @param s Handle to use.
+ * @param h Handle to use.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_layout_get(const esio_state s);
+int esio_layout_get(const esio_handle h);
 
 /**
  * Set the default layout associated with the given handle.
  * The supplied layout will be used when writing any new fields.
  *
- * @param s Handle to use.
+ * @param h Handle to use.
  * @param layout_index Layout index to set in the range
  *                     <tt>[0, </tt>esio_layout_count()<tt>)</tt>.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_layout_set(esio_state s, int layout_index);
+int esio_layout_set(esio_handle h, int layout_index);
 /*\@}*/
 
 #ifdef __cplusplus

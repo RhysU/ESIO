@@ -193,7 +193,7 @@ FCT_BGN()
     (void) input_dir;  // Possibly unused
     (void) output_dir; // Possibly unused
     char * filename = NULL;
-    esio_state state;
+    esio_handle state;
 
     FCT_FIXTURE_SUITE_BGN(plane_suite)
     {

@@ -17,14 +17,14 @@ concepts:
 
 ESIO usage usually involves some variation on the following steps:
 <ol>
-  <li>Initialize an opaque \ref esio_state handle for a
+  <li>Initialize an opaque \ref esio_handle for a
       particular MPI communicator.</li>
   <li>Create or open a data file using the handle.</li>
   <li>Write or read some attributes using the handle.</li>
   <li>Write or read one or more distributed lines, planes, or fields
       of data using the handle.</li>
   <li>Close the data file using the handle.</li>
-  <li>Finalize the \c esio_state handle.</li>
+  <li>Finalize the \c esio_handle.</li>
 </ol>
 
 A complete C-based MPI program using ESIO to write some (trivial) data
@@ -33,23 +33,23 @@ might look like:
 
 \section conceptshandles Handles
 
-ESIO maintains state within opaque \ref esio_state handles.  A user
-creates an \c esio_state handle by invoking esio_initialize() with
+ESIO maintains state within opaque \ref esio_handle "esio_handles".
+A user creates an \c esio_handle by invoking esio_initialize() with
 an MPI communicator.  All subsequent calls to the ESIO API using that
 particular handle <i>must be made collectively</i> across the MPI
 communicator supplied at the handle's creation time.  When finished
 using a handle, a user calls esio_finalize().
 
-Multiple \c esio_state handles may be created against the same or
-different MPI communicators.  For example, one handle may created against
-MPI_COMM_WORLD and another created against MPI_COMM_SELF.  ESIO calls
-using the first handle must be made collectively across all MPI ranks.
-In contrast, ESIO calls using the second handle may be made on only a
-single rank (that is, collectively across MPI_COMM_SELF).
+Multiple \c esio_handle may be created against the same or different MPI
+communicators.  For example, one handle may created against MPI_COMM_WORLD
+and another created against MPI_COMM_SELF.  ESIO calls using the first
+handle must be made collectively across all MPI ranks.  In contrast,
+ESIO calls using the second handle may be made on only a single rank
+(that is, collectively across MPI_COMM_SELF).
 
-To the extent allowed by your MPI stack and the parallel HDF5
-implementation, ESIO is thread safe provided that a single \c esio_state
-handle is not used concurrently by more than one thread.
+To the extent allowed by the underlying MPI stack and the parallel HDF5
+implementation, ESIO is thread safe provided that a single \c esio_handle
+is not used concurrently by more than one thread.
 
 \section conceptsfiles Files
 
@@ -58,11 +58,11 @@ href="http://www.hdfgroup.org/HDF5/">HDF5</a> files usable by any
 application conforming to the <a href="http://www.hdfgroup.org/HDF5/">The
 HDF5 Group</a>'s specifications.
 
-At any time, a \ref esio_state handle may have an data file associated
-with it.  A file must be associated with a handle before any attributes
-or data may be read or written.  Existing files may be opened using
-esio_file_open().  New files may be created using esio_file_create().
-When finished using a file, a user should call esio_file_close().
+At any time, a \ref esio_handle may have a data file associated with it.
+A file must be associated with a handle before any attributes or data may
+be read or written.  Existing files may be opened using esio_file_open().
+New files may be created using esio_file_create().  When finished using
+a file, a user should call esio_file_close().
 
 Information written to a file is <i>always</i> buffered and should
 <i>not</i> be assumed to be on disk while a file is open.  Buffers are
@@ -171,8 +171,8 @@ used to write data to file.  Further, operations on any existing field
 will always use the layout with which a field was initially created.
 
 The total number of field layouts available may be queried using
-esio_layout_count().  The default layout associated with a particular \ref
-esio_state handle can be retrieved using esio_layout_get() and specified
+esio_layout_count().  The default layout associated with a particular
+\ref esio_handle can be retrieved using esio_layout_get() and specified
 using esio_layout_set().  The default layout is used whenever esio writes
 a new field to file.  Note that any existing layout is preserved when
 a field is overwritten.

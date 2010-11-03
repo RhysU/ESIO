@@ -51,17 +51,17 @@ static
 MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
 
 static
-hid_t esio_field_create(const esio_state s,
+hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
                         const char *name, hid_t type_id);
 
 static
-hid_t esio_plane_create(const esio_state s,
+hid_t esio_plane_create(const esio_handle h,
                         int bglobal, int aglobal,
                         const char *name, hid_t type_id);
 
 static
-hid_t esio_line_create(const esio_state s,
+hid_t esio_line_create(const esio_handle h,
                        int aglobal,
                        const char *name, hid_t type_id);
 
@@ -75,7 +75,7 @@ static
 int esio_line_close(hid_t dataset_id);
 
 static
-int esio_field_write_internal(const esio_state s,
+int esio_field_write_internal(const esio_handle h,
                               const char *name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
@@ -84,7 +84,7 @@ int esio_field_write_internal(const esio_state s,
                               hid_t type_id);
 
 static
-int esio_field_read_internal(const esio_state s,
+int esio_field_read_internal(const esio_handle h,
                              const char *name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
@@ -93,7 +93,7 @@ int esio_field_read_internal(const esio_state s,
                              hid_t type_id);
 
 static
-int esio_plane_write_internal(const esio_state s,
+int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
                               int bglobal, int bstart, int blocal, int bstride,
@@ -101,7 +101,7 @@ int esio_plane_write_internal(const esio_state s,
                               hid_t type_id);
 
 static
-int esio_plane_read_internal(const esio_state s,
+int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
                              int bglobal, int bstart, int blocal, int bstride,
@@ -109,14 +109,14 @@ int esio_plane_read_internal(const esio_state s,
                              hid_t type_id);
 
 static
-int esio_line_write_internal(const esio_state s,
+int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
                              int aglobal, int astart, int alocal, int astride,
                              hid_t type_id);
 
 static
-int esio_line_read_internal(const esio_state s,
+int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
                             int aglobal, int astart, int alocal, int astride,
@@ -126,7 +126,7 @@ int esio_line_read_internal(const esio_state s,
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
 
-struct esio_state_s {
+struct esio_handle_s {
     MPI_Comm  comm;         //< Communicator used for collective calls
     int       comm_rank;    //< Process rank within in MPI communicator
     int       comm_size;    //< Number of ranks within MPI communicator
@@ -199,7 +199,7 @@ esio_MPI_Comm_dup_with_name(MPI_Comm comm)
     return retval;
 }
 
-esio_state
+esio_handle
 esio_initialize(MPI_Comm comm)
 {
     // Sanity check incoming arguments
@@ -217,31 +217,31 @@ esio_initialize(MPI_Comm comm)
     MPI_Info info;
     ESIO_MPICHKN(MPI_Info_create(&info));
 
-    // Create and initialize ESIO's opaque state struct
-    esio_state s = calloc(1, sizeof(struct esio_state_s));
-    if (s == NULL) {
-        ESIO_ERROR_NULL("failed to allocate space for state", ESIO_ENOMEM);
+    // Create and initialize ESIO's opaque handler struct
+    esio_handle h = calloc(1, sizeof(struct esio_handle_s));
+    if (h == NULL) {
+        ESIO_ERROR_NULL("failed to allocate space for handle", ESIO_ENOMEM);
     }
-    s->comm         = esio_MPI_Comm_dup_with_name(comm);
-    s->comm_rank    = comm_rank;
-    s->comm_size    = comm_size;
-    s->info         = info;
-    s->file_id      = -1;
-    s->layout_index = 0;
+    h->comm         = esio_MPI_Comm_dup_with_name(comm);
+    h->comm_rank    = comm_rank;
+    h->comm_size    = comm_size;
+    h->info         = info;
+    h->file_id      = -1;
+    h->layout_index = 0;
 
-    if (s->comm == MPI_COMM_NULL) {
-        esio_finalize(s);
-        ESIO_ERROR_NULL("Detected MPI_COMM_NULL in s->comm", ESIO_ESANITY);
+    if (h->comm == MPI_COMM_NULL) {
+        esio_finalize(h);
+        ESIO_ERROR_NULL("Detected MPI_COMM_NULL in h->comm", ESIO_ESANITY);
     }
 
-    return s;
+    return h;
 }
 
 #ifdef __INTEL_COMPILER
 // remark #1418: external function definitializeion with no prior declaration
 #pragma warning(push,disable:1418)
 #endif
-esio_state
+esio_handle
 esio_initialize_fortran(MPI_Fint fcomm)
 {
     // Converting MPI communicators from Fortran to C requires MPI_Comm_f2c
@@ -253,19 +253,19 @@ esio_initialize_fortran(MPI_Fint fcomm)
 #endif
 
 int
-esio_finalize(esio_state s)
+esio_finalize(esio_handle h)
 {
-    if (s) {
-        esio_file_close(s); // Close any open file
-        if (s->comm != MPI_COMM_NULL) {
-            ESIO_MPICHKR(MPI_Comm_free(&s->comm));
-            s->comm = MPI_COMM_NULL;
+    if (h) {
+        esio_file_close(h); // Close any open file
+        if (h->comm != MPI_COMM_NULL) {
+            ESIO_MPICHKR(MPI_Comm_free(&h->comm));
+            h->comm = MPI_COMM_NULL;
         }
-        if (s->info != MPI_INFO_NULL) {
-            ESIO_MPICHKR(MPI_Info_free(&s->info));
-            s->info = MPI_INFO_NULL;
+        if (h->info != MPI_INFO_NULL) {
+            ESIO_MPICHKR(MPI_Info_free(&h->info));
+            h->info = MPI_INFO_NULL;
         }
-        free(s);
+        free(h);
     }
 
     return ESIO_SUCCESS;
@@ -277,18 +277,18 @@ int esio_layout_count()
 }
 
 int
-esio_layout_get(const esio_state s)
+esio_layout_get(const esio_handle h)
 {
-    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
 
-    return s->layout_index;
+    return h->layout_index;
 }
 
 int
-esio_layout_set(esio_state s, int layout_index)
+esio_layout_set(esio_handle h, int layout_index)
 {
-    if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
     }
     if (layout_index < 0) {
         ESIO_ERROR("layout_index < 0", ESIO_EINVAL);
@@ -297,19 +297,19 @@ esio_layout_set(esio_state s, int layout_index)
         ESIO_ERROR("layout_index >= esio_nlayout", ESIO_EINVAL);
     }
 
-    s->layout_index = layout_index;
+    h->layout_index = layout_index;
 
     return ESIO_SUCCESS;
 }
 
 int
-esio_file_create(esio_state s, const char *file, int overwrite)
+esio_file_create(esio_handle h, const char *file, int overwrite)
 {
     // Sanity check incoming arguments
-    if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
     }
-    if (s->file_id != -1) {
+    if (h->file_id != -1) {
         ESIO_ERROR("Cannot create file because previous file not closed",
                    ESIO_EINVAL);
     }
@@ -326,7 +326,7 @@ esio_file_create(esio_state s, const char *file, int overwrite)
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
     }
     // Set collective details
-    if (H5Pset_fapl_mpio(fapl_id, s->comm, s->info)) {
+    if (H5Pset_fapl_mpio(fapl_id, h->comm, h->info)) {
         H5Pclose(fapl_id);
         ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
     }
@@ -349,8 +349,8 @@ esio_file_create(esio_state s, const char *file, int overwrite)
         }
     }
 
-    // File creation successful: update state
-    s->file_id = file_id;
+    // File creation successful: update handle
+    h->file_id = file_id;
 
     // Clean up temporary resources
     H5Pclose(fapl_id);
@@ -359,13 +359,13 @@ esio_file_create(esio_state s, const char *file, int overwrite)
 }
 
 int
-esio_file_open(esio_state s, const char *file, int readwrite)
+esio_file_open(esio_handle h, const char *file, int readwrite)
 {
     // Sanity check incoming arguments
-    if (s == NULL) {
-        ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
     }
-    if (s->file_id != -1) {
+    if (h->file_id != -1) {
         ESIO_ERROR("Cannot open new file because previous file not closed",
                    ESIO_EINVAL);
     }
@@ -379,7 +379,7 @@ esio_file_open(esio_state s, const char *file, int readwrite)
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
     }
     // Set collective details
-    if (H5Pset_fapl_mpio(fapl_id, s->comm, s->info)) {
+    if (H5Pset_fapl_mpio(fapl_id, h->comm, h->info)) {
         H5Pclose(fapl_id);
         ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
     }
@@ -394,8 +394,8 @@ esio_file_open(esio_state s, const char *file, int readwrite)
         ESIO_ERROR("Unable to open existing file", ESIO_EFAILED);
     }
 
-    // File creation successful: update state
-    s->file_id = file_id;
+    // File creation successful: update handle
+    h->file_id = file_id;
 
     // Clean up temporary resources
     H5Pclose(fapl_id);
@@ -403,14 +403,14 @@ esio_file_open(esio_state s, const char *file, int readwrite)
     return ESIO_SUCCESS;
 }
 
-int esio_file_flush(esio_state s)
+int esio_file_flush(esio_handle h)
 {
     // Sanity check incoming arguments
-    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
 
     // Flush any currently open file
-    if (s->file_id != -1) {
-        if (H5Fflush(s->file_id, H5F_SCOPE_GLOBAL) < 0) {
+    if (h->file_id != -1) {
+        if (H5Fflush(h->file_id, H5F_SCOPE_GLOBAL) < 0) {
             ESIO_ERROR("Unable to flush file", ESIO_EFAILED);
         }
     }
@@ -419,39 +419,39 @@ int esio_file_flush(esio_state s)
 
 }
 
-int esio_file_close(esio_state s)
+int esio_file_close(esio_handle h)
 {
     // Sanity check incoming arguments
-    if (s == NULL) ESIO_ERROR("s == NULL", ESIO_EFAULT);
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
 
     // Close any currently open file
-    if (s->file_id != -1) {
+    if (h->file_id != -1) {
 
-        if (H5Fclose(s->file_id) < 0) {
+        if (H5Fclose(h->file_id) < 0) {
             ESIO_ERROR("Unable to close file", ESIO_EFAILED);
         }
 
-        // Close successful: update state
-        s->file_id = -1;
+        // Close successful: update handle
+        h->file_id = -1;
     }
 
     return ESIO_SUCCESS;
 }
 
 static
-hid_t esio_field_create(const esio_state s,
+hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
                         const char *name, hid_t type_id)
 {
-    // Sanity check that the state's layout_index matches our internal table
-    if (esio_layout[s->layout_index].index != s->layout_index) {
+    // Sanity check that the handle's layout_index matches our internal table
+    if (esio_layout[h->layout_index].index != h->layout_index) {
         ESIO_ERROR_VAL("SEVERE: Consistency error in esio_layout",
                 ESIO_ESANITY, -1);
     }
 
-    // Create the filespace using current layout within state
+    // Create the filespace using current layout within handle
     const hid_t filespace
-        = (esio_layout[s->layout_index].filespace_creator)(cglobal,
+        = (esio_layout[h->layout_index].filespace_creator)(cglobal,
                                                          bglobal,
                                                          aglobal);
     if (filespace < 0) {
@@ -460,15 +460,15 @@ hid_t esio_field_create(const esio_state s,
 
     // Create the dataspace
     const hid_t dset_id
-        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash field's metadata
-    if (ESIO_SUCCESS != esio_field_metadata_write(s->file_id, name,
-                                                  s->layout_index,
+    if (ESIO_SUCCESS != esio_field_metadata_write(h->file_id, name,
+                                                  h->layout_index,
                                                   cglobal, bglobal, aglobal,
                                                   type_id)) {
         H5Sclose(filespace);
@@ -483,7 +483,7 @@ hid_t esio_field_create(const esio_state s,
 }
 
 static
-hid_t esio_plane_create(const esio_state s,
+hid_t esio_plane_create(const esio_handle h,
                         int bglobal, int aglobal,
                         const char *name, hid_t type_id)
 {
@@ -496,14 +496,14 @@ hid_t esio_plane_create(const esio_state s,
 
     // Create the dataspace
     const hid_t dset_id
-        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash plane's metadata
-    if (ESIO_SUCCESS != esio_plane_metadata_write(s->file_id, name,
+    if (ESIO_SUCCESS != esio_plane_metadata_write(h->file_id, name,
                                                   bglobal, aglobal,
                                                   type_id)) {
         H5Sclose(filespace);
@@ -518,7 +518,7 @@ hid_t esio_plane_create(const esio_state s,
 }
 
 static
-hid_t esio_line_create(const esio_state s,
+hid_t esio_line_create(const esio_handle h,
                        int aglobal,
                        const char *name, hid_t type_id)
 {
@@ -531,14 +531,14 @@ hid_t esio_line_create(const esio_state s,
 
     // Create the dataspace
     const hid_t dset_id
-        = H5Dcreate1(s->file_id, name, type_id, filespace, H5P_DEFAULT);
+        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
     }
 
     // Stash line's metadata
-    if (ESIO_SUCCESS != esio_line_metadata_write(s->file_id, name,
+    if (ESIO_SUCCESS != esio_line_metadata_write(h->file_id, name,
                                                  aglobal, type_id)) {
         H5Sclose(filespace);
         H5Dclose(dset_id);
@@ -581,13 +581,13 @@ int esio_line_close(hid_t dataset_id)
     return ESIO_SUCCESS;
 }
 
-int esio_field_size(const esio_state s,
+int esio_field_size(const esio_handle h,
                     const char *name,
                     int *cglobal, int *bglobal, int *aglobal)
 {
     int ncomponents;
     const int status
-        = esio_field_sizev(s, name, cglobal, bglobal, aglobal, &ncomponents);
+        = esio_field_sizev(h, name, cglobal, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_field_sizev",
                    ESIO_EINVAL);
@@ -595,18 +595,18 @@ int esio_field_size(const esio_state s,
     return status;
 }
 
-int esio_field_sizev(const esio_state s,
+int esio_field_sizev(const esio_handle h,
                      const char *name,
                      int *cglobal, int *bglobal, int *aglobal,
                      int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_field_metadata_read(
-            s->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
+            h->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
     if (status != ESIO_SUCCESS) {
         ESIO_ERROR("Unable to read field metadata", status);
     }
@@ -614,13 +614,13 @@ int esio_field_sizev(const esio_state s,
     return ESIO_SUCCESS;
 }
 
-int esio_plane_size(const esio_state s,
+int esio_plane_size(const esio_handle h,
                     const char *name,
                     int *bglobal, int *aglobal)
 {
     int ncomponents;
     const int status
-        = esio_plane_sizev(s, name, bglobal, aglobal, &ncomponents);
+        = esio_plane_sizev(h, name, bglobal, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_plane_sizev",
                    ESIO_EINVAL);
@@ -628,18 +628,18 @@ int esio_plane_size(const esio_state s,
     return status;
 }
 
-int esio_plane_sizev(const esio_state s,
+int esio_plane_sizev(const esio_handle h,
                      const char *name,
                      int *bglobal, int *aglobal,
                      int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_plane_metadata_read(
-            s->file_id, name, bglobal, aglobal, ncomponents);
+            h->file_id, name, bglobal, aglobal, ncomponents);
     if (status != ESIO_SUCCESS) {
         ESIO_ERROR("Unable to read plane metadata", status);
     }
@@ -647,12 +647,12 @@ int esio_plane_sizev(const esio_state s,
     return ESIO_SUCCESS;
 }
 
-int esio_line_size(const esio_state s,
+int esio_line_size(const esio_handle h,
                    const char *name,
                    int *aglobal)
 {
     int ncomponents;
-    const int status = esio_line_sizev(s, name, aglobal, &ncomponents);
+    const int status = esio_line_sizev(h, name, aglobal, &ncomponents);
     if (ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_line_sizev",
                    ESIO_EINVAL);
@@ -660,18 +660,18 @@ int esio_line_size(const esio_state s,
     return status;
 }
 
-int esio_line_sizev(const esio_state s,
+int esio_line_sizev(const esio_handle h,
                     const char *name,
                     int *aglobal,
                     int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     const int status = esio_line_metadata_read(
-            s->file_id, name, aglobal, ncomponents);
+            h->file_id, name, aglobal, ncomponents);
     if (status != ESIO_SUCCESS) {
         ESIO_ERROR("Unable to read line metadata", ESIO_EFAILED);
     }
@@ -684,7 +684,7 @@ int esio_line_sizev(const esio_state s,
 // *******************************************************************
 
 static
-int esio_field_write_internal(const esio_state s,
+int esio_field_write_internal(const esio_handle h,
                               const char *name,
                               const void *field,
                               int cglobal, int cstart, int clocal, int cstride,
@@ -694,8 +694,8 @@ int esio_field_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
@@ -722,7 +722,7 @@ int esio_field_write_internal(const esio_state s,
     int layout_index;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
-    const int mstat = esio_field_metadata_read(s->file_id, name,
+    const int mstat = esio_field_metadata_read(h->file_id, name,
                                                &layout_index,
                                                &field_cglobal,
                                                &field_bglobal,
@@ -734,8 +734,8 @@ int esio_field_write_internal(const esio_state s,
 
         // Create dataset and write it with the active field layout
         const hid_t dset_id
-            = esio_field_create(s, cglobal, bglobal, aglobal, name, type_id);
-        const int wstat = (esio_layout[s->layout_index].field_writer)(
+            = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id);
+        const int wstat = (esio_layout[h->layout_index].field_writer)(
                 dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
@@ -771,7 +771,7 @@ int esio_field_write_internal(const esio_state s,
         }
 
         // Open the existing field's dataset
-        const hid_t dset_id = H5Dopen1(s->file_id, name);
+        const hid_t dset_id = H5Dopen1(h->file_id, name);
         if (dset_id < 0) {
             ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
         }
@@ -807,7 +807,7 @@ int esio_field_write_internal(const esio_state s,
 }
 
 static
-int esio_field_read_internal(const esio_state s,
+int esio_field_read_internal(const esio_handle h,
                              const char *name,
                              void *field,
                              int cglobal, int cstart, int clocal, int cstride,
@@ -817,8 +817,8 @@ int esio_field_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
     if (cglobal  < 0)     ESIO_ERROR("cglobal < 0",            ESIO_EINVAL);
@@ -845,7 +845,7 @@ int esio_field_read_internal(const esio_state s,
     int layout_index;
     int field_cglobal, field_bglobal, field_aglobal;
     int field_ncomponents;
-    const int status = esio_field_metadata_read(s->file_id, name,
+    const int status = esio_field_metadata_read(h->file_id, name,
                                                 &layout_index,
                                                 &field_cglobal,
                                                 &field_bglobal,
@@ -874,7 +874,7 @@ int esio_field_read_internal(const esio_state s,
 
     // Open existing dataset
     const hid_t dapl_id = H5P_DEFAULT;
-    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    const hid_t dset_id = H5Dopen2(h->file_id, name, dapl_id);
     if (dset_id < 0) {
         ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
@@ -908,14 +908,14 @@ int esio_field_read_internal(const esio_state s,
 
 #define GEN_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                                   \
 int esio_field_ ## OP ## _ ## TYPE (                                        \
-        const esio_state s,                                                 \
+        const esio_handle h,                                                \
         const char *name,                                                   \
         QUAL TYPE *field,                                                   \
         int cglobal, int cstart, int clocal, int cstride,                   \
         int bglobal, int bstart, int blocal, int bstride,                   \
         int aglobal, int astart, int alocal, int astride)                   \
 {                                                                           \
-    return esio_field_ ## OP ## _internal(s, name, field,                   \
+    return esio_field_ ## OP ## _internal(h, name, field,                   \
                                           cglobal, cstart, clocal, cstride, \
                                           bglobal, bstart, blocal, bstride, \
                                           aglobal, astart, alocal, astride, \
@@ -934,7 +934,7 @@ GEN_FIELD_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 #define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_field_ ## OP ## v_ ## TYPE(                                      \
-        const esio_state s,                                               \
+        const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *field,                                                 \
         int cglobal, int cstart, int clocal, int cstride,                 \
@@ -963,7 +963,7 @@ int esio_field_ ## OP ## v_ ## TYPE(                                      \
                    ESIO_EINVAL);                                          \
     }                                                                     \
     const int retval = esio_field_ ## OP ## _internal(                    \
-            s, name, field,                                               \
+            h, name, field,                                               \
             cglobal, cstart, clocal, (cstride / ncomponents),             \
             bglobal, bstart, blocal, (bstride / ncomponents),             \
             aglobal, astart, alocal, (astride / ncomponents),             \
@@ -986,7 +986,7 @@ GEN_FIELD_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 // *******************************************************************
 
 static
-int esio_plane_write_internal(const esio_state s,
+int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
                               int bglobal, int bstart, int blocal, int bstride,
@@ -995,8 +995,8 @@ int esio_plane_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
@@ -1017,7 +1017,7 @@ int esio_plane_write_internal(const esio_state s,
     // Attempt to read metadata for the plane (which may or may not exist)
     int plane_bglobal, plane_aglobal;
     int plane_ncomponents;
-    const int mstat = esio_plane_metadata_read(s->file_id, name,
+    const int mstat = esio_plane_metadata_read(h->file_id, name,
                                                &plane_bglobal,
                                                &plane_aglobal,
                                                &plane_ncomponents);
@@ -1025,7 +1025,7 @@ int esio_plane_write_internal(const esio_state s,
     hid_t dset_id;
     if (mstat != ESIO_SUCCESS) {
         // Plane did not exist so create it
-        dset_id = esio_plane_create(s, bglobal, aglobal, name, type_id);
+        dset_id = esio_plane_create(h, bglobal, aglobal, name, type_id);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new plane", ESIO_EFAILED);
         }
@@ -1049,7 +1049,7 @@ int esio_plane_write_internal(const esio_state s,
         }
 
         // Open the existing plane's dataset
-        dset_id = H5Dopen1(s->file_id, name);
+        dset_id = H5Dopen1(h->file_id, name);
         if (dset_id < 0) {
             ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
         }
@@ -1082,7 +1082,7 @@ int esio_plane_write_internal(const esio_state s,
 }
 
 static
-int esio_plane_read_internal(const esio_state s,
+int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
                              int bglobal, int bstart, int blocal, int bstride,
@@ -1091,8 +1091,8 @@ int esio_plane_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
     if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
@@ -1113,7 +1113,7 @@ int esio_plane_read_internal(const esio_state s,
     // Read metadata for the plane
     int plane_bglobal, plane_aglobal;
     int plane_ncomponents;
-    const int status = esio_plane_metadata_read(s->file_id, name,
+    const int status = esio_plane_metadata_read(h->file_id, name,
                                                 &plane_bglobal,
                                                 &plane_aglobal,
                                                 &plane_ncomponents);
@@ -1137,7 +1137,7 @@ int esio_plane_read_internal(const esio_state s,
 
     // Open existing dataset
     const hid_t dapl_id = H5P_DEFAULT;
-    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    const hid_t dset_id = H5Dopen2(h->file_id, name, dapl_id);
     if (dset_id < 0) {
         ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
@@ -1170,13 +1170,13 @@ int esio_plane_read_internal(const esio_state s,
 
 #define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                                   \
 int esio_plane_ ## OP ## _ ## TYPE (                                        \
-        const esio_state s,                                                 \
+        const esio_handle h,                                                \
         const char *name,                                                   \
         QUAL TYPE *plane,                                                   \
         int bglobal, int bstart, int blocal, int bstride,                   \
         int aglobal, int astart, int alocal, int astride)                   \
 {                                                                           \
-    return esio_plane_ ## OP ## _internal(s, name, plane,                   \
+    return esio_plane_ ## OP ## _internal(h, name, plane,                   \
                                           bglobal, bstart, blocal, bstride, \
                                           aglobal, astart, alocal, astride, \
                                           H5TYPE);                          \
@@ -1193,7 +1193,7 @@ GEN_PLANE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 #define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE)                                \
 int esio_plane_ ## OP ## v_ ## TYPE(                                      \
-        const esio_state s,                                               \
+        const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *plane,                                                 \
         int bglobal, int bstart, int blocal, int bstride,                 \
@@ -1216,7 +1216,7 @@ int esio_plane_ ## OP ## v_ ## TYPE(                                      \
                    ESIO_EINVAL);                                          \
     }                                                                     \
     const int retval = esio_plane_ ## OP ## _internal(                    \
-            s, name, plane,                                               \
+            h, name, plane,                                               \
             bglobal, bstart, blocal, (bstride / ncomponents),             \
             aglobal, astart, alocal, (astride / ncomponents),             \
             array_type_id);                                               \
@@ -1238,7 +1238,7 @@ GEN_PLANE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 // *******************************************************************
 
 static
-int esio_line_write_internal(const esio_state s,
+int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
                              int aglobal, int astart, int alocal, int astride,
@@ -1246,8 +1246,8 @@ int esio_line_write_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
@@ -1262,14 +1262,14 @@ int esio_line_write_internal(const esio_state s,
 
     // Attempt to read metadata for the line (which may or may not exist)
     int line_aglobal, line_ncomponents;
-    const int mstat = esio_line_metadata_read(s->file_id, name,
+    const int mstat = esio_line_metadata_read(h->file_id, name,
                                               &line_aglobal,
                                               &line_ncomponents);
 
     hid_t dset_id;
     if (mstat == ESIO_EINVAL) {
         // Line did not exist so create it
-        dset_id = esio_line_create(s, aglobal, name, type_id);
+        dset_id = esio_line_create(h, aglobal, name, type_id);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new line", ESIO_EFAILED);
         }
@@ -1289,7 +1289,7 @@ int esio_line_write_internal(const esio_state s,
         }
 
         // Open the existing line's dataset
-        dset_id = H5Dopen1(s->file_id, name);
+        dset_id = H5Dopen1(h->file_id, name);
         if (dset_id < 0) {
             ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
         }
@@ -1323,7 +1323,7 @@ int esio_line_write_internal(const esio_state s,
 }
 
 static
-int esio_line_read_internal(const esio_state s,
+int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
                             int aglobal, int astart, int alocal, int astride,
@@ -1331,8 +1331,8 @@ int esio_line_read_internal(const esio_state s,
 {
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
@@ -1347,7 +1347,7 @@ int esio_line_read_internal(const esio_state s,
 
     // Read metadata for the line
     int line_aglobal, line_ncomponents;
-    const int status = esio_line_metadata_read(s->file_id, name,
+    const int status = esio_line_metadata_read(h->file_id, name,
                                                &line_aglobal,
                                                &line_ncomponents);
     if (status != ESIO_SUCCESS) {
@@ -1367,7 +1367,7 @@ int esio_line_read_internal(const esio_state s,
 
     // Open existing dataset
     const hid_t dapl_id = H5P_DEFAULT;
-    const hid_t dset_id = H5Dopen2(s->file_id, name, dapl_id);
+    const hid_t dset_id = H5Dopen2(h->file_id, name, dapl_id);
     if (dset_id < 0) {
         ESIO_ERROR("Unable to open dataset", ESIO_EFAILED);
     }
@@ -1399,12 +1399,12 @@ int esio_line_read_internal(const esio_state s,
 
 #define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                                    \
 int esio_line_ ## OP ## _ ## TYPE (                                         \
-        const esio_state s,                                                 \
+        const esio_handle h,                                                \
         const char *name,                                                   \
         QUAL TYPE *line,                                                    \
         int aglobal, int astart, int alocal, int astride)                   \
 {                                                                           \
-    return esio_line_ ## OP ## _internal(s, name, line,                     \
+    return esio_line_ ## OP ## _internal(h, name, line,                     \
                                          aglobal, astart, alocal, astride,  \
                                          H5TYPE);                           \
 }
@@ -1420,7 +1420,7 @@ GEN_LINE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
 
 #define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE)                                 \
 int esio_line_ ## OP ## v_ ## TYPE(                                       \
-        const esio_state s,                                               \
+        const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *line,                                                  \
         int aglobal, int astart, int alocal, int astride,                 \
@@ -1437,7 +1437,7 @@ int esio_line_ ## OP ## v_ ## TYPE(                                       \
                    ESIO_EINVAL);                                          \
     }                                                                     \
     const int retval = esio_line_ ## OP ## _internal(                     \
-            s, name, line,                                                \
+            h, name, line,                                                \
             aglobal, astart, alocal, (astride / ncomponents),             \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
@@ -1457,13 +1457,13 @@ GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 // ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE
 // *********************************************************************
 
-int esio_attribute_sizev(const esio_state s,
+int esio_attribute_sizev(const esio_handle h,
                          const char *name,
                          int *ncomponents)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     // Attempt to retrieve information on the attribute
@@ -1472,7 +1472,7 @@ int esio_attribute_sizev(const esio_state s,
     H5T_class_t type_class;
     size_t type_size;
     DISABLE_HDF5_ERROR_HANDLER
-    const herr_t err = esio_H5LTget_attribute_ndims_info(s->file_id, "/", name,
+    const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id, "/", name,
                                                          &rank, dims,
                                                          &type_class,
                                                          &type_size);
@@ -1492,20 +1492,20 @@ int esio_attribute_sizev(const esio_state s,
 }
 
 #define GEN_ATTRIBUTE_WRITEV(TYPE)                                            \
-int esio_attribute_writev_##TYPE(const esio_state s,                          \
+int esio_attribute_writev_##TYPE(const esio_handle h,                         \
                                  const char *name,                            \
                                  const TYPE *value,                           \
                                  int ncomponents)                             \
 {                                                                             \
     /* Sanity check incoming arguments */                                     \
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);  \
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);  \
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
                                                                               \
     const herr_t err = H5LTset_attribute_##TYPE(                              \
-            s->file_id, "/", name, value, ncomponents);                       \
+            h->file_id, "/", name, value, ncomponents);                       \
     if (err < 0) {                                                            \
         ESIO_ERROR("unable to write attribute", ESIO_EFAILED);                \
     }                                                                         \
@@ -1514,14 +1514,14 @@ int esio_attribute_writev_##TYPE(const esio_state s,                          \
 }
 
 #define GEN_ATTRIBUTE_READV(TYPE)                                             \
-int esio_attribute_readv_##TYPE(const esio_state s,                           \
+int esio_attribute_readv_##TYPE(const esio_handle h,                          \
                                 const char *name,                             \
                                 TYPE *value,                                  \
                                 int ncomponents)                              \
 {                                                                             \
     /* Sanity check incoming arguments */                                     \
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);  \
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);  \
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
@@ -1533,7 +1533,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
     size_t type_size;                                                         \
     DISABLE_HDF5_ERROR_HANDLER                                                \
     const herr_t err1 = esio_H5LTget_attribute_ndims_info(                    \
-            s->file_id, "/", name, &rank, dims, &type_class, &type_size);     \
+            h->file_id, "/", name, &rank, dims, &type_class, &type_size);     \
     ENABLE_HDF5_ERROR_HANDLER                                                 \
     if (err1 < 0) {                                                           \
         ESIO_ERROR("unable to interrogate requested attribute", ESIO_EINVAL); \
@@ -1547,7 +1547,7 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
                                                                               \
     /* Read the attribute's data */                                           \
     const herr_t err2 = H5LTget_attribute_##TYPE(                             \
-            s->file_id, "/", name, value);                                    \
+            h->file_id, "/", name, value);                                    \
     if (err2 < 0) {                                                           \
         ESIO_ERROR("unable to retrieve requested attribute", ESIO_EFAILED);   \
     }                                                                         \
@@ -1556,19 +1556,19 @@ int esio_attribute_readv_##TYPE(const esio_state s,                           \
 }
 
 #define GEN_ATTRIBUTE_WRITE(TYPE)                                             \
-int esio_attribute_write_##TYPE(const esio_state s,                           \
+int esio_attribute_write_##TYPE(const esio_handle h,                          \
                                 const char *name,                             \
                                 const TYPE *value)                            \
 {                                                                             \
-    return esio_attribute_writev_##TYPE(s, name, value, 1);                   \
+    return esio_attribute_writev_##TYPE(h, name, value, 1);                   \
 }
 
 #define GEN_ATTRIBUTE_READ(TYPE)                                              \
-int esio_attribute_read_##TYPE(const esio_state s,                            \
+int esio_attribute_read_##TYPE(const esio_handle h,                           \
                                const char *name,                              \
                                TYPE *value)                                   \
 {                                                                             \
-    return esio_attribute_readv_##TYPE(s, name, value, 1);                    \
+    return esio_attribute_readv_##TYPE(h, name, value, 1);                    \
 }
 
 GEN_ATTRIBUTE_WRITEV(double)
@@ -1590,17 +1590,17 @@ GEN_ATTRIBUTE_READ(int)
 // STRING STRING STRING STRING STRING STRING STRING STRING STRING STRING
 // *********************************************************************
 
-int esio_string_set(const esio_state s,
+int esio_string_set(const esio_handle h,
                     const char *name,
                     const char *value)
 {
     // Sanity check incoming arguments
-    if (s == NULL)        ESIO_ERROR("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);
 
-    const herr_t err = H5LTset_attribute_string(s->file_id, "/", name, value);
+    const herr_t err = H5LTset_attribute_string(h->file_id, "/", name, value);
     if (err < 0) {
         ESIO_ERROR("unable to write attribute", ESIO_EFAILED);
     }
@@ -1608,13 +1608,13 @@ int esio_string_set(const esio_state s,
     return ESIO_SUCCESS;
 }
 
-char* esio_string_get(const esio_state s,
+char* esio_string_get(const esio_handle h,
                       const char *name)
 {
     // Sanity check incoming arguments
-    if (s == NULL)
-        ESIO_ERROR_NULL("s == NULL",              ESIO_EFAULT);
-    if (s->file_id == -1)
+    if (h == NULL)
+        ESIO_ERROR_NULL("h == NULL",              ESIO_EFAULT);
+    if (h->file_id == -1)
         ESIO_ERROR_NULL("No file currently open", ESIO_EINVAL);
     if (name == NULL)
         ESIO_ERROR_NULL("name == NULL",           ESIO_EFAULT);
@@ -1624,7 +1624,7 @@ char* esio_string_get(const esio_state s,
 
     // Attempt to open the requested attribute
     const hid_t aid = H5Aopen_by_name(
-            s->file_id, "/", name, H5P_DEFAULT, H5P_DEFAULT);
+            h->file_id, "/", name, H5P_DEFAULT, H5P_DEFAULT);
     if (aid < 0) {
         ENABLE_HDF5_ERROR_HANDLER
         ESIO_ERROR_NULL("unable to interrogate requested attribute",

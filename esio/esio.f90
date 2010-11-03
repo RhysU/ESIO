@@ -24,7 +24,7 @@
 !! $Id$
 
 ! TODO Document Fortran API
-! TODO Allow Fortran to detect invalid state before other failure
+! TODO Allow Fortran to detect invalid handle before other failure
 ! TODO Allow Fortran to use customizable error handling
 
 !> \file
@@ -45,14 +45,14 @@ module esio
                                          c_float_complex,    &
                                          c_int,              &
                                          c_null_char,        &
-                                         esio_state => c_ptr
+                                         esio_handle => c_ptr
 
   implicit none  ! Nothing implicit
   private        ! Everything default private
 
 ! C interoperation details are kept hidden from the client...
 ! ... with the exception of our opaque handle object type.
-  public :: esio_state
+  public :: esio_handle
 
 ! Public API
   public :: esio_initialize, esio_finalize
@@ -79,7 +79,7 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  type(esio_state) function esio_initialize (comm)
+  type(esio_handle) function esio_initialize (comm)
 
     integer, intent(in) :: comm
 
@@ -87,7 +87,7 @@ contains
     interface
       function impl (comm) bind (C, name="esio_initialize_fortran")
         import
-        type(esio_state)           :: impl
+        type(esio_handle)          :: impl
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
       end function impl
     end interface
@@ -98,19 +98,19 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_finalize (state)
+  integer function esio_finalize (handle)
 
-    type(esio_state), intent(in) :: state
+    type(esio_handle), intent(in) :: handle
 
     interface
-      function impl (state) bind (C, name="esio_finalize")
+      function impl (handle) bind (C, name="esio_finalize")
         import
-        integer(c_int)                      :: impl
-        type(esio_state), intent(in), value :: state
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: handle
       end function impl
     end interface
 
-    esio_finalize = impl(state)
+    esio_finalize = impl(handle)
 
   end function esio_finalize
 
@@ -131,122 +131,122 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_layout_get (state)
+  integer function esio_layout_get (handle)
 
-    type(esio_state), intent(in) :: state
+    type(esio_handle), intent(in) :: handle
 
     interface
-      function impl (state) bind (C, name="esio_layout_get")
+      function impl (handle) bind (C, name="esio_layout_get")
         import
-        integer(c_int)                      :: impl
-        type(esio_state), intent(in), value :: state
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: handle
       end function impl
     end interface
 
-    esio_layout_get = impl(state)
+    esio_layout_get = impl(handle)
 
   end function esio_layout_get
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_layout_set (state, layout_tag)
+  integer function esio_layout_set (handle, layout_tag)
 
-    type(esio_state), intent(in) :: state
-    integer,          intent(in) :: layout_tag
+    type(esio_handle), intent(in) :: handle
+    integer,           intent(in) :: layout_tag
 
     interface
-      function impl (state, layout_tag) bind (C, name="esio_layout_set")
+      function impl (handle, layout_tag) bind (C, name="esio_layout_set")
         import
-        integer(c_int)                      :: impl
-        type(esio_state), intent(in), value :: state
-        integer(c_int),   intent(in), value :: layout_tag
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: handle
+        integer(c_int),    intent(in), value :: layout_tag
       end function impl
     end interface
 
-    esio_layout_set = impl(state, layout_tag)
+    esio_layout_set = impl(handle, layout_tag)
 
   end function esio_layout_set
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_create (state, file, overwrite)
+  integer function esio_file_create (handle, file, overwrite)
 
-    type(esio_state), intent(in) :: state
-    character(len=*), intent(in) :: file
-    logical,          intent(in) :: overwrite
+    type(esio_handle), intent(in) :: handle
+    character(len=*),  intent(in) :: file
+    logical,           intent(in) :: overwrite
 
     interface
-      function impl (state, file, overwrite) bind (C, name="esio_file_create")
+      function impl (handle, file, overwrite) bind (C, name="esio_file_create")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: overwrite
       end function impl
     end interface
 
-    esio_file_create = impl(state, f_c_string(file), f_c_logical(overwrite))
+    esio_file_create = impl(handle, f_c_string(file), f_c_logical(overwrite))
 
   end function esio_file_create
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_open (state, file, readwrite)
+  integer function esio_file_open (handle, file, readwrite)
 
-    type(esio_state), intent(in) :: state
-    character(len=*), intent(in) :: file
-    logical,          intent(in) :: readwrite
+    type(esio_handle), intent(in) :: handle
+    character(len=*),  intent(in) :: file
+    logical,           intent(in) :: readwrite
 
     interface
-      function impl (state, file, readwrite) bind (C, name="esio_file_open")
+      function impl (handle, file, readwrite) bind (C, name="esio_file_open")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: readwrite
       end function impl
     end interface
 
-    esio_file_open = impl(state, f_c_string(file), f_c_logical(readwrite))
+    esio_file_open = impl(handle, f_c_string(file), f_c_logical(readwrite))
 
   end function esio_file_open
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_close (state)
+  integer function esio_file_close (handle)
 
-    type(esio_state), intent(in) :: state
+    type(esio_handle), intent(in) :: handle
 
     interface
-      function impl (state) bind (C, name="esio_file_close")
+      function impl (handle) bind (C, name="esio_file_close")
         import
-        integer(c_int)                      :: impl
-        type(esio_state), intent(in), value :: state
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: handle
       end function impl
     end interface
 
-    esio_file_close = impl(state)
+    esio_file_close = impl(handle)
 
   end function esio_file_close
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_size (state, name, aglobal, bglobal, cglobal)
+  integer function esio_field_size (handle, name, aglobal, bglobal, cglobal)
 
-    type(esio_state), intent(in)  :: state
-    character(len=*), intent(in)  :: name
-    integer,          intent(out) :: aglobal
-    integer,          intent(out) :: bglobal
-    integer,          intent(out) :: cglobal
+    type(esio_handle), intent(in)  :: handle
+    character(len=*),  intent(in)  :: name
+    integer,           intent(out) :: aglobal
+    integer,           intent(out) :: bglobal
+    integer,           intent(out) :: cglobal
 
     integer(c_int) :: tmp_c, tmp_b, tmp_a
 
     interface
-      function impl (state, name, cglobal, bglobal, aglobal)  &
+      function impl (handle, name, cglobal, bglobal, aglobal)  &
                     bind (C, name="esio_field_size")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         integer(c_int),               intent(inout)     :: cglobal
         integer(c_int),               intent(inout)     :: bglobal
@@ -255,7 +255,7 @@ contains
     end interface
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_size = impl(state, f_c_string(name), tmp_c, tmp_b, tmp_a)
+    esio_field_size = impl(handle, f_c_string(name), tmp_c, tmp_b, tmp_a)
     aglobal = tmp_a
     bglobal = tmp_b
     cglobal = tmp_c
@@ -265,27 +265,27 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_write_double (state, name, field,               &
+  integer function esio_field_write_double (handle, name, field,              &
                                             aglobal, astart, alocal, astride, &
                                             bglobal, bstart, blocal, bstride, &
                                             cglobal, cstart, clocal, cstride)
 
-    type(esio_state), intent(in) :: state
-    character(len=*), intent(in) :: name
-    real(c_double),   intent(in) :: field(*)
-    integer,          intent(in) :: aglobal, astart, alocal, astride
-    integer,          intent(in) :: bglobal, bstart, blocal, bstride
-    integer,          intent(in) :: cglobal, cstart, clocal, cstride
+    type(esio_handle), intent(in) :: handle
+    character(len=*),  intent(in) :: name
+    real(c_double),    intent(in) :: field(*)
+    integer,           intent(in) :: aglobal, astart, alocal, astride
+    integer,           intent(in) :: bglobal, bstart, blocal, bstride
+    integer,           intent(in) :: cglobal, cstart, clocal, cstride
 
     interface
-      function impl (state, name, field,               &
+      function impl (handle, name, field,              &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_write_double")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -305,7 +305,7 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_write_double = impl(state, f_c_string(name), field,       &
+    esio_field_write_double = impl(handle, f_c_string(name), field,      &
                                    cglobal, cstart - 1, clocal, cstride, &
                                    bglobal, bstart - 1, blocal, bstride, &
                                    aglobal, astart - 1, alocal, astride)
@@ -314,27 +314,27 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_write_single (state, name, field,               &
+  integer function esio_field_write_single (handle, name, field,              &
                                             aglobal, astart, alocal, astride, &
                                             bglobal, bstart, blocal, bstride, &
                                             cglobal, cstart, clocal, cstride)
 
-    type(esio_state), intent(in) :: state
-    character(len=*), intent(in) :: name
-    real(c_float),    intent(in) :: field(*)
-    integer,          intent(in) :: aglobal, astart, alocal, astride
-    integer,          intent(in) :: bglobal, bstart, blocal, bstride
-    integer,          intent(in) :: cglobal, cstart, clocal, cstride
+    type(esio_handle), intent(in) :: handle
+    character(len=*),  intent(in) :: name
+    real(c_float),     intent(in) :: field(*)
+    integer,           intent(in) :: aglobal, astart, alocal, astride
+    integer,           intent(in) :: bglobal, bstart, blocal, bstride
+    integer,           intent(in) :: cglobal, cstart, clocal, cstride
 
     interface
-      function impl (state, name, field,               &
+      function impl (handle, name, field,              &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_write_float")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -354,7 +354,7 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_write_single = impl(state, f_c_string(name), field,       &
+    esio_field_write_single = impl(handle, f_c_string(name), field,      &
                                    cglobal, cstart - 1, clocal, cstride, &
                                    bglobal, bstart - 1, blocal, bstride, &
                                    aglobal, astart - 1, alocal, astride)
@@ -363,27 +363,27 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_read_double (state, name, field,               &
+  integer function esio_field_read_double (handle, name, field,              &
                                            aglobal, astart, alocal, astride, &
                                            bglobal, bstart, blocal, bstride, &
                                            cglobal, cstart, clocal, cstride)
 
-    type(esio_state), intent(in)  :: state
-    character(len=*), intent(in)  :: name
-    real(c_double),   intent(out) :: field(*)
-    integer,          intent(in)  :: aglobal, astart, alocal, astride
-    integer,          intent(in)  :: bglobal, bstart, blocal, bstride
-    integer,          intent(in)  :: cglobal, cstart, clocal, cstride
+    type(esio_handle), intent(in)  :: handle
+    character(len=*),  intent(in)  :: name
+    real(c_double),    intent(out) :: field(*)
+    integer,           intent(in)  :: aglobal, astart, alocal, astride
+    integer,           intent(in)  :: bglobal, bstart, blocal, bstride
+    integer,           intent(in)  :: cglobal, cstart, clocal, cstride
 
     interface
-      function impl (state, name, field,               &
+      function impl (handle, name, field,              &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_read_double")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(out)       :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -403,7 +403,7 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_read_double = impl(state, f_c_string(name), field,       &
+    esio_field_read_double = impl(handle, f_c_string(name), field,      &
                                   cglobal, cstart - 1, clocal, cstride, &
                                   bglobal, bstart - 1, blocal, bstride, &
                                   aglobal, astart - 1, alocal, astride)
@@ -412,27 +412,27 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_read_single (state, name, field,                &
+  integer function esio_field_read_single (handle, name, field,               &
                                            aglobal, astart, alocal, astride,  &
                                            bglobal, bstart, blocal, bstride,  &
                                            cglobal, cstart, clocal, cstride)
 
-    type(esio_state), intent(in)  :: state
-    character(len=*), intent(in)  :: name
-    real(c_float),    intent(out) :: field(*)
-    integer,          intent(in)  :: aglobal, astart, alocal, astride
-    integer,          intent(in)  :: bglobal, bstart, blocal, bstride
-    integer,          intent(in)  :: cglobal, cstart, clocal, cstride
+    type(esio_handle), intent(in)  :: handle
+    character(len=*),  intent(in)  :: name
+    real(c_float),     intent(out) :: field(*)
+    integer,           intent(in)  :: aglobal, astart, alocal, astride
+    integer,           intent(in)  :: bglobal, bstart, blocal, bstride
+    integer,           intent(in)  :: cglobal, cstart, clocal, cstride
 
     interface
-      function impl (state, name, field,               &
+      function impl (handle, name, field,              &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_read_float")
         import
         integer(c_int)                                  :: impl
-        type(esio_state),             intent(in), value :: state
+        type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(out)       :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -452,7 +452,7 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_read_single = impl(state, f_c_string(name), field,       &
+    esio_field_read_single = impl(handle, f_c_string(name), field,      &
                                   cglobal, cstart - 1, clocal, cstride, &
                                   bglobal, bstart - 1, blocal, bstride, &
                                   aglobal, astart - 1, alocal, astride)
