@@ -35,8 +35,8 @@
 module esio
 
 ! Use ISO_C_BINDING for interoperation with ESIO's C implementation.
-! Rename C_PTR to ESIO_STATE to make the handle object types more opaque.
-! State traverses the language boundary as TYPE(ESIO_STATE)s.
+! Rename C_PTR to ESIO_HANDLE to make the handle object types more opaque.
+! State traverses the language boundary as TYPE(ESIO_HANDLE)s.
 ! Renaming also prevents collision if caller uses ISO_C_BINDING directly.
   use, intrinsic :: iso_c_binding, only: c_char,             &
                                          c_double,           &
