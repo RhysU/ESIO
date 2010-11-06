@@ -55,8 +55,8 @@ program main
   call mpi_comm_size(mpi_comm_world, numprocs, ierr)
 
   if (myid.eq.0) write(*,*) "initializing esio"
-  handle = esio_initialize(mpi_comm_world)
-  ierr   = esio_file_create(handle, filename, .TRUE.)
+  call esio_initialize(handle, mpi_comm_world)
+  call esio_file_create(handle, filename, .TRUE.)
 
   if (myid.eq.0) write(*,*) "initializing problem"
   call initialize_problem(myid,numprocs)
@@ -79,10 +79,10 @@ program main
   do i = 1, niter
 !   TODO Use generic, precision-agnostic call
 !   Zeros in {a,b,c}stride arguments indicate field is contiguous
-    ierr = esio_field_write_double(handle, fieldname, u, &
-                                   ny, 1,    ny,   0,    &
-                                   nx, xist, xisz, 0,    &
-                                   nz, zjst, zjsz, 0)
+    call esio_field_write_double(handle, fieldname, u, &
+                                 ny, 1,    ny,   0,    &
+                                 nx, xist, xisz, 0,    &
+                                 nz, zjst, zjsz, 0)
   end do
   etime = mpi_wtime()
 
@@ -95,8 +95,8 @@ program main
                (niter*(nc*8*ny*nz*nx/2.)/(10e6))/(etime-stime), " MB/s"
   end if
 
-  ierr = esio_file_close(handle)
-  ierr = esio_finalize(handle)
+  call esio_file_close(handle)
+  call esio_finalize(handle)
   call mpi_finalize(ierr)
 
 end program main

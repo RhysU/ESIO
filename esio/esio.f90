@@ -26,6 +26,7 @@
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid handle before other failure
 ! TODO Allow Fortran to use customizable error handling
+! TODO Disable error handling when ierr is present??
 
 !> \file
 !! Provides ESIO's Fortran-based public API following the library's
@@ -45,43 +46,41 @@ module esio
                                          c_float_complex,    &
                                          c_int,              &
                                          c_null_char,        &
+                                         c_associated,       &
                                          esio_handle => c_ptr
 
   implicit none  ! Nothing implicit
-  private        ! Everything default private
 
 ! C interoperation details are kept hidden from the client...
+  private :: c_char, c_double, c_double_complex
+  private :: c_float, c_float_complex, c_int, c_null_char
+  private :: c_associated
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
-! Public API
-  public :: esio_initialize, esio_finalize
-  public :: esio_layout_count, esio_layout_get, esio_layout_set
-  public :: esio_file_create, esio_file_open, esio_file_close
-  public :: esio_field_size
-  public :: esio_field_write_double, esio_field_write_single
-  public :: esio_field_read_double, esio_field_read_single
-
 ! Generic, precision-agnostic interfaces atop the public API
-  public :: esio_field_write
   interface esio_field_write
     module procedure esio_field_write_double
     module procedure esio_field_write_single
   end interface
 
-  public :: esio_field_read
   interface esio_field_read
     module procedure esio_field_read_double
     module procedure esio_field_read_single
   end interface
 
+! Internal helper routines
+  private :: f_c_string, f_c_logical
+
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  type(esio_handle) function esio_initialize (comm)
+  subroutine esio_initialize (h, comm, ierr)
 
-    integer, intent(in) :: comm
+    type(esio_handle), intent(out)           :: h
+    integer,           intent(in)            :: comm
+    integer,           intent(out), optional :: ierr
 
     ! See C routine esio_initialize_fortran re: MPI communicator interoperation
     interface
@@ -92,31 +91,43 @@ contains
       end function impl
     end interface
 
-    esio_initialize = impl(comm)
+    h = impl(comm)
+    if (present(ierr)) then
+      if (c_associated(h)) then
+        ierr = 0  ! 0 == ESIO_SUCCESS
+      else
+        ierr = 5  ! 5 == ESIO_EFAILED
+      end if
+    end if
 
-  end function esio_initialize
+  end subroutine esio_initialize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_finalize (handle)
-
-    type(esio_handle), intent(in) :: handle
+  subroutine esio_finalize (h, ierr)
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle) bind (C, name="esio_finalize")
+      function impl (h) bind (C, name="esio_finalize")
         import
         integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: handle
+        type(esio_handle), intent(in), value :: h
       end function impl
     end interface
 
-    esio_finalize = impl(handle)
+    stat = impl(h)
+    if (present(ierr)) ierr = stat
 
-  end function esio_finalize
+  end subroutine esio_finalize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_layout_count ()
+  subroutine esio_layout_count (count, ierr)
+
+    integer, intent(out)           :: count
+    integer, intent(out), optional :: ierr
 
     interface
       function impl () bind (C, name="esio_layout_count")
@@ -125,128 +136,167 @@ contains
       end function impl
     end interface
 
-    esio_layout_count = impl()
+    count = impl()
+    if (present(ierr)) ierr = 0
 
-  end function esio_layout_count
+  end subroutine esio_layout_count
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_layout_get (handle)
+  subroutine esio_layout_get (h, layout_index, ierr)
 
-    type(esio_handle), intent(in) :: handle
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(out)           :: layout_index
+    integer,           intent(out), optional :: ierr
 
     interface
-      function impl (handle) bind (C, name="esio_layout_get")
+      function impl (h) bind (C, name="esio_layout_get")
         import
         integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: handle
+        type(esio_handle), intent(in), value :: h
       end function impl
     end interface
 
-    esio_layout_get = impl(handle)
+    layout_index = impl(h)
+    if (present(ierr)) ierr = 0  ! FIXME: See bug #1178
 
-  end function esio_layout_get
+  end subroutine esio_layout_get
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_layout_set (handle, layout_tag)
+  subroutine esio_layout_set (h, layout_index, ierr)
 
-    type(esio_handle), intent(in) :: handle
-    integer,           intent(in) :: layout_tag
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(in)            :: layout_index
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, layout_tag) bind (C, name="esio_layout_set")
+      function impl (h, layout_index) bind (C, name="esio_layout_set")
         import
         integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: handle
-        integer(c_int),    intent(in), value :: layout_tag
+        type(esio_handle), intent(in), value :: h
+        integer(c_int),    intent(in), value :: layout_index
       end function impl
     end interface
 
-    esio_layout_set = impl(handle, layout_tag)
+    stat = impl(h, layout_index)
+    if (present(ierr)) ierr = stat
 
-  end function esio_layout_set
+  end subroutine esio_layout_set
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_create (handle, file, overwrite)
+  subroutine esio_file_create (h, file, overwrite, ierr)
 
-    type(esio_handle), intent(in) :: handle
-    character(len=*),  intent(in) :: file
-    logical,           intent(in) :: overwrite
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: file
+    logical,           intent(in)            :: overwrite
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, file, overwrite) bind (C, name="esio_file_create")
+      function impl (h, file, overwrite) bind (C, name="esio_file_create")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: overwrite
       end function impl
     end interface
 
-    esio_file_create = impl(handle, f_c_string(file), f_c_logical(overwrite))
+    stat = impl(h, f_c_string(file), f_c_logical(overwrite))
+    if (present(ierr)) ierr = stat
 
-  end function esio_file_create
+  end subroutine esio_file_create
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_open (handle, file, readwrite)
+  subroutine esio_file_open (h, file, readwrite, ierr)
 
-    type(esio_handle), intent(in) :: handle
-    character(len=*),  intent(in) :: file
-    logical,           intent(in) :: readwrite
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: file
+    logical,           intent(in)            :: readwrite
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, file, readwrite) bind (C, name="esio_file_open")
+      function impl (h, file, readwrite) bind (C, name="esio_file_open")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: readwrite
       end function impl
     end interface
 
-    esio_file_open = impl(handle, f_c_string(file), f_c_logical(readwrite))
+    stat = impl(h, f_c_string(file), f_c_logical(readwrite))
+    if (present(ierr)) ierr = stat
 
-  end function esio_file_open
+  end subroutine esio_file_open
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_file_close (handle)
+  subroutine esio_file_flush (h, ierr)
 
-    type(esio_handle), intent(in) :: handle
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle) bind (C, name="esio_file_close")
+      function impl (h) bind (C, name="esio_file_flush")
         import
         integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: handle
+        type(esio_handle), intent(in), value :: h
       end function impl
     end interface
 
-    esio_file_close = impl(handle)
+    stat = impl(h)
+    if (present(ierr)) ierr = stat
 
-  end function esio_file_close
+  end subroutine esio_file_flush
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_size (handle, name, aglobal, bglobal, cglobal)
+  subroutine esio_file_close (h, ierr)
 
-    type(esio_handle), intent(in)  :: handle
-    character(len=*),  intent(in)  :: name
-    integer,           intent(out) :: aglobal
-    integer,           intent(out) :: bglobal
-    integer,           intent(out) :: cglobal
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    interface
+      function impl (h) bind (C, name="esio_file_close")
+        import
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: h
+      end function impl
+    end interface
+
+    stat = impl(h)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_file_close
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_field_size (h, name, aglobal, bglobal, cglobal, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out)           :: bglobal
+    integer,           intent(out)           :: cglobal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     integer(c_int) :: tmp_c, tmp_b, tmp_a
 
     interface
-      function impl (handle, name, cglobal, bglobal, aglobal)  &
+      function impl (h, name, cglobal, bglobal, aglobal)  &
                     bind (C, name="esio_field_size")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
         integer(c_int),               intent(inout)     :: cglobal
         integer(c_int),               intent(inout)     :: bglobal
@@ -255,37 +305,41 @@ contains
     end interface
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_size = impl(handle, f_c_string(name), tmp_c, tmp_b, tmp_a)
+    stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a)
     aglobal = tmp_a
     bglobal = tmp_b
     cglobal = tmp_c
+    if (present(ierr)) ierr = stat
 
-  end function esio_field_size
+  end subroutine esio_field_size
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_write_double (handle, name, field,              &
-                                            aglobal, astart, alocal, astride, &
-                                            bglobal, bstart, blocal, bstride, &
-                                            cglobal, cstart, clocal, cstride)
+  subroutine esio_field_write_double (h, name, field,                   &
+                                      aglobal, astart, alocal, astride, &
+                                      bglobal, bstart, blocal, bstride, &
+                                      cglobal, cstart, clocal, cstride, &
+                                      ierr)
 
-    type(esio_handle), intent(in) :: handle
+    type(esio_handle), intent(in) :: h
     character(len=*),  intent(in) :: name
     real(c_double),    intent(in) :: field(*)
     integer,           intent(in) :: aglobal, astart, alocal, astride
     integer,           intent(in) :: bglobal, bstart, blocal, bstride
     integer,           intent(in) :: cglobal, cstart, clocal, cstride
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, name, field,              &
+      function impl (h, name, field,                   &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_write_double")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -305,36 +359,40 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_write_double = impl(handle, f_c_string(name), field,      &
-                                   cglobal, cstart - 1, clocal, cstride, &
-                                   bglobal, bstart - 1, blocal, bstride, &
-                                   aglobal, astart - 1, alocal, astride)
+    stat = impl(h, f_c_string(name), field,           &
+                cglobal, cstart - 1, clocal, cstride, &
+                bglobal, bstart - 1, blocal, bstride, &
+                aglobal, astart - 1, alocal, astride)
+    if (present(ierr)) ierr = stat
 
-  end function esio_field_write_double
+  end subroutine esio_field_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_write_single (handle, name, field,              &
-                                            aglobal, astart, alocal, astride, &
-                                            bglobal, bstart, blocal, bstride, &
-                                            cglobal, cstart, clocal, cstride)
+  subroutine esio_field_write_single (h, name, field,                   &
+                                      aglobal, astart, alocal, astride, &
+                                      bglobal, bstart, blocal, bstride, &
+                                      cglobal, cstart, clocal, cstride, &
+                                      ierr)
 
-    type(esio_handle), intent(in) :: handle
+    type(esio_handle), intent(in) :: h
     character(len=*),  intent(in) :: name
     real(c_float),     intent(in) :: field(*)
     integer,           intent(in) :: aglobal, astart, alocal, astride
     integer,           intent(in) :: bglobal, bstart, blocal, bstride
     integer,           intent(in) :: cglobal, cstart, clocal, cstride
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, name, field,              &
+      function impl (h, name, field,                   &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_write_float")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(in)        :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -354,36 +412,40 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_write_single = impl(handle, f_c_string(name), field,      &
-                                   cglobal, cstart - 1, clocal, cstride, &
-                                   bglobal, bstart - 1, blocal, bstride, &
-                                   aglobal, astart - 1, alocal, astride)
+    stat = impl(h, f_c_string(name), field,           &
+                cglobal, cstart - 1, clocal, cstride, &
+                bglobal, bstart - 1, blocal, bstride, &
+                aglobal, astart - 1, alocal, astride)
+    if (present(ierr)) ierr = stat
 
-  end function esio_field_write_single
+  end subroutine esio_field_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_read_double (handle, name, field,              &
-                                           aglobal, astart, alocal, astride, &
-                                           bglobal, bstart, blocal, bstride, &
-                                           cglobal, cstart, clocal, cstride)
+  subroutine esio_field_read_double (h, name, field,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     cglobal, cstart, clocal, cstride, &
+                                     ierr)
 
-    type(esio_handle), intent(in)  :: handle
+    type(esio_handle), intent(in)  :: h
     character(len=*),  intent(in)  :: name
     real(c_double),    intent(out) :: field(*)
     integer,           intent(in)  :: aglobal, astart, alocal, astride
     integer,           intent(in)  :: bglobal, bstart, blocal, bstride
     integer,           intent(in)  :: cglobal, cstart, clocal, cstride
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, name, field,              &
+      function impl (h, name, field,                   &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_read_double")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_double),               intent(out)       :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -403,36 +465,40 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_read_double = impl(handle, f_c_string(name), field,      &
-                                  cglobal, cstart - 1, clocal, cstride, &
-                                  bglobal, bstart - 1, blocal, bstride, &
-                                  aglobal, astart - 1, alocal, astride)
+    stat = impl(h, f_c_string(name), field,           &
+                cglobal, cstart - 1, clocal, cstride, &
+                bglobal, bstart - 1, blocal, bstride, &
+                aglobal, astart - 1, alocal, astride)
+    if (present(ierr)) ierr = stat
 
-  end function esio_field_read_double
+  end subroutine esio_field_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  integer function esio_field_read_single (handle, name, field,               &
-                                           aglobal, astart, alocal, astride,  &
-                                           bglobal, bstart, blocal, bstride,  &
-                                           cglobal, cstart, clocal, cstride)
+  subroutine esio_field_read_single (h, name, field,                    &
+                                     aglobal, astart, alocal, astride,  &
+                                     bglobal, bstart, blocal, bstride,  &
+                                     cglobal, cstart, clocal, cstride,  &
+                                     ierr)
 
-    type(esio_handle), intent(in)  :: handle
+    type(esio_handle), intent(in)  :: h
     character(len=*),  intent(in)  :: name
     real(c_float),     intent(out) :: field(*)
     integer,           intent(in)  :: aglobal, astart, alocal, astride
     integer,           intent(in)  :: bglobal, bstart, blocal, bstride
     integer,           intent(in)  :: cglobal, cstart, clocal, cstride
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
 
     interface
-      function impl (handle, name, field,              &
+      function impl (h, name, field,                   &
                      cglobal, cstart, clocal, cstride, &
                      bglobal, bstart, blocal, bstride, &
                      aglobal, astart, alocal, astride) &
                      bind (C, name="esio_field_read_float")
         import
         integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
+        type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
         real(c_float),                intent(out)       :: field(*)
         integer(c_int),               intent(in), value :: cglobal, &
@@ -452,12 +518,13 @@ contains
 
 !   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    esio_field_read_single = impl(handle, f_c_string(name), field,      &
-                                  cglobal, cstart - 1, clocal, cstride, &
-                                  bglobal, bstart - 1, blocal, bstride, &
-                                  aglobal, astart - 1, alocal, astride)
+    stat = impl(h, f_c_string(name), field,           &
+                cglobal, cstart - 1, clocal, cstride, &
+                bglobal, bstart - 1, blocal, bstride, &
+                aglobal, astart - 1, alocal, astride)
+    if (present(ierr)) ierr = stat
 
-  end function esio_field_read_single
+  end subroutine esio_field_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
