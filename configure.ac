@@ -54,11 +54,23 @@ dnl Manipulate Fortran settings and find MPI
 dnl ------------------------------------------------
 AC_PROG_FC
 AC_LANG_PUSH([Fortran])
+AC_FC_SRCEXT([f90])
+AC_FC_FREEFORM()
+dnl Enable the preprocessor for all Fortran sources
+for f90cppflag in -fpp -cpp none
+do
+    if test "x$f90cppflag" == xnone; then
+        AC_MSG_WARN([Unsure how to enable Fortran source preprocessor])
+        break
+    fi
+    AX_CHECK_COMPILER_FLAGS([$f90cppflag],[break],[])
+done
+FCFLAGS="$FCFLAGS $f90cppflag"
+AC_FC_WRAPPERS
+AX_FCFLAGS_WARN_ALL
 if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
 fi
-AC_FC_WRAPPERS
-AX_FCFLAGS_WARN_ALL
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpf90.))
 MPIFC_LOCATION=$(eval command -v $MPIFC)
 AC_SUBST([MPIFC_LOCATION])
