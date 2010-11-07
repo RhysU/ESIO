@@ -47,6 +47,7 @@ module esio
                                          c_int,              &
                                          c_null_char,        &
                                          c_associated,       &
+                                         c_funptr,           &
                                          esio_handle => c_ptr
 
   implicit none  ! Nothing implicit
@@ -54,7 +55,7 @@ module esio
 ! C interoperation details are kept hidden from the client...
   private :: c_char, c_double, c_double_complex
   private :: c_float, c_float_complex, c_int, c_null_char
-  private :: c_associated
+  private :: c_associated, c_funptr
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
@@ -528,20 +529,31 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! Convert Fortran-style string to a C-style one
-! See http://fortranwiki.org/fortran/show/Generating+C+Interfaces#strings
+!>Convert Fortran-style string to a C-style one.
+!!Trailing whitespace is trimmed.
+!!See http://fortranwiki.org/fortran/show/Generating+C+Interfaces#strings
   pure function f_c_string (f_string) result (c_string)
+
+    use, intrinsic :: iso_c_binding, only: c_char, c_null_char
+
+    implicit none
 
     character(len=*), intent(in) :: f_string
     character(len=1,kind=c_char) :: c_string(len_trim(f_string)+1)
+    integer                      :: n, i
 
-    c_string = trim(f_string) // c_null_char
+    n = len_trim(f_string)
+    do i = 1, n
+!     Trivial slice required; f_string(i) parsed as an invalid function call
+      c_string(i) = f_string(i:i)
+    end do
+    c_string(n + 1) = c_null_char
 
   end function f_c_string
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! Convert Fortran LOGICAL to a C-style true/false INT
+!>Convert Fortran \c logical to a C-style true/false \c int.
   elemental function f_c_logical (f_logical) result (c_logical)
 
     logical, intent(in) :: f_logical
