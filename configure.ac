@@ -56,12 +56,13 @@ AC_PROG_FC
 AC_LANG_PUSH([Fortran])
 AC_FC_SRCEXT([f90])
 AC_FC_FREEFORM()
-dnl BEGIN: Enable the preprocessor for all Fortran sources
-dnl Man this is stupidly complicated to get correct
+dnl BEGIN: Enable the preprocessor for all Fortran .f90 sources
+dnl Stupidly complicated to get correct.  Modify FCFLAGS_f90 with result.
+dnl
 ax_save_FCFLAGS=$FCFLAGS
 AC_LANG_WERROR
 AC_MSG_CHECKING([for flags required to enable Fortran preprocessing])
-for fppflag in '' -fpp -cpp none
+for fppflag in '' -fpp -cpp '-x f95-cpp-input' none
 do
     if test "x$fppflag" == xnone; then
         AC_MSG_RESULT([unknown])
@@ -78,7 +79,7 @@ do
                       ])
 done
 AC_MSG_RESULT([$fppflag])
-FCFLAGS="$ax_save_FCFLAGS $fppflag"
+FCFLAGS_f90="$FCFLAGS_f90 $fppflag"
 dnl END: Enable the preprocessor for all Fortran sources
 AC_FC_WRAPPERS
 AX_FCFLAGS_WARN_ALL
