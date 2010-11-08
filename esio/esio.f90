@@ -334,7 +334,7 @@ contains
     interface
       subroutine c_free (p) bind (C, name="free")
         import
-        type(c_ptr), intent(in) :: p(*)
+        type(c_ptr), intent(in) :: p
       end subroutine c_free
     end interface
 
