@@ -280,6 +280,339 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#define FNAME esio_line_write_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_line_write_double"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_line_write_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_line_write_float"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_line_write_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_line_write_int"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_line_read_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_line_read_double"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_line_read_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_line_read_float"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_line_read_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_line_read_int"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_line_size (h, name, aglobal, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    integer(c_int) :: tmp_a
+
+    interface
+      function impl (h, name, aglobal) bind (C, name="esio_line_size")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: aglobal
+      end function impl
+    end interface
+
+    stat = impl(h, f_c_string(name), tmp_a)
+    aglobal = tmp_a
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_line_size
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_writev_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_line_writev_double"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_writev_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_line_writev_float"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_writev_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_line_writev_int"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_readv_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_line_readv_double"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_readv_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_line_readv_float"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_line_readv_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_line_readv_int"
+#include "line.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_line_sizev (h, name, aglobal, ncomponents, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out)           :: ncomponents
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    integer(c_int) :: tmp_a, tmp_ncomponents
+
+    interface
+      function impl (h, name, aglobal, ncomponents)  &
+                    bind (C, name="esio_line_sizev")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: aglobal
+        integer(c_int),               intent(inout)     :: ncomponents
+      end function impl
+    end interface
+
+    stat = impl(h, f_c_string(name), tmp_a, tmp_ncomponents)
+    aglobal = tmp_a
+    ncomponents = tmp_ncomponents
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_line_sizev
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_write_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_plane_write_double"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_write_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_plane_write_float"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_write_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_plane_write_int"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_read_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_plane_read_double"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_read_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_plane_read_float"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_plane_read_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_plane_read_int"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_plane_size (h, name, aglobal, bglobal, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out)           :: bglobal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    integer(c_int) :: tmp_b, tmp_a
+
+    interface
+      function impl (h, name, bglobal, aglobal)  &
+                    bind (C, name="esio_plane_size")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: bglobal
+        integer(c_int),               intent(inout)     :: aglobal
+      end function impl
+    end interface
+
+!   Note reordering Fortran's (a, b) to C's (b, a)
+    stat = impl(h, f_c_string(name), tmp_b, tmp_a)
+    aglobal = tmp_a
+    bglobal = tmp_b
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_plane_size
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_writev_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_plane_writev_double"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_writev_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_plane_writev_float"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_writev_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_plane_writev_int"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_readv_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_plane_readv_double"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_readv_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_plane_readv_float"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_plane_readv_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_plane_readv_int"
+#include "plane.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_plane_sizev (h, name, aglobal, bglobal, ncomponents, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out)           :: bglobal
+    integer,           intent(out)           :: ncomponents
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    integer(c_int) :: tmp_b, tmp_a, tmp_ncomponents
+
+    interface
+      function impl (h, name, bglobal, aglobal, ncomponents)  &
+                    bind (C, name="esio_plane_sizev")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: bglobal
+        integer(c_int),               intent(inout)     :: aglobal
+        integer(c_int),               intent(inout)     :: ncomponents
+      end function impl
+    end interface
+
+!   Note reordering Fortran's (a, b) to C's (b, a)
+    stat = impl(h, f_c_string(name), tmp_b, tmp_a, tmp_ncomponents)
+    aglobal = tmp_a
+    bglobal = tmp_b
+    ncomponents = tmp_ncomponents
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_plane_sizev
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #define FNAME esio_field_write_double
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
@@ -418,7 +751,7 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_field_sizev (h, name, aglobal, bglobal, cglobal, & 
+  subroutine esio_field_sizev (h, name, aglobal, bglobal, cglobal, &
                                ncomponents, ierr)
 
     type(esio_handle), intent(in)            :: h
