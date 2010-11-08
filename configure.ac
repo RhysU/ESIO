@@ -56,16 +56,30 @@ AC_PROG_FC
 AC_LANG_PUSH([Fortran])
 AC_FC_SRCEXT([f90])
 AC_FC_FREEFORM()
-dnl Enable the preprocessor for all Fortran sources
-for f90cppflag in -fpp -cpp none
+dnl BEGIN: Enable the preprocessor for all Fortran sources
+dnl Man this is stupidly complicated to get correct
+ax_save_FCFLAGS=$FCFLAGS
+AC_LANG_WERROR
+AC_MSG_CHECKING([for flags required to enable Fortran preprocessing])
+for fppflag in '' -fpp -cpp none
 do
-    if test "x$f90cppflag" == xnone; then
-        AC_MSG_WARN([Unsure how to enable Fortran source preprocessor])
+    if test "x$fppflag" == xnone; then
+        AC_MSG_RESULT([unknown])
+        AC_MSG_ERROR([Could not enable Fortran preprocessing])
         break
     fi
-    AX_CHECK_COMPILER_FLAGS([$f90cppflag],[break],[])
+    ax_fpp_save_FCFLAGS=$FCFLAGS
+    FCFLAGS="$FCFLAGS $fppflag"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[#define TESTDEFINE])],[
+                         FCFLAGS=$ax_fpp_save_FCFLAGS
+                         break
+                      ],[
+                         FCFLAGS=$ax_fpp_save_FCFLAGS
+                      ])
 done
-FCFLAGS="$FCFLAGS $f90cppflag"
+AC_MSG_RESULT([$fppflag])
+FCFLAGS="$ax_save_FCFLAGS $fppflag"
+dnl END: Enable the preprocessor for all Fortran sources
 AC_FC_WRAPPERS
 AX_FCFLAGS_WARN_ALL
 if test "x$ax_enable_debug" != "xno"; then
