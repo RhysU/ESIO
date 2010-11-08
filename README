@@ -24,10 +24,15 @@ The code depends upon the following libraries:
 If you have no `configure' script in the top level directory, run
 `bootstrap' to create one using GNU autoconf and automake.
 
-Before compiling suzerain, you need to run the provided `configure'
+Before compiling ESIO, you need to run the provided `configure'
 script.  Generally, just `./configure' will work, but you may wish to
 provide more parameters.  Run `./configure --help' for details.
 
+ESIO uses GNU Libtool in order to build shared libraries on a variety
+of systems.  While this is very nice for making usable binaries, it can
+be a pain when trying to debug a program.  For that reason, compilation
+of shared libraries can be turned off by specifying the --disable-shared
+option to configure.
 
 3. Compilation
 --------------
