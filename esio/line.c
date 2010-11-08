@@ -25,7 +25,7 @@
 
 // Designed to be #included from layout.c
 #if !defined(METHODNAME) || !defined(OPFUNC) || !defined(QUALIFIER)
-#error "One or METHODNAME, OPFUN, or QUALIFIER not defined"
+#error "One of METHODNAME, OPFUNC, or QUALIFIER not defined"
 #endif
 
 hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
