@@ -1,3 +1,4 @@
+#ifdef ALWAYS_SKIP_TEMPLATE_HEADER
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
@@ -25,6 +26,8 @@
 
 ! Designed to be #included from esio.f90
 ! If VECTORVALUED has been #defined, then ncomponents is added to arguments
+#endif
+
 #if !defined(FNAME) || !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
 #error "One of FNAME, FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
