@@ -25,7 +25,6 @@
 
 ! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid handle before other failure
-! TODO Allow Fortran to use customizable error handling
 ! TODO Disable error handling when ierr is present??
 
 !> \file
@@ -47,7 +46,6 @@ module esio
                                          c_int,              &
                                          c_null_char,        &
                                          c_associated,       &
-                                         c_funptr,           &
                                          esio_handle => c_ptr
 
   implicit none  ! Nothing implicit
@@ -55,7 +53,7 @@ module esio
 ! C interoperation details are kept hidden from the client...
   private :: c_char, c_double, c_double_complex
   private :: c_float, c_float_complex, c_int, c_null_char
-  private :: c_associated, c_funptr
+  private :: c_associated
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
@@ -69,6 +67,10 @@ module esio
     module procedure esio_field_read_double
     module procedure esio_field_read_single
   end interface
+
+! TODO Allow Fortran to use customizable error handling
+! Error handling routine
+  private :: esio_error
 
 ! Internal helper routines
   private :: f_c_string, f_c_logical
@@ -277,6 +279,87 @@ contains
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_close
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_string_set (h, name, value, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    character(len=*),  intent(in)            :: value
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    interface
+      function impl (h, name, value) bind (C, name="esio_string_set")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        character(len=1,kind=c_char), intent(in)        :: value(*)
+      end function impl
+    end interface
+
+    stat = impl(h, f_c_string(name), f_c_string(value))
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_string_set
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_string_get (h, name, value, ierr)
+
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_loc, c_f_pointer
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    character(len=*),  intent(out)           :: value
+    integer,           intent(out), optional :: ierr
+
+    type(c_ptr)                              :: tmp_p
+    character(len=1,kind=c_char), pointer    :: tmp_str(:)
+    integer                                  :: i, n(1)
+
+!   The C implementation which returns newly allocated memory
+    interface
+      function impl (h, name) bind (C, name="esio_string_get")
+        import
+        type(c_ptr)                                     :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+      end function impl
+    end interface
+
+!   An (unavoidable?) abuse of the ISO_C_BINDING to get at C's free
+    interface
+      subroutine c_free (p) bind (C, name="free")
+        import
+        type(c_ptr), intent(in) :: p(*)
+      end subroutine c_free
+    end interface
+
+    tmp_p = impl(h, f_c_string(name))
+    if (c_associated(tmp_p)) then
+      value = ''
+      n(1) = len(value)
+      call c_f_pointer(tmp_p, tmp_str, n)
+      do i = 1, n(1)
+        if (tmp_str(i) == c_null_char) exit
+        value(i:i) = tmp_str(i)
+      end do
+      call c_free(tmp_p)
+      if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
+    else
+      if (present(ierr)) then
+        ierr = 5  ! 5 == ESIO_EFAILED
+      else
+        call esio_error('esio_string_get failed but ierr was not supplied', &
+                        __FILE__, __LINE__, 5)
+        call abort
+      endif
+    endif
+
+  end subroutine esio_string_get
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -926,6 +1009,30 @@ contains
     if (present(ierr)) ierr = stat
 
   end subroutine esio_field_sizev
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_error (reason, file, line, esio_errno)
+
+    character(len=*),  intent(in) :: reason
+    character(len=*),  intent(in) :: file
+    integer,           intent(in) :: line
+    integer,           intent(in) :: esio_errno
+
+    interface
+      subroutine c_impl (reason, file, line, esio_errno)  &
+                 bind (C, name="esio_error")
+        import
+        character(len=1,kind=c_char), intent(in)        :: reason(*)
+        character(len=1,kind=c_char), intent(in)        :: file(*)
+        integer(c_int),               intent(in), value :: line
+        integer(c_int),               intent(in), value :: esio_errno
+      end subroutine
+    end interface
+
+    call c_impl(f_c_string(reason), f_c_string(file), line, esio_errno)
+
+  end subroutine esio_error
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
