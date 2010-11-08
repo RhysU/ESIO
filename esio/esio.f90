@@ -280,6 +280,54 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#define FNAME esio_field_write_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_field_write_double"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_field_write_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_field_write_float"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_field_write_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_field_write_int"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_field_read_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_field_read_double"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_field_read_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_field_read_float"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_field_read_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_field_read_int"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine esio_field_size (h, name, aglobal, bglobal, cglobal, ierr)
 
     type(esio_handle), intent(in)            :: h
@@ -314,218 +362,99 @@ contains
 
   end subroutine esio_field_size
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_field_writev_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_field_writev_double"
+#include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_field_write_double (h, name, field,                   &
-                                      aglobal, astart, alocal, astride, &
-                                      bglobal, bstart, blocal, bstride, &
-                                      cglobal, cstart, clocal, cstride, &
-                                      ierr)
+#define VECTORVALUED
+#define FNAME esio_field_writev_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_field_writev_float"
+#include "field.f90"
 
-    type(esio_handle), intent(in) :: h
-    character(len=*),  intent(in) :: name
-    real(c_double),    intent(in) :: field(*)
-    integer,           intent(in) :: aglobal, astart, alocal, astride
-    integer,           intent(in) :: bglobal, bstart, blocal, bstride
-    integer,           intent(in) :: cglobal, cstart, clocal, cstride
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_field_writev_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_field_writev_int"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_field_readv_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_field_readv_double"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_field_readv_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_field_readv_float"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_field_readv_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_field_readv_int"
+#include "field.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_field_sizev (h, name, aglobal, bglobal, cglobal, & 
+                               ncomponents, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: aglobal
+    integer,           intent(out)           :: bglobal
+    integer,           intent(out)           :: cglobal
+    integer,           intent(out)           :: ncomponents
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+    integer(c_int) :: tmp_c, tmp_b, tmp_a, tmp_ncomponents
+
     interface
-      function impl (h, name, field,                   &
-                     cglobal, cstart, clocal, cstride, &
-                     bglobal, bstart, blocal, bstride, &
-                     aglobal, astart, alocal, astride) &
-                     bind (C, name="esio_field_write_double")
+      function impl (h, name, cglobal, bglobal, aglobal, ncomponents)  &
+                    bind (C, name="esio_field_sizev")
         import
         integer(c_int)                                  :: impl
         type(esio_handle),            intent(in), value :: h
         character(len=1,kind=c_char), intent(in)        :: name(*)
-        real(c_double),               intent(in)        :: field(*)
-        integer(c_int),               intent(in), value :: cglobal, &
-                                                           cstart,  &
-                                                           clocal,  &
-                                                           cstride
-        integer(c_int),               intent(in), value :: bglobal, &
-                                                           bstart,  &
-                                                           blocal,  &
-                                                           bstride
-        integer(c_int),               intent(in), value :: aglobal, &
-                                                           astart,  &
-                                                           alocal,  &
-                                                           astride
+        integer(c_int),               intent(inout)     :: cglobal
+        integer(c_int),               intent(inout)     :: bglobal
+        integer(c_int),               intent(inout)     :: aglobal
+        integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
 
-!   Note conversion from one- to zero-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), field,           &
-                cglobal, cstart - 1, clocal, cstride, &
-                bglobal, bstart - 1, blocal, bstride, &
-                aglobal, astart - 1, alocal, astride)
+    stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a, tmp_ncomponents)
+    aglobal = tmp_a
+    bglobal = tmp_b
+    cglobal = tmp_c
+    ncomponents = tmp_ncomponents
     if (present(ierr)) ierr = stat
 
-  end subroutine esio_field_write_double
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine esio_field_write_single (h, name, field,                   &
-                                      aglobal, astart, alocal, astride, &
-                                      bglobal, bstart, blocal, bstride, &
-                                      cglobal, cstart, clocal, cstride, &
-                                      ierr)
-
-    type(esio_handle), intent(in) :: h
-    character(len=*),  intent(in) :: name
-    real(c_float),     intent(in) :: field(*)
-    integer,           intent(in) :: aglobal, astart, alocal, astride
-    integer,           intent(in) :: bglobal, bstart, blocal, bstride
-    integer,           intent(in) :: cglobal, cstart, clocal, cstride
-    integer,           intent(out), optional :: ierr
-    integer                                  :: stat
-
-    interface
-      function impl (h, name, field,                   &
-                     cglobal, cstart, clocal, cstride, &
-                     bglobal, bstart, blocal, bstride, &
-                     aglobal, astart, alocal, astride) &
-                     bind (C, name="esio_field_write_float")
-        import
-        integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: h
-        character(len=1,kind=c_char), intent(in)        :: name(*)
-        real(c_float),                intent(in)        :: field(*)
-        integer(c_int),               intent(in), value :: cglobal, &
-                                                           cstart,  &
-                                                           clocal,  &
-                                                           cstride
-        integer(c_int),               intent(in), value :: bglobal, &
-                                                           bstart,  &
-                                                           blocal,  &
-                                                           bstride
-        integer(c_int),               intent(in), value :: aglobal, &
-                                                           astart,  &
-                                                           alocal,  &
-                                                           astride
-      end function impl
-    end interface
-
-!   Note conversion from one- to zero-based starting offsets
-!   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), field,           &
-                cglobal, cstart - 1, clocal, cstride, &
-                bglobal, bstart - 1, blocal, bstride, &
-                aglobal, astart - 1, alocal, astride)
-    if (present(ierr)) ierr = stat
-
-  end subroutine esio_field_write_single
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine esio_field_read_double (h, name, field,                   &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
-                                     cglobal, cstart, clocal, cstride, &
-                                     ierr)
-
-    type(esio_handle), intent(in)  :: h
-    character(len=*),  intent(in)  :: name
-    real(c_double),    intent(out) :: field(*)
-    integer,           intent(in)  :: aglobal, astart, alocal, astride
-    integer,           intent(in)  :: bglobal, bstart, blocal, bstride
-    integer,           intent(in)  :: cglobal, cstart, clocal, cstride
-    integer,           intent(out), optional :: ierr
-    integer                                  :: stat
-
-    interface
-      function impl (h, name, field,                   &
-                     cglobal, cstart, clocal, cstride, &
-                     bglobal, bstart, blocal, bstride, &
-                     aglobal, astart, alocal, astride) &
-                     bind (C, name="esio_field_read_double")
-        import
-        integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: h
-        character(len=1,kind=c_char), intent(in)        :: name(*)
-        real(c_double),               intent(out)       :: field(*)
-        integer(c_int),               intent(in), value :: cglobal, &
-                                                           cstart,  &
-                                                           clocal,  &
-                                                           cstride
-        integer(c_int),               intent(in), value :: bglobal, &
-                                                           bstart,  &
-                                                           blocal,  &
-                                                           bstride
-        integer(c_int),               intent(in), value :: aglobal, &
-                                                           astart,  &
-                                                           alocal,  &
-                                                           astride
-      end function impl
-    end interface
-
-!   Note conversion from one- to zero-based starting offsets
-!   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), field,           &
-                cglobal, cstart - 1, clocal, cstride, &
-                bglobal, bstart - 1, blocal, bstride, &
-                aglobal, astart - 1, alocal, astride)
-    if (present(ierr)) ierr = stat
-
-  end subroutine esio_field_read_double
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine esio_field_read_single (h, name, field,                    &
-                                     aglobal, astart, alocal, astride,  &
-                                     bglobal, bstart, blocal, bstride,  &
-                                     cglobal, cstart, clocal, cstride,  &
-                                     ierr)
-
-    type(esio_handle), intent(in)  :: h
-    character(len=*),  intent(in)  :: name
-    real(c_float),     intent(out) :: field(*)
-    integer,           intent(in)  :: aglobal, astart, alocal, astride
-    integer,           intent(in)  :: bglobal, bstart, blocal, bstride
-    integer,           intent(in)  :: cglobal, cstart, clocal, cstride
-    integer,           intent(out), optional :: ierr
-    integer                                  :: stat
-
-    interface
-      function impl (h, name, field,                   &
-                     cglobal, cstart, clocal, cstride, &
-                     bglobal, bstart, blocal, bstride, &
-                     aglobal, astart, alocal, astride) &
-                     bind (C, name="esio_field_read_float")
-        import
-        integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: h
-        character(len=1,kind=c_char), intent(in)        :: name(*)
-        real(c_float),                intent(out)       :: field(*)
-        integer(c_int),               intent(in), value :: cglobal, &
-                                                           cstart,  &
-                                                           clocal,  &
-                                                           cstride
-        integer(c_int),               intent(in), value :: bglobal, &
-                                                           bstart,  &
-                                                           blocal,  &
-                                                           bstride
-        integer(c_int),               intent(in), value :: aglobal, &
-                                                           astart,  &
-                                                           alocal,  &
-                                                           astride
-      end function impl
-    end interface
-
-!   Note conversion from one- to zero-based starting offsets
-!   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), field,           &
-                cglobal, cstart - 1, clocal, cstride, &
-                bglobal, bstart - 1, blocal, bstride, &
-                aglobal, astart - 1, alocal, astride)
-    if (present(ierr)) ierr = stat
-
-  end subroutine esio_field_read_single
+  end subroutine esio_field_sizev
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

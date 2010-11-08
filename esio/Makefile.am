@@ -47,6 +47,7 @@ EXTRA_DIST += layout0.c
 EXTRA_DIST += layout1.c
 EXTRA_DIST += line.c
 EXTRA_DIST += plane.c
+EXTRA_DIST += field.f90
 
 # Public Fortran library is a superset of libesio.la
 noinst_LTLIBRARIES       += libesiof.la

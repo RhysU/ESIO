@@ -184,10 +184,10 @@ sub find_includes {
         } elsif (/^#\s*include\s*["<]([^">]*)[">]/) {
             # ---------------------------------------------------
             # koomie mod. 7/26/2010 - ignore #include
+	    # rhys unmod. 7/11/2010 - unignore #include
             # ---------------------------------------------------
-            print "# WARN: koomie ignoring \#include for $1 ($file)\n"
-            ### $included = $1;
-	    ### $after = $';
+            $included = $1;
+	    $after = $';
         # Fortran 90 "use"
         } elsif (/^\s*use\s+(\w+)/i) {   
 	    # koomie mod. 7/28/2010 - skip user provide ignore modules

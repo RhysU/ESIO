@@ -10,7 +10,8 @@ BUILT_SOURCES += Makefile.dep
 CLEANFILES    += Makefile.dep
 
 SFMAKEDEPEND_INVOKE = $(PERL) $(top_srcdir)/build-aux/sfmakedepend.pl
-SFMAKEDEPEND_FLAGS  = $(subst -I,-I ,$(filter -I%,$(AM_FCFLAGS)))      \
+SFMAKEDEPEND_FLAGS  = -I $(srcdir)                                     \
+                      $(subst -I,-I ,$(filter -I%,$(AM_FCFLAGS)))      \
                       -i mpi -i hdf5 -i h5lt -i esio -i grvy -i ifport \
                       -strip
 
