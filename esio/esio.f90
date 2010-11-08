@@ -280,6 +280,144 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+#define FNAME esio_attribute_write_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_attribute_write_double"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_attribute_write_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_attribute_write_float"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_attribute_write_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_attribute_write_int"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_attribute_read_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_attribute_read_double"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_attribute_read_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_attribute_read_float"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define FNAME esio_attribute_read_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_attribute_read_int"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! No esio_attribute_size in C interface so none in Fortran either
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_writev_double
+#define FINTENT intent(in)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_attribute_writev_double"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_writev_single
+#define FINTENT intent(in)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_attribute_writev_float"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_writev_integer
+#define FINTENT intent(in)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_attribute_writev_int"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_readv_double
+#define FINTENT intent(out)
+#define CTYPE real(c_double)
+#define CBINDNAME "esio_attribute_readv_double"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_readv_single
+#define FINTENT intent(out)
+#define CTYPE real(c_float)
+#define CBINDNAME "esio_attribute_readv_float"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#define VECTORVALUED
+#define FNAME esio_attribute_readv_integer
+#define FINTENT intent(out)
+#define CTYPE integer(c_int)
+#define CBINDNAME "esio_attribute_readv_int"
+#include "attribute.f90"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_attribute_sizev (h, name, ncomponents, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    character(len=*),  intent(in)            :: name
+    integer,           intent(out)           :: ncomponents
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+    integer(c_int) :: tmp_ncomponents
+
+    interface
+      function impl (h, name, ncomponents)  &
+                    bind (C, name="esio_attribute_sizev")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: h
+        character(len=1,kind=c_char), intent(in)        :: name(*)
+        integer(c_int),               intent(inout)     :: ncomponents
+      end function impl
+    end interface
+
+    stat = impl(h, f_c_string(name), tmp_ncomponents)
+    ncomponents = tmp_ncomponents
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_attribute_sizev
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #define FNAME esio_line_write_double
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
