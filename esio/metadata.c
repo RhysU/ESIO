@@ -245,6 +245,11 @@ int esio_plane_metadata_write(hid_t loc_id, const char *name,
                               int bglobal, int aglobal,
                               hid_t type_id)
 {
+    (void) loc_id;  // Unused
+    (void) name;    // Unused
+    (void) bglobal; // Unused
+    (void) aglobal; // Unused
+    (void) type_id; // Unused
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }
 
@@ -267,6 +272,10 @@ int esio_line_metadata_write(hid_t loc_id, const char *name,
                              int aglobal,
                              hid_t type_id)
 {
+    (void) loc_id;  // Unused
+    (void) name;    // Unused
+    (void) aglobal; // Unused
+    (void) type_id; // Unused
     return ESIO_SUCCESS; // NOP: Using esio_hdf5metadata_read to retrieve
 }
 
