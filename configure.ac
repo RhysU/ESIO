@@ -16,7 +16,7 @@ AM_CONFIG_HEADER(esio/config.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE(1.9 no-define tar-ustar -Wall -Werror foreign)
+AM_INIT_AUTOMAKE(1.11 no-define tar-ustar -Wall -Werror foreign)
 AC_PREREQ([2.61])
 AX_AM_MACROS
 AX_ADD_AM_CTAGSFLAGS
