@@ -86,6 +86,7 @@ contains
     integer,           intent(out), optional :: ierr
 
     ! See C routine esio_initialize_fortran re: MPI communicator interoperation
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (comm) bind (C, name="esio_initialize_fortran")
         import
@@ -93,6 +94,7 @@ contains
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     h = impl(comm)
     if (present(ierr)) then
@@ -112,6 +114,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h) bind (C, name="esio_finalize")
         import
@@ -119,6 +122,7 @@ contains
         type(esio_handle), intent(in), value :: h
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h)
     if (present(ierr)) ierr = stat
@@ -132,12 +136,14 @@ contains
     integer, intent(out)           :: count
     integer, intent(out), optional :: ierr
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl () bind (C, name="esio_layout_count")
         import
         integer(c_int) :: impl
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     count = impl()
     if (present(ierr)) ierr = 0
@@ -152,6 +158,7 @@ contains
     integer,           intent(out)           :: layout_index
     integer,           intent(out), optional :: ierr
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h) bind (C, name="esio_layout_get")
         import
@@ -159,6 +166,7 @@ contains
         type(esio_handle), intent(in), value :: h
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     layout_index = impl(h)
     if (present(ierr)) ierr = 0  ! FIXME: See bug #1178
@@ -174,6 +182,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, layout_index) bind (C, name="esio_layout_set")
         import
@@ -182,6 +191,7 @@ contains
         integer(c_int),    intent(in), value :: layout_index
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, layout_index)
     if (present(ierr)) ierr = stat
@@ -198,6 +208,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, file, overwrite) bind (C, name="esio_file_create")
         import
@@ -207,6 +218,7 @@ contains
         integer(c_int),               intent(in), value :: overwrite
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(file), f_c_logical(overwrite))
     if (present(ierr)) ierr = stat
@@ -223,6 +235,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, file, readwrite) bind (C, name="esio_file_open")
         import
@@ -232,6 +245,7 @@ contains
         integer(c_int),               intent(in), value :: readwrite
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(file), f_c_logical(readwrite))
     if (present(ierr)) ierr = stat
@@ -246,6 +260,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h) bind (C, name="esio_file_flush")
         import
@@ -253,6 +268,7 @@ contains
         type(esio_handle), intent(in), value :: h
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h)
     if (present(ierr)) ierr = stat
@@ -267,6 +283,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h) bind (C, name="esio_file_close")
         import
@@ -274,6 +291,7 @@ contains
         type(esio_handle), intent(in), value :: h
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h)
     if (present(ierr)) ierr = stat
@@ -290,6 +308,7 @@ contains
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, value) bind (C, name="esio_string_set")
         import
@@ -299,6 +318,7 @@ contains
         character(len=1,kind=c_char), intent(in)        :: value(*)
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(name), f_c_string(value))
     if (present(ierr)) ierr = stat
@@ -320,7 +340,8 @@ contains
     character(len=1,kind=c_char), pointer    :: tmp_str(:)
     integer                                  :: i, n(1)
 
-!   The C implementation which returns newly allocated memory
+!   The C implementation returns newly allocated memory
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name) bind (C, name="esio_string_get")
         import
@@ -329,14 +350,17 @@ contains
         character(len=1,kind=c_char), intent(in)        :: name(*)
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   An (unavoidable?) abuse of the ISO_C_BINDING to get at C's free
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       subroutine c_free (p) bind (C, name="free")
         import
         type(c_ptr), intent(in) :: p
       end subroutine c_free
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     tmp_p = impl(h, f_c_string(name))
     if (c_associated(tmp_p)) then
@@ -363,50 +387,62 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_write_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_attribute_write_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_write_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_attribute_write_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_write_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_attribute_write_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_write_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_attribute_write_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_write_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_attribute_write_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_write_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_attribute_write_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_read_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_attribute_read_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_read_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_attribute_read_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_read_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_attribute_read_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_read_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_attribute_read_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_attribute_read_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_attribute_read_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_attribute_read_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_attribute_read_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -415,56 +451,68 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_writev_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_attribute_writev_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_writev_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_attribute_writev_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_writev_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_attribute_writev_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_writev_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_attribute_writev_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_writev_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_attribute_writev_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_writev_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_attribute_writev_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_readv_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_attribute_readv_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_readv_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_attribute_readv_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_readv_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_attribute_readv_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_readv_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_attribute_readv_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_attribute_readv_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_attribute_readv_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_attribute_readv_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_attribute_readv_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "attribute.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -479,6 +527,7 @@ contains
 
     integer(c_int) :: tmp_ncomponents
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, ncomponents)  &
                     bind (C, name="esio_attribute_sizev")
@@ -489,6 +538,7 @@ contains
         integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(name), tmp_ncomponents)
     ncomponents = tmp_ncomponents
@@ -501,50 +551,62 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_write_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_line_write_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_write_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_line_write_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_write_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_line_write_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_write_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_line_write_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_write_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_line_write_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_write_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_line_write_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_read_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_line_read_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_read_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_line_read_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_read_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_line_read_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_read_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_line_read_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_line_read_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_line_read_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_line_read_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_line_read_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -559,6 +621,7 @@ contains
 
     integer(c_int) :: tmp_a
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, aglobal) bind (C, name="esio_line_size")
         import
@@ -568,6 +631,7 @@ contains
         integer(c_int),               intent(inout)     :: aglobal
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(name), tmp_a)
     aglobal = tmp_a
@@ -577,56 +641,68 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_writev_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_line_writev_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_writev_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_line_writev_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_writev_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_line_writev_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_writev_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_line_writev_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_writev_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_line_writev_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_writev_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_line_writev_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_readv_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_line_readv_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_readv_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_line_readv_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_readv_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_line_readv_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_readv_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_line_readv_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_line_readv_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_line_readv_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_line_readv_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_line_readv_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "line.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -642,6 +718,7 @@ contains
 
     integer(c_int) :: tmp_a, tmp_ncomponents
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, aglobal, ncomponents)  &
                     bind (C, name="esio_line_sizev")
@@ -653,6 +730,7 @@ contains
         integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(h, f_c_string(name), tmp_a, tmp_ncomponents)
     aglobal = tmp_a
@@ -663,50 +741,62 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_write_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_plane_write_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_write_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_plane_write_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_write_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_plane_write_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_write_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_plane_write_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_write_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_plane_write_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_write_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_plane_write_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_read_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_plane_read_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_read_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_plane_read_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_read_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_plane_read_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_read_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_plane_read_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_plane_read_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_plane_read_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_plane_read_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_plane_read_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -722,6 +812,7 @@ contains
 
     integer(c_int) :: tmp_b, tmp_a
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, bglobal, aglobal)  &
                     bind (C, name="esio_plane_size")
@@ -733,6 +824,7 @@ contains
         integer(c_int),               intent(inout)     :: aglobal
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(h, f_c_string(name), tmp_b, tmp_a)
@@ -744,56 +836,68 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_writev_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_plane_writev_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_writev_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_plane_writev_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_writev_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_plane_writev_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_writev_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_plane_writev_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_writev_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_plane_writev_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_writev_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_plane_writev_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_readv_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_plane_readv_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_readv_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_plane_readv_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_readv_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_plane_readv_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_readv_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_plane_readv_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_plane_readv_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_plane_readv_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_plane_readv_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_plane_readv_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "plane.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -810,6 +914,7 @@ contains
 
     integer(c_int) :: tmp_b, tmp_a, tmp_ncomponents
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, bglobal, aglobal, ncomponents)  &
                     bind (C, name="esio_plane_sizev")
@@ -822,6 +927,7 @@ contains
         integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(h, f_c_string(name), tmp_b, tmp_a, tmp_ncomponents)
@@ -834,50 +940,62 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_write_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_field_write_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_write_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_field_write_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_write_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_field_write_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_write_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_field_write_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_write_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_field_write_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_write_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_field_write_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_read_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_field_read_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_read_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_field_read_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_read_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_field_read_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_read_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_field_read_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define FNAME esio_field_read_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_field_read_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define FNAME esio_field_read_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_field_read_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -894,6 +1012,7 @@ contains
 
     integer(c_int) :: tmp_c, tmp_b, tmp_a
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, cglobal, bglobal, aglobal)  &
                     bind (C, name="esio_field_size")
@@ -906,6 +1025,7 @@ contains
         integer(c_int),               intent(inout)     :: aglobal
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
     stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a)
@@ -918,56 +1038,68 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_writev_double
-#define FINTENT intent(in)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_field_writev_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_writev_double
+#  define FINTENT intent(in)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_field_writev_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_writev_single
-#define FINTENT intent(in)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_field_writev_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_writev_single
+#  define FINTENT intent(in)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_field_writev_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_writev_integer
-#define FINTENT intent(in)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_field_writev_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_writev_integer
+#  define FINTENT intent(in)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_field_writev_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_readv_double
-#define FINTENT intent(out)
-#define CTYPE real(c_double)
-#define CBINDNAME "esio_field_readv_double"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_readv_double
+#  define FINTENT intent(out)
+#  define CTYPE real(c_double)
+#  define CBINDNAME "esio_field_readv_double"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_readv_single
-#define FINTENT intent(out)
-#define CTYPE real(c_float)
-#define CBINDNAME "esio_field_readv_float"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_readv_single
+#  define FINTENT intent(out)
+#  define CTYPE real(c_float)
+#  define CBINDNAME "esio_field_readv_float"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#define VECTORVALUED
-#define FNAME esio_field_readv_integer
-#define FINTENT intent(out)
-#define CTYPE integer(c_int)
-#define CBINDNAME "esio_field_readv_int"
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define VECTORVALUED
+#  define FNAME esio_field_readv_integer
+#  define FINTENT intent(out)
+#  define CTYPE integer(c_int)
+#  define CBINDNAME "esio_field_readv_int"
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 #include "field.f90"
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -986,6 +1118,7 @@ contains
 
     integer(c_int) :: tmp_c, tmp_b, tmp_a, tmp_ncomponents
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       function impl (h, name, cglobal, bglobal, aglobal, ncomponents)  &
                     bind (C, name="esio_field_sizev")
@@ -999,6 +1132,7 @@ contains
         integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
     stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a, tmp_ncomponents)
@@ -1019,6 +1153,7 @@ contains
     integer,           intent(in) :: line
     integer,           intent(in) :: esio_errno
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
       subroutine c_impl (reason, file, line, esio_errno)  &
                  bind (C, name="esio_error")
@@ -1029,6 +1164,7 @@ contains
         integer(c_int),               intent(in), value :: esio_errno
       end subroutine
     end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     call c_impl(f_c_string(reason), f_c_string(file), line, esio_errno)
 

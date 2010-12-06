@@ -1,4 +1,4 @@
-#ifdef ALWAYS_SKIP_TEMPLATE_HEADER
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
@@ -26,7 +26,7 @@
 
 ! Designed to be #included from esio.f90
 ! If VECTORVALUED has been #defined, then ncomponents is added to arguments
-#endif
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 #if !defined(FNAME) || !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
 #error "One of FNAME, FINTENT, CTYPE, or CBINDNAME not defined"
@@ -51,6 +51,7 @@ subroutine FNAME (h, name, plane,                   &
   integer,           intent(out), optional :: ierr
   integer                                  :: stat
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
     function impl (h, name, plane,                   &
                    bglobal, bstart, blocal, bstride, &
@@ -77,6 +78,7 @@ subroutine FNAME (h, name, plane,                   &
 #endif
     end function impl
   end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 ! Note conversion from one- to zero-based starting offsets
 ! Note reordering Fortran's (a, b) to C's (b, a)
