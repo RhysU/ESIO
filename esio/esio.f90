@@ -57,16 +57,106 @@ module esio
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
-! Generic, precision-agnostic interfaces atop the public API
+! Generic, precision-agnostic attribute interfaces atop the public API
+  interface esio_attribute_write
+    module procedure esio_attribute_write_double
+    module procedure esio_attribute_write_single
+    module procedure esio_attribute_write_integer
+  end interface
+
+  interface esio_attribute_read
+    module procedure esio_attribute_read_double
+    module procedure esio_attribute_read_single
+    module procedure esio_attribute_read_integer
+  end interface
+
+  interface esio_attribute_writev
+    module procedure esio_attribute_writev_double
+    module procedure esio_attribute_writev_single
+    module procedure esio_attribute_writev_integer
+  end interface
+
+  interface esio_attribute_readv
+    module procedure esio_attribute_readv_double
+    module procedure esio_attribute_readv_single
+    module procedure esio_attribute_readv_integer
+  end interface
+
+! Generic, precision-agnostic line interfaces atop the public API
+  interface esio_line_write
+    module procedure esio_line_write_double
+    module procedure esio_line_write_single
+    module procedure esio_line_write_integer
+  end interface
+
+  interface esio_line_read
+    module procedure esio_line_read_double
+    module procedure esio_line_read_single
+    module procedure esio_line_read_integer
+  end interface
+
+  interface esio_line_writev
+    module procedure esio_line_writev_double
+    module procedure esio_line_writev_single
+    module procedure esio_line_writev_integer
+  end interface
+
+  interface esio_line_readv
+    module procedure esio_line_readv_double
+    module procedure esio_line_readv_single
+    module procedure esio_line_readv_integer
+  end interface
+
+! Generic, precision-agnostic plane interfaces atop the public API
+  interface esio_plane_write
+    module procedure esio_plane_write_double
+    module procedure esio_plane_write_single
+    module procedure esio_plane_write_integer
+  end interface
+
+  interface esio_plane_read
+    module procedure esio_plane_read_double
+    module procedure esio_plane_read_single
+    module procedure esio_plane_read_integer
+  end interface
+
+  interface esio_plane_writev
+    module procedure esio_plane_writev_double
+    module procedure esio_plane_writev_single
+    module procedure esio_plane_writev_integer
+  end interface
+
+  interface esio_plane_readv
+    module procedure esio_plane_readv_double
+    module procedure esio_plane_readv_single
+    module procedure esio_plane_readv_integer
+  end interface
+
+! Generic, precision-agnostic field interfaces atop the public API
   interface esio_field_write
     module procedure esio_field_write_double
     module procedure esio_field_write_single
+    module procedure esio_field_write_integer
   end interface
 
   interface esio_field_read
     module procedure esio_field_read_double
     module procedure esio_field_read_single
+    module procedure esio_field_read_integer
   end interface
+
+  interface esio_field_writev
+    module procedure esio_field_writev_double
+    module procedure esio_field_writev_single
+    module procedure esio_field_writev_integer
+  end interface
+
+  interface esio_field_readv
+    module procedure esio_field_readv_double
+    module procedure esio_field_readv_single
+    module procedure esio_field_readv_integer
+  end interface
+
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
@@ -387,63 +477,69 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_write_double (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_write_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_attribute_write_double"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_write_single (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_write_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_attribute_write_float"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_write_integer (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_write_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_attribute_write_int"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_read_double (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_read_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_attribute_read_double"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_read_single (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_read_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_attribute_read_float"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_read_integer (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_attribute_read_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_attribute_read_int"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -451,69 +547,75 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_writev_double (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_writev_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_attribute_writev_double"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_writev_single (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_writev_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_attribute_writev_float"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_writev_integer (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_writev_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_attribute_writev_int"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_readv_double (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_readv_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_attribute_readv_double"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_readv_single (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_readv_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_attribute_readv_float"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_attribute_readv_integer (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_attribute_readv_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_attribute_readv_int"
+#  include "attribute.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "attribute.f90"
+end subroutine esio_attribute_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -551,63 +653,81 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_write_double (h, name, line,                    &
+                                   aglobal, astart, alocal, astride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_write_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_write_double"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_write_single (h, name, line,                    &
+                                   aglobal, astart, alocal, astride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_write_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_write_float"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_write_integer (h, name, line,                    &
+                                    aglobal, astart, alocal, astride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_write_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_write_int"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_read_double (h, name, line,                    &
+                                  aglobal, astart, alocal, astride, &
+                                  ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_read_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_read_double"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_read_single (h, name, line,                    &
+                                  aglobal, astart, alocal, astride, &
+                                  ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_read_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_read_float"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_read_integer (h, name, line,                    &
+                                   aglobal, astart, alocal, astride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_line_read_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_read_int"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -641,69 +761,87 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_writev_double (h, name, line,                    &
+                                    aglobal, astart, alocal, astride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_writev_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_writev_double"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_writev_single (h, name, line,                    &
+                                    aglobal, astart, alocal, astride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_writev_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_writev_float"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_writev_integer (h, name, line,                    &
+                                     aglobal, astart, alocal, astride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_writev_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_writev_int"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_readv_double (h, name, line,                    &
+                                   aglobal, astart, alocal, astride, &
+                                   ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_readv_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_readv_double"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_readv_single (h, name, line,                    &
+                                   aglobal, astart, alocal, astride, &
+                                   ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_readv_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_readv_float"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_line_readv_integer (h, name, line,                    &
+                                    aglobal, astart, alocal, astride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_line_readv_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_readv_int"
+#  include "line.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "line.f90"
+end subroutine esio_line_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -741,63 +879,87 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_write_double (h, name, plane,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_write_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_write_double"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_write_single (h, name, plane,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_write_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_write_float"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_write_integer (h, name, plane,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_write_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_write_int"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_read_double (h, name, plane,                   &
+                                   aglobal, astart, alocal, astride, &
+                                   bglobal, bstart, blocal, bstride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_read_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_read_double"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_read_single (h, name, plane,                   &
+                                   aglobal, astart, alocal, astride, &
+                                   bglobal, bstart, blocal, bstride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_read_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_read_float"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_read_integer (h, name, plane,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_plane_read_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_read_int"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -836,69 +998,93 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_writev_double (h, name, plane,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_writev_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_writev_double"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_writev_single (h, name, plane,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_writev_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_writev_float"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_writev_integer (h, name, plane,                   &
+                                      aglobal, astart, alocal, astride, &
+                                      bglobal, bstart, blocal, bstride, &
+                                      ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_writev_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_writev_int"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_readv_double (h, name, plane,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_readv_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_readv_double"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_readv_single (h, name, plane,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_readv_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_readv_float"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_plane_readv_integer (h, name, plane,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_plane_readv_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_readv_int"
+#  include "plane.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "plane.f90"
+end subroutine esio_plane_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -940,63 +1126,93 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_write_double (h, name, field,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    cglobal, cstart, clocal, cstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_write_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_write_double"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_write_single (h, name, field,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    cglobal, cstart, clocal, cstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_write_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_write_float"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_write_integer (h, name, field,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     cglobal, cstart, clocal, cstride, &
+                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_write_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_write_int"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_read_double (h, name, field,                   &
+                                   aglobal, astart, alocal, astride, &
+                                   bglobal, bstart, blocal, bstride, &
+                                   cglobal, cstart, clocal, cstride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_read_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_read_double"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_read_single (h, name, field,                   &
+                                   aglobal, astart, alocal, astride, &
+                                   bglobal, bstart, blocal, bstride, &
+                                   cglobal, cstart, clocal, cstride, &
+                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_read_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_read_float"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_read_integer (h, name, field,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    cglobal, cstart, clocal, cstride, &
+                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#  define FNAME esio_field_read_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_read_int"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1038,69 +1254,99 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_writev_double (h, name, field,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     cglobal, cstart, clocal, cstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_writev_double
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_writev_double"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_writev_single (h, name, field,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     cglobal, cstart, clocal, cstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_writev_single
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_writev_float"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_writev_integer (h, name, field,                   &
+                                      aglobal, astart, alocal, astride, &
+                                      bglobal, bstart, blocal, bstride, &
+                                      cglobal, cstart, clocal, cstride, &
+                                      ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_writev_integer
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_writev_int"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_readv_double (h, name, field,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    cglobal, cstart, clocal, cstride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_readv_double
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_readv_double"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_readv_single (h, name, field,                   &
+                                    aglobal, astart, alocal, astride, &
+                                    bglobal, bstart, blocal, bstride, &
+                                    cglobal, cstart, clocal, cstride, &
+                                    ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_readv_single
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_readv_float"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+subroutine esio_field_readv_integer (h, name, field,                   &
+                                     aglobal, astart, alocal, astride, &
+                                     bglobal, bstart, blocal, bstride, &
+                                     cglobal, cstart, clocal, cstride, &
+                                     ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
-#  define FNAME esio_field_readv_integer
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_readv_int"
+#  include "field.f90"
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-#include "field.f90"
+end subroutine esio_field_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

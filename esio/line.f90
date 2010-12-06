@@ -1,4 +1,3 @@
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
@@ -24,20 +23,11 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
-! Designed to be #included from esio.f90
-! If VECTORVALUED has been #defined, then ncomponents is added to arguments
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+! Designed to be #included from esio.f90 within a subroutine declaration
 
-#if !defined(FNAME) || !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
-#error "One of FNAME, FINTENT, CTYPE, or CBINDNAME not defined"
+#if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
+#error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
-
-subroutine FNAME (h, name, line,                    &
-                  aglobal, astart, alocal, astride, &
-#ifdef VECTORVALUED
-                  ncomponents,                      &
-#endif
-                  ierr)
 
   type(esio_handle), intent(in) :: h
   character(len=*),  intent(in) :: name
@@ -82,9 +72,6 @@ subroutine FNAME (h, name, line,                    &
              )
   if (present(ierr)) ierr = stat
 
-end subroutine FNAME
-
-#undef FNAME
 #undef FINTENT
 #undef CTYPE
 #undef CBINDNAME
