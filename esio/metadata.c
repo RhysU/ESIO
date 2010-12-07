@@ -161,7 +161,7 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
         return ESIO_EFAILED;
     } else {
         // On success, sanity check layout_index's value...
-        if (metadata[3] < 0 || metadata[3] >= esio_layout_count()) {
+        if (metadata[3] < 0 || metadata[3] >= esio_field_layout_count()) {
             ESIO_ERROR("ESIO metadata contains unknown layout_index",
                        ESIO_ESANITY); // Very Bad (TM)
         }

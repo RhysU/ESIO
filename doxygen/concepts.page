@@ -171,11 +171,11 @@ used to write data to file.  Further, operations on any existing field
 will always use the layout with which a field was initially created.
 
 The total number of field layouts available may be queried using
-esio_layout_count().  The default layout associated with a particular
-\ref esio_handle can be retrieved using esio_layout_get() and specified
-using esio_layout_set().  The default layout is used whenever esio writes
-a new field to file.  Note that any existing layout is preserved when
-a field is overwritten.
+esio_field_layout_count().  The default layout associated with a particular
+\ref esio_handle can be retrieved using esio_field_layout_get() and specified
+using esio_field_layout_set().  The default layout is used whenever esio writes
+a new field to file.  Note that any existing layout is preserved when a field
+is overwritten.
 
 Two layouts are available in the current ESIO release.  The first
 (and default) layout 0 provides maximum interoperability with other
@@ -186,11 +186,11 @@ full three dimensional data in, for example, visualization applications.
 Future layout numbers will be monotonically increasing and stable across
 ESIO versions.
 
-Users are advised to choose a non-default layout only after having
-benchmarked the available layouts and determined that performance gains
-offset usability and data longevity.  At such a time, applications
-can be retrofit to use a higher performance layout simply by adding an
-esio_layout_set() call immediately after esio_handle_initialize().  All legacy
-fields will continue to work alongside any new fields.
+Users are advised to choose a non-default layout only after having benchmarked
+the available layouts and determined that performance gains offset usability
+and data longevity.  At such a time, applications can be retrofit to use a
+higher performance layout simply by adding an esio_field_layout_set() call
+immediately after esio_handle_initialize().  All legacy fields will continue to
+work alongside any new fields.
 
 */

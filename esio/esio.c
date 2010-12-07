@@ -145,21 +145,22 @@ static const struct {
     esio_filespace_creator_t filespace_creator;
     esio_field_writer_t      field_writer;
     esio_field_reader_t      field_reader;
-} esio_layout[] = {
+} esio_field_layout[] = {
     {
         0,
-        &esio_layout0_filespace_creator,
-        &esio_layout0_field_writer,
-        &esio_layout0_field_reader
+        &esio_field_layout0_filespace_creator,
+        &esio_field_layout0_field_writer,
+        &esio_field_layout0_field_reader
     },
     {
         1,
-        &esio_layout1_filespace_creator,
-        &esio_layout1_field_writer,
-        &esio_layout1_field_reader
+        &esio_field_layout1_filespace_creator,
+        &esio_field_layout1_field_writer,
+        &esio_field_layout1_field_reader
     },
 };
-static const int esio_nlayout = sizeof(esio_layout)/sizeof(esio_layout[0]);
+static const int esio_field_nlayout = sizeof(esio_field_layout)
+                                    / sizeof(esio_field_layout[0]);
 
 static
 MPI_Comm
@@ -271,13 +272,13 @@ esio_handle_finalize(esio_handle h)
     return ESIO_SUCCESS;
 }
 
-int esio_layout_count()
+int esio_field_layout_count()
 {
-    return esio_nlayout;
+    return esio_field_nlayout;
 }
 
 int
-esio_layout_get(const esio_handle h)
+esio_field_layout_get(const esio_handle h)
 {
     if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
 
@@ -285,7 +286,7 @@ esio_layout_get(const esio_handle h)
 }
 
 int
-esio_layout_set(esio_handle h, int layout_index)
+esio_field_layout_set(esio_handle h, int layout_index)
 {
     if (h == NULL) {
         ESIO_ERROR("h == NULL", ESIO_EFAULT);
@@ -293,8 +294,8 @@ esio_layout_set(esio_handle h, int layout_index)
     if (layout_index < 0) {
         ESIO_ERROR("layout_index < 0", ESIO_EINVAL);
     }
-    if (layout_index >= esio_nlayout) {
-        ESIO_ERROR("layout_index >= esio_nlayout", ESIO_EINVAL);
+    if (layout_index >= esio_field_nlayout) {
+        ESIO_ERROR("layout_index >= esio_field_nlayout", ESIO_EINVAL);
     }
 
     h->layout_index = layout_index;
@@ -444,14 +445,14 @@ hid_t esio_field_create(const esio_handle h,
                         const char *name, hid_t type_id)
 {
     // Sanity check that the handle's layout_index matches our internal table
-    if (esio_layout[h->layout_index].index != h->layout_index) {
-        ESIO_ERROR_VAL("SEVERE: Consistency error in esio_layout",
+    if (esio_field_layout[h->layout_index].index != h->layout_index) {
+        ESIO_ERROR_VAL("SEVERE: Consistency error in esio_field_layout",
                 ESIO_ESANITY, -1);
     }
 
     // Create the filespace using current layout within handle
     const hid_t filespace
-        = (esio_layout[h->layout_index].filespace_creator)(cglobal,
+        = (esio_field_layout[h->layout_index].filespace_creator)(cglobal,
                                                          bglobal,
                                                          aglobal);
     if (filespace < 0) {
@@ -735,7 +736,7 @@ int esio_field_write_internal(const esio_handle h,
         // Create dataset and write it with the active field layout
         const hid_t dset_id
             = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id);
-        const int wstat = (esio_layout[h->layout_index].field_writer)(
+        const int wstat = (esio_field_layout[h->layout_index].field_writer)(
                 dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
@@ -789,7 +790,7 @@ int esio_field_write_internal(const esio_handle h,
         H5Tclose(field_type_id);
 
         // Overwrite existing data using layout routines per metadata
-        const int wstat = (esio_layout[layout_index].field_writer)(
+        const int wstat = (esio_field_layout[layout_index].field_writer)(
                 dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
@@ -894,7 +895,7 @@ int esio_field_read_internal(const esio_handle h,
     // Read the field based on the metadata's layout_index
     // Note that this means we can read any layout ESIO understands
     // Note that reading does not change the chosen field write layout_index
-    (esio_layout[layout_index].field_reader)(dset_id, field,
+    (esio_field_layout[layout_index].field_reader)(dset_id, field,
                                            cglobal, cstart, clocal, cstride,
                                            bglobal, bstart, blocal, bstride,
                                            aglobal, astart, alocal, astride,

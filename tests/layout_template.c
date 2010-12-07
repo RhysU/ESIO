@@ -252,7 +252,7 @@ FCT_BGN()
             state = esio_handle_initialize(MPI_COMM_WORLD);
             assert(state);
 
-            esio_layout_set(state, LAYOUT_TAG);
+            esio_field_layout_set(state, LAYOUT_TAG);
         }
         FCT_SETUP_END();
 
@@ -272,8 +272,8 @@ FCT_BGN()
         // Test scalar-valued fields, including overwrite details
         FCT_TEST_BGN(field)
         {
-            fct_req(LAYOUT_TAG < esio_layout_count());
-            fct_req(LAYOUT_TAG == esio_layout_get(state));
+            fct_req(LAYOUT_TAG < esio_field_layout_count());
+            fct_req(LAYOUT_TAG == esio_field_layout_get(state));
 
             REAL *field;
 
@@ -411,8 +411,8 @@ FCT_BGN()
         // Test vector-valued fields
         FCT_TEST_BGN(vfield)
         {
-            fct_req(LAYOUT_TAG < esio_layout_count());
-            fct_req(LAYOUT_TAG == esio_layout_get(state));
+            fct_req(LAYOUT_TAG < esio_field_layout_count());
+            fct_req(LAYOUT_TAG == esio_field_layout_get(state));
 
             REAL *vfield;
 

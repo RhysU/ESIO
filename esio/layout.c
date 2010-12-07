@@ -69,34 +69,19 @@
 #undef OPFUNC
 #undef QUALIFIER
 
-// FIXME: Enable
-// #define METHODNAME esio_point_writer
-// #define OPFUNC     H5Dwrite
-// #define QUALIFIER  const
-// #include "point.c"
-// #undef METHODNAME
-// #undef OPFUNC
-// #undef QUALIFIER
-// 
-// #define METHODNAME esio_point_reader
-// #define OPFUNC     H5Dread
-// #define QUALIFIER  /* mutable */
-// #include "point.c"
-// #undef METHODNAME
-// #undef OPFUNC
-// #undef QUALIFIER
-
 // ***********************************************************************
 // LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0
 // ***********************************************************************
 
-hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
+hid_t esio_field_layout0_filespace_creator(int cglobal,
+                                           int bglobal,
+                                           int aglobal)
 {
     const hsize_t dims[3] = { cglobal, bglobal, aglobal };
     return H5Screate_simple(3, dims, NULL);
 }
 
-#define METHODNAME esio_layout0_field_writer
+#define METHODNAME esio_field_layout0_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
 #include "layout0.c"
@@ -104,7 +89,7 @@ hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
 #undef OPFUNC
 #undef QUALIFIER
 
-#define METHODNAME esio_layout0_field_reader
+#define METHODNAME esio_field_layout0_field_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
 #include "layout0.c"
@@ -116,13 +101,15 @@ hid_t esio_layout0_filespace_creator(int cglobal, int bglobal, int aglobal)
 // LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1
 // ***********************************************************************
 
-hid_t esio_layout1_filespace_creator(int cglobal, int bglobal, int aglobal)
+hid_t esio_field_layout1_filespace_creator(int cglobal,
+                                           int bglobal,
+                                           int aglobal)
 {
     const hsize_t dims[2] = { cglobal * bglobal, aglobal };
     return H5Screate_simple(2, dims, NULL);
 }
 
-#define METHODNAME esio_layout1_field_writer
+#define METHODNAME esio_field_layout1_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
 #include "layout1.c"
@@ -130,7 +117,7 @@ hid_t esio_layout1_filespace_creator(int cglobal, int bglobal, int aglobal)
 #undef OPFUNC
 #undef QUALIFIER
 
-#define METHODNAME esio_layout1_field_reader
+#define METHODNAME esio_field_layout1_field_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
 #include "layout1.c"

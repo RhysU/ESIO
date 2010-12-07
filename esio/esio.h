@@ -1035,7 +1035,7 @@ int esio_field_sizev(const esio_handle h,
  *
  * @return The number of layouts available within ESIO.
  */
-int esio_layout_count();
+int esio_field_layout_count();
 
 
 /**
@@ -1046,7 +1046,7 @@ int esio_layout_count();
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_layout_get(const esio_handle h);
+int esio_field_layout_get(const esio_handle h);
 
 /**
  * Set the default layout associated with the given handle.
@@ -1054,11 +1054,11 @@ int esio_layout_get(const esio_handle h);
  *
  * @param h Handle to use.
  * @param layout_index Layout index to set in the range
- *                     <tt>[0, </tt>esio_layout_count()<tt>)</tt>.
+ *                     <tt>[0, </tt>esio_field_layout_count()<tt>)</tt>.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_layout_set(esio_handle h, int layout_index);
+int esio_field_layout_set(esio_handle h, int layout_index);
 /*\@}*/
 
 #ifdef __cplusplus

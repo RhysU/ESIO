@@ -1391,14 +1391,14 @@ end subroutine esio_field_readv_integer
 !! See \ref conceptslayouts "layout concepts" for more details.
 !!@{
 
-  subroutine esio_layout_count (count, ierr)
+  subroutine esio_field_layout_count (count, ierr)
 
     integer, intent(out)           :: count
     integer, intent(out), optional :: ierr
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl () bind (C, name="esio_layout_count")
+      function impl () bind (C, name="esio_field_layout_count")
         import
         integer(c_int) :: impl
       end function impl
@@ -1408,11 +1408,11 @@ end subroutine esio_field_readv_integer
     count = impl()
     if (present(ierr)) ierr = 0
 
-  end subroutine esio_layout_count
+  end subroutine esio_field_layout_count
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_layout_get (h, layout_index, ierr)
+  subroutine esio_field_layout_get (h, layout_index, ierr)
 
     type(esio_handle), intent(in)            :: h
     integer,           intent(out)           :: layout_index
@@ -1420,7 +1420,7 @@ end subroutine esio_field_readv_integer
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (h) bind (C, name="esio_layout_get")
+      function impl (h) bind (C, name="esio_field_layout_get")
         import
         integer(c_int)                       :: impl
         type(esio_handle), intent(in), value :: h
@@ -1431,11 +1431,11 @@ end subroutine esio_field_readv_integer
     layout_index = impl(h)
     if (present(ierr)) ierr = 0  ! FIXME: See bug #1178
 
-  end subroutine esio_layout_get
+  end subroutine esio_field_layout_get
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_layout_set (h, layout_index, ierr)
+  subroutine esio_field_layout_set (h, layout_index, ierr)
 
     type(esio_handle), intent(in)            :: h
     integer,           intent(in)            :: layout_index
@@ -1444,7 +1444,7 @@ end subroutine esio_field_readv_integer
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (h, layout_index) bind (C, name="esio_layout_set")
+      function impl (h, layout_index) bind (C, name="esio_field_layout_set")
         import
         integer(c_int)                       :: impl
         type(esio_handle), intent(in), value :: h
@@ -1456,7 +1456,7 @@ end subroutine esio_field_readv_integer
     stat = impl(h, layout_index)
     if (present(ierr)) ierr = stat
 
-  end subroutine esio_layout_set
+  end subroutine esio_field_layout_set
 
 !!@}
 
