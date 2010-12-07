@@ -280,7 +280,13 @@ int esio_field_layout_count()
 int
 esio_field_layout_get(const esio_handle h)
 {
-    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
+    if (h == NULL) {
+        // Normal error checking conventions would dictate we invoke
+        //   ESIO_ERROR("h == NULL", ESIO_EFAULT);
+        // but this routine's return values coincide with the error code range.
+        // Instead return the global default layout on NULL input.
+        return 0;
+    }
 
     return h->layout_index;
 }

@@ -1044,7 +1044,9 @@ int esio_field_layout_count();
  *
  * @param h Handle to use.
  *
- * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ * \return A \c layout_index value suitable for use with
+ *         esio_field_layout_set().  On error, zero is
+ *         returned.
  */
 int esio_field_layout_get(const esio_handle h);
 
