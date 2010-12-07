@@ -28,8 +28,39 @@
 
 !> \file
 !! Provides ESIO's Fortran-based public API following the library's
-!! \ref concepts "usage concepts".  All methods in this header
-!! invoke ESIO's \ref error.h "error handling mechanisms" on failure.
+!! \ref concepts "usage concepts".  The Fortran API almost exactly
+!! follows ESIO's C-based public API documented within \ref esio.h
+!! with only a few exceptions:
+!! <ol>
+!!   <li>
+!!     All Fortran functionality is exposed through subroutines instead
+!!     of the C API's functions.  The \c intent(in) and \c intent(out)
+!!     semantics of each call are identical to the C version everywhere
+!!     with the exception of esio_handle_initialize(), esio_string_get(), and
+!!     esio_field_layout_get().  These three routines have an extra
+!!     \c intent(out) parameter in Fortran.
+!!   </li>
+!!   <li>
+!!     The \ref conceptsfields "field" and \ref conceptsplanes "plane"
+!!     routines place their A, B, and C direction arguments in "Fortran-order"
+!!     (that is, fastest index first).
+!!   </li>
+!!   <li>
+!!     All \c astart, \c bstart, and \c cstart arguments are one-indexed
+!!     within Fortran as opposed to the C API's zero-based indexing.
+!!   </li>
+!!   <li>
+!!     All subroutines contain an optional \c intent(out) \c ierr parameter
+!!     that will be zero on successful return and non-zero on failure.
+!!     All methods in this module also invoke ESIO's \ref error.h
+!!     "error handling mechanisms" on failure.
+!!   </li>
+!!   <li>
+!!     A custom error handler may be registered through the C API in \ref
+!!     error.h, but no mechanism is provided to register an error handler
+!!     within Fortran.
+!!   </li>
+!! </ol>
 
 module esio
 
