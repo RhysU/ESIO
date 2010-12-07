@@ -55,7 +55,7 @@ program main
   call mpi_comm_size(mpi_comm_world, numprocs, ierr)
 
   if (myid.eq.0) write(*,*) "initializing esio"
-  call esio_initialize(handle, mpi_comm_world)
+  call esio_handle_initialize(handle, mpi_comm_world)
   call esio_file_create(handle, filename, .TRUE.)
 
   if (myid.eq.0) write(*,*) "initializing problem"
@@ -96,7 +96,7 @@ program main
   end if
 
   call esio_file_close(handle)
-  call esio_finalize(handle)
+  call esio_handle_finalize(handle)
   call mpi_finalize(ierr)
 
 end program main

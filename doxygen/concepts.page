@@ -34,11 +34,11 @@ might look like:
 \section conceptshandles Handles
 
 ESIO maintains state within opaque \ref esio_handle "esio_handles".
-A user creates an \c esio_handle by invoking esio_initialize() with
+A user creates an \c esio_handle by invoking esio_handle_initialize() with
 an MPI communicator.  All subsequent calls to the ESIO API using that
 particular handle <i>must be made collectively</i> across the MPI
 communicator supplied at the handle's creation time.  When finished
-using a handle, a user calls esio_finalize().
+using a handle, a user calls esio_handle_finalize().
 
 Multiple \c esio_handle may be created against the same or different MPI
 communicators.  For example, one handle may created against MPI_COMM_WORLD
@@ -190,7 +190,7 @@ Users are advised to choose a non-default layout only after having
 benchmarked the available layouts and determined that performance gains
 offset usability and data longevity.  At such a time, applications
 can be retrofit to use a higher performance layout simply by adding an
-esio_layout_set() call immediately after esio_initialize().  All legacy
+esio_layout_set() call immediately after esio_handle_initialize().  All legacy
 fields will continue to work alongside any new fields.
 
 */

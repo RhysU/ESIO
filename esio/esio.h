@@ -49,7 +49,7 @@ typedef struct esio_handle_s *esio_handle;
 
 /**
  * Initialize a handle against the given MPI communicator.
- * The handle must be finalized using esio_finalize() to avoid
+ * The handle must be finalized using esio_handle_finalize() to avoid
  * resource leaks.
  *
  * \param comm MPI communicator (e.g. \c MPI_COMM_WORLD) used to determine
@@ -57,7 +57,7 @@ typedef struct esio_handle_s *esio_handle;
  *             the handle must be made collectively on \c comm.
  * \return A new handle on success.  Otherwise \c NULL.
  */
-esio_handle esio_initialize(MPI_Comm comm);
+esio_handle esio_handle_initialize(MPI_Comm comm);
 
 /**
  * Finalize a handle.
@@ -66,7 +66,7 @@ esio_handle esio_initialize(MPI_Comm comm);
  * \param h Handle to finalize.  May be \c NULL.
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_finalize(esio_handle h);
+int esio_handle_finalize(esio_handle h);
 /*\@}*/
 
 

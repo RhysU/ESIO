@@ -1,4 +1,4 @@
-}!-----------------------------------------------------------------------bl-
+!!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
 !! esio 0.0.1: ExaScale IO library for turbulence simulation restart files
@@ -173,16 +173,17 @@ contains
 !! See \ref conceptshandles "handles" for the associated semantics.
 !!@{
 
-  subroutine esio_initialize (h, comm, ierr)
+  subroutine esio_handle_initialize (h, comm, ierr)
 
     type(esio_handle), intent(out)           :: h
     integer,           intent(in)            :: comm
     integer,           intent(out), optional :: ierr
 
-    ! See C routine esio_initialize_fortran re: MPI communicator interoperation
+    ! See C routine esio_handle_initialize_fortran
+    ! for details on MPI communicator interoperation
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (comm) bind (C, name="esio_initialize_fortran")
+      function impl (comm) bind (C, name="esio_handle_initialize_fortran")
         import
         type(esio_handle)          :: impl
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
@@ -199,18 +200,18 @@ contains
       end if
     end if
 
-  end subroutine esio_initialize
+  end subroutine esio_handle_initialize
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_finalize (h, ierr)
+  subroutine esio_handle_finalize (h, ierr)
     type(esio_handle), intent(in)            :: h
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (h) bind (C, name="esio_finalize")
+      function impl (h) bind (C, name="esio_handle_finalize")
         import
         integer(c_int)                       :: impl
         type(esio_handle), intent(in), value :: h
@@ -221,7 +222,7 @@ contains
     stat = impl(h)
     if (present(ierr)) ierr = stat
 
-  end subroutine esio_finalize
+  end subroutine esio_handle_finalize
 
 !> @}
 

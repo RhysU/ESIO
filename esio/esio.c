@@ -200,7 +200,7 @@ esio_MPI_Comm_dup_with_name(MPI_Comm comm)
 }
 
 esio_handle
-esio_initialize(MPI_Comm comm)
+esio_handle_initialize(MPI_Comm comm)
 {
     // Sanity check incoming arguments
     if (comm == MPI_COMM_NULL) {
@@ -230,7 +230,7 @@ esio_initialize(MPI_Comm comm)
     h->layout_index = 0;
 
     if (h->comm == MPI_COMM_NULL) {
-        esio_finalize(h);
+        esio_handle_finalize(h);
         ESIO_ERROR_NULL("Detected MPI_COMM_NULL in h->comm", ESIO_ESANITY);
     }
 
@@ -242,18 +242,18 @@ esio_initialize(MPI_Comm comm)
 #pragma warning(push,disable:1418)
 #endif
 esio_handle
-esio_initialize_fortran(MPI_Fint fcomm)
+esio_handle_initialize_fortran(MPI_Fint fcomm)
 {
     // Converting MPI communicators from Fortran to C requires MPI_Comm_f2c
     // See section 16.3.4 of the MPI 2.2 Standard for details
-    return esio_initialize(MPI_Comm_f2c(fcomm));
+    return esio_handle_initialize(MPI_Comm_f2c(fcomm));
 }
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
 #endif
 
 int
-esio_finalize(esio_handle h)
+esio_handle_finalize(esio_handle h)
 {
     if (h) {
         esio_file_close(h); // Close any open file

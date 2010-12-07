@@ -82,7 +82,7 @@ FCT_BGN()
             esio_set_error_handler(esio_handler);
             filename = tempnam(output_dir, "l1tst");
             assert(filename);
-            state = esio_initialize(MPI_COMM_WORLD);
+            state = esio_handle_initialize(MPI_COMM_WORLD);
             assert(state);
         }
         FCT_SETUP_END();
@@ -90,7 +90,7 @@ FCT_BGN()
         FCT_TEARDOWN_BGN()
         {
             if (filename) free(filename);
-            esio_finalize(state);
+            esio_handle_finalize(state);
         }
         FCT_TEARDOWN_END();
 

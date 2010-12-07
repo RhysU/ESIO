@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-    esio_handle h = esio_initialize(MPI_COMM_WORLD);
+    esio_handle h = esio_handle_initialize(MPI_COMM_WORLD);
     esio_file_create(h, "data.h5", 1 /* overwrite */);
 
     esio_string_set(h, "program", argv[0]);
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
                            2*world_size, 2*world_rank, 2, 1);
 
     esio_file_close(h);
-    esio_finalize(h);
+    esio_handle_finalize(h);
 
     return 0;
 }

@@ -224,7 +224,7 @@ FCT_BGN()
             assert(filename);
 
             // Initialize ESIO state
-            state = esio_initialize(MPI_COMM_WORLD);
+            state = esio_handle_initialize(MPI_COMM_WORLD);
             assert(state);
         }
         FCT_SETUP_END();
@@ -232,7 +232,7 @@ FCT_BGN()
         FCT_TEARDOWN_BGN()
         {
             // Finalize ESIO state
-            esio_finalize(state);
+            esio_handle_finalize(state);
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
