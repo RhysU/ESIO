@@ -1,4 +1,4 @@
-!!-----------------------------------------------------------------------bl-
+}!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
 !! esio 0.0.1: ExaScale IO library for turbulence simulation restart files
@@ -169,6 +169,10 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!> \name Initializing and finalizing a state handle
+!! See \ref conceptshandles "handles" for the associated semantics.
+!!@{
+
   subroutine esio_initialize (h, comm, ierr)
 
     type(esio_handle), intent(out)           :: h
@@ -219,76 +223,13 @@ contains
 
   end subroutine esio_finalize
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine esio_layout_count (count, ierr)
-
-    integer, intent(out)           :: count
-    integer, intent(out), optional :: ierr
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    interface
-      function impl () bind (C, name="esio_layout_count")
-        import
-        integer(c_int) :: impl
-      end function impl
-    end interface
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-    count = impl()
-    if (present(ierr)) ierr = 0
-
-  end subroutine esio_layout_count
+!> @}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_layout_get (h, layout_index, ierr)
-
-    type(esio_handle), intent(in)            :: h
-    integer,           intent(out)           :: layout_index
-    integer,           intent(out), optional :: ierr
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    interface
-      function impl (h) bind (C, name="esio_layout_get")
-        import
-        integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: h
-      end function impl
-    end interface
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-    layout_index = impl(h)
-    if (present(ierr)) ierr = 0  ! FIXME: See bug #1178
-
-  end subroutine esio_layout_get
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-  subroutine esio_layout_set (h, layout_index, ierr)
-
-    type(esio_handle), intent(in)            :: h
-    integer,           intent(in)            :: layout_index
-    integer,           intent(out), optional :: ierr
-    integer                                  :: stat
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    interface
-      function impl (h, layout_index) bind (C, name="esio_layout_set")
-        import
-        integer(c_int)                       :: impl
-        type(esio_handle), intent(in), value :: h
-        integer(c_int),    intent(in), value :: layout_index
-      end function impl
-    end interface
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-    stat = impl(h, layout_index)
-    if (present(ierr)) ierr = stat
-
-  end subroutine esio_layout_set
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!> \name Opening and closing files
+!! See \ref conceptsfiles "file concepts" for more details.
+!!@{
 
   subroutine esio_file_create (h, file, overwrite, ierr)
 
@@ -388,7 +329,13 @@ contains
 
   end subroutine esio_file_close
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating string-valued attributes
+!! See \ref conceptsattributes "attributes concepts" for more details.
+!!@{
 
   subroutine esio_string_set (h, name, value, ierr)
 
@@ -475,7 +422,13 @@ contains
 
   end subroutine esio_string_get
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating scalar-valued attributes
+!! See \ref conceptsattributes "attribute concepts" for more details.
+!!@{
 
 subroutine esio_attribute_write_double (h, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -545,7 +498,13 @@ end subroutine esio_attribute_read_integer
 
 ! No esio_attribute_size in C interface so none in Fortran either
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating vector-valued attributes
+!! See \ref conceptsattributes "attributes concepts" for more details.
+!!@{
 
 subroutine esio_attribute_writev_double (h, name, value, ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -648,10 +607,13 @@ end subroutine esio_attribute_readv_integer
 
   end subroutine esio_attribute_sizev
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, one-dimensional, scalar-valued data
+!! See \ref conceptslines "line concepts" for more details.
+!!@{
 
 subroutine esio_line_write_double (h, name, line,                    &
                                    aglobal, astart, alocal, astride, &
@@ -759,7 +721,13 @@ end subroutine esio_line_read_integer
 
   end subroutine esio_line_size
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, one-dimensional, vector-valued data
+!! See \ref conceptslines "line concepts" for more details.
+!!@{
 
 subroutine esio_line_writev_double (h, name, line,                    &
                                     aglobal, astart, alocal, astride, &
@@ -877,7 +845,13 @@ end subroutine esio_line_readv_integer
 
   end subroutine esio_line_sizev
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, two-dimensional, scalar-valued data
+!! See \ref conceptsplanes "plane concepts" for more details.
+!!@{
 
 subroutine esio_plane_write_double (h, name, plane,                   &
                                     aglobal, astart, alocal, astride, &
@@ -996,7 +970,13 @@ end subroutine esio_plane_read_integer
 
   end subroutine esio_plane_size
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, two-dimensional, vector-valued data
+!! See \ref conceptsplanes "plane concepts" for more details.
+!!@{
 
 subroutine esio_plane_writev_double (h, name, plane,                   &
                                      aglobal, astart, alocal, astride, &
@@ -1124,7 +1104,13 @@ end subroutine esio_plane_readv_integer
 
   end subroutine esio_plane_sizev
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, three-dimensional, scalar-valued data
+!! See \ref conceptsfields "field concepts" for more details.
+!!@{
 
 subroutine esio_field_write_double (h, name, field,                   &
                                     aglobal, astart, alocal, astride, &
@@ -1252,7 +1238,13 @@ end subroutine esio_field_read_integer
 
   end subroutine esio_field_size
 
+!!@}
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Manipulating distributed, three-dimensional, vector-valued data
+!! See \ref conceptsfields "field concepts" for more details.
+!!@{
 
 subroutine esio_field_writev_double (h, name, field,                   &
                                      aglobal, astart, alocal, astride, &
@@ -1389,6 +1381,83 @@ end subroutine esio_field_readv_integer
     if (present(ierr)) ierr = stat
 
   end subroutine esio_field_sizev
+
+!!\@}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!> \name Querying and controlling field layout
+!! See \ref conceptslayouts "layout concepts" for more details.
+!!@{
+
+  subroutine esio_layout_count (count, ierr)
+
+    integer, intent(out)           :: count
+    integer, intent(out), optional :: ierr
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl () bind (C, name="esio_layout_count")
+        import
+        integer(c_int) :: impl
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    count = impl()
+    if (present(ierr)) ierr = 0
+
+  end subroutine esio_layout_count
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_layout_get (h, layout_index, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(out)           :: layout_index
+    integer,           intent(out), optional :: ierr
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (h) bind (C, name="esio_layout_get")
+        import
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: h
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    layout_index = impl(h)
+    if (present(ierr)) ierr = 0  ! FIXME: See bug #1178
+
+  end subroutine esio_layout_get
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_layout_set (h, layout_index, ierr)
+
+    type(esio_handle), intent(in)            :: h
+    integer,           intent(in)            :: layout_index
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (h, layout_index) bind (C, name="esio_layout_set")
+        import
+        integer(c_int)                       :: impl
+        type(esio_handle), intent(in), value :: h
+        integer(c_int),    intent(in), value :: layout_index
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(h, layout_index)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_layout_set
+
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
