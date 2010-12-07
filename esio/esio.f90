@@ -23,7 +23,6 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
-! TODO Document Fortran API
 ! TODO Allow Fortran to detect invalid handle before other failure
 ! TODO Disable error handling when ierr is present??
 
@@ -56,107 +55,6 @@ module esio
   private :: c_associated
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
-
-! Generic, precision-agnostic attribute interfaces atop the public API
-  interface esio_attribute_write
-    module procedure esio_attribute_write_double
-    module procedure esio_attribute_write_single
-    module procedure esio_attribute_write_integer
-  end interface
-
-  interface esio_attribute_read
-    module procedure esio_attribute_read_double
-    module procedure esio_attribute_read_single
-    module procedure esio_attribute_read_integer
-  end interface
-
-  interface esio_attribute_writev
-    module procedure esio_attribute_writev_double
-    module procedure esio_attribute_writev_single
-    module procedure esio_attribute_writev_integer
-  end interface
-
-  interface esio_attribute_readv
-    module procedure esio_attribute_readv_double
-    module procedure esio_attribute_readv_single
-    module procedure esio_attribute_readv_integer
-  end interface
-
-! Generic, precision-agnostic line interfaces atop the public API
-  interface esio_line_write
-    module procedure esio_line_write_double
-    module procedure esio_line_write_single
-    module procedure esio_line_write_integer
-  end interface
-
-  interface esio_line_read
-    module procedure esio_line_read_double
-    module procedure esio_line_read_single
-    module procedure esio_line_read_integer
-  end interface
-
-  interface esio_line_writev
-    module procedure esio_line_writev_double
-    module procedure esio_line_writev_single
-    module procedure esio_line_writev_integer
-  end interface
-
-  interface esio_line_readv
-    module procedure esio_line_readv_double
-    module procedure esio_line_readv_single
-    module procedure esio_line_readv_integer
-  end interface
-
-! Generic, precision-agnostic plane interfaces atop the public API
-  interface esio_plane_write
-    module procedure esio_plane_write_double
-    module procedure esio_plane_write_single
-    module procedure esio_plane_write_integer
-  end interface
-
-  interface esio_plane_read
-    module procedure esio_plane_read_double
-    module procedure esio_plane_read_single
-    module procedure esio_plane_read_integer
-  end interface
-
-  interface esio_plane_writev
-    module procedure esio_plane_writev_double
-    module procedure esio_plane_writev_single
-    module procedure esio_plane_writev_integer
-  end interface
-
-  interface esio_plane_readv
-    module procedure esio_plane_readv_double
-    module procedure esio_plane_readv_single
-    module procedure esio_plane_readv_integer
-  end interface
-
-! Generic, precision-agnostic field interfaces atop the public API
-  interface esio_field_write
-    module procedure esio_field_write_double
-    module procedure esio_field_write_single
-    module procedure esio_field_write_integer
-  end interface
-
-  interface esio_field_read
-    module procedure esio_field_read_double
-    module procedure esio_field_read_single
-    module procedure esio_field_read_integer
-  end interface
-
-  interface esio_field_writev
-    module procedure esio_field_writev_double
-    module procedure esio_field_writev_single
-    module procedure esio_field_writev_integer
-  end interface
-
-  interface esio_field_readv
-    module procedure esio_field_readv_double
-    module procedure esio_field_readv_single
-    module procedure esio_field_readv_integer
-  end interface
-
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
