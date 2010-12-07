@@ -77,7 +77,7 @@
 
 ! Note conversion from one- to zero-based starting offsets
 ! Note reordering Fortran's (a, b, c) to C's (c, b, a)
-  stat = impl(h, f_c_string(name), field,           &
+  stat = impl(h, esio_f_c_string(name), field,      &
               cglobal, cstart - 1, clocal, cstride, &
               bglobal, bstart - 1, blocal, bstride, &
               aglobal, astart - 1, alocal, astride  &

@@ -71,7 +71,7 @@
 
 ! Note conversion from one- to zero-based starting offsets
 ! Note reordering Fortran's (a, b) to C's (b, a)
-  stat = impl(h, f_c_string(name), plane,           &
+  stat = impl(h, esio_f_c_string(name), plane,      &
               bglobal, bstart - 1, blocal, bstride, &
               aglobal, astart - 1, alocal, astride  &
 #ifdef VECTORVALUED

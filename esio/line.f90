@@ -64,7 +64,7 @@
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 ! Note conversion from one- to zero-based starting offsets
-  stat = impl(h, f_c_string(name), line,            &
+  stat = impl(h, esio_f_c_string(name), line,       &
               aglobal, astart - 1, alocal, astride  &
 #ifdef VECTORVALUED
               ,ncomponents                          &

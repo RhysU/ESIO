@@ -57,7 +57,7 @@
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = impl(h, f_c_string(name), value            &
+  stat = impl(h, esio_f_c_string(name), value       &
 #ifdef VECTORVALUED
               ,ncomponents                          &
 #endif

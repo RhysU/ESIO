@@ -81,15 +81,19 @@ module esio
 ! Rename C_PTR to ESIO_HANDLE to make the handle object types more opaque.
 ! State traverses the language boundary as TYPE(ESIO_HANDLE)s.
 ! Renaming also prevents collision if caller uses ISO_C_BINDING directly.
-  use, intrinsic :: iso_c_binding, only: c_char,             &
-                                         c_double,           &
-                                         c_double_complex,   &
-                                         c_float,            &
-                                         c_float_complex,    &
-                                         c_int,              &
-                                         c_null_char,        &
-                                         c_associated,       &
+  use, intrinsic :: iso_c_binding, only: c_char,               &
+                                         c_double,             &
+                                         c_double_complex,     &
+                                         c_float,              &
+                                         c_float_complex,      &
+                                         c_int,                &
+                                         c_null_char,          &
+                                         c_associated,         &
                                          esio_handle => c_ptr
+
+  use esio_c_binding, only: esio_f_c_string, esio_f_c_logical, &
+                            esio_c_f_stringcopy,               &
+                            esio_c_free
 
   implicit none  ! Nothing implicit
 
@@ -97,15 +101,15 @@ module esio
   private :: c_char, c_double, c_double_complex
   private :: c_float, c_float_complex, c_int, c_null_char
   private :: c_associated
+  private :: esio_f_c_string, esio_f_c_logical
+  private :: esio_c_f_stringcopy
+  private :: esio_c_free
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
   private :: esio_error
-
-! Internal helper routines
-  private :: f_c_string, f_c_logical
 
 contains
 
@@ -194,7 +198,7 @@ contains
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(file), f_c_logical(overwrite))
+    stat = impl(h, esio_f_c_string(file), esio_f_c_logical(overwrite))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_create
@@ -221,7 +225,7 @@ contains
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(file), f_c_logical(readwrite))
+    stat = impl(h, esio_f_c_string(file), esio_f_c_logical(readwrite))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_open
@@ -300,7 +304,7 @@ contains
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(name), f_c_string(value))
+    stat = impl(h, esio_f_c_string(name), esio_f_c_string(value))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_string_set
@@ -309,7 +313,7 @@ contains
 
   subroutine esio_string_get (h, name, value, ierr)
 
-    use, intrinsic :: iso_c_binding, only: c_ptr, c_loc, c_f_pointer
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
 
     type(esio_handle), intent(in)            :: h
     character(len=*),  intent(in)            :: name
@@ -317,8 +321,6 @@ contains
     integer,           intent(out), optional :: ierr
 
     type(c_ptr)                              :: tmp_p
-    character(len=1,kind=c_char), pointer    :: tmp_str(:)
-    integer                                  :: i, n(1)
 
 !   The C implementation returns newly allocated memory
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -332,26 +334,8 @@ contains
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-!   An (unavoidable?) abuse of the ISO_C_BINDING to get at C's free
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    interface
-      subroutine c_free (p) bind (C, name="free")
-        import
-        type(c_ptr), intent(in) :: p
-      end subroutine c_free
-    end interface
-#endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
-    tmp_p = impl(h, f_c_string(name))
-    if (c_associated(tmp_p)) then
-      value = ''
-      n(1) = len(value)
-      call c_f_pointer(tmp_p, tmp_str, n)
-      do i = 1, n(1)
-        if (tmp_str(i) == c_null_char) exit
-        value(i:i) = tmp_str(i)
-      end do
-      call c_free(tmp_p)
+    tmp_p = impl(h, esio_f_c_string(name))
+    if (esio_c_f_stringcopy(tmp_p, value)) then
       if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
     else
       if (present(ierr)) then
@@ -361,7 +345,8 @@ contains
                         __FILE__, __LINE__, 5)
         call abort
       endif
-    endif
+    end if
+    call esio_c_free(tmp_p)
 
   end subroutine esio_string_get
 
@@ -544,7 +529,7 @@ end subroutine esio_attribute_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(name), tmp_ncomponents)
+    stat = impl(h, esio_f_c_string(name), tmp_ncomponents)
     ncomponents = tmp_ncomponents
     if (present(ierr)) ierr = stat
 
@@ -658,7 +643,7 @@ end subroutine esio_line_read_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(name), tmp_a)
+    stat = impl(h, esio_f_c_string(name), tmp_a)
     aglobal = tmp_a
     if (present(ierr)) ierr = stat
 
@@ -781,7 +766,7 @@ end subroutine esio_line_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(h, f_c_string(name), tmp_a, tmp_ncomponents)
+    stat = impl(h, esio_f_c_string(name), tmp_a, tmp_ncomponents)
     aglobal = tmp_a
     ncomponents = tmp_ncomponents
     if (present(ierr)) ierr = stat
@@ -906,7 +891,7 @@ end subroutine esio_plane_read_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
-    stat = impl(h, f_c_string(name), tmp_b, tmp_a)
+    stat = impl(h, esio_f_c_string(name), tmp_b, tmp_a)
     aglobal = tmp_a
     bglobal = tmp_b
     if (present(ierr)) ierr = stat
@@ -1039,7 +1024,7 @@ end subroutine esio_plane_readv_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
-    stat = impl(h, f_c_string(name), tmp_b, tmp_a, tmp_ncomponents)
+    stat = impl(h, esio_f_c_string(name), tmp_b, tmp_a, tmp_ncomponents)
     aglobal = tmp_a
     bglobal = tmp_b
     ncomponents = tmp_ncomponents
@@ -1173,7 +1158,7 @@ end subroutine esio_field_read_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a)
+    stat = impl(h, esio_f_c_string(name), tmp_c, tmp_b, tmp_a)
     aglobal = tmp_a
     bglobal = tmp_b
     cglobal = tmp_c
@@ -1316,7 +1301,7 @@ end subroutine esio_field_readv_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
-    stat = impl(h, f_c_string(name), tmp_c, tmp_b, tmp_a, tmp_ncomponents)
+    stat = impl(h, esio_f_c_string(name), tmp_c, tmp_b, tmp_a, tmp_ncomponents)
     aglobal = tmp_a
     bglobal = tmp_b
     cglobal = tmp_c
@@ -1424,49 +1409,10 @@ end subroutine esio_field_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    call c_impl(f_c_string(reason), f_c_string(file), line, esio_errno)
+    call c_impl(esio_f_c_string(reason), esio_f_c_string(file), &
+                line, esio_errno)
 
   end subroutine esio_error
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!>Convert Fortran-style string to a C-style one.
-!!Trailing whitespace is trimmed.
-!!See http://fortranwiki.org/fortran/show/Generating+C+Interfaces#strings
-  pure function f_c_string (f_string) result (c_string)
-
-    use, intrinsic :: iso_c_binding, only: c_char, c_null_char
-
-    implicit none
-
-    character(len=*), intent(in) :: f_string
-    character(len=1,kind=c_char) :: c_string(len_trim(f_string)+1)
-    integer                      :: n, i
-
-    n = len_trim(f_string)
-    do i = 1, n
-!     Trivial slice required; f_string(i) parsed as an invalid function call
-      c_string(i) = f_string(i:i)
-    end do
-    c_string(n + 1) = c_null_char
-
-  end function f_c_string
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-!>Convert Fortran \c logical to a C-style true/false \c int.
-  elemental function f_c_logical (f_logical) result (c_logical)
-
-    logical, intent(in) :: f_logical
-    integer(c_int)      :: c_logical
-
-    if (f_logical) then
-      c_logical = 1_c_int
-    else
-      c_logical = 0_c_int
-    end if
-
-  end function f_c_logical
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
