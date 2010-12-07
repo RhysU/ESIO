@@ -34,11 +34,24 @@
 !! <ol>
 !!   <li>
 !!     All Fortran functionality is exposed through subroutines instead
-!!     of the C API's functions.  The \c intent(in) and \c intent(out)
+!!     of the C API's functions.
+!!   </li>
+!!   <li>
+!!     The Fortran API uses "<tt>integer</tt>", "<tt>single</tt>", and
+!!     "<tt>double</tt>" to refer to the types the C API calls "<tt>int</tt>",
+!!     "<tt>float</tt>" and "<tt>double</tt>".
+!!   </li>
+!!   <li>
+!!     The \c intent(in) and \c intent(out)
 !!     semantics of each call are identical to the C version everywhere
 !!     with the exception of esio_handle_initialize(), esio_string_get(), and
 !!     esio_field_layout_get().  These three routines have an extra
 !!     \c intent(out) parameter in Fortran.
+!!   </li>
+!!   <li>
+!!     Logical-like \c int arguments within the C API, for example
+!!     esio_file_create()'s \c overwrite and esio_file_open()'s \c readwrite,
+!!     have Fortran type \c logical.
 !!   </li>
 !!   <li>
 !!     The \ref conceptsfields "field" and \ref conceptsplanes "plane"

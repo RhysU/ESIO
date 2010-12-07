@@ -27,9 +27,23 @@ ESIO usage usually involves some variation on the following steps:
   <li>Finalize the \c esio_handle.</li>
 </ol>
 
-A complete C-based MPI program using ESIO to write some (trivial) data
+A complete, C-based MPI program using ESIO to write some (trivial) data
 might look like:
 \include concepts1.c
+ESIO's C API is documented within the esio.h reference material.
+
+A complete, Fortran-based MPI program using ESIO to perform the same
+task would look like:
+\include concepts2.f90
+ESIO's Fortran API is documented, relative to the C API, within the esio.f90
+reference material.
+
+Note that the C sample used the zero-indexed expression <tt>2*world_rank</tt>
+within the call to esio_line_write_double while the Fortran sample used the
+one-indexed expression <tt>2*world_rank + 1</tt>.  ESIO's C API respects
+"C-isms" like row-major ordering, zero-based offsets, and calling integers
+<tt>int</tt>s.  ESIO's Fortran API respects "Fortran-isms" like column-major
+ordering, one-based offsets, and calling integers <tt>integer</tt>s.
 
 \section conceptshandles Handles
 
