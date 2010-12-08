@@ -73,6 +73,10 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !>Copy the contents of a C-style string to a Fortran-style string
+!!On non-NULL \c c_string, copy as much of its contents as possible into
+!!\c f_string.  Return success if-and-only-if the entire copy succeeded.
+!!Otherwise return failure.  In addition to returning failure, copying
+!!a NULL pointer clears \c f_string.
   function esio_c_f_stringcopy (c_string, f_string) result (success)
 
     use, intrinsic :: iso_c_binding, only: c_ptr, c_associated, c_f_pointer, &
@@ -87,15 +91,19 @@ contains
     integer                               :: i, n(1)
 
     success = .false.
-    f_string = ''
     if (c_associated(c_string)) then
       n(1) = len(f_string)
       call c_f_pointer(c_string, tmp_str, n)
       do i = 1, n(1)
-        if (tmp_str(i) == c_null_char) exit
+        if (tmp_str(i) == c_null_char) then
+          f_string(i:) = ''   ! Clear any remaining Fortran string storage
+          success = .true.    ! Success because full copy succeeded
+          exit
+        end if
         f_string(i:i) = tmp_str(i)
       end do
-      success = .true.
+    else
+      f_string = ''           ! Clear entire Fortran string on NULL pointer
     end if
 
   end function esio_c_f_stringcopy
