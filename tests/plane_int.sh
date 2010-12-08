@@ -9,6 +9,11 @@ if ! [ -x plane_int ]; then
     exit 1
 fi
 
+if ! [ -x plane_int_f ]; then
+    echo "plane_int_f binary not found or not executable"
+    exit 1
+fi
+
 if ! which mpiexec > /dev/null ; then
     echo "WARNING: Unable to find mpiexec; skipping plane_int"
     exit 0
@@ -26,4 +31,9 @@ do
                 $cmd -d $dir $auxstride
         done
     done
+done
+for cmd in "mpiexec -np 1 ./plane_int_f" # FORTRAN
+do
+    echo $cmd
+    $cmd
 done

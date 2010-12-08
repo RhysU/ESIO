@@ -9,6 +9,11 @@ if ! [ -x line_int ]; then
     exit 1
 fi
 
+if ! [ -x line_int_f ]; then
+    echo "line_int_f binary not found or not executable"
+    exit 1
+fi
+
 if ! which mpiexec > /dev/null ; then
     echo "WARNING: Unable to find mpiexec; skipping line_int"
     exit 0
@@ -22,4 +27,9 @@ do
         echo $cmd $auxstride
         $cmd $auxstride
     done
+done
+for cmd in "mpiexec -np 1 ./line_int_f" # FORTRAN
+do
+    echo $cmd
+    $cmd
 done

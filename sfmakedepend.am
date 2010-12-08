@@ -12,7 +12,8 @@ CLEANFILES    += Makefile.dep
 SFMAKEDEPEND_INVOKE = $(PERL) $(top_srcdir)/build-aux/sfmakedepend.pl
 SFMAKEDEPEND_FLAGS  = -I $(srcdir)                                     \
                       $(subst -I,-I ,$(filter -I%,$(AM_FCFLAGS)))      \
-                      -i mpi -i hdf5 -i h5lt -i esio -i grvy -i ifport \
+                      -i mpi -i hdf5 -i h5lt -i grvy -i ifport         \
+                      -i esio -i esio_c_binding                        \
                       -strip
 
 Makefile.dep: $(wildcard $(srcdir)/*.[Ff] $(srcdir)/*.[Ff]90)

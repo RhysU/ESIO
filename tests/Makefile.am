@@ -34,23 +34,39 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
+#############################################################################
+## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##
+#############################################################################
+
 ## Basic C API sanity checks
 TESTS          += basic
 check_PROGRAMS += basic
 basic_SOURCES   = basic.c
-basic_LDADD     = ../esio/libesio.la
-basic_LDADD    += $(GRVY_LIBS) $(HDF5_LDFLAGS)
+basic_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## Basic Fortran API sanity checks
+TESTS           += basic_f
+check_PROGRAMS  += basic_f
+basic_f_SOURCES  = basic_f.f90 testframework.f90
+basic_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ###########################################################################
 ## STRING STRING STRING STRING STRING STRING STRING STRING STRING STRING ##
 ###########################################################################
 
-## String tests in C
+## String tests...
 TESTS          += string.sh    # NB Wrapper script
 EXTRA_DIST     += string.sh    # NB Wrapper script
+
+## ...in C
 check_PROGRAMS += string
 string_SOURCES  = string.c
 string_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## ...in Fortran
+check_PROGRAMS   += string_f
+string_f_SOURCES  = string_f.f90 testframework.f90
+string_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ###########################################################################
 ## ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ##
@@ -70,12 +86,19 @@ check_PROGRAMS          += attribute_float
 attribute_float_SOURCES  = attribute_float.c
 attribute_float_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
-## Attribute integer tests in C
+## Attribute integer tests...
 TESTS                 += attribute_int.sh         # NB Wrapper script
 EXTRA_DIST            += attribute_int.sh         # NB Wrapper script
+
+## ...in C
 check_PROGRAMS        += attribute_int
 attribute_int_SOURCES  = attribute_int.c
 attribute_int_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## ...in Fortran
+check_PROGRAMS          += attribute_int_f
+attribute_int_f_SOURCES  = attribute_int_f.f90 testframework.f90
+attribute_int_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ###########################################################################
 ## LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE LINE ##
@@ -95,12 +118,19 @@ check_PROGRAMS      += line_float
 line_float_SOURCES   = line_float.c
 line_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
-## Line integer tests in C
+## Line integer tests...
 TESTS             += line_int.sh         # NB Wrapper script
 EXTRA_DIST        += line_int.sh         # NB Wrapper script
+
+## ...in C
 check_PROGRAMS    += line_int
 line_int_SOURCES   = line_int.c
 line_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## ...in Fortran
+check_PROGRAMS     += line_int_f
+line_int_f_SOURCES  = line_int_f.f90 testframework.f90
+line_int_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
 ## PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE PLANE ##
@@ -120,12 +150,19 @@ check_PROGRAMS       += plane_float
 plane_float_SOURCES   = plane_float.c
 plane_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
-## Plane integer tests in C
+## Plane integer tests...
 TESTS              += plane_int.sh         # NB Wrapper script
 EXTRA_DIST         += plane_int.sh         # NB Wrapper script
+
+## ...in C
 check_PROGRAMS     += plane_int
 plane_int_SOURCES   = plane_int.c
 plane_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## ...in Fortran
+check_PROGRAMS      += plane_int_f
+plane_int_f_SOURCES  = plane_int_f.f90 testframework.f90
+plane_int_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
 ## LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 LAYOUT 0 ##
@@ -145,12 +182,19 @@ check_PROGRAMS         += layout0_float
 layout0_float_SOURCES   = layout0_float.c
 layout0_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
-## Layout 0 integer tests in C
+## Layout 0 integer tests...
 TESTS                += layout0_int.sh         # NB Wrapper script
 EXTRA_DIST           += layout0_int.sh         # NB Wrapper script
+
+## ...in C
 check_PROGRAMS       += layout0_int
 layout0_int_SOURCES   = layout0_int.c
 layout0_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## ...in Fortran
+check_PROGRAMS        += layout0_int_f
+layout0_int_f_SOURCES  = layout0_int_f.f90 testframework.f90
+layout0_int_f_LDADD    = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
 ## LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 LAYOUT 1 ##
@@ -178,19 +222,16 @@ layout1_int_SOURCES   = layout1_int.c
 layout1_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
-### FORTRAN TESTS FORTRAN TESTS FORTRAN TESTS FORTRAN TESTS FORTRAN TESTS ###
+### MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS ###
 #############################################################################
-
-# FIXME Disabled
-## Fortran test program to read/write a field
-#noinst_PROGRAMS        += simplef90
-#simplef90_SOURCES       = header.f90 simplef90.f90
-#simplef90_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_FLIBS)
-
 
 # Build test programs without running 'make check'
 .PHONY: check-programs
 check-programs: $(check_PROGRAMS)
+
+# Extra things to clean up
+clean-local:
+	rm -f *.mod *.gcno *.gcda
 
 # License updates
 include $(top_srcdir)/license.am

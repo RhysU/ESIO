@@ -9,14 +9,20 @@ if ! [ -x attribute_int ]; then
     exit 1
 fi
 
+if ! [ -x attribute_int_f ]; then
+    echo "attribute_int_f binary not found or not executable"
+    exit 1
+fi
+
 if ! which mpiexec > /dev/null ; then
     echo "WARNING: Unable to find mpiexec; skipping attribute_int"
     exit 0
 fi
 
 set -e # Fail on first error
-for cmd in "mpiexec -np 1 ./attribute_int -n  6" \
-           "mpiexec -np 2 ./attribute_int -n 25"
+for cmd in "mpiexec -np 1 ./attribute_int   -n  6" \
+           "mpiexec -np 2 ./attribute_int   -n 25" \
+           "mpiexec -np 1 ./attribute_int_f      " # FORTRAN
 do
     echo $cmd
     $cmd
