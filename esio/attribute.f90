@@ -31,8 +31,10 @@
 
   type(esio_handle), intent(in) :: h
   character(len=*),  intent(in) :: name
+#ifndef VECTORVALUED
   CTYPE,             FINTENT    :: value
-#ifdef VECTORVALUED
+#else
+  CTYPE,             FINTENT    :: value(*)
   integer,           intent(in) :: ncomponents
 #endif
   integer,           intent(out), optional :: ierr
@@ -49,8 +51,10 @@
       integer(c_int)                                  :: impl
       type(esio_handle),            intent(in), value :: h
       character(len=1,kind=c_char), intent(in)        :: name(*)
+#ifndef VECTORVALUED
       CTYPE,                        FINTENT           :: value
-#ifdef VECTORVALUED
+#else
+      CTYPE,                        FINTENT           :: value(*)
       integer(c_int),               intent(in), value :: ncomponents
 #endif
     end function impl
