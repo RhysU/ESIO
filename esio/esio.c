@@ -239,7 +239,7 @@ esio_handle_initialize(MPI_Comm comm)
 }
 
 #ifdef __INTEL_COMPILER
-// remark #1418: external function definitializeion with no prior declaration
+// remark #1418: external function definition with no prior declaration
 #pragma warning(push,disable:1418)
 #endif
 esio_handle
