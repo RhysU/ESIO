@@ -23,6 +23,8 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
+#include "testframework_assert.h"
+
 program basic_f
 
     use mpi
@@ -37,23 +39,23 @@ program basic_f
 
 !   Check that Fortran thinks the right file does not (yet) exist
     inquire (file=trim(filename), exist=file_exists)
-    if (file_exists) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(.not. file_exists)
 
 !   Open and close a unique file with overwrite disabled
     call esio_file_create(h, filename, .false., ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
 
 !   Check that Fortran thinks the right file exists
     inquire (file=trim(filename), exist=file_exists)
-    if (.not. file_exists) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(file_exists)
 
 !   Open and close an old file with overwrite enabled
     call esio_file_create(h, filename, .true., ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
 
     call testframework_teardown()
 

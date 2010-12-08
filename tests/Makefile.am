@@ -12,10 +12,11 @@ noinst_HEADERS  = fct.h
 noinst_PROGRAMS = # Append below
 BUILT_SOURCES   = # Append below
 CLEANFILES      = # Append below
-EXTRA_DIST      = layout_template.c \
-                  plane_template.c  \
-                  line_template.c   \
-                  attribute_template.c
+EXTRA_DIST      = layout_template.c     \
+                  plane_template.c      \
+                  line_template.c       \
+                  attribute_template.c  \
+                  testframework_assert.h
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)

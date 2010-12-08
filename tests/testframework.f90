@@ -39,8 +39,9 @@ module testframework
   character(len=255), public :: input_dir, output_dir, filename
   type(esio_handle),  public :: h
 
+  logical :: verbose = .false.
 
-  public :: testframework_setup, testframework_teardown
+  public :: testframework_setup, testframework_teardown, testframework_assert
 
 contains
 
@@ -48,7 +49,7 @@ contains
 
   subroutine testframework_setup ()
 
-    use, intrinsic :: iso_fortran_env, only: standard_output => output_unit
+    use, intrinsic :: iso_fortran_env, only: output_unit
 
 !   Initialize MPI
     call MPI_Init (ierr)
@@ -60,11 +61,17 @@ contains
 
 !   Initialize a rank-dependent output unit for progress messages
     if (world_rank == 0) then
-      output = standard_output
+      output = output_unit
     else
       output = 7
       open (7, file = '/dev/null', action = 'write')
     end if
+
+!   Check if assertions should be verbose in nature
+!   Uses input_dir as a scratchpad
+    input_dir = ''
+    call get_environment_variable("ESIO_TEST_VERBOSE", input_dir)
+    verbose = len_trim(input_dir) > 0
 
 !   Initialize a test-specific temporary filename
     call get_environment_variable("ESIO_TEST_INPUT_DIR",  input_dir)
@@ -72,6 +79,9 @@ contains
     if (world_rank == 0) then
       if (.not. f_tempnam(output_dir, "etst", filename)) then
         call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+      end if
+      if (verbose) then
+        write (output, *) "Generated test filename: ", trim(filename)
       end if
     end if
     call MPI_Bcast (filename, len(filename), MPI_CHARACTER,  &
@@ -98,7 +108,7 @@ contains
     end if
 
 !   Attempt to delete the named temporary file, if it exists
-    if (world_rank == 0) then
+    if (.not. verbose .and. world_rank == 0) then
       inquire (file=trim(filename), exist=file_exists)
       if (file_exists) ierr = unlink(trim(filename))
     end if
@@ -111,15 +121,41 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine testframework_assert (condition, sourcefile, line)
+
+    use, intrinsic :: iso_fortran_env, only: output_unit, error_unit
+
+    logical,          intent(in) :: condition
+    character(len=*), intent(in) :: sourcefile
+    integer,          intent(in) :: line
+
+    flush (output_unit)
+    flush (error_unit)
+    if (verbose .and. condition) then
+      write (output_unit, *) "Assertion passed at ", sourcefile, ":", line, &
+                            " on rank ", world_rank
+    else if (.not. condition) then
+      write (error_unit, *) "Assertion failed at ", sourcefile, ":", line,  &
+                            " on rank ", world_rank
+      call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+      stop
+    end if
+    flush (error_unit)
+    flush (output_unit)
+
+  end subroutine testframework_assert
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   function f_tempnam (dir, pfx, tempnam) result (success)
 
     use, intrinsic :: iso_c_binding, only: c_ptr, c_char
 
-    logical                       :: success
-    character(len=*), intent(in)  :: dir
-    character(len=*), intent(in)  :: pfx
+    logical                         :: success
+    character(len=*), intent(in)    :: dir
+    character(len=*), intent(in)    :: pfx
     character(len=*), intent(inout) :: tempnam
-    type(c_ptr)                   :: tmp_p
+    type(c_ptr)                     :: tmp_p
 
 !   See 'man 3 tempnam' for details on the C API
     interface

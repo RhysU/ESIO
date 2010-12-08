@@ -23,6 +23,8 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
+#include "testframework_assert.h"
+
 program string_f
 
     use mpi
@@ -38,20 +40,20 @@ program string_f
 
 !   Create a file, write a string, and close it
     call esio_file_create(h, filename, .false., ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
     call esio_string_set(h, "name", value, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
 
 !   Re-open the file read-only, check the string, and close it
     call esio_file_open(h, filename, .false., ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
     call esio_string_get(h, "name", buffer, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
-    if (value /= trim(buffer)) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(value == trim(buffer))
     call esio_file_close(h, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    ASSERT(ierr == 0)
 
     call testframework_teardown()
 
