@@ -31,9 +31,27 @@ program string_f
 
     implicit none
 
+    character(len=*), parameter :: value = "testTESTDATAdata"
+    character(len=255)          :: buffer
+
     call testframework_setup()
 
-    write (output,*) 'FIXME: Implement Fortran test'
+!   Create a file, write a string, and close it
+    call esio_file_create(h, filename, .false., ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    call esio_string_set(h, "name", value, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    call esio_file_close(h, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+
+!   Re-open the file read-only, check the string, and close it
+    call esio_file_open(h, filename, .false., ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    call esio_string_get(h, "name", buffer, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    if (value /= trim(buffer)) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    call esio_file_close(h, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
 
     call testframework_teardown()
 
