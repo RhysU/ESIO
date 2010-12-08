@@ -136,12 +136,7 @@ contains
     if (esio_c_f_stringcopy(tmp_p, tempnam)) then
       success = .true.
     end if
-
-!   TODO: Attempting to free the memory dies due to free on invalid pointer.
-!         No idea why this occurs.  Routine leaks memory, but this is not a
-!         showstopper for a test harness routine.  I do /NOT/ see this problem
-!         around esio.f90's use of esio_c_free() within esio_string_get().
-!   call esio_c_free(tmp_p)
+    call esio_c_free(tmp_p)
 
   end function f_tempnam
 

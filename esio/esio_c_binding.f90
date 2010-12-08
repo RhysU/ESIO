@@ -36,11 +36,11 @@ module esio_c_binding
   public :: esio_c_f_stringcopy
   public :: esio_c_free
 
-  !> Allows deallocation of memory using C's free.
+!>Deallocate the specified memory using C's free.
   interface
-    subroutine esio_c_free (p) bind (C, name="free")
+    subroutine esio_c_free (ptr) bind (C, name="free")
       use, intrinsic :: iso_c_binding, only: c_ptr
-      type(c_ptr), intent(in) :: p
+      type(c_ptr), intent(in), value :: ptr
     end subroutine esio_c_free
   end interface
 
