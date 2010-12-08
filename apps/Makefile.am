@@ -42,7 +42,7 @@ main_LIBTOOLFLAGS  = --tag=FC
 main.f90: header.o                       # Explicit module dependence
 
 # Additional files to clean
-CLEANFILES += *.mod *.gcno
+CLEANFILES += *.mod *.gcno *.gcda
 
 # License updates
 include $(top_srcdir)/license.am

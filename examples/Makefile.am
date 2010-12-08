@@ -33,7 +33,7 @@ concepts2_LDADD         = ../esio/libesiof.la $(HDF5_LDFLAGS)
 concepts2_LIBTOOLFLAGS  = --tag=FC
 
 # Additional files to clean
-CLEANFILES += *.mod *.gcno
+CLEANFILES += *.mod *.gcno *.gcda
 
 # License updates
 include $(top_srcdir)/license.am

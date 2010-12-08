@@ -65,7 +65,7 @@ module_DATA    = esio.mod
 
 # Extra things to clean up
 clean-local:
-	rm -f *.mod *.gcno
+	rm -f *.mod *.gcno *.gcna
 
 # License updates
 include $(top_srcdir)/license.am
