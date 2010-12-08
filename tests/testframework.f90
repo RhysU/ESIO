@@ -54,9 +54,9 @@ contains
     call MPI_Init (ierr)
     if (ierr /= MPI_SUCCESS) call abort()
     call MPI_Comm_size (MPI_COMM_WORLD, world_size, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
     call MPI_Comm_rank (MPI_COMM_WORLD, world_rank, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
 
 !   Initialize a rank-dependent output unit for progress messages
     if (world_rank == 0) then
@@ -71,12 +71,12 @@ contains
     call get_environment_variable("ESIO_TEST_OUTPUT_DIR", output_dir)
     if (world_rank == 0) then
       if (.not. f_tempnam(output_dir, "etst", filename)) then
-        call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+        call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
       end if
     end if
     call MPI_Bcast (filename, len(filename), MPI_CHARACTER,  &
                     0, MPI_COMM_WORLD, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort(MPI_COMM_WORLD, 1, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
 
 !   Initialize an ESIO handle against MPI_COMM_WORLD
     call esio_handle_initialize (h, MPI_COMM_WORLD)
@@ -87,10 +87,23 @@ contains
 
   subroutine testframework_teardown ()
 
+    logical :: file_exists
+
+!   Finalize the ESIO handle
     call esio_handle_finalize (h)
+
+!   Close rank-dependent output unit
     if (world_rank /= 0) then
       close (7)
     end if
+
+!   Attempt to delete the named temporary file, if it exists
+    if (world_rank == 0) then
+      inquire (file=trim(filename), exist=file_exists)
+      if (file_exists) ierr = unlink(trim(filename))
+    end if
+
+!   Finalize MPI
     call MPI_Finalize (ierr)
     if (ierr /= MPI_SUCCESS) call abort()
 
