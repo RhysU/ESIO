@@ -22,7 +22,8 @@ fi
 set -e # Fail on first error
 for cmd in "mpiexec -np 1 ./attribute_int   -n  6" \
            "mpiexec -np 2 ./attribute_int   -n 25" \
-           "mpiexec -np 1 ./attribute_int_f      " # FORTRAN
+           "mpiexec -np 1 ./attribute_int_f      " \
+           "mpiexec -np 2 ./attribute_int_f      "
 do
     echo $cmd
     $cmd

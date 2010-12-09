@@ -103,22 +103,29 @@ contains
                     0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
 
-!   Create an ndims-dimensional process topology on cart_comm
-    dims(:) = 0
-    call MPI_Dims_create (world_size, ndims, dims, ierr)
-    if (verbose) then
-      write (output, *) "Test topology is [", dims, "] on ", &
-                        world_size, " ranks"
+!   Create an ndims-dimensional process topology on cart_comm when ndims > 0
+!   Otherwise duplicate MPI_COMM_WORLD details into cart_comm, cart_rank
+    if (ndims > 0) then
+        dims(:) = 0
+        call MPI_Dims_create (world_size, ndims, dims, ierr)
+        if (verbose) then
+          write (output, *) "Test topology is [", dims, "] on ", &
+                            world_size, " ranks"
+        end if
+        if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+        call MPI_Cart_create (MPI_COMM_WORLD, ndims, dims, .false., .true., &
+                              cart_comm, ierr)
+        if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    else
+        call MPI_Comm_dup (MPI_COMM_WORLD, cart_comm, ierr)
+        if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
     end if
-    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
-    call MPI_Cart_create (MPI_COMM_WORLD, ndims, dims, .false., .true., &
-                          cart_comm, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
     CALL MPI_Comm_rank (cart_comm, cart_rank, ierr)
     if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
-
-    CALL MPI_Cart_coords (cart_comm, cart_rank, ndims, coords, ierr)
-    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    if (ndims > 0) then
+        CALL MPI_Cart_coords (cart_comm, cart_rank, ndims, coords, ierr)
+        if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    end if
 
 !   Initialize an ESIO handle against the new communicator
     call esio_handle_initialize (h, cart_comm, ierr)

@@ -32,7 +32,8 @@ do
         done
     done
 done
-for cmd in "mpiexec -np 1 ./plane_int_f" # FORTRAN
+for cmd in "mpiexec -np 1 ./plane_int_f" \
+           "mpiexec -np 2 ./plane_int_f"
 do
     echo $cmd
     $cmd

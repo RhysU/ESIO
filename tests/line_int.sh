@@ -28,7 +28,8 @@ do
         $cmd $auxstride
     done
 done
-for cmd in "mpiexec -np 1 ./line_int_f" # FORTRAN
+for cmd in "mpiexec -np 1 ./line_int_f" \
+           "mpiexec -np 2 ./line_int_f"
 do
     echo $cmd
     $cmd

@@ -15,8 +15,10 @@ if ! which mpiexec > /dev/null ; then
 fi
 
 set -e # Fail on first error
-for cmd in "mpiexec -np 1 ./string" \
-           "mpiexec -np 2 ./string"
+for cmd in "mpiexec -np 1 ./string  " \
+           "mpiexec -np 2 ./string  " \
+           "mpiexec -np 1 ./string_f" \
+           "mpiexec -np 2 ./string_f"
 do
     echo $cmd
     $cmd
