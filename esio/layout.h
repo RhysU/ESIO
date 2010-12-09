@@ -70,6 +70,7 @@ int esio_field_layout ## NUM ##_field_reader(              \
 
 ESIO_LAYOUT_DECLARATIONS(0)
 ESIO_LAYOUT_DECLARATIONS(1)
+ESIO_LAYOUT_DECLARATIONS(2)
 
 int esio_plane_writer(
         hid_t dset_id, const void *plane,

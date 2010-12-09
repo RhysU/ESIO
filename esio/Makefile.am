@@ -45,6 +45,7 @@ noinst_HEADERS += metadata.h
 # Templated implementation files necessary for building the library
 EXTRA_DIST += layout0.c
 EXTRA_DIST += layout1.c
+EXTRA_DIST += layout2.c
 EXTRA_DIST += line.c
 EXTRA_DIST += plane.c
 EXTRA_DIST += attribute.f90

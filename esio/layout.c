@@ -124,3 +124,31 @@ hid_t esio_field_layout1_filespace_creator(int cglobal,
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
+
+// ***********************************************************************
+// LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2
+// ***********************************************************************
+
+hid_t esio_field_layout2_filespace_creator(int cglobal,
+                                           int bglobal,
+                                           int aglobal)
+{
+    const hsize_t dims[3] = { cglobal, bglobal, aglobal };
+    return H5Screate_simple(3, dims, NULL);
+}
+
+#define METHODNAME esio_field_layout2_field_writer
+#define OPFUNC     H5Dwrite
+#define QUALIFIER  const
+#include "layout2.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER
+
+#define METHODNAME esio_field_layout2_field_reader
+#define OPFUNC     H5Dread
+#define QUALIFIER  /* mutable */
+#include "layout2.c"
+#undef METHODNAME
+#undef OPFUNC
+#undef QUALIFIER

@@ -223,6 +223,31 @@ layout1_int_SOURCES   = layout1_int.c
 layout1_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
+## LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 LAYOUT 2 ##
+#############################################################################
+
+## Layout 2 double precision tests in C
+TESTS                  += layout2_double.sh    # NB Wrapper script
+EXTRA_DIST             += layout2_double.sh    # NB Wrapper script
+check_PROGRAMS         += layout2_double
+layout2_double_SOURCES  = layout2_double.c
+layout2_double_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## Layout 2 single precision tests in C
+TESTS                  += layout2_float.sh     # NB Wrapper script
+EXTRA_DIST             += layout2_float.sh     # NB Wrapper script
+check_PROGRAMS         += layout2_float
+layout2_float_SOURCES   = layout2_float.c
+layout2_float_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+## Layout 2 integer tests in C
+TESTS                += layout2_int.sh         # NB Wrapper script
+EXTRA_DIST           += layout2_int.sh         # NB Wrapper script
+check_PROGRAMS       += layout2_int
+layout2_int_SOURCES   = layout2_int.c
+layout2_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+#############################################################################
 ### MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS ###
 #############################################################################
 
