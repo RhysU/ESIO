@@ -303,9 +303,9 @@ FCT_BGN()
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
-                        const REAL value = 11*((k + cstart) + 13)
-                                         +  5*((j + bstart) +  7)
-                                         +  2*((i + astart) +  3);
+                        const REAL value = (REAL) 11*((k + cstart) + 13)
+                                               +  5*((j + bstart) +  7)
+                                               +  2*((i + astart) +  3);
                         field[k*cstride + j*bstride + i*astride] = value;
                     }
                 }
@@ -360,7 +360,8 @@ FCT_BGN()
                 for (int k = 0; k < cglobal; ++k) {
                     for (int j = 0; j < bglobal; ++j) {
                         for (int i = 0; i < aglobal; ++i) {
-                            const REAL expected = 2*(i+3)+5*(j+7)+11*(k+13);
+                            const REAL expected
+                                = (REAL) 2*(i+3)+5*(j+7)+11*(k+13);
                             const REAL value    = *p_field++;
                             fct_chk_eq_dbl(value, expected);
                         }
@@ -394,9 +395,9 @@ FCT_BGN()
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
-                        const REAL expected = 11*((k + cstart) + 13)
-                                            +  5*((j + bstart) +  7)
-                                            +  2*((i + astart) +  3);
+                        const REAL expected = (REAL) 11*((k + cstart) + 13)
+                                                   +  5*((j + bstart) +  7)
+                                                   +  2*((i + astart) +  3);
                         const REAL value
                                 = field[k*cstride + j*bstride + i*astride];
                         fct_chk_eq_dbl(value, expected);
@@ -436,10 +437,10 @@ FCT_BGN()
                     for (int i = 0; i < alocal; ++i) {
                         for (int h = 0; h < ncomponents; ++h) {
                             vfield[k*cstride + j*bstride + i*astride + h]
-                                    = 11*((k + cstart) + 13)
-                                    +  5*((j + bstart) +  7)
-                                    +  2*((i + astart) +  3)
-                                    - h;
+                                    = (REAL) 11*((k + cstart) + 13)
+                                           +  5*((j + bstart) +  7)
+                                           +  2*((i + astart) +  3)
+                                           - h;
                         }
                     }
                 }
@@ -546,10 +547,10 @@ FCT_BGN()
                 for (int j = 0; j < blocal; ++j) {
                     for (int i = 0; i < alocal; ++i) {
                         for (int h = 0; h < ncomponents; ++h) {
-                            const REAL expected = 11*((k + cstart) + 13)
-                                                +  5*((j + bstart) +  7)
-                                                +  2*((i + astart) +  3)
-                                                - h;
+                            const REAL expected = (REAL) 11*((k + cstart) + 13)
+                                                       +  5*((j + bstart) +  7)
+                                                       +  2*((i + astart) +  3)
+                                                       - h;
                             const REAL value = vfield[
                                     k*cstride + j*bstride + i*astride + h];
                             fct_chk_eq_dbl(value, expected);

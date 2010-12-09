@@ -217,7 +217,7 @@ FCT_BGN()
 
             // Populate local line with test data
             for (int i = 0; i < alocal; ++i) {
-                const REAL value = 2*((i + astart) +  3);
+                const REAL value = (REAL) 2*((i + astart) +  3);
                 line[i*astride] = value;
             }
 
@@ -258,7 +258,7 @@ FCT_BGN()
 
                 REAL *p_line = line;
                 for (int i = 0; i < aglobal; ++i) {
-                    const REAL expected = 2*(i+3);
+                    const REAL expected = (REAL) 2*(i+3);
                     const REAL value    = *p_line++;
                     fct_chk_eq_dbl(value, expected);
                 }
@@ -284,7 +284,7 @@ FCT_BGN()
                                    aglobal, astart, alocal, 0));
             }
             for (int i = 0; i < alocal; ++i) {
-                const REAL expected =  2*((i + astart) +  3);
+                const REAL expected = (REAL) 2*((i + astart) +  3);
                 const REAL value = line[i*astride];
                 fct_chk_eq_dbl(value, expected);
             }
@@ -313,7 +313,7 @@ FCT_BGN()
             // Populate local vline with test data
             for (int i = 0; i < alocal; ++i) {
                 for (int h = 0; h < ncomponents; ++h) {
-                    vline[i*astride + h] = 2*((i + astart) +  3) - h;
+                    vline[i*astride + h] = (REAL) 2*((i + astart) +  3) - h;
                 }
             }
 
@@ -397,7 +397,7 @@ FCT_BGN()
             }
             for (int i = 0; i < alocal; ++i) {
                 for (int h = 0; h < ncomponents; ++h) {
-                    const REAL expected = 2*((i + astart) +  3) - h;
+                    const REAL expected = (REAL) 2*((i + astart) +  3) - h;
                     const REAL value = vline[i*astride + h];
                     fct_chk_eq_dbl(value, expected);
                 }

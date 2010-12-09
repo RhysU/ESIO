@@ -229,7 +229,7 @@ FCT_BGN()
 
             // Populate test data
             for (int i = 0; i < ncomponents; ++i) {
-                value[i] = i + 5678;
+                value[i] = (TYPE) i + 5678;
             }
 
             // Write attribute to file

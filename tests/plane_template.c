@@ -270,8 +270,8 @@ FCT_BGN()
             // Populate local plane with test data
             for (int j = 0; j < blocal; ++j) {
                 for (int i = 0; i < alocal; ++i) {
-                    const REAL value =  5*((j + bstart) +  7)
-                                     +  2*((i + astart) +  3);
+                    const REAL value =  (REAL) 5*((j + bstart) +  7)
+                                            +  2*((i + astart) +  3);
                     plane[j*bstride + i*astride] = value;
                 }
             }
@@ -319,7 +319,7 @@ FCT_BGN()
                 REAL *p_plane = plane;
                 for (int j = 0; j < bglobal; ++j) {
                     for (int i = 0; i < aglobal; ++i) {
-                        const REAL expected = 2*(i+3)+5*(j+7);
+                        const REAL expected = (REAL) 2*(i+3)+5*(j+7);
                         const REAL value    = *p_plane++;
                         fct_chk_eq_dbl(value, expected);
                     }
@@ -349,8 +349,8 @@ FCT_BGN()
             }
             for (int j = 0; j < blocal; ++j) {
                 for (int i = 0; i < alocal; ++i) {
-                    const REAL expected =  5*((j + bstart) +  7)
-                                        +  2*((i + astart) +  3);
+                    const REAL expected =  (REAL) 5*((j + bstart) +  7)
+                                               +  2*((i + astart) +  3);
                     const REAL value = plane[j*bstride + i*astride];
                     fct_chk_eq_dbl(value, expected);
                 }
@@ -383,9 +383,9 @@ FCT_BGN()
                 for (int i = 0; i < alocal; ++i) {
                     for (int h = 0; h < ncomponents; ++h) {
                         vplane[j*bstride + i*astride + h]
-                                =  5*((j + bstart) +  7)
-                                +  2*((i + astart) +  3)
-                                - h;
+                                =  (REAL) 5*((j + bstart) +  7)
+                                       +  2*((i + astart) +  3)
+                                       - h;
                     }
                 }
             }
@@ -482,9 +482,9 @@ FCT_BGN()
             for (int j = 0; j < blocal; ++j) {
                 for (int i = 0; i < alocal; ++i) {
                     for (int h = 0; h < ncomponents; ++h) {
-                        const REAL expected =  5*((j + bstart) +  7)
-                                            +  2*((i + astart) +  3)
-                                            - h;
+                        const REAL expected =  (REAL) 5*((j + bstart) +  7)
+                                                   +  2*((i + astart) +  3)
+                                                   - h;
                         const REAL value = vplane[j*bstride + i*astride + h];
                         fct_chk_eq_dbl(value, expected);
                     }
