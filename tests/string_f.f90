@@ -27,7 +27,6 @@
 
 program string_f
 
-    use mpi
     use esio
     use testframework
 

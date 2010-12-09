@@ -27,7 +27,6 @@
 
 program attribute_int_f
 
-    use mpi
     use esio
     use testframework
 
@@ -74,9 +73,7 @@ program attribute_int_f
     call esio_attribute_readv_integer(h, "name_vector", buffer, &
                                       size(value_vector), ierr)
     ASSERT(ierr == 0)
-    do i = 1, size(value_vector)
-        ASSERT(buffer(i) == value_vector(i))
-    end do
+    ASSERT(all(buffer == value_vector))
 
 !   Close the file
     call esio_file_close(h, ierr)

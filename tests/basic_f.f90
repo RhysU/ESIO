@@ -27,7 +27,6 @@
 
 program basic_f
 
-    use mpi
     use esio
     use testframework
 

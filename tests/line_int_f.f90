@@ -27,27 +27,29 @@
 
 program line_int_f
 
-    use mpi
     use esio
     use testframework
 
     implicit none
 
-    integer :: i, j
-    integer :: value_scalar(3),   buffer_scalar(3)
-    integer :: value_vector(2,3), buffer_vector(2,3)
-    integer :: aglobal, astart, alocal, astride, ncomponents
+    integer                   :: value_scalar(3),   buffer_scalar(3)
+    integer                   :: value_vector(2,3), buffer_vector(2,3)
+    integer, parameter        :: ncomponents = size(value_vector, 1)
+    integer                   :: i, j
 
-    call testframework_setup()
+    call testframework_setup (1)  ! One-dimensional Cartesian topology
+
+!   Prepare heterogeneous test data distribution across the topology
+    do j = 1, ndims
+        global(j) = size(value_scalar,j) * dims(j)
+        start(j)  = size(value_scalar,j) * coords(j) + 1
+        local(j)  = size(value_scalar,j)
+        stride(j) = 0
+    end do
 
 !   Populate test data based on process rank
-    aglobal     = size(value_scalar) * world_size
-    astart      = size(value_scalar) * world_rank + 1
-    alocal      = size(value_scalar)
-    astride     = 1
-    ncomponents = size(value_vector,1)
     do j = lbound(value_scalar,1), ubound(value_scalar,1)
-       value_scalar(j) = j + astart - 1
+       value_scalar(j) = start(1) + j - 1
     end do
     do j = lbound(value_vector,2), ubound(value_vector,2)
         do i = lbound(value_vector,1), ubound(value_vector,1)
@@ -60,15 +62,15 @@ program line_int_f
     ASSERT(ierr == 0)
 
 !   Write a scalar-valued line
-    call esio_line_write_integer(h, "name_scalar", value_scalar,   &
-                                 aglobal, astart, alocal, astride, &
+    call esio_line_write_integer(h, "name_scalar", value_scalar,           &
+                                 global(1), start(1), local(1), stride(1), &
                                  ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued line
-    call esio_line_writev_integer(h, "name_vector", value_vector, &
-                                  ncomponents,                    &
-                                  aglobal, astart, alocal, 0,     &
+    call esio_line_writev_integer(h, "name_vector", value_vector,           &
+                                  ncomponents,                              &
+                                  global(1), start(1), local(1), stride(1), &
                                   ierr)
     ASSERT(ierr == 0)
 
@@ -83,13 +85,13 @@ program line_int_f
 !   Check the scalar-valued line's size and data
     call esio_line_size(h, "name_scalar", i, ierr)
     ASSERT(ierr == 0)
-    ASSERT(i == size(value_scalar))
+    ASSERT(i == global(1))
     call esio_line_sizev(h, "name_scalar", i, j, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == 1)
-    ASSERT(j == size(value_scalar))
-    call esio_line_read_integer(h, "name_scalar", buffer_scalar,  &
-                                aglobal, astart, alocal, astride, &
+    ASSERT(j == global(1))
+    call esio_line_read_integer(h, "name_scalar", buffer_scalar,          &
+                                global(1), start(1), local(1), stride(1), &
                                 ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
@@ -98,10 +100,10 @@ program line_int_f
     call esio_line_sizev(h, "name_vector", i, j, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == ncomponents)
-    ASSERT(j == aglobal)
-    call esio_line_readv_integer(h, "name_vector", buffer_vector,  &
-                                 ncomponents,                      &
-                                 aglobal, astart, alocal, 0,       &
+    ASSERT(j == global(1))
+    call esio_line_readv_integer(h, "name_vector", buffer_vector,          &
+                                 ncomponents,                              &
+                                 global(1), start(1), local(1), stride(1), &
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))

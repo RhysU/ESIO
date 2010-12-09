@@ -37,7 +37,11 @@ module testframework
 
   integer,            public :: ierr, world_size, world_rank, output
   character(len=255), public :: input_dir, output_dir, filename
+  integer,            public :: ndims, cart_comm, cart_rank
   type(esio_handle),  public :: h
+
+  integer, public, allocatable, dimension(:) :: dims, coords
+  integer, public, allocatable, dimension(:) :: global, start, local, stride
 
   logical :: verbose = .false.
 
@@ -47,9 +51,20 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine testframework_setup ()
+  subroutine testframework_setup (dimensionality)
 
     use, intrinsic :: iso_fortran_env, only: output_unit
+
+    integer, intent(in), optional :: dimensionality
+
+!   Determine process topology dimensionality and allocate storage
+    if (present(dimensionality)) then
+      ndims = dimensionality
+    else
+      ndims = 0
+    end if
+    allocate ( dims(ndims), coords(ndims),                              &
+               global(ndims), start(ndims), local(ndims), stride(ndims) )
 
 !   Initialize MPI
     call MPI_Init (ierr)
@@ -88,8 +103,26 @@ contains
                     0, MPI_COMM_WORLD, ierr)
     if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
 
-!   Initialize an ESIO handle against MPI_COMM_WORLD
-    call esio_handle_initialize (h, MPI_COMM_WORLD)
+!   Create an ndims-dimensional process topology on cart_comm
+    dims(:) = 0
+    call MPI_Dims_create (world_size, ndims, dims, ierr)
+    if (verbose) then
+      write (output, *) "Test topology is [", dims, "] on ", &
+                        world_size, " ranks"
+    end if
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    call MPI_Cart_create (MPI_COMM_WORLD, ndims, dims, .false., .true., &
+                          cart_comm, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    CALL MPI_Comm_rank (cart_comm, cart_rank, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+
+    CALL MPI_Cart_coords (cart_comm, cart_rank, ndims, coords, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+
+!   Initialize an ESIO handle against the new communicator
+    call esio_handle_initialize (h, cart_comm, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
 
   end subroutine testframework_setup
 
@@ -100,7 +133,15 @@ contains
     logical :: file_exists
 
 !   Finalize the ESIO handle
-    call esio_handle_finalize (h)
+    call esio_handle_finalize (h, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+
+!   Finalize the communicator
+    call MPI_Comm_free (cart_comm, ierr)
+    if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+
+!   Deallocate working storage for process topology
+    deallocate ( dims, coords, global, start, local, stride )
 
 !   Close rank-dependent output unit
     if (world_rank /= 0) then
