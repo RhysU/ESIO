@@ -37,9 +37,9 @@
 !!     of the C API's functions.
 !!   </li>
 !!   <li>
-!!     The Fortran API uses "<tt>integer</tt>", "<tt>single</tt>", and
-!!     "<tt>double</tt>" to refer to the types the C API calls "<tt>int</tt>",
-!!     "<tt>float</tt>" and "<tt>double</tt>".
+!!     The Fortran API uses <tt>integer</tt>, <tt>single</tt>, and
+!!     <tt>double</tt> to refer to the types the C API calls <tt>int</tt>,
+!!     <tt>float</tt> and <tt>double</tt>.
 !!   </li>
 !!   <li>
 !!     The \c intent(in) and \c intent(out)
