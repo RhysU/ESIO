@@ -50,8 +50,10 @@ program basic_f
     inquire (file=trim(filename), exist=file_exists)
     ASSERT(file_exists)
 
-!   Open and close an old file with overwrite enabled
+!   Open, flush, and close an old file with overwrite enabled
     call esio_file_create(h, filename, .true., ierr)
+    ASSERT(ierr == 0)
+    call esio_file_flush(h, ierr)
     ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
