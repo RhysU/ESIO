@@ -66,9 +66,10 @@ program line_int_f
     ASSERT(ierr == 0)
 
 !   Write a vector-valued line
-    call esio_line_writev_integer(h, "name_vector", value_vector,   &
-                                  aglobal, astart, alocal, 0,       &
-                                  ncomponents, ierr)
+    call esio_line_writev_integer(h, "name_vector", value_vector, &
+                                  ncomponents,                    &
+                                  aglobal, astart, alocal, 0,     &
+                                  ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
@@ -85,8 +86,8 @@ program line_int_f
     ASSERT(i == size(value_scalar))
     call esio_line_sizev(h, "name_scalar", i, j, ierr)
     ASSERT(ierr == 0)
-    ASSERT(i == size(value_scalar))
-    ASSERT(j == 1)
+    ASSERT(i == 1)
+    ASSERT(j == size(value_scalar))
     call esio_line_read_integer(h, "name_scalar", buffer_scalar,  &
                                 aglobal, astart, alocal, astride, &
                                 ierr)
@@ -96,11 +97,12 @@ program line_int_f
 !   Check the vector-valued line's size and data
     call esio_line_sizev(h, "name_vector", i, j, ierr)
     ASSERT(ierr == 0)
-    ASSERT(i == aglobal)
-    ASSERT(j == ncomponents)
+    ASSERT(i == ncomponents)
+    ASSERT(j == aglobal)
     call esio_line_readv_integer(h, "name_vector", buffer_vector,  &
+                                 ncomponents,                      &
                                  aglobal, astart, alocal, 0,       &
-                                 ncomponents, ierr)
+                                 ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))
 

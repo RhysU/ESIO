@@ -29,20 +29,20 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
-  type(esio_handle), intent(in) :: h
+  type(esio_handle), intent(in) :: handle
   character(len=*),  intent(in) :: name
   CTYPE,             FINTENT    :: plane(*)
-  integer,           intent(in) :: aglobal, astart, alocal, astride
-  integer,           intent(in) :: bglobal, bstart, blocal, bstride
 #ifdef VECTORVALUED
   integer,           intent(in) :: ncomponents
 #endif
+  integer,           intent(in) :: aglobal, astart, alocal, astride
+  integer,           intent(in) :: bglobal, bstart, blocal, bstride
   integer,           intent(out), optional :: ierr
   integer                                  :: stat
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (h, name, plane,                   &
+    function impl (handle, name, plane,              &
                    bglobal, bstart, blocal, bstride, &
                    aglobal, astart, alocal, astride  &
 #ifdef VECTORVALUED
@@ -51,7 +51,7 @@
                    ) bind (C, name=CBINDNAME)
       import
       integer(c_int)                                  :: impl
-      type(esio_handle),            intent(in), value :: h
+      type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: plane(*)
       integer(c_int),               intent(in), value :: bglobal, &
@@ -71,7 +71,7 @@
 
 ! Note conversion from one- to zero-based starting offsets
 ! Note reordering Fortran's (a, b) to C's (b, a)
-  stat = impl(h, esio_f_c_string(name), plane,      &
+  stat = impl(handle, esio_f_c_string(name), plane, &
               bglobal, bstart - 1, blocal, bstride, &
               aglobal, astart - 1, alocal, astride  &
 #ifdef VECTORVALUED

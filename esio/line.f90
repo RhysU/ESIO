@@ -29,19 +29,19 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
-  type(esio_handle), intent(in) :: h
+  type(esio_handle), intent(in) :: handle
   character(len=*),  intent(in) :: name
   CTYPE,             FINTENT    :: line(*)
-  integer,           intent(in) :: aglobal, astart, alocal, astride
 #ifdef VECTORVALUED
   integer,           intent(in) :: ncomponents
 #endif
+  integer,           intent(in) :: aglobal, astart, alocal, astride
   integer,           intent(out), optional :: ierr
   integer                                  :: stat
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (h, name, line,                    &
+    function impl (handle, name, line,               &
                    aglobal, astart, alocal, astride  &
 #ifdef VECTORVALUED
                    ,ncomponents                      &
@@ -49,7 +49,7 @@
                    ) bind (C, name=CBINDNAME)
       import
       integer(c_int)                                  :: impl
-      type(esio_handle),            intent(in), value :: h
+      type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: line(*)
       integer(c_int),               intent(in), value :: aglobal, &
@@ -64,7 +64,7 @@
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 ! Note conversion from one- to zero-based starting offsets
-  stat = impl(h, esio_f_c_string(name), line,       &
+  stat = impl(handle, esio_f_c_string(name), line,  &
               aglobal, astart - 1, alocal, astride  &
 #ifdef VECTORVALUED
               ,ncomponents                          &

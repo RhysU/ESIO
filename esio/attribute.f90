@@ -29,7 +29,7 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
-  type(esio_handle), intent(in) :: h
+  type(esio_handle), intent(in) :: handle
   character(len=*),  intent(in) :: name
 #ifndef VECTORVALUED
   CTYPE,             FINTENT    :: value
@@ -42,14 +42,14 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (h, name, value                    &
+    function impl (handle, name, value               &
 #ifdef VECTORVALUED
                    ,ncomponents                      &
 #endif
                    ) bind (C, name=CBINDNAME)
       import
       integer(c_int)                                  :: impl
-      type(esio_handle),            intent(in), value :: h
+      type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
 #ifndef VECTORVALUED
       CTYPE,                        FINTENT           :: value
@@ -61,7 +61,7 @@
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = impl(h, esio_f_c_string(name), value       &
+  stat = impl(handle, esio_f_c_string(name), value  &
 #ifdef VECTORVALUED
               ,ncomponents                          &
 #endif
