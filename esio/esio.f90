@@ -42,11 +42,12 @@
 !!     <tt>float</tt> and <tt>double</tt>.
 !!   </li>
 !!   <li>
-!!     The \c intent(in) and \c intent(out)
-!!     semantics of each call are identical to the C version everywhere
-!!     with the exception of esio_handle_initialize(), esio_string_get(), and
-!!     esio_field_layout_get().  These three routines have an extra
-!!     \c intent(out) parameter in Fortran.
+!!     The \c intent(in) and \c intent(out) semantics of each call
+!!     are identical to the C version everywhere with the exception
+!!     of esio::esio_handle_initialize(), esio::esio_string_get(),
+!!     and esio::esio_field_layout_get().  These three routines have an
+!!     extra \c intent(out) parameter in Fortran.
+!!
 !!   </li>
 !!   <li>
 !!     Logical-like \c int arguments within the C API, for example
