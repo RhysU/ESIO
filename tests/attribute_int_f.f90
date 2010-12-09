@@ -39,26 +39,36 @@ program attribute_int_f
 
     call testframework_setup()
 
-!   Create a file, write values, and close it
+!   Create a file
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
+
+!   Write a scalar-valued attribute
     call esio_attribute_write_integer(h, "name_scalar", value_scalar, ierr)
     ASSERT(ierr == 0)
+
+!   Write a vector-valued attribute
     call esio_attribute_writev_integer(h, "name_vector", value_vector, &
                                        size(value_vector), ierr)
     ASSERT(ierr == 0)
+
+!   Close the file
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
 
-!   Re-open the file read-only, check sizes and values, and close it
+!   Re-open the same file read-only
     call esio_file_open(h, filename, .false., ierr)
     ASSERT(ierr == 0)
+
+!   Check the scalar-valued attribute's size and data
     call esio_attribute_sizev(h, "name_scalar", buffer(1), ierr)
+    ASSERT(ierr == 0)
     ASSERT(buffer(1) == 1)
     call esio_attribute_read_integer(h, "name_scalar", buffer(1), ierr)
     ASSERT(ierr == 0)
     ASSERT(buffer(1) == 123)
 
+!   Check the vector-valued attribute's size and data
     call esio_attribute_sizev(h, "name_vector", buffer(1), ierr)
     ASSERT(buffer(1) == size(value_vector))
     call esio_attribute_readv_integer(h, "name_vector", buffer, &
@@ -67,6 +77,8 @@ program attribute_int_f
     do i = 1, size(value_vector)
         ASSERT(buffer(i) == value_vector(i))
     end do
+
+!   Close the file
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
 
