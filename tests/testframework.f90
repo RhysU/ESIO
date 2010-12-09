@@ -129,8 +129,11 @@ contains
     character(len=*), intent(in) :: sourcefile
     integer,          intent(in) :: line
 
+! Really?!  http://software.intel.com/en-us/forums/showthread.php?t=66887
+#ifndef __INTEL_COMPILER
     flush (output_unit)
     flush (error_unit)
+#endif
     if (verbose .and. condition) then
       write (output_unit, *) "Assertion passed at ", sourcefile, ":", line, &
                             " on rank ", world_rank
@@ -140,8 +143,10 @@ contains
       call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
       stop
     end if
+#ifndef __INTEL_COMPILER
     flush (error_unit)
     flush (output_unit)
+#endif
 
   end subroutine testframework_assert
 
