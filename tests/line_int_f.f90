@@ -32,29 +32,27 @@ program line_int_f
 
     implicit none
 
-    integer                   :: value_scalar(3),   buffer_scalar(3)
-    integer                   :: value_vector(2,3), buffer_vector(2,3)
-    integer, parameter        :: ncomponents = size(value_vector, 1)
-    integer                   :: i, j
+    integer            :: value_scalar(3),   buffer_scalar(3)
+    integer            :: value_vector(2,3), buffer_vector(2,3)
+    integer, parameter :: ncomponents = size(value_vector, 1)
+    integer            :: i, j
 
     call testframework_setup (1)  ! One-dimensional Cartesian topology
 
-!   Prepare heterogeneous test data distribution across the topology
-    do j = 1, ndims
-        global(j) = size(value_scalar,j) * dims(j)
-        start(j)  = size(value_scalar,j) * coords(j) + 1
-        local(j)  = size(value_scalar,j)
-        stride(j) = 0
+!   Prepare homogeneous test data distribution across the topology
+    do i = 1, ndims
+        global(i) = size(value_scalar,i) * dims(i)
+        start(i)  = size(value_scalar,i) * coords(i) + 1
+        local(i)  = size(value_scalar,i)
+        stride(i) = 0
     end do
 
 !   Populate test data based on process rank
     do j = lbound(value_scalar,1), ubound(value_scalar,1)
        value_scalar(j) = start(1) + j - 1
     end do
-    do j = lbound(value_vector,2), ubound(value_vector,2)
-        do i = lbound(value_vector,1), ubound(value_vector,1)
-            value_vector(i,j) = i*value_scalar(j)
-        end do
+    do i = lbound(value_vector,1), ubound(value_vector,1)
+        value_vector(i,:) = i*value_scalar(:)
     end do
 
 !   Create a file
@@ -83,9 +81,9 @@ program line_int_f
     ASSERT(ierr == 0)
 
 !   Check the scalar-valued line's size and data
-    call esio_line_size(h, "name_scalar", i, ierr)
+    call esio_line_size(h, "name_scalar", j, ierr)
     ASSERT(ierr == 0)
-    ASSERT(i == global(1))
+    ASSERT(j == global(1))
     call esio_line_sizev(h, "name_scalar", i, j, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == 1)
