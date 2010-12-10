@@ -46,8 +46,11 @@ available.
 
 <h2> Installation </h2>
 
-After the build is complete, issue a <tt>make install</tt> to install
-the library.  The installation will consist of two top-level
-directories housing the library and include files.
+After the build is complete, issue
+
+\code > make \endcode
+
+to install the library.  The installation will consist of two top-level
+directories housing ESIO's library and include files.
 
 */

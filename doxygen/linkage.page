@@ -1,39 +1,118 @@
 /*! \page linkage Linking applications
 
-<b>FIXME: Update linkage information</b>
-<b>FIXME: Add pkg-config information</b>
+<h2>Compiling and linking a C/C++ application against ESIO</h2>
 
-To link an external C/C++ or Fortran application with the library, the
-\c include directory must be added to the compilers include search
-path in order to access the grvy.h header file (or for Fortran, the \c
-lib directory should be added to access the pre-compiled
-grvy F90 module).  The \c lib directory should also be added
-to the linker search path along with a request to link against the
-libGRVY library.  Several example link steps are provided below.  These
-examples assume that the libGRVY library has been successfully built and
-installed previously in the users's ~/bin/grvy directory:
+To compile and link a C or C++ application against your ESIO installation, the
+installation's \c include directory and \c lib directory must be added to your
+C/C++ compiler's include and library search paths, respectively.  You will need
+to supply flags to link against ESIO <i>and</i> HDF5's basic and high-level
+libraries.  Note that you will either need to use your MPI implementation's
+C/C++ compiler wrapper script, denoted here by <tt>$(MPICC)</tt>, or you will
+additionally need to provide MPI-related flags within the sample commands
+below.
 
-<h3>C/C++ Example</h3>
+Assuming you installed HDF5 under $HDF5HOME and also assuming at ESIO
+configuration time you specified <tt>--prefix=$HOME</tt> to install ESIO under
+your home directory, compiling and linking an MPI application consisting of a
+single source file named <tt>app.c</tt> might look as follows:
 
-\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib -lgrvy \endcode
+\code > $(MPICC) -I$HOME/include app.c -L$HOME/lib -lesio -L$HDF5HOME -lhdf5_hl -lhdf5 -lz -lm \endcode
 
-<h3>Fortran Example</h3>
+This is error prone as you must supply the same HDF5 installation directories
+used at ESIO configuration time.  Continuing the example, if you set your
+<tt>PKG_CONFIG_PATH</tt> environment variable to contain
+<tt>$HOME/lib/pkgconfig</tt> you can use <a
+href="http://pkg-config.freedesktop.org/wiki/"><tt>pkg-config</tt></a> to
+lookup the relevant linking information automatically:
 
-\code > $(FC) -I$HOME/bin/grvy/lib app.f90 -L$HOME/bin/grvy/lib -lgrvy \endcode
+\code > $(MPICC) `pkg-config --cflags esio-hdf5` app.c `pkg-config --libs esio-hdf5` \endcode
 
-To embed the dynamic library search path for the libGRVY library
-directly into the application executable, use an additional linker
-option as follows:
+Finally, if you are using HDF5's parallel compiler wrapper script <tt>h5pcc</tt>
+the above two examples no longer need to include many HDF5-related specifics:
 
-<h3>C/C++ Example</h3>
+\code > h5pcc -I$HOME/include app.c -L$HOME/lib -lesio \endcode
 
-\code > $(CC) -I$HOME/bin/grvy/include app.c -L$HOME/bin/grvy/lib \
-         -Wl,-rpath,$HOME/bin/grvy/lib -lgrvy \endcode
+\code > h5pcc `pkg-config --cflags esio` app.c `pkg-config --libs esio` \endcode
 
+Using pkg-config will avoid many easy-to-make mistakes.  It is highly
+recommended you use pkg-config with ESIO where possible.
 
-<b>Important Note:</b> F90 module file formats are not consistent
-across multiple compilers. Therefore, a Fortran application and the libGRVY
-F90 interface \em must be built with the same Fortran compiler family to ensure
+<h2>Compiling and linking a Fortran application against ESIO</h2>
+
+To compile and link a Fortran 90 application against your ESIO installation,
+the installation's \c lib directory must be added to both your Fortran
+compiler's include and library search paths.  In particular, if you do not
+provide \c lib within the search path you will see error messages stating that
+<tt>esio.mod</tt> is missing.  You will need to supply flags to link against
+ESIO <i>and</i> HDF5's basic and high-level Fortran libraries.  Note that you
+will either need to use your MPI implementation's Fortran compiler wrapper
+script, denoted here by <tt>$(MPIFC)</tt>, or you will additionally need to
+provide MPI-related flags within the sample commands below.
+
+Assuming the same installation detailed in the C/C++ examples just above, you
+would compile and link a Fortran MPI application consisting of a single source
+file named <tt>app.f90</tt> as follows:
+
+\code > $(MPIFC) -I$HOME/lib app.f90 -L$HOME/lib -lesiof -L$HDF5HOME -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz -lm \endcode
+
+Using pkg-config simplifies the process considerably:
+
+\code > $(MPIFC) `pkg-config --variable=fflags esio-hdf5` app.f90 `pkg-config --variable=flibs esio-hdf5` \endcode
+
+Again, if you are using HDF5's parallel compiler wrapper script <tt>h5pfc</tt>
+the above two examples become simpler:
+
+\code > h5pfc -I$HOME/lib app.f90 -L$HOME/lib -lesiof \endcode
+
+\code > h5pfc `pkg-config --variable=fflags esio` app.f90 `pkg-config --variable=flibs esio` \endcode
+
+<b>Important Note:</b> F90 module file formats are not consistent across
+multiple compilers. Therefore, a Fortran application and the ESIO F90 interface
+\em must be built with the same Fortran compiler family to ensure
 compatibility.
+
+<h2>Obtaining ESIO configuration information from pkg-config</h2>
+
+ESIO's pkg-config files capture many configuration-time settings so that they
+can be retrieved easily.  For example, the MPI and HDF5 compiler wrapper
+scripts used to build an ESIO installation can be retrieved as follows:
+
+\code
+> pkg-config --variable=mpicc        esio-hdf5
+> pkg-config --variable=hdf5_version esio-hdf5
+> pkg-config --variable=h5pcc        esio-hdf5
+\endcode
+
+These values could be used, for example, in a standalone Makefile.  Provided
+that your PKG_CONFIG_PATH is configured correctly, such a Makefile can
+automatically determine the information necessary to build an ESIO-based
+application.
+
+<h2>Using ESIO with GNU Autoconf/Automake</h2>
+
+Because an ESIO installation provides pkg-config information, using ESIO with
+<a href="http://www.gnu.org/software/autoconf/">Autoconf</a> and <a
+href="http://www.gnu.org/software/automake/">Automake</a> in a C/C++ project is
+straightforward.  The exact details are beyond the scope of this documentation,
+but the process consists of the following steps:
+
+<ol>
+ <li>Use <a href="http://www.gnu.org/software/autoconf-archive/ax_mpi.html">
+     <tt>AX_MPI</tt></a> within your <tt>configure.ac</tt> to determine
+     where your system's MPI compiler wrappers are located.</li>
+ <li>Ensure that automake is using the MPI compiler wrapper by including
+     a statement like <tt>CC=@@MPICC@@</tt> within your Makefile.am.</li>
+ <li>Use the PKG_CHECK_MODULES autoconf macro to look for ESIO's
+     <tt>esio-hdf5</tt> pkg-config information at configure time.
+     Load the information into variables like <tt>ESIO_CFLAGS</tt>
+     and <tt>ESIO_LIBS</tt>.</li>
+ <li>Add <tt>ESIO_CFLAGS</tt> and <tt>ESIO_LIBS</tt> to the appropriate
+     targets within your Makefile.am.</li>
+</ol>
+
+One very good, but not ESIO-specific, write up on using GNU Autoconf/Automake
+with pkg-config is <a
+href="http://www.openismus.com/documents/linux/using_libraries/using_libraries">
+Using C/C++ libraries with Automake and Autoconf</a>.
 
 */
