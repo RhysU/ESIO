@@ -37,7 +37,8 @@ program layout0_int_f
     integer, parameter :: ncomponents = size(value_vector, 1)
     integer            :: i, j, k, l
 
-    call testframework_setup (3)  ! Three-dimensional Cartesian topology
+    ! Three-dimensional Cartesian topology
+    call testframework_setup (__FILE__, 3)
 
 !   Set and retrieve the field layout to sniff test the API
     call esio_field_layout_count(i, ierr)

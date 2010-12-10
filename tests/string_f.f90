@@ -35,7 +35,7 @@ program string_f
     character(len=*), parameter :: value = "testTESTDATAdata"
     character(len=255)          :: buffer
 
-    call testframework_setup()
+    call testframework_setup(__FILE__)
 
 !   Create a file, write a string, and close it
     call esio_file_create(h, filename, .false., ierr)

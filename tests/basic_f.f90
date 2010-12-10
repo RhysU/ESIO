@@ -34,7 +34,7 @@ program basic_f
 
     logical :: file_exists
 
-    call testframework_setup()
+    call testframework_setup(__FILE__)
 
 !   Check that Fortran thinks the right file does not (yet) exist
     inquire (file=trim(filename), exist=file_exists)

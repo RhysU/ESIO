@@ -36,7 +36,7 @@ module testframework
   private        ! Everything default private
 
   integer,            public :: ierr, world_size, world_rank, output
-  character(len=255), public :: input_dir, output_dir, filename
+  character(len=255), public :: input_dir, output_dir, filetemplate, filename
   integer,            public :: ndims, cart_comm, cart_rank
   type(esio_handle),  public :: h
 
@@ -51,11 +51,12 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine testframework_setup (dimensionality)
+  subroutine testframework_setup (testsource, dimensionality)
 
     use, intrinsic :: iso_fortran_env, only: output_unit
 
-    integer, intent(in), optional :: dimensionality
+    character(len=*), intent(in)           :: testsource
+    integer,          intent(in), optional :: dimensionality
 
 !   Determine process topology dimensionality and allocate storage
     if (present(dimensionality)) then
@@ -91,8 +92,13 @@ contains
 !   Initialize a test-specific temporary filename
     call get_environment_variable("ESIO_TEST_INPUT_DIR",  input_dir)
     call get_environment_variable("ESIO_TEST_OUTPUT_DIR", output_dir)
+    if (.not. create_testfiletemplate(output_dir, &
+                                      testsource, &
+                                      filetemplate)) then
+        call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
+    end if
     if (world_rank == 0) then
-      if (.not. f_tempnam(output_dir, "etst", filename)) then
+      if (.not. create_testfilename(filetemplate, filename)) then
         call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
       end if
       if (verbose) then
@@ -200,34 +206,62 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  function f_tempnam (dir, pfx, tempnam) result (success)
+  function create_testfiletemplate(dir, filename, filetemplate)  &
+           result (success)
 
     use, intrinsic :: iso_c_binding, only: c_ptr, c_char
 
     logical                         :: success
     character(len=*), intent(in)    :: dir
-    character(len=*), intent(in)    :: pfx
-    character(len=*), intent(inout) :: tempnam
+    character(len=*), intent(in)    :: filename
+    character(len=*), intent(inout) :: filetemplate
     type(c_ptr)                     :: tmp_p
 
-!   See 'man 3 tempnam' for details on the C API
     interface
-      function impl (dir, pfx) bind (C, name="tempnam")
+      function impl (dir, filename) bind (C, name="create_testfiletemplate")
         import
         type(c_ptr)                              :: impl
         character(len=1,kind=c_char), intent(in) :: dir(*)
-        character(len=1,kind=c_char), intent(in) :: pfx(*)
+        character(len=1,kind=c_char), intent(in) :: filename(*)
       end function impl
     end interface
 
     success = .false.
-    tmp_p = impl(esio_f_c_string(dir), esio_f_c_string(pfx))
-    if (esio_c_f_stringcopy(tmp_p, tempnam)) then
+    tmp_p = impl(esio_f_c_string(dir), esio_f_c_string(filename))
+    if (esio_c_f_stringcopy(tmp_p, filetemplate)) then
       success = .true.
     end if
     call esio_c_free(tmp_p)
 
-  end function f_tempnam
+  end function create_testfiletemplate
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  function create_testfilename(filetemplate, filename) result (success)
+
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_char
+
+    logical                         :: success
+    character(len=*), intent(in)    :: filetemplate
+    character(len=*), intent(inout) :: filename
+    type(c_ptr)                     :: tmp_p
+
+    interface
+      function impl (filetemplate) bind (C, name="create_testfilename")
+        import
+        type(c_ptr)                              :: impl
+        character(len=1,kind=c_char), intent(in) :: filetemplate(*)
+      end function impl
+    end interface
+
+    success = .false.
+    tmp_p = impl(esio_f_c_string(filetemplate))
+    if (esio_c_f_stringcopy(tmp_p, filename)) then
+      success = .true.
+    end if
+    call esio_c_free(tmp_p)
+
+  end function create_testfilename
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

@@ -36,7 +36,7 @@ program attribute_int_f
     integer, parameter :: value_vector(4) = (/12, 34, 56, 78/)
     integer            :: buffer(4)
 
-    call testframework_setup()
+    call testframework_setup(__FILE__)
 
 !   Create a file
     call esio_file_create(h, filename, .false., ierr)

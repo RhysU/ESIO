@@ -37,7 +37,8 @@ program plane_int_f
     integer, parameter :: ncomponents = size(value_vector, 1)
     integer            :: i, j, k
 
-    call testframework_setup (2)  ! Two-dimensional Cartesian topology
+    ! Two-dimensional Cartesian topology
+    call testframework_setup (__FILE__, 2)
 
 !   Prepare homogeneous test data distribution across the topology
     do i = 1, ndims

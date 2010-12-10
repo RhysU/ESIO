@@ -37,7 +37,8 @@ program line_int_f
     integer, parameter :: ncomponents = size(value_vector, 1)
     integer            :: i, j
 
-    call testframework_setup (1)  ! One-dimensional Cartesian topology
+    ! One-dimensional Cartesian topology
+    call testframework_setup (__FILE__, 1)
 
 !   Prepare homogeneous test data distribution across the topology
     do i = 1, ndims
