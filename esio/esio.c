@@ -54,6 +54,9 @@ static
 hid_t esio_H5P_DATASET_XFER_create(const esio_handle h);
 
 static
+hid_t esio_H5P_FILE_ACCESS_create(const esio_handle h);
+
+static
 hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
                         const char *name, hid_t type_id);
@@ -214,21 +217,41 @@ hid_t esio_H5P_DATASET_XFER_create(const esio_handle h)
 {
     (void) h; // Unused (for now)
 
-    /* Create property list for collective operation */
+    // Create property list for collective operation
     const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
     if (plist_id < 0) {
         ESIO_ERROR_VAL("Creating plist with type H5P_DATASET_XFER failed",
-                       ESIO_EFAILED, -1);
+                       ESIO_ESANITY, -1);
     }
 
-    /* Set property list to perform collective operation */
+    // Set property list to perform collective operation
     if (H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) < 0) {
         H5Pclose(plist_id);
         ESIO_ERROR_VAL("Setting IO transfer mode on plist failed",
-                       ESIO_EFAILED, -1);
+                       ESIO_ESANITY, -1);
     }
 
     return plist_id;
+}
+
+static
+hid_t esio_H5P_FILE_ACCESS_create(const esio_handle h)
+{
+    // Initialize file access list property identifier
+    const hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (fapl_id == -1) {
+        ESIO_ERROR_VAL("Unable to create fapl_id",
+                       ESIO_ESANITY, -1);
+    }
+
+    // Set property list collective details
+    if (H5Pset_fapl_mpio(fapl_id, h->comm, h->info)) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR_VAL("Unable to store MPI details in fapl_id",
+                       ESIO_ESANITY, -1);
+    }
+
+    return fapl_id;
 }
 
 esio_handle
@@ -359,14 +382,9 @@ esio_file_create(esio_handle h, const char *file, int overwrite)
     const hid_t fcpl_id = H5P_DEFAULT;
 
     // Initialize file access list property identifier
-    const hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (fapl_id == -1) {
+    const hid_t fapl_id = esio_H5P_FILE_ACCESS_create(h);
+    if (fapl_id < 0) {
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
-    }
-    // Set collective details
-    if (H5Pset_fapl_mpio(fapl_id, h->comm, h->info)) {
-        H5Pclose(fapl_id);
-        ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
     }
 
     // Collectively create the file
@@ -412,14 +430,9 @@ esio_file_open(esio_handle h, const char *file, int readwrite)
     }
 
     // Initialize file access list property identifier
-    const hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (fapl_id == -1) {
+    const hid_t fapl_id = esio_H5P_FILE_ACCESS_create(h);
+    if (fapl_id < 0) {
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
-    }
-    // Set collective details
-    if (H5Pset_fapl_mpio(fapl_id, h->comm, h->info)) {
-        H5Pclose(fapl_id);
-        ESIO_ERROR("Unable to store MPI details in fapl_id", ESIO_ESANITY);
     }
 
     // Initialize access flags
