@@ -47,7 +47,6 @@
 !!     of esio::esio_handle_initialize(), esio::esio_string_get(),
 !!     and esio::esio_field_layout_get().  These three routines have an
 !!     extra \c intent(out) parameter in Fortran.
-!!
 !!   </li>
 !!   <li>
 !!     Logical-like \c int arguments within the C API, for example
