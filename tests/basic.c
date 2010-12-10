@@ -39,6 +39,8 @@
 #include <esio/esio.h>
 #include <esio/error.h>
 
+#include "testutils.h"
+
 // Include FCTX and silence useless warnings
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:981)
@@ -69,9 +71,9 @@ FCT_BGN()
     // Fixture-related details
     const char * const input_dir  = getenv("ESIO_TEST_INPUT_DIR");
     const char * const output_dir = getenv("ESIO_TEST_OUTPUT_DIR");
+    char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     char * filename = NULL;
     esio_handle state;
-
 
     FCT_FIXTURE_SUITE_BGN(esio_file)
     {
@@ -80,7 +82,7 @@ FCT_BGN()
             (void) input_dir; // Unused
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
             esio_set_error_handler(esio_handler);
-            filename = tempnam(output_dir, "l1tst");
+            filename = create_testfilename(filetemplate);
             assert(filename);
             state = esio_handle_initialize(MPI_COMM_WORLD);
             assert(state);
@@ -150,5 +152,7 @@ FCT_BGN()
 
     }
     FCT_FIXTURE_SUITE_END();
+
+    if (filetemplate) free(filetemplate);
 }
 FCT_END()

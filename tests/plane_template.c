@@ -47,6 +47,8 @@
 #include <esio/esio.h>
 #include <esio/error.h>
 
+#include "testutils.h"
+
 // Include FCTX and silence useless warnings
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:981)
@@ -190,8 +192,8 @@ FCT_BGN()
     // Fixture-related details
     const char * const input_dir  = getenv("ESIO_TEST_INPUT_DIR");
     const char * const output_dir = getenv("ESIO_TEST_OUTPUT_DIR");
+    char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
-    (void) output_dir; // Possibly unused
     char * filename = NULL;
     esio_handle state;
 
@@ -208,7 +210,7 @@ FCT_BGN()
             // Rank 0 generates a unique filename and broadcasts it
             int filenamelen;
             if (world_rank == 0) {
-                filename = tempnam(output_dir, "l00t");
+                filename = create_testfilename(filetemplate);
                 if (preserve) {
                     printf("\nfilename: %s\n", filename);
                 }
@@ -497,5 +499,7 @@ FCT_BGN()
 
     }
     FCT_FIXTURE_SUITE_END();
+
+    if (filetemplate) free(filetemplate);
 }
 FCT_END()
