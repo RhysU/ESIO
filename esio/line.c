@@ -28,18 +28,11 @@
 #error "One of METHODNAME, OPFUNC, or QUALIFIER not defined"
 #endif
 
-hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
+hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
                  int aglobal, int astart, int alocal, int astride,
                  hid_t type_id)
 {
     (void) aglobal; /* Unused but present for API consistency */
-
-    /* Create property list for collective operation */
-    const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
-    if (H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) < 0) {
-        H5Pclose(plist_id);
-        ESIO_ERROR("Setting IO transfer mode failed", ESIO_EFAILED);
-    }
 
     /* Establish (possibly strided) memspace details */
     const hsize_t nelems = alocal * astride;
@@ -52,7 +45,6 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
         const hsize_t count  = alocal;
         if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET,
                                 &start, &stride, &count, NULL) < 0) {
-            H5Pclose(plist_id);
             H5Sclose(memspace);
             ESIO_ERROR("Selecting memory hyperslab failed", ESIO_EFAILED);
         }
@@ -65,7 +57,6 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
     const hsize_t count[1] = { alocal };
     if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                             start, NULL, count, NULL) < 0) {
-        H5Pclose(plist_id);
         H5Sclose(memspace);
         H5Sclose(filespace);
         ESIO_ERROR("Selecting file hyperslab failed", ESIO_EFAILED);
@@ -77,14 +68,12 @@ hid_t METHODNAME(hid_t dset_id, QUALIFIER void *line,
     if (status < 0) {
         H5Sclose(filespace);
         H5Sclose(memspace);
-        H5Pclose(plist_id);
         ESIO_ERROR("Operation failed", ESIO_EFAILED);
     }
 
     /* Release temporary resources */
     H5Sclose(filespace);
     H5Sclose(memspace);
-    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }

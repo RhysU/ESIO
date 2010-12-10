@@ -51,6 +51,9 @@ static
 MPI_Comm esio_MPI_Comm_dup_with_name(MPI_Comm comm);
 
 static
+hid_t esio_H5P_DATASET_XFER_create(const esio_handle h);
+
+static
 hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
                         const char *name, hid_t type_id);
@@ -204,6 +207,28 @@ esio_MPI_Comm_dup_with_name(MPI_Comm comm)
     }
 
     return retval;
+}
+
+static
+hid_t esio_H5P_DATASET_XFER_create(const esio_handle h)
+{
+    (void) h; // Unused (for now)
+
+    /* Create property list for collective operation */
+    const hid_t plist_id = H5Pcreate(H5P_DATASET_XFER);
+    if (plist_id < 0) {
+        ESIO_ERROR_VAL("Creating plist with type H5P_DATASET_XFER failed",
+                       ESIO_EFAILED, -1);
+    }
+
+    /* Set property list to perform collective operation */
+    if (H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) < 0) {
+        H5Pclose(plist_id);
+        ESIO_ERROR_VAL("Setting IO transfer mode on plist failed",
+                       ESIO_EFAILED, -1);
+    }
+
+    return plist_id;
 }
 
 esio_handle
@@ -745,20 +770,28 @@ int esio_field_write_internal(const esio_handle h,
     if (mstat != ESIO_SUCCESS) {
         // Field did not exist
 
+        // Obtain appropriate dataset transfer properties
+        const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+        if (plist_id < 0) {
+            ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+        }
+
         // Create dataset and write it with the active field layout
         const hid_t dset_id
             = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id);
         const int wstat = (esio_field_layout[h->layout_index].field_writer)(
-                dset_id, field,
+                plist_id, dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
                 aglobal, astart, alocal, astride,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
+            H5Pclose(plist_id);
             ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
         }
         esio_field_close(dset_id);
+        H5Pclose(plist_id);
 
     } else {
         // Field already existed
@@ -801,18 +834,26 @@ int esio_field_write_internal(const esio_handle h,
         }
         H5Tclose(field_type_id);
 
+        // Obtain appropriate dataset transfer properties
+        const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+        if (plist_id < 0) {
+            ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+        }
+
         // Overwrite existing data using layout routines per metadata
         const int wstat = (esio_field_layout[layout_index].field_writer)(
-                dset_id, field,
+                plist_id, dset_id, field,
                 cglobal, cstart, clocal, cstride,
                 bglobal, bstart, blocal, bstride,
                 aglobal, astart, alocal, astride,
                 type_id);
         if (wstat != ESIO_SUCCESS) {
             esio_field_close(dset_id);
+            H5Pclose(plist_id);
             ESIO_ERROR_VAL("Error overwriting field", ESIO_EFAILED, wstat);
         }
         esio_field_close(dset_id);
+        H5Pclose(plist_id);
 
     }
 
@@ -904,14 +945,24 @@ int esio_field_read_internal(const esio_handle h,
     }
     H5Tclose(field_type_id);
 
+    // Obtain appropriate dataset transfer properties
+    const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+    if (plist_id < 0) {
+        H5Dclose(dset_id);
+        H5Tclose(field_type_id);
+        ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+    }
+
     // Read the field based on the metadata's layout_index
     // Note that this means we can read any layout ESIO understands
     // Note that reading does not change the chosen field write layout_index
-    (esio_field_layout[layout_index].field_reader)(dset_id, field,
+    (esio_field_layout[layout_index].field_reader)(plist_id, dset_id, field,
                                            cglobal, cstart, clocal, cstride,
                                            bglobal, bstart, blocal, bstride,
                                            aglobal, astart, alocal, astride,
                                            type_id);
+
+    H5Pclose(plist_id);
 
     // Close dataset
     esio_field_close(dset_id);
@@ -1080,16 +1131,25 @@ int esio_plane_write_internal(const esio_handle h,
         H5Tclose(plane_type_id);
     }
 
+    // Obtain appropriate dataset transfer properties
+    const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+    if (plist_id < 0) {
+        esio_plane_close(dset_id);
+        ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+    }
+
     // Write field
-    const int wstat = esio_plane_writer(dset_id, plane,
+    const int wstat = esio_plane_writer(plist_id, dset_id, plane,
                                         bglobal, bstart, blocal, bstride,
                                         aglobal, astart, alocal, astride,
                                         type_id);
     if (wstat != ESIO_SUCCESS) {
         esio_plane_close(dset_id);
+        H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error writing plane", ESIO_EFAILED, wstat);
     }
     esio_plane_close(dset_id);
+    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }
@@ -1148,6 +1208,12 @@ int esio_plane_read_internal(const esio_handle h,
                     ESIO_EINVAL);
     }
 
+    // Obtain appropriate dataset transfer properties
+    const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+    if (plist_id < 0) {
+        ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+    }
+
     // Open existing dataset
     const hid_t dapl_id = H5P_DEFAULT;
     const hid_t dset_id = H5Dopen2(h->file_id, name, dapl_id);
@@ -1162,21 +1228,24 @@ int esio_plane_read_internal(const esio_handle h,
     if (converter == NULL) {
         H5Tclose(plane_type_id);
         H5Dclose(dset_id);
+        H5Pclose(plist_id);
         ESIO_ERROR("request type not convertible to existing plane type",
                     ESIO_EINVAL);
     }
     H5Tclose(plane_type_id);
 
     // Read plane
-    const int rstat = esio_plane_reader(dset_id, plane,
+    const int rstat = esio_plane_reader(plist_id, dset_id, plane,
                                         bglobal, bstart, blocal, bstride,
                                         aglobal, astart, alocal, astride,
                                         type_id);
     if (rstat != ESIO_SUCCESS) {
         esio_plane_close(dset_id);
+        H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error reading plane", ESIO_EFAILED, rstat);
     }
     esio_plane_close(dset_id);
+    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }
@@ -1322,15 +1391,23 @@ int esio_line_write_internal(const esio_handle h,
         ESIO_ERROR("Unrecoverable error attempting to write line", mstat);
     }
 
+    // Obtain appropriate dataset transfer properties
+    const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+    if (plist_id < 0) {
+        ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+    }
+
     // Write field
-    const int wstat = esio_line_writer(dset_id, line,
+    const int wstat = esio_line_writer(plist_id, dset_id, line,
                                        aglobal, astart, alocal, astride,
                                        type_id);
     if (wstat != ESIO_SUCCESS) {
         esio_line_close(dset_id);
+        H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error writing line", ESIO_EFAILED, wstat);
     }
     esio_line_close(dset_id);
+    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }
@@ -1397,15 +1474,23 @@ int esio_line_read_internal(const esio_handle h,
     }
     H5Tclose(line_type_id);
 
+    // Obtain appropriate dataset transfer properties
+    const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
+    if (plist_id < 0) {
+        ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
+    }
+
     // Read line
-    const int rstat = esio_line_reader(dset_id, line,
+    const int rstat = esio_line_reader(plist_id, dset_id, line,
                                        aglobal, astart, alocal, astride,
                                        type_id);
     if (rstat != ESIO_SUCCESS) {
         esio_line_close(dset_id);
+        H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error reading line", ESIO_EFAILED, rstat);
     }
     esio_line_close(dset_id);
+    H5Pclose(plist_id);
 
     return ESIO_SUCCESS;
 }

@@ -34,13 +34,13 @@
 
 typedef hid_t (*esio_filespace_creator_t)(int, int, int);
 
-typedef int   (*esio_field_writer_t)     (hid_t, const void *,
+typedef int   (*esio_field_writer_t)     (hid_t, hid_t, const void *,
                                           int, int, int, int,
                                           int, int, int, int,
                                           int, int, int, int,
                                           hid_t);
 
-typedef int   (*esio_field_reader_t)     (hid_t, void *,
+typedef int   (*esio_field_reader_t)     (hid_t, hid_t, void *,
                                           int, int, int, int,
                                           int, int, int, int,
                                           int, int, int, int,
@@ -55,14 +55,14 @@ hid_t esio_field_layout ## NUM ## _filespace_creator(      \
         int cglobal, int bglobal, int aglobal);            \
                                                            \
 int esio_field_layout ## NUM ## _field_writer(             \
-        hid_t dset_id, const void *field,                  \
+        hid_t plist_id, hid_t dset_id, const void *field,  \
         int cglobal, int cstart, int clocal, int cstride,  \
         int bglobal, int bstart, int blocal, int bstride,  \
         int aglobal, int astart, int alocal, int astride,  \
         hid_t type_id);                                    \
                                                            \
 int esio_field_layout ## NUM ##_field_reader(              \
-        hid_t dset_id, void *field,                        \
+        hid_t plist_id, hid_t dset_id, void *field,        \
         int cglobal, int cstart, int clocal, int cstride,  \
         int bglobal, int bstart, int blocal, int bstride,  \
         int aglobal, int astart, int alocal, int astride,  \
@@ -73,33 +73,25 @@ ESIO_LAYOUT_DECLARATIONS(1)
 ESIO_LAYOUT_DECLARATIONS(2)
 
 int esio_plane_writer(
-        hid_t dset_id, const void *plane,
+        hid_t plist_id, hid_t dset_id, const void *plane,
         int bglobal, int bstart, int blocal, int bstride,
         int aglobal, int astart, int alocal, int astride,
         hid_t type_id);
 
 int esio_plane_reader(
-        hid_t dset_id, void *plane,
+        hid_t plist_id, hid_t dset_id, void *plane,
         int bglobal, int bstart, int blocal, int bstride,
         int aglobal, int astart, int alocal, int astride,
         hid_t type_id);
 
 int esio_line_writer(
-        hid_t dset_id, const void *line,
+        hid_t plist_id, hid_t dset_id, const void *line,
         int aglobal, int astart, int alocal, int astride,
         hid_t type_id);
 
 int esio_line_reader(
-        hid_t dset_id, void *line,
+        hid_t plist_id, hid_t dset_id, void *line,
         int aglobal, int astart, int alocal, int astride,
-        hid_t type_id);
-
-int esio_point_writer(
-        hid_t dset_id, const void *point,
-        hid_t type_id);
-
-int esio_point_reader(
-        hid_t dset_id, void *point,
         hid_t type_id);
 
 #endif /* __ESIO_LAYOUT_H */
