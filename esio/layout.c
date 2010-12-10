@@ -105,8 +105,8 @@ hid_t esio_field_layout1_filespace_creator(int cglobal,
                                            int bglobal,
                                            int aglobal)
 {
-    const hsize_t dims[2] = { cglobal * bglobal, aglobal };
-    return H5Screate_simple(2, dims, NULL);
+    const hsize_t dims[3] = { cglobal, bglobal, aglobal };
+    return H5Screate_simple(3, dims, NULL);
 }
 
 #define METHODNAME esio_field_layout1_field_writer
@@ -133,8 +133,8 @@ hid_t esio_field_layout2_filespace_creator(int cglobal,
                                            int bglobal,
                                            int aglobal)
 {
-    const hsize_t dims[3] = { cglobal, bglobal, aglobal };
-    return H5Screate_simple(3, dims, NULL);
+    const hsize_t dims[2] = { cglobal * bglobal, aglobal };
+    return H5Screate_simple(2, dims, NULL);
 }
 
 #define METHODNAME esio_field_layout2_field_writer
