@@ -54,6 +54,10 @@ html-local: doxygen-run
 # Target for all documentation
 docs: doxygen-run
 
+# Target to build test-related programs within tests subdirectory
+check-programs: all
+	cd tests && $(MAKE) $(AM_MAKEFLAGS) check-programs
+
 # -------------------------------------------
 # Optional support for code coverage analysis
 # -------------------------------------------
