@@ -204,7 +204,13 @@ FCT_BGN()
                                                       "attribute",
                                                       &data));
 
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:1572)
+#endif
                 fct_chk(data == 5678);
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
 
                 fct_req(0 <= H5Fclose(file_id));
             }
@@ -212,7 +218,13 @@ FCT_BGN()
             // Re-read the file in a distributed manner and verify contents
             fct_req(0 == esio_file_open(state, filename, 0));
             fct_req(0 == AFFIX(esio_attribute_read)(state, "attribute", &value));
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:1572)
+#endif
             fct_chk(value == 5678);
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
             fct_req(0 == esio_file_close(state));
         }
         FCT_TEST_END();
@@ -260,7 +272,13 @@ FCT_BGN()
                 fct_req(0 <= AFFIX(H5LTget_attribute)(file_id, "/",
                                                       "attribute", value));
                 for (int i = 0; i < ncomponents; ++i) {
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:1572)
+#endif
                     fct_chk(i + 5678 == value[i]);
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
                 }
                 fct_req(0 <= H5Fclose(file_id));
                 free(value);
@@ -273,7 +291,13 @@ FCT_BGN()
             fct_req(0 == AFFIX(esio_attribute_readv)(state, "attribute",
                                                      value, ncomponents));
             for (int i = 0; i < ncomponents; ++i) {
+#ifdef __INTEL_COMPILER
+#pragma warning(push,disable:1572)
+#endif
                 fct_chk(i + 5678 == value[i]);
+#ifdef __INTEL_COMPILER
+#pragma warning(pop)
+#endif
             }
             free(value);
             fct_req(0 == esio_file_close(state));

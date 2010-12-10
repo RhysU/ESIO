@@ -38,6 +38,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "testutils.h"
+
 char * create_testfiletemplate(const char *dir, const char * const filename)
 {
     // Use a default if dir is NULL or empty
@@ -49,8 +51,12 @@ char * create_testfiletemplate(const char *dir, const char * const filename)
     char * const t2 = basename(t1);
 
     // Determine required storage
-    size_t len = strlen(dir) + strlen("/test.")
-               + strlen(t2) + strlen(".XXXXXX") + 1;
+    size_t len = 0;
+    len += strlen(dir);
+    len += strlen("/test.");
+    len += strlen(t2);
+    len += strlen(".XXXXXX");
+    len += 1;
 
     // Allocate required storage
     char * const retval = malloc(len);
