@@ -1,2 +1,5 @@
 /install-sh
 /missing
+/arg-nonnull.h
+/config.rpath
+/link-warning.h

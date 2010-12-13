@@ -34,6 +34,8 @@ dnl Manipulate C settings and find MPI/HDF5
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG
 AC_PROG_CC
+gl_EARLY
+gl_INIT
 AC_LANG_PUSH([C])
 if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
@@ -137,7 +139,7 @@ AC_CONFIG_FILES([
     esio/Makefile
     esio/version.h
     examples/Makefile
-    lib/Makefile
+    gnulib/Makefile
     tests/Makefile
 ])
 

@@ -4,14 +4,15 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 # Build in these directories:
-SUBDIRS = lib esio examples tests apps doxygen
+SUBDIRS = gnulib esio examples tests apps doxygen
 
 # Distribute these items:
-DIST_SUBDIRS = lib esio examples tests apps doxygen
-EXTRA_DIST  = bootstrap
-EXTRA_DIST += $(DX_CONFIG)
-EXTRA_DIST += build-aux/sfmakedepend.pl
-EXTRA_DIST += build-aux/update_license.pl
+DIST_SUBDIRS = gnulib esio examples tests apps doxygen
+EXTRA_DIST   = bootstrap
+EXTRA_DIST  += $(DX_CONFIG)
+EXTRA_DIST  += build-aux/sfmakedepend.pl
+EXTRA_DIST  += build-aux/update_license.pl
+EXTRA_DIST  += m4/gnulib-cache.m4
 
 # Eliminate .svn directories in dist tarball
 dist-hook:

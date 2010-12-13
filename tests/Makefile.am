@@ -1,12 +1,12 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CFLAGS       =
-AM_CPPFLAGS     = -I$(top_srcdir)     -I$(top_builddir)
-AM_CPPFLAGS    += -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS      = -I$(top_srcdir)     -I$(top_builddir)
-AM_FCFLAGS     += -I$(top_srcdir)/lib -I$(top_builddir)/lib
+AM_CPPFLAGS     = -I$(top_srcdir)        -I$(top_builddir)
+AM_CPPFLAGS    += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_FCFLAGS      = -I$(top_srcdir)        -I$(top_builddir)
+AM_FCFLAGS     += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
 AM_FCFLAGS     += -I$(top_builddir)/esio
-AM_LDFLAGS      = -L$(top_builddir)/lib
+AM_LDFLAGS      = # Append below
 check_PROGRAMS  = # Append below
 noinst_PROGRAMS = # Append below
 BUILT_SOURCES   = # Append below

@@ -1,9 +1,9 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CFLAGS          =
-AM_CPPFLAGS        = -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_FCFLAGS         = -I$(top_srcdir)/lib -I$(top_builddir)/lib
-AM_LDFLAGS         = -L$(top_builddir)/lib
+AM_CPPFLAGS        = -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_FCFLAGS         = -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_LDFLAGS         = # Append below
 BUILT_SOURCES      = # Append below
 check_PROGRAMS     = # Append below
 CLEANFILES         = # Append below
@@ -30,6 +30,8 @@ libesio_la_SOURCES  += esio.c
 libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
+libesio_la_LDFLAGS  += $(LTLIBINTL) $(LIB_ACL)     # gnulib requirement
+libesio_la_LIBADD    = ../gnulib/libgnu.a
 
 # Headers shipped with the library
 esio_includedir       = $(includedir)/esio
