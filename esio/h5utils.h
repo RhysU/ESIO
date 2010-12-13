@@ -30,6 +30,10 @@
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
 //****************************************************************
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Macro to save and disable current HDF5 error handler
 #define DISABLE_HDF5_ERROR_HANDLER                               \
     H5E_auto2_t hdf5_handler;                                    \
@@ -49,5 +53,9 @@ esio_H5LTget_attribute_ndims_info(hid_t loc_id,
                                   hsize_t *dims,
                                   H5T_class_t *type_class,
                                   size_t *type_size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ESIO_H5UTILS_H */

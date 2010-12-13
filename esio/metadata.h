@@ -26,11 +26,15 @@
 #ifndef __ESIO_METADATA_H
 #define __ESIO_METADATA_H
 
+#include <hdf5.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //*********************************************************************
 // INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL PROTOTYPES INTERNAL
 //*********************************************************************
-
-#include <hdf5.h>
 
 int esio_type_ncomponents(hid_t type_id);
 
@@ -61,5 +65,9 @@ int esio_line_metadata_write(hid_t loc_id, const char *name,
 int esio_line_metadata_read(hid_t loc_id, const char *name,
                             int *aglobal,
                             int *ncomponents);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ESIO_METADATA_H */

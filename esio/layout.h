@@ -28,6 +28,10 @@
 
 #include <hdf5.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //*********************************************************************
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
@@ -93,5 +97,9 @@ int esio_line_reader(
         hid_t plist_id, hid_t dset_id, void *line,
         int aglobal, int astart, int alocal, int astride,
         hid_t type_id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __ESIO_LAYOUT_H */

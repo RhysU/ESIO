@@ -27,11 +27,12 @@ lib_LTLIBRARIES     += libesio.la
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_SOURCES   = error.c
 libesio_la_SOURCES  += esio.c
+libesio_la_SOURCES  += file-copy.c
 libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 libesio_la_LDFLAGS  += $(LTLIBINTL) $(LIB_ACL)     # gnulib requirement
-libesio_la_LIBADD    = ../gnulib/libgnu.a
+libesio_la_LIBADD    = ../gnulib/libgnu.la
 
 # Headers shipped with the library
 esio_includedir       = $(includedir)/esio
@@ -40,6 +41,7 @@ esio_include_HEADERS += esio.h
 esio_include_HEADERS += version.h
 
 # Headers internal to the library
+noinst_HEADERS += file-copy.h
 noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h

@@ -53,3 +53,6 @@
 /xalloc-die.c
 /xalloc.h
 /xmalloc.c
+/dummy.c
+/chown.c
+/fchown-stub.c
