@@ -39,6 +39,7 @@ esio_includedir       = $(includedir)/esio
 esio_include_HEADERS  = error.h
 esio_include_HEADERS += esio.h
 esio_include_HEADERS += version.h
+esio_include_HEADERS += visibility.h
 
 # Headers internal to the library
 noinst_HEADERS += file-copy.h
