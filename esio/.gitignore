@@ -1,0 +1,10 @@
+/config.h
+/config.h.in
+/.deps
+/.license.stamp
+/Makefile
+/Makefile.dep
+/Makefile.in
+/*.mod
+/stamp-h1
+/version.h

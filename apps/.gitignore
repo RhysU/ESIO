@@ -1,0 +1,9 @@
+/.deps
+/hellompi_c
+/hellompi_f90
+/.license.stamp
+/main
+/Makefile
+/Makefile.dep
+/Makefile.in
+/*.mod
