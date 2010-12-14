@@ -10,12 +10,12 @@
 #
 # This file represents the specification of how gnulib-tool is used.
 # It acts as a cache: It is written and read by gnulib-tool.
-# In projects using CVS, this file is meant to be stored in CVS,
-# like the configure.ac and various Makefile.am files.
+# In projects that use version control, this file is meant to be put under
+# version control, like the configure.ac and various Makefile.am files.
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --libtool --macro-prefix=gl binary-io chown full-write open safe-read unistd
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --libtool --macro-prefix=gl --no-vc-files binary-io chown full-write open safe-read strdup unistd
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -25,6 +25,7 @@ gl_MODULES([
   full-write
   open
   safe-read
+  strdup
   unistd
 ])
 gl_AVOID([])
@@ -38,3 +39,4 @@ gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([gl])
 gl_PO_DOMAIN([])
+gl_VC_FILES([false])
