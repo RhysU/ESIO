@@ -19,14 +19,7 @@
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
-gl_MODULES([
-  binary-io
-  chown
-  full-write
-  open
-  safe-read
-  unistd
-])
+gl_MODULES([ binary-io chown full-write open safe-read unistd ])
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib])
 gl_M4_BASE([m4])
