@@ -1,7 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CFLAGS          =
-AM_CPPFLAGS        = -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_CPPFLAGS        = -I$(top_srcdir)        -I$(top_builddir)
+AM_CPPFLAGS       += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
 AM_FCFLAGS         = -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
 AM_LDFLAGS         = # Append below
 BUILT_SOURCES      = # Append below
@@ -24,6 +25,7 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 
 # Public C library
 lib_LTLIBRARIES     += libesio.la
+libesio_la_CFLAGS    = -DESIO_SHARED_EXPORTS
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_SOURCES   = error.c
 libesio_la_SOURCES  += esio.c
@@ -59,7 +61,7 @@ EXTRA_DIST += line.f90
 EXTRA_DIST += plane.f90
 
 # Public Fortran library is a superset of libesio.la
-noinst_LTLIBRARIES       += libesiof.la
+lib_LTLIBRARIES          += libesiof.la
 libesiof_la_LIBTOOLFLAGS  = --tag=FC
 libesiof_la_SOURCES       = esio_c_binding.f90
 libesiof_la_SOURCES      += esio.f90

@@ -27,6 +27,7 @@
 #define __ESIO_ERROR_H__
 
 #include <stdio.h>
+#include <esio/visibility.h>
 
 /** @file
  * Provides standardized error numbers and error handling routines.  Error
@@ -80,10 +81,11 @@ enum esio_status {
  *      the convenience macros: ESIO_ERROR, ESIO_ERROR_VAL,
  *      ESIO_ERROR_VOID, ESIO_ERROR_NULL
  */
-void esio_error(const char * reason,
-                const char * file,
-                int line,
-                int esio_errno);
+void
+esio_error(const char * reason,
+           const char * file,
+           int line,
+           int esio_errno) ESIO_API;
 
 /**
  * Print an error message to the current error stream.
@@ -96,10 +98,11 @@ void esio_error(const char * reason,
  * @param line Line at which the error was reported.
  * @param reason Reason for the error.
  */
-void esio_stream_printf(const char *label,
-                        const char *file,
-                        int line,
-                        const char *reason);
+void
+esio_stream_printf(const char *label,
+                   const char *file,
+                   int line,
+                   const char *reason) ESIO_API;
 
 /**
  * Look up a human-readable error message for the given error status.
@@ -108,7 +111,8 @@ void esio_stream_printf(const char *label,
  *
  * @return A message suitable for use in logging or error messages.
  */
-const char * esio_strerror(const int esio_errno);
+const char *
+esio_strerror(const int esio_errno) ESIO_API;
 
 /**
  * Defines the function prototype necessary for an error handler.
@@ -151,7 +155,7 @@ typedef void esio_stream_handler_t(const char * label,
  * @return the previous error handler in use.
  */
 esio_error_handler_t *
-esio_set_error_handler(esio_error_handler_t * new_handler);
+esio_set_error_handler(esio_error_handler_t * new_handler) ESIO_API;
 
 /**
  * An error handler implementation that disables all error reporting.
@@ -160,7 +164,7 @@ esio_set_error_handler(esio_error_handler_t * new_handler);
  * @return the previous error handler in use.
  */
 esio_error_handler_t *
-esio_set_error_handler_off(void);
+esio_set_error_handler_off(void) ESIO_API;
 
 /**
  * Sets the current stream handler for the process.
@@ -172,7 +176,7 @@ esio_set_error_handler_off(void);
  * @return the previous stream handler in use.
  */
 esio_stream_handler_t *
-esio_set_stream_handler(esio_stream_handler_t * new_handler);
+esio_set_stream_handler(esio_stream_handler_t * new_handler) ESIO_API;
 
 /**
  * Set the default stream for error message display.  Default
@@ -182,7 +186,8 @@ esio_set_stream_handler(esio_stream_handler_t * new_handler);
  *
  * @return the previous stream in use.
  */
-FILE * esio_set_stream(FILE * new_stream);
+FILE *
+esio_set_stream(FILE * new_stream) ESIO_API;
 
 /**
  * Invokes esio_error and returns the value \c esio_errno.

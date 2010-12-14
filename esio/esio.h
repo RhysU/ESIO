@@ -27,6 +27,7 @@
 #define __ESIO_ESIO_H
 
 #include <mpi.h>
+#include <esio/visibility.h>
 
 /** \file
  * Provides ESIO's C-based public API following the library's
@@ -57,7 +58,21 @@ typedef struct esio_handle_s *esio_handle;
  *             the handle must be made collectively on \c comm.
  * \return A new handle on success.  Otherwise \c NULL.
  */
-esio_handle esio_handle_initialize(MPI_Comm comm);
+esio_handle esio_handle_initialize(MPI_Comm comm) ESIO_API;
+
+/** \cond INTERNAL */
+/**
+ * Initialize a handle against the given MPI Fortran communicator.
+ * The handle must be finalized using esio_handle_finalize() to avoid
+ * resource leaks.
+ *
+ * \param comm MPI communicator (e.g. \c MPI_COMM_WORLD) used to determine
+ *             the parallel scope of the handle.  All ESIO calls employing
+ *             the handle must be made collectively on \c comm.
+ * \return A new handle on success.  Otherwise \c NULL.
+ */
+esio_handle esio_handle_initialize_fortran(MPI_Fint fcomm) ESIO_API;
+/** \endcond */
 
 /**
  * Finalize a handle.
@@ -66,7 +81,7 @@ esio_handle esio_handle_initialize(MPI_Comm comm);
  * \param h Handle to finalize.  May be \c NULL.
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_handle_finalize(esio_handle h);
+int esio_handle_finalize(esio_handle h) ESIO_API;
 /*\@}*/
 
 
@@ -86,7 +101,7 @@ int esio_handle_finalize(esio_handle h);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_create(esio_handle h, const char *file, int overwrite);
+int esio_file_create(esio_handle h, const char *file, int overwrite) ESIO_API;
 
 /**
  * Open an existing file.
@@ -98,7 +113,7 @@ int esio_file_create(esio_handle h, const char *file, int overwrite);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_open(esio_handle h, const char *file, int readwrite);
+int esio_file_open(esio_handle h, const char *file, int readwrite) ESIO_API;
 
 /**
  * Flush buffers associated with any currently open file.
@@ -107,7 +122,7 @@ int esio_file_open(esio_handle h, const char *file, int readwrite);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_flush(esio_handle h);
+int esio_file_flush(esio_handle h) ESIO_API;
 
 /**
  * Close any currently open file.
@@ -117,7 +132,7 @@ int esio_file_flush(esio_handle h);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_file_close(esio_handle h);
+int esio_file_close(esio_handle h) ESIO_API;
 /*\@}*/
 
 
@@ -137,9 +152,10 @@ int esio_file_close(esio_handle h);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_string_set(const esio_handle h,
-                    const char *name,
-                    const char *value);
+int
+esio_string_set(const esio_handle h,
+                const char *name,
+                const char *value) ESIO_API;
 
 /**
  * Get a string-valued attribute.
@@ -153,33 +169,42 @@ int esio_string_set(const esio_handle h,
  * \return A newly allocated buffer containing the null-terminated string
  *         on success.  \c NULL on failure.
  */
-char* esio_string_get(const esio_handle h,
-                      const char *name);
+char*
+esio_string_get(const esio_handle h,
+                const char *name) ESIO_API;
 /*\@}*/
 
 
 /** \cond INTERNAL */
-#define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)                \
-int esio_attribute_write_##TYPE(const esio_handle h,  \
-                                const char *name,     \
-                                const TYPE *value);
+#define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)            \
+int                                               \
+esio_attribute_write_##TYPE(const esio_handle h,  \
+                            const char *name,     \
+                            const TYPE *value)    \
+                            ESIO_API;
 
-#define ESIO_ATTRIBUTE_READ_GEN(TYPE)                 \
-int esio_attribute_read_##TYPE(const esio_handle h,   \
-                               const char *name,      \
-                               TYPE *value);
+#define ESIO_ATTRIBUTE_READ_GEN(TYPE)             \
+int                                               \
+esio_attribute_read_##TYPE(const esio_handle h,   \
+                           const char *name,      \
+                           TYPE *value)           \
+                           ESIO_API;
 
-#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)               \
-int esio_attribute_writev_##TYPE(const esio_handle h, \
-                                 const char *name,    \
-                                 const TYPE *value,   \
-                                 int ncomponents);
+#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)           \
+int                                               \
+esio_attribute_writev_##TYPE(const esio_handle h, \
+                             const char *name,    \
+                             const TYPE *value,   \
+                             int ncomponents)     \
+                             ESIO_API;
 
-#define ESIO_ATTRIBUTE_READV_GEN(TYPE)                \
-int esio_attribute_readv_##TYPE(const esio_handle h,  \
-                                const char *name,     \
-                                TYPE *value,          \
-                                int ncomponents);
+#define ESIO_ATTRIBUTE_READV_GEN(TYPE)            \
+int                                               \
+esio_attribute_readv_##TYPE(const esio_handle h,  \
+                            const char *name,     \
+                            TYPE *value,          \
+                            int ncomponents)      \
+                            ESIO_API;
 /** \endcond */
 
 /**
@@ -301,9 +326,10 @@ ESIO_ATTRIBUTE_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_attribute_sizev(const esio_handle h,
-                         const char *name,
-                         int *ncomponents);
+int
+esio_attribute_sizev(const esio_handle h,
+                     const char *name,
+                     int *ncomponents) ESIO_API;
 /*\@}*/
 
 #undef ESIO_ATTRIBUTE_WRITE_GEN
@@ -313,31 +339,39 @@ int esio_attribute_sizev(const esio_handle h,
 
 
 /** \cond INTERNAL */
-#define ESIO_LINE_WRITE_GEN(TYPE)                                             \
-int esio_line_write_##TYPE(const esio_handle h,                               \
-                           const char *name,                                  \
-                           const TYPE *line,                                  \
-                           int aglobal, int astart, int alocal, int astride);
+#define ESIO_LINE_WRITE_GEN(TYPE)                                         \
+int                                                                       \
+esio_line_write_##TYPE(const esio_handle h,                               \
+                       const char *name,                                  \
+                       const TYPE *line,                                  \
+                       int aglobal, int astart, int alocal, int astride)  \
+                       ESIO_API;
 
-#define ESIO_LINE_READ_GEN(TYPE)                                              \
-int esio_line_read_##TYPE(const esio_handle h,                                \
-                          const char *name,                                   \
-                          TYPE *line,                                         \
-                          int aglobal, int astart, int alocal, int astride);
+#define ESIO_LINE_READ_GEN(TYPE)                                          \
+int                                                                       \
+esio_line_read_##TYPE(const esio_handle h,                                \
+                      const char *name,                                   \
+                      TYPE *line,                                         \
+                      int aglobal, int astart, int alocal, int astride)   \
+                       ESIO_API;
 
-#define ESIO_LINE_WRITEV_GEN(TYPE)                                            \
-int esio_line_writev_##TYPE(const esio_handle h,                              \
-                            const char *name,                                 \
-                            const TYPE *line,                                 \
-                            int aglobal, int astart, int alocal, int astride, \
-                            int ncomponents);
+#define ESIO_LINE_WRITEV_GEN(TYPE)                                        \
+int                                                                       \
+esio_line_writev_##TYPE(const esio_handle h,                              \
+                        const char *name,                                 \
+                        const TYPE *line,                                 \
+                        int aglobal, int astart, int alocal, int astride, \
+                        int ncomponents)                                  \
+                        ESIO_API;
 
-#define ESIO_LINE_READV_GEN(TYPE)                                             \
-int esio_line_readv_##TYPE(const esio_handle h,                               \
-                           const char *name,                                  \
-                           TYPE *line,                                        \
-                           int aglobal, int astart, int alocal, int astride,  \
-                           int ncomponents);
+#define ESIO_LINE_READV_GEN(TYPE)                                         \
+int                                                                       \
+esio_line_readv_##TYPE(const esio_handle h,                               \
+                       const char *name,                                  \
+                       TYPE *line,                                        \
+                       int aglobal, int astart, int alocal, int astride,  \
+                       int ncomponents)                                   \
+                       ESIO_API;
 /** \endcond */
 
 /**
@@ -415,9 +449,11 @@ ESIO_LINE_READ_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_line_size(const esio_handle h,
-                   const char *name,
-                   int *aglobal);
+int
+esio_line_size(const esio_handle h,
+               const char *name,
+               int *aglobal) ESIO_API;
+
 /*\@}*/
 
 /**
@@ -502,10 +538,11 @@ ESIO_LINE_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_line_sizev(const esio_handle h,
-                    const char *name,
-                    int *aglobal,
-                    int *ncomponents);
+int
+esio_line_sizev(const esio_handle h,
+                const char *name,
+                int *aglobal,
+                int *ncomponents) ESIO_API;
 /*\@}*/
 
 #undef ESIO_LINE_WRITE_GEN
@@ -515,35 +552,43 @@ int esio_line_sizev(const esio_handle h,
 
 
 /** \cond INTERNAL */
-#define ESIO_PLANE_WRITE_GEN(TYPE)                                            \
-int esio_plane_write_##TYPE(const esio_handle h,                              \
-                            const char *name,                                 \
-                            const TYPE *plane,                                \
-                            int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride);
+#define ESIO_PLANE_WRITE_GEN(TYPE)                                        \
+int                                                                       \
+esio_plane_write_##TYPE(const esio_handle h,                              \
+                        const char *name,                                 \
+                        const TYPE *plane,                                \
+                        int bglobal, int bstart, int blocal, int bstride, \
+                        int aglobal, int astart, int alocal, int astride) \
+                        ESIO_API;
 
-#define ESIO_PLANE_READ_GEN(TYPE)                                             \
-int esio_plane_read_##TYPE(const esio_handle h,                               \
-                           const char *name,                                  \
-                           TYPE *plane,                                       \
-                           int bglobal, int bstart, int blocal, int bstride,  \
-                           int aglobal, int astart, int alocal, int astride);
+#define ESIO_PLANE_READ_GEN(TYPE)                                         \
+int                                                                       \
+esio_plane_read_##TYPE(const esio_handle h,                               \
+                       const char *name,                                  \
+                       TYPE *plane,                                       \
+                       int bglobal, int bstart, int blocal, int bstride,  \
+                       int aglobal, int astart, int alocal, int astride)  \
+                       ESIO_API;
 
-#define ESIO_PLANE_WRITEV_GEN(TYPE)                                           \
-int esio_plane_writev_##TYPE(const esio_handle h,                             \
-                             const char *name,                                \
-                             const TYPE *plane,                               \
-                             int bglobal, int bstart, int blocal, int bstride,\
-                             int aglobal, int astart, int alocal, int astride,\
-                             int ncomponents);
+#define ESIO_PLANE_WRITEV_GEN(TYPE)                                       \
+int                                                                       \
+esio_plane_writev_##TYPE(const esio_handle h,                             \
+                         const char *name,                                \
+                         const TYPE *plane,                               \
+                         int bglobal, int bstart, int blocal, int bstride,\
+                         int aglobal, int astart, int alocal, int astride,\
+                         int ncomponents)                                 \
+                         ESIO_API;
 
-#define ESIO_PLANE_READV_GEN(TYPE)                                            \
-int esio_plane_readv_##TYPE(const esio_handle h,                              \
-                            const char *name,                                 \
-                            TYPE *plane,                                      \
-                            int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride, \
-                            int ncomponents);
+#define ESIO_PLANE_READV_GEN(TYPE)                                        \
+int                                                                       \
+esio_plane_readv_##TYPE(const esio_handle h,                              \
+                        const char *name,                                 \
+                        TYPE *plane,                                      \
+                        int bglobal, int bstart, int blocal, int bstride, \
+                        int aglobal, int astart, int alocal, int astride, \
+                        int ncomponents)                                  \
+                        ESIO_API;
 /** \endcond */
 
 /**
@@ -638,9 +683,10 @@ ESIO_PLANE_READ_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_plane_size(const esio_handle h,
-                    const char *name,
-                    int *bglobal, int *aglobal);
+int
+esio_plane_size(const esio_handle h,
+                const char *name,
+                int *bglobal, int *aglobal) ESIO_API;
 /*\@}*/
 
 /**
@@ -742,10 +788,11 @@ ESIO_PLANE_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_plane_sizev(const esio_handle h,
-                     const char *name,
-                     int *bglobal, int *aglobal,
-                     int *ncomponents);
+int
+esio_plane_sizev(const esio_handle h,
+                 const char *name,
+                 int *bglobal, int *aglobal,
+                 int *ncomponents) ESIO_API;
 /*\@}*/
 
 #undef ESIO_PLANE_WRITE_GEN
@@ -755,39 +802,47 @@ int esio_plane_sizev(const esio_handle h,
 
 
 /** \cond INTERNAL */
-#define ESIO_FIELD_WRITE_GEN(TYPE)                                            \
-int esio_field_write_##TYPE(const esio_handle h,                              \
-                            const char *name,                                 \
-                            const TYPE *field,                                \
-                            int cglobal, int cstart, int clocal, int cstride, \
-                            int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride);
+#define ESIO_FIELD_WRITE_GEN(TYPE)                                        \
+int                                                                       \
+esio_field_write_##TYPE(const esio_handle h,                              \
+                        const char *name,                                 \
+                        const TYPE *field,                                \
+                        int cglobal, int cstart, int clocal, int cstride, \
+                        int bglobal, int bstart, int blocal, int bstride, \
+                        int aglobal, int astart, int alocal, int astride) \
+                        ESIO_API;
 
-#define ESIO_FIELD_READ_GEN(TYPE)                                             \
-int esio_field_read_##TYPE(const esio_handle h,                               \
-                           const char *name,                                  \
-                           TYPE *field,                                       \
-                           int cglobal, int cstart, int clocal, int cstride,  \
-                           int bglobal, int bstart, int blocal, int bstride,  \
-                           int aglobal, int astart, int alocal, int astride);
+#define ESIO_FIELD_READ_GEN(TYPE)                                         \
+int                                                                       \
+esio_field_read_##TYPE(const esio_handle h,                               \
+                       const char *name,                                  \
+                       TYPE *field,                                       \
+                       int cglobal, int cstart, int clocal, int cstride,  \
+                       int bglobal, int bstart, int blocal, int bstride,  \
+                       int aglobal, int astart, int alocal, int astride)  \
+                       ESIO_API;
 
-#define ESIO_FIELD_WRITEV_GEN(TYPE)                                           \
-int esio_field_writev_##TYPE(const esio_handle h,                             \
-                             const char *name,                                \
-                             const TYPE *field,                               \
-                             int cglobal, int cstart, int clocal, int cstride,\
-                             int bglobal, int bstart, int blocal, int bstride,\
-                             int aglobal, int astart, int alocal, int astride,\
-                             int ncomponents);
+#define ESIO_FIELD_WRITEV_GEN(TYPE)                                       \
+int                                                                       \
+esio_field_writev_##TYPE(const esio_handle h,                             \
+                         const char *name,                                \
+                         const TYPE *field,                               \
+                         int cglobal, int cstart, int clocal, int cstride,\
+                         int bglobal, int bstart, int blocal, int bstride,\
+                         int aglobal, int astart, int alocal, int astride,\
+                         int ncomponents)                                 \
+                         ESIO_API;
 
-#define ESIO_FIELD_READV_GEN(TYPE)                                            \
-int esio_field_readv_##TYPE(const esio_handle h,                              \
-                            const char *name,                                 \
-                            TYPE *field,                                      \
-                            int cglobal, int cstart, int clocal, int cstride, \
-                            int bglobal, int bstart, int blocal, int bstride, \
-                            int aglobal, int astart, int alocal, int astride, \
-                            int ncomponents);
+#define ESIO_FIELD_READV_GEN(TYPE)                                        \
+int                                                                       \
+esio_field_readv_##TYPE(const esio_handle h,                              \
+                        const char *name,                                 \
+                        TYPE *field,                                      \
+                        int cglobal, int cstart, int clocal, int cstride, \
+                        int bglobal, int bstart, int blocal, int bstride, \
+                        int aglobal, int astart, int alocal, int astride, \
+                        int ncomponents)                                  \
+                        ESIO_API;
 /** \endcond */
 
 /**
@@ -894,9 +949,10 @@ ESIO_FIELD_READ_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_field_size(const esio_handle h,
-                    const char *name,
-                    int *cglobal, int *bglobal, int *aglobal);
+int
+esio_field_size(const esio_handle h,
+                const char *name,
+                int *cglobal, int *bglobal, int *aglobal) ESIO_API;
 /*\@}*/
 
 
@@ -1011,10 +1067,11 @@ ESIO_FIELD_READV_GEN(int)
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_field_sizev(const esio_handle h,
-                     const char *name,
-                     int *cglobal, int *bglobal, int *aglobal,
-                     int *ncomponents);
+int
+esio_field_sizev(const esio_handle h,
+                 const char *name,
+                 int *cglobal, int *bglobal, int *aglobal,
+                 int *ncomponents) ESIO_API;
 /*\@}*/
 
 #undef ESIO_FIELD_WRITE_GEN
@@ -1035,7 +1092,7 @@ int esio_field_sizev(const esio_handle h,
  *
  * @return The number of layouts available within ESIO.
  */
-int esio_field_layout_count();
+int esio_field_layout_count() ESIO_API;
 
 
 /**
@@ -1048,7 +1105,7 @@ int esio_field_layout_count();
  *         esio_field_layout_set().  On error, zero is
  *         returned.
  */
-int esio_field_layout_get(const esio_handle h);
+int esio_field_layout_get(const esio_handle h) ESIO_API;
 
 /**
  * Set the default layout associated with the given handle.
@@ -1060,7 +1117,7 @@ int esio_field_layout_get(const esio_handle h);
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int esio_field_layout_set(esio_handle h, int layout_index);
+int esio_field_layout_set(esio_handle h, int layout_index) ESIO_API;
 /*\@}*/
 
 #ifdef __cplusplus

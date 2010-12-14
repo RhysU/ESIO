@@ -48,6 +48,7 @@ MPICC_LOCATION=$(eval command -v $MPICC)
 AC_SUBST([MPICC_LOCATION])
 AX_MPIP()
 AX_LIB_HDF5([parallel])
+AX_VISIBILITY([hidden])
 AC_LANG_POP([C])
 AC_CACHE_SAVE
 
@@ -102,7 +103,7 @@ dnl ------------------------------------------------
 dnl Enable GNU libtool
 dnl Current version checks also in Makefile.am
 dnl ------------------------------------------------
-LT_INIT
+LT_INIT([disable_static])
 LT_PREREQ([2.2.6])
 AC_SUBST(LIBTOOL_DEPS)
 AC_CACHE_SAVE

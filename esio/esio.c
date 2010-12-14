@@ -292,10 +292,6 @@ esio_handle_initialize(MPI_Comm comm)
     return h;
 }
 
-#ifdef __INTEL_COMPILER
-// remark #1418: external function definition with no prior declaration
-#pragma warning(push,disable:1418)
-#endif
 esio_handle
 esio_handle_initialize_fortran(MPI_Fint fcomm)
 {
@@ -303,9 +299,6 @@ esio_handle_initialize_fortran(MPI_Fint fcomm)
     // See section 16.3.4 of the MPI 2.2 Standard for details
     return esio_handle_initialize(MPI_Comm_f2c(fcomm));
 }
-#ifdef __INTEL_COMPILER
-#pragma warning(pop)
-#endif
 
 int
 esio_handle_finalize(esio_handle h)

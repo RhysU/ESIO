@@ -73,3 +73,4 @@
 /xalloc.m4
 /xsize.m4
 /chown.m4
+/warn-on-use.m4
