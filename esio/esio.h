@@ -1092,7 +1092,7 @@ esio_field_sizev(const esio_handle h,
  *
  * @return The number of layouts available within ESIO.
  */
-int esio_field_layout_count() ESIO_API;
+int esio_field_layout_count(void) ESIO_API;
 
 
 /**
