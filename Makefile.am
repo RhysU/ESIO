@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-ACLOCAL_AMFLAGS = -I m4 -I gnulib-m4
+ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 # Build in these directories:
@@ -13,7 +13,6 @@ EXTRA_DIST  += $(DX_CONFIG)
 EXTRA_DIST  += build-aux/sfmakedepend.pl
 EXTRA_DIST  += build-aux/update_license.pl
 EXTRA_DIST  += m4/gnulib-cache.m4
-EXTRA_DIST  += gnulib-m4/*
 
 # Eliminate .svn directories in dist tarball
 dist-hook:
@@ -39,7 +38,6 @@ MAINTAINERCLEANFILES =     \
     config.status          \
     config.sub             \
     configure              \
-    gnulib-m4              \
     Makefile.in            \
     src/config.h.in        \
     src/Makefile.in        \
