@@ -8,7 +8,7 @@ SUBDIRS = gnulib esio examples tests apps doxygen
 
 # Distribute these items:
 DIST_SUBDIRS = gnulib esio examples tests apps doxygen
-EXTRA_DIST   = bootstrap
+EXTRA_DIST   = # bootstrap not to be distributed in tarballs
 EXTRA_DIST  += $(DX_CONFIG)
 EXTRA_DIST  += build-aux/sfmakedepend.pl
 EXTRA_DIST  += build-aux/update_license.pl
