@@ -37,7 +37,7 @@ libtoolize --automake --copy  && \
 echo "- gnulib-tool."         && \
 gnulib-tool --update          && \
 echo "- aclocal."             && \
-aclocal -I m4                 && \
+aclocal -I m4 -I gnulib-m4    && \
 echo "- autoconf."            && \
 autoconf                      && \
 echo "- autoheader."          && \
