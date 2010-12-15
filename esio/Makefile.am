@@ -79,6 +79,7 @@ clean-local:
 include $(top_srcdir)/license.am
 
 # Automatic dependency generation for Fortran
+SFMAKEDEPEND_FLAGS =
 include $(top_srcdir)/sfmakedepend.am
 
 # Required for AX_AM_MACROS

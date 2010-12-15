@@ -48,6 +48,7 @@ CLEANFILES += *.mod *.gcno *.gcda
 include $(top_srcdir)/license.am
 
 # Automatic dependency generation for Fortran
+SFMAKEDEPEND_FLAGS = -i esio
 include $(top_srcdir)/sfmakedepend.am
 
 # Required for AX_AM_MACROS

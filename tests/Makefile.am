@@ -17,7 +17,8 @@ noinst_HEADERS  = fct.h                  \
 EXTRA_DIST      = layout_template.c      \
                   plane_template.c       \
                   line_template.c        \
-                  attribute_template.c
+                  attribute_template.c   \
+                  empty.h5
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -265,6 +266,7 @@ clean-local:
 include $(top_srcdir)/license.am
 
 # Automatic dependency generation for Fortran
+SFMAKEDEPEND_FLAGS = -i esio -i esio_c_binding
 include $(top_srcdir)/sfmakedepend.am
 
 # Required for AX_AM_MACROS
