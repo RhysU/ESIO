@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --libtool --macro-prefix=gl --no-vc-files binary-io chown full-write open rename safe-read strdup-posix unistd
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --libtool --macro-prefix=gl --no-vc-files binary-io chown full-write open rename safe-read strdup-posix unistd
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -36,6 +36,7 @@ gl_PO_BASE([])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_LIB([libgnu])
+gl_LGPL
 gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([gl])
