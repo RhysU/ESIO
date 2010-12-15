@@ -1,10 +1,15 @@
 /alloca.h
 /arg-nonnull.h
 /c++defs.h
+/charset.alias
+/configmake.h
 /.deps
+/dirent.h
 /fcntl.h
 /Makefile
 /Makefile.in
+/ref-add.sed
+/ref-del.sed
 /stdio.h
 /stdlib.h
 /string.h
@@ -13,3 +18,4 @@
 /unistd.h
 /warn-on-use.h
 /wchar.h
+/wctype.h
