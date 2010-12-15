@@ -33,6 +33,7 @@ libesio_la_SOURCES  += file-copy.c
 libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
+libesio_la_SOURCES  += restart-rename.c
 libesio_la_LDFLAGS  += $(LTLIBINTL) $(LIB_ACL)     # gnulib requirement
 libesio_la_LIBADD    = ../gnulib/libgnu.la
 
@@ -45,6 +46,7 @@ esio_include_HEADERS += visibility.h
 
 # Headers internal to the library
 noinst_HEADERS += file-copy.h
+noinst_HEADERS += restart-rename.h
 noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h
