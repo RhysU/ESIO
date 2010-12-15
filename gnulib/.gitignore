@@ -1,11 +1,15 @@
+/alloca.h
 /arg-nonnull.h
 /c++defs.h
 /.deps
 /fcntl.h
 /Makefile
 /Makefile.in
+/stdio.h
+/stdlib.h
 /string.h
 /sys
 /time.h
 /unistd.h
 /warn-on-use.h
+/wchar.h
