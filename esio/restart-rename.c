@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
@@ -90,13 +92,32 @@ int restart_nextindex(const char *tmpl,
     return ((int) curr) + 1;
 }
 
+// Thread local storage of filter_tmpl, if possible
+#ifndef TLS
+# define TLS
+#endif
+static TLS const char *filter_tmpl = NULL;
+
+// Used as an argument to scandir within restart_rename
+static int filter(const struct dirent *d)
+{
+    return restart_nextindex(filter_tmpl, d->d_name, 0);
+}
+
+// Used as an argument to scandir within restart_rename
+static int compar(const struct dirent **a,
+                  const struct dirent **b)
+{
+    return strverscmp((*a)->d_name, (*b)->d_name);
+}
+
 int restart_rename(const char *src_filename,
                    const char *dst_template,
                    int keep_howmany)
 {
     if (src_filename == NULL) ESIO_ERROR("src_filename == NULL", ESIO_EFAULT);
     if (dst_template == NULL) ESIO_ERROR("dst_template == NULL", ESIO_EFAULT);
-    if (keep_howmany < 0)     ESIO_ERROR("keep_howmany < 0",     ESIO_EINVAL);
+    if (keep_howmany < 1)     ESIO_ERROR("keep_howmany < 1",     ESIO_EINVAL);
 
     // Ensure we can stat src_filename, which should (mostly) isolate
     // rename(2) ENOENT errors to be related to the destination file.
@@ -106,23 +127,165 @@ int restart_rename(const char *src_filename,
                    ESIO_EFAILED);
     }
 
-    // FIXME Implement
-
-    // Sanity check arguments
-    // Ensure src_filename present
     // Split dst_template into dst_dirname/dst_basename
-    // Ensure dst_dirname exists
-    // Ensure dst_basename well-formed (only 1 sequence of # characters)
-    //    Calculate offsets for pre, ###, post
-    // Calculate ndigits base on maximum of
-    //    1) ceil(log(keep_howmany)/log(10.0))
-    //    2) length of # character sequence
-    // Convert dst_basename to dst_basename_printf by replacing ### with %0NNd
-    //     where NN = ndigits
+    // Need some auxiliary memory since dirname/basename mutate their argument
+    const size_t tmpl_len = strlen(dst_template);
+    char *buffer = malloc(/* NB */ 3 * (tmpl_len + 1));
+    if (!buffer) ESIO_ERROR("Unable to allocate buffer", ESIO_ENOMEM);
+    strcpy(buffer,                dst_template);
+    strcpy(buffer + tmpl_len + 1, dst_template);
+    const char * tmpl_dirname  = dirname(buffer);
+    const char * tmpl_basename = basename(buffer + tmpl_len + 1);
 
-    // Use scandir to obtain a sorted list of current files matching pattern:
-    //    1) Use strverscmp to sort versions per versionsort manpage suggestion
-    //    2) Write a custom filter that:
-    //        2a) Checks for a name match
-    //        2b) Checks for a regular file
+    // Obtain prefix/suffix pointers from splitting tmpl_basename at ('#')*
+    // Additionally, count the number of '#' characters within tmpl_basename
+    char *prefix = buffer + 2*(tmpl_len + 1);
+    strcpy(prefix, tmpl_basename);
+    char *suffix  = strchr(prefix, '#');
+    if (!suffix) {
+        free(buffer);
+        ESIO_ERROR("src_filename must contain at least one '#'", ESIO_EINVAL);
+    }
+    int ndigits = 0;
+    while (*suffix == '#') {
+        ++ndigits;
+        *suffix++ = 0;
+    }
+
+    // Ensure tmpl_basename had only a single sequence of '#' characters
+    if (strchr(suffix, '#')) {
+        free(buffer);
+        ESIO_ERROR("src_filename cannot contain multiple nonadjacent '#'s",
+                   ESIO_EINVAL);
+    }
+
+    // Ensure ndigits is big enough to comfortably handle keep_howmany choice
+    {
+        const int n = (keep_howmany == 1)
+                    ? 1
+                    : (int) ceil(log(keep_howmany-1)/log(10));
+        ndigits = (ndigits > n) ? ndigits : n;
+    }
+
+    // Scan the directory tmpl_dirname looking for things matching tmpl_basename
+    // Sort is according to strverscmp which does what we need here
+    filter_tmpl = tmpl_basename; // Thread local, if possible
+    struct dirent **namelist;
+    int n = scandir(tmpl_dirname, &namelist, filter, compar);
+    if (n < 0) {
+        free(buffer);
+        ESIO_ERROR("Error invoking scandir within restart_rename",
+                   ESIO_EFAILED);
+    }
+
+    // Allocate buffers in which we'll build source and destination paths
+    // NAME_MAX is a reasonable first guess-- use realloc if necessary
+    size_t srclen = NAME_MAX;
+    char *srcbuf  = malloc(srclen);
+    if (!srcbuf) {
+        free(buffer);
+        ESIO_ERROR("Unable to allocate srcbuf", ESIO_ENOMEM);
+    }
+    size_t dstlen = NAME_MAX;
+    char *dstbuf  = malloc(dstlen);
+    if (!dstbuf) {
+        free(srcbuf);
+        free(buffer);
+        ESIO_ERROR("Unable to allocate dstbuf", ESIO_ENOMEM);
+    }
+
+    // Process found entries in reverse order.
+    // Process means renaming them to be the next index value where appropriate.
+    while (n--) {
+
+        // Compute the target index value for the current entry.
+        const int next
+            = restart_nextindex(tmpl_basename, namelist[n]->d_name, -1);
+        if (next <= 0 || next >= keep_howmany) {
+            // Skip processing any entry which are malformed or out-of-range
+            free(namelist[n]);
+            continue;
+        } else {
+            // Construct the source pathname for any in-range entry
+            while (srclen < snprintf(srcbuf, srclen, "%s/%s",
+                                     tmpl_dirname, namelist[n]->d_name)) {
+                srclen *= 2; // Too little space in srcbuf, enlarge it
+                char *p = realloc(srcbuf, srclen);
+                if (p) {
+                    srcbuf = p;
+                } else {
+                    free(namelist[n]);              // Free current
+                    while (n--) free(namelist[n]);  // Free any remaining
+                    free(namelist);                 // Free overhead
+                    free(srcbuf);
+                    free(dstbuf);
+                    free(buffer);
+                    ESIO_ERROR("Unable to enlarge srcbuf", ESIO_ENOMEM);
+                }
+            }
+            free(namelist[n]);
+        }
+
+        // Construct the destination pathname from the template details
+        while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%*d%s",
+                                 tmpl_dirname, prefix, ndigits, next, suffix)) {
+            dstlen *= 2; // Too little space in dstbuf, enlarge it
+            char *p = realloc(dstbuf, dstlen);
+            if (p) {
+                dstbuf = p;
+            } else {
+                while (n--) free(namelist[n]);  // Free any remaining
+                free(namelist);                 // Free overhead
+                free(srcbuf);
+                free(dstbuf);
+                free(buffer);
+                ESIO_ERROR("Unable to enlarge dstbuf", ESIO_ENOMEM);
+            }
+        }
+
+        // Rename the entry from srcbuf to dstbuf
+        if (rename(srcbuf, dstbuf)) {
+            char msg[1024];
+            snprintf(msg, sizeof(msg),
+                     "Error renaming '%s' to '%s'", srcbuf, dstbuf);
+            while (n--) free(namelist[n]);  // Free any remaining
+            free(namelist);                 // Free overhead
+            free(srcbuf);
+            free(dstbuf);
+            free(buffer);
+            ESIO_ERROR(msg, ESIO_EFAILED);
+        }
+    }
+    free(namelist);
+    free(srcbuf);
+
+    // Build the destination for the src_filename rename
+    while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%*d%s",
+                             tmpl_dirname, prefix, ndigits, 0, suffix)) {
+        dstlen *= 2; // Too little space in dstbuf, enlarge it
+        char *p = realloc(dstbuf, dstlen);
+        if (p) {
+            dstbuf = p;
+        } else {
+            free(dstbuf);
+            free(buffer);
+            ESIO_ERROR("Unable to enlarge dstbuf", ESIO_ENOMEM);
+        }
+    }
+
+    // Finally, perform the rename we've wanted all along
+    if (rename(src_filename, dstbuf)) {
+        char msg[1024];
+        snprintf(msg, sizeof(msg),
+                 "Error renaming '%s' to '%s'", src_filename, dstbuf);
+        free(dstbuf);
+        free(buffer);
+        ESIO_ERROR(msg, ESIO_EFAILED);
+    }
+
+    // Clean up
+    free(dstbuf);
+    free(buffer);
+
+    return ESIO_SUCCESS;
 }
