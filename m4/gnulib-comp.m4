@@ -26,14 +26,12 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
-  # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module arg-nonnull:
   # Code from module binary-io:
   # Code from module c++defs:
   # Code from module canonicalize-lgpl:
   # Code from module chown:
-  # Code from module configmake:
   # Code from module dirent:
   # Code from module dirname-lgpl:
   # Code from module double-slash-root:
@@ -41,17 +39,11 @@ AC_DEFUN([gl_EARLY],
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module fcntl-h:
-  # Code from module fnmatch:
   # Code from module full-write:
   # Code from module include_next:
-  # Code from module localcharset:
   # Code from module lstat:
   # Code from module malloc-posix:
   # Code from module malloca:
-  # Code from module mbrtowc:
-  # Code from module mbsinit:
-  # Code from module mbsrtowcs:
-  # Code from module memchr:
   # Code from module multiarch:
   # Code from module open:
   # Code from module pathmax:
@@ -70,9 +62,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module stdio:
   # Code from module stdlib:
   # Code from module strdup-posix:
-  # Code from module streq:
   # Code from module string:
-  # Code from module strnlen1:
   # Code from module strverscmp:
   # Code from module sys_stat:
   # Code from module time:
@@ -80,7 +70,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module verify:
   # Code from module warn-on-use:
   # Code from module wchar:
-  # Code from module wctype:
   # Code from module write:
 ])
 
@@ -98,11 +87,6 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='gnulib'
-  # Code from module alloca:
-changequote(,)dnl
-LTALLOCA=`echo "$ALLOCA" | sed -e 's/\.[^.]* /.lo /g;s/\.[^.]*$/.lo/'`
-changequote([, ])dnl
-AC_SUBST([LTALLOCA])
   # Code from module alloca-opt:
   gl_FUNC_ALLOCA
   # Code from module arg-nonnull:
@@ -116,7 +100,6 @@ AC_SUBST([LTALLOCA])
   # Code from module chown:
   gl_FUNC_CHOWN
   gl_UNISTD_MODULE_INDICATOR([chown])
-  # Code from module configmake:
   # Code from module dirent:
   gl_DIRENT_H
   # Code from module dirname-lgpl:
@@ -128,14 +111,8 @@ AC_SUBST([LTALLOCA])
   # Code from module extensions:
   # Code from module fcntl-h:
   gl_FCNTL_H
-  # Code from module fnmatch:
-  gl_FUNC_FNMATCH_POSIX
   # Code from module full-write:
   # Code from module include_next:
-  # Code from module localcharset:
-  gl_LOCALCHARSET
-  LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(top_builddir)/$gl_source_base\""
-  AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
   # Code from module lstat:
   gl_FUNC_LSTAT
   gl_SYS_STAT_MODULE_INDICATOR([lstat])
@@ -144,18 +121,6 @@ AC_SUBST([LTALLOCA])
   gl_STDLIB_MODULE_INDICATOR([malloc-posix])
   # Code from module malloca:
   gl_MALLOCA
-  # Code from module mbrtowc:
-  gl_FUNC_MBRTOWC
-  gl_WCHAR_MODULE_INDICATOR([mbrtowc])
-  # Code from module mbsinit:
-  gl_FUNC_MBSINIT
-  gl_WCHAR_MODULE_INDICATOR([mbsinit])
-  # Code from module mbsrtowcs:
-  gl_FUNC_MBSRTOWCS
-  gl_WCHAR_MODULE_INDICATOR([mbsrtowcs])
-  # Code from module memchr:
-  gl_FUNC_MEMCHR
-  gl_STRING_MODULE_INDICATOR([memchr])
   # Code from module multiarch:
   gl_MULTIARCH
   # Code from module open:
@@ -198,10 +163,8 @@ AC_SUBST([LTALLOCA])
   # Code from module strdup-posix:
   gl_FUNC_STRDUP_POSIX
   gl_STRING_MODULE_INDICATOR([strdup])
-  # Code from module streq:
   # Code from module string:
   gl_HEADER_STRING_H
-  # Code from module strnlen1:
   # Code from module strverscmp:
   gl_FUNC_STRVERSCMP
   gl_STRING_MODULE_INDICATOR([strverscmp])
@@ -216,8 +179,6 @@ AC_SUBST([LTALLOCA])
   # Code from module warn-on-use:
   # Code from module wchar:
   gl_WCHAR_H
-  # Code from module wctype:
-  gl_WCTYPE_H
   # Code from module write:
   gl_FUNC_WRITE
   gl_UNISTD_MODULE_INDICATOR([write])
@@ -360,42 +321,27 @@ AC_DEFUN([gl_FILE_LIST], [
   build-aux/arg-nonnull.h
   build-aux/c++defs.h
   build-aux/warn-on-use.h
-  lib/alloca.c
   lib/alloca.in.h
   lib/basename-lgpl.c
   lib/binary-io.h
   lib/canonicalize-lgpl.c
   lib/chown.c
-  lib/config.charset
   lib/dirent.in.h
   lib/dirname-lgpl.c
   lib/dirname.h
   lib/errno.in.h
   lib/fchown-stub.c
   lib/fcntl.in.h
-  lib/fnmatch.c
-  lib/fnmatch.in.h
-  lib/fnmatch_loop.c
   lib/full-write.c
   lib/full-write.h
-  lib/localcharset.c
-  lib/localcharset.h
   lib/lstat.c
   lib/malloc.c
   lib/malloca.c
   lib/malloca.h
   lib/malloca.valgrind
-  lib/mbrtowc.c
-  lib/mbsinit.c
-  lib/mbsrtowcs-state.c
-  lib/mbsrtowcs.c
-  lib/memchr.c
-  lib/memchr.valgrind
   lib/open.c
   lib/pathmax.h
   lib/readlink.c
-  lib/ref-add.sin
-  lib/ref-del.sin
   lib/rename.c
   lib/rmdir.c
   lib/safe-read.c
@@ -412,25 +358,20 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdio.in.h
   lib/stdlib.in.h
   lib/strdup.c
-  lib/streq.h
   lib/string.in.h
   lib/stripslash.c
-  lib/strnlen1.c
-  lib/strnlen1.h
   lib/strverscmp.c
   lib/sys_stat.in.h
   lib/time.in.h
   lib/unistd.in.h
   lib/verify.h
   lib/wchar.in.h
-  lib/wctype.in.h
   lib/write.c
   m4/00gnulib.m4
   m4/alloca.m4
   m4/asm-underscore.m4
   m4/canonicalize.m4
   m4/chown.m4
-  m4/codeset.m4
   m4/dirent_h.m4
   m4/dirname.m4
   m4/dos.m4
@@ -440,24 +381,12 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/extensions.m4
   m4/fcntl-o.m4
   m4/fcntl_h.m4
-  m4/fnmatch.m4
-  m4/glibc21.m4
   m4/gnulib-common.m4
   m4/include_next.m4
-  m4/localcharset.m4
-  m4/locale-fr.m4
-  m4/locale-ja.m4
-  m4/locale-zh.m4
   m4/longlong.m4
   m4/lstat.m4
   m4/malloc.m4
   m4/malloca.m4
-  m4/mbrtowc.m4
-  m4/mbsinit.m4
-  m4/mbsrtowcs.m4
-  m4/mbstate_t.m4
-  m4/memchr.m4
-  m4/mmap-anon.m4
   m4/mode_t.m4
   m4/multiarch.m4
   m4/open.m4
@@ -484,7 +413,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/warn-on-use.m4
   m4/wchar_h.m4
   m4/wchar_t.m4
-  m4/wctype_h.m4
   m4/wint_t.m4
   m4/write.m4
 ])
