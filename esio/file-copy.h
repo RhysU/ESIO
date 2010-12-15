@@ -36,12 +36,15 @@ extern "C" {
  * \param dest_filename Destination filename
  * \param overwrite If zero, fail if an existing file is detected.
  *                  If nonzero, clobber any existing file.
+ * \param blockuntilsync If nonzero, block until the device reports
+ *                       that all data has been flushed cleanly.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int file_copy (const char *src_filename,
                const char *dest_filename,
-               int overwrite);
+               int overwrite,
+               int blockuntilsync);
 
 #ifdef __cplusplus
 }

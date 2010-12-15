@@ -41,7 +41,8 @@ AM_FCFLAGS += $(GRVY_FCFLAGS)
 #############################################################################
 
 ## Basic C API sanity checks
-TESTS          += basic
+TESTS          += basic.sh     # NB Wrapper script
+EXTRA_DIST     += basic.sh     # NB Wrapper script
 check_PROGRAMS += basic
 basic_SOURCES   = basic.c testutils.c
 basic_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)

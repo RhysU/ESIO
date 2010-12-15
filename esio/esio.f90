@@ -205,6 +205,39 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine esio_file_clone (handle, srcfile, dstfile, overwrite, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: srcfile
+    character(len=*),  intent(in)            :: dstfile
+    logical,           intent(in)            :: overwrite
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, srcfile, dstfile, overwrite)  &
+                    bind (C, name="esio_file_clone")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: srcfile(*)
+        character(len=1,kind=c_char), intent(in)        :: dstfile(*)
+        integer(c_int),               intent(in), value :: overwrite
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(handle,                      &
+                esio_f_c_string(srcfile),    &
+                esio_f_c_string(dstfile),    &
+                esio_f_c_logical(overwrite))
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_file_clone
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine esio_file_open (handle, file, readwrite, ierr)
 
     type(esio_handle), intent(in)            :: handle

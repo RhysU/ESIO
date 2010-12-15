@@ -44,7 +44,8 @@ enum { IO_SIZE = 32 * 1024 };
 int
 file_copy (const char *src_filename,
            const char *dest_filename,
-           int overwrite)
+           int overwrite,
+           int blockuntilsync)
 {
     int src_fd;
     struct stat statbuf;
@@ -97,6 +98,13 @@ file_copy (const char *src_filename,
     }
 
     free (buf);
+
+    /* If requested, ensure the destination file has hit the device */
+    if (blockuntilsync) {
+        if (fsync (dest_fd) < 0) {
+            ESIO_ERROR("Error sync-ing destination file", ESIO_EFAILED);
+        }
+    }
 
     if (close (dest_fd) < 0) {
         ESIO_ERROR("Error closing destination file", ESIO_EFAILED);

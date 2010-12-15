@@ -38,6 +38,7 @@
 
 #include "error.h"
 #include "esio.h"
+#include "file-copy.h"
 #include "h5utils.h"
 #include "layout.h"
 #include "metadata.h"
@@ -405,6 +406,40 @@ esio_file_create(esio_handle h, const char *file, int overwrite)
     H5Pclose(fapl_id);
 
     return ESIO_SUCCESS;
+}
+
+int esio_file_clone(esio_handle h,
+                    const char *srcfile,
+                    const char *dstfile,
+                    int overwrite)
+{
+    // Sanity check incoming arguments
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
+    }
+    if (h->file_id != -1) {
+        ESIO_ERROR("Cannot create file because previous file not closed",
+                   ESIO_EINVAL);
+    }
+    if (srcfile == NULL) {
+        ESIO_ERROR("srcfile == NULL", ESIO_EFAULT);
+    }
+    if (dstfile == NULL) {
+        ESIO_ERROR("dstfile == NULL", ESIO_EFAULT);
+    }
+
+    // First rank copies the file synchronously and broadcasts result
+    int status;
+    if (h->comm_rank == 0) {
+       status = file_copy(srcfile, dstfile, overwrite, 1 /*blockuntilsync*/);
+    }
+    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, 0/*root*/, h->comm));
+
+    // Bail now if an error occurred
+    if (status) return status;
+
+    // All ranks then open the file in readwrite mode
+    return esio_file_open(h, dstfile, 1 /* readwrite */);
 }
 
 int

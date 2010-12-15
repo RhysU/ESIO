@@ -104,6 +104,22 @@ int esio_handle_finalize(esio_handle h) ESIO_API;
 int esio_file_create(esio_handle h, const char *file, int overwrite) ESIO_API;
 
 /**
+ * Create and open a new file by cloning the contents of an existing file.
+ *
+ * \param h Handle to use.
+ * \param srcfile Name of the existing file to be cloned.
+ * \param dstfile Name of the new file to be opened.
+ * \param overwrite If zero, fail if an existing file with name \c dstfile
+ *                  is detected.  If nonzero, clobber any existing file.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
+int esio_file_clone(esio_handle h,
+                    const char *srcfile,
+                    const char *dstfile,
+                    int overwrite) ESIO_API;
+
+/**
  * Open an existing file.
  *
  * \param h Handle to use.
