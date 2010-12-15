@@ -47,6 +47,13 @@ check_PROGRAMS          += restart_helpers
 restart_helpers_SOURCES  = restart_helpers.c ../esio/restart-rename.c
 restart_helpers_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
+## Externally observable restart renaming tets
+TESTS                   += # FIXME Add wrapper script
+EXTRA_DIST              += # FIXME Add wrapper script
+check_PROGRAMS          += restart_rename
+restart_rename_SOURCES   = restart_rename.c ../esio/restart-rename.c
+restart_rename_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
 #############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##
 #############################################################################
