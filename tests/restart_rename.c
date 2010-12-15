@@ -37,7 +37,7 @@
 
 #include <esio/restart-rename.h>
 
-static int print_usage(FILE *stream, const char *arg0)
+static void print_usage(FILE *stream, const char *arg0)
 {
     fprintf(stream, "Usage:\n");
     fprintf(stream, "\t%s src_filename dst_template keep_howmany\n", arg0);
@@ -68,9 +68,13 @@ int main(int argc, char *argv[])
     const char *src_filename = argv[1];
     const char *dst_template = argv[2];
     errno = 0;
-    const unsigned long nlong = strtol(argv[3], NULL, 10);
+    const long nlong = strtol(argv[3], NULL, 10);
     if (errno) {
         fprintf(stderr, "Error parsing keep_howmany = '%s'\n", argv[3]);
+        return EXIT_FAILURE;
+    }
+    if (nlong < 1) {
+        fprintf(stderr, "Error keep_howmany < 1\n");
         return EXIT_FAILURE;
     }
     if (nlong > INT_MAX) {
