@@ -30,6 +30,28 @@
 extern "C" {
 #endif
 
+/**
+ * Increment any index number found in \c name when it matches \c tmpl.
+ * A match requires that the strings are character-by-character identical
+ * up to the first \c # (hash sign) and after the last \c # (hash sign)
+ * in \c tmpl.  The string \c name must contain one or more decimal
+ * digits within the \c # region within \c tmpl.  The current index number
+ * is defined to be the decimal value parsed from the \c # region within
+ * \c name.  The incremented index number is one plus the current index.
+ *
+ * @param tmpl   Template to use.
+ * @param name   Name to use.
+ * @param errval Value to return on usage error due to a bad template
+ *               or an index overflow condition.
+ *
+ * @return The incremented index number on success or zero if \c name
+ *         does not match \c tmpl.  Note that a successful, matching result
+ *         will be strictly positive whenever \c errval < 0.
+ */
+int restart_nextindex(const char *tmpl,
+                      const char *name,
+                      const int errval);
+
 int restart_rename(const char *src_filename,
                    const char *dst_template,
                    int keep_howmany);

@@ -38,6 +38,16 @@ AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
 #############################################################################
+## INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL ##
+#############################################################################
+
+## Internal restart renaming logic tests
+TESTS                   += restart_helpers
+check_PROGRAMS          += restart_helpers
+restart_helpers_SOURCES  = restart_helpers.c ../esio/restart-rename.c
+restart_helpers_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+#############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##
 #############################################################################
 
