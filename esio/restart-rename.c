@@ -148,23 +148,23 @@ static int compar(const struct dirent **a,
     return strverscmp((*a)->d_name, (*b)->d_name);
 }
 
-int restart_rename(const char *src_filename,
+int restart_rename(const char *src_filepath,
                    const char *dst_template,
                    int keep_howmany)
 {
     char errmsg[256] = ""; // Used to provide fairly extensive error messages
 
-    if (src_filename == NULL) ESIO_ERROR("src_filename == NULL", ESIO_EFAULT);
+    if (src_filepath == NULL) ESIO_ERROR("src_filepath == NULL", ESIO_EFAULT);
     if (dst_template == NULL) ESIO_ERROR("dst_template == NULL", ESIO_EFAULT);
     if (keep_howmany < 1)     ESIO_ERROR("keep_howmany < 1",     ESIO_EINVAL);
 
-    // Ensure we can stat src_filename, which should (mostly) isolate
+    // Ensure we can stat src_filepath, which should (mostly) isolate
     // rename(2) ENOENT errors to be related to the destination file.
     struct stat statbuf;
-    if (stat(src_filename, &statbuf) < 0) {
+    if (stat(src_filepath, &statbuf) < 0) {
         snprintf(errmsg, sizeof(errmsg),
-                 "Error stat(2)-ing src_filename '%s' during restart_rename",
-                 src_filename);
+                 "Error stat(2)-ing src_filepath '%s' during restart_rename",
+                 src_filepath);
         ESIO_ERROR(errmsg, ESIO_EFAILED);
     }
 
@@ -289,20 +289,20 @@ int restart_rename(const char *src_filename,
     free(namelist);
     if (srcbuf) free(srcbuf);
 
-    // Build the destination for the src_filename rename
+    // Build the destination for the src_filepath rename
     if (0 > snprintf_realloc(&dstbuf, &dstlen, "%s/%s%0*d%s",
                              tmpl_dirname, prefix, ndigits, 0, suffix)) {
         snprintf(errmsg, sizeof(errmsg), "Unable to form dstbuf for '%s'",
-                 src_filename);
+                 src_filepath);
         if (dstbuf) free(dstbuf);
         free(buffer);
         ESIO_ERROR(errmsg, ESIO_ENOMEM);
     }
 
-    // Finally, perform the rename of src_filename to match dst_template
-    if (rename(src_filename, dstbuf)) {
+    // Finally, perform the rename of src_filepath to match dst_template
+    if (rename(src_filepath, dstbuf)) {
         snprintf(errmsg, sizeof(errmsg),
-                 "Error renaming '%s' to '%s'", src_filename, dstbuf);
+                 "Error renaming '%s' to '%s'", src_filepath, dstbuf);
         if (dstbuf) free(dstbuf);
         free(buffer);
         ESIO_ERROR(errmsg, ESIO_EFAILED);

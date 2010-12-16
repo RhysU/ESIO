@@ -78,7 +78,24 @@ int restart_nextindex(const char *tmpl,
                       const char *name,
                       const int errval);
 
-int restart_rename(const char *src_filename,
+/**
+ * Rename the restart file \c src_filepath to match \c dst_template when the
+ * restart index is zero.  Other files matching dst_template with index numbers
+ * in the range <tt>[0,keep_howmany-1]</tt> (inclusive) have their index
+ * numbers incremented.
+ *
+ * @param src_filepath The file to be renamed to restart index zero.
+ *                     It <b>must not</b> match \c dst_template.
+ * @param dst_template The destination template, which must contain a
+ *                     single sequence of one or more consecutive
+ *                     hash signs ('#') which will be populated with
+ *                     restart index numbers.
+ * @param keep_howmany How many old restart files should be kept around?
+ *                     This argument must be strictly positive.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
+int restart_rename(const char *src_filepath,
                    const char *dst_template,
                    int keep_howmany);
 
