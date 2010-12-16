@@ -29,5 +29,6 @@
 /plane_int
 /plane_int_f
 /restart_helpers
+/restart_rename
 /string
 /string_f
