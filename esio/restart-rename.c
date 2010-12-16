@@ -123,8 +123,11 @@ int restart_rename(const char *src_filename,
     // rename(2) ENOENT errors to be related to the destination file.
     struct stat statbuf;
     if (stat(src_filename, &statbuf) < 0) {
-        ESIO_ERROR("Error to stat(2)-ing src_filename during restart_rename",
-                   ESIO_EFAILED);
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "Error stat(2)-ing src_filename '%s' during restart_rename",
+                 src_filename);
+        ESIO_ERROR(msg, ESIO_EFAILED);
     }
 
     // Split dst_template into dst_dirname/dst_basename
@@ -143,8 +146,12 @@ int restart_rename(const char *src_filename,
     strcpy(prefix, tmpl_basename);
     char *suffix  = strchr(prefix, '#');
     if (!suffix) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "dst_template '%s' must contain at least one '#'",
+                 dst_template);
         free(buffer);
-        ESIO_ERROR("src_filename must contain at least one '#'", ESIO_EINVAL);
+        ESIO_ERROR(msg, ESIO_EINVAL);
     }
     int ndigits = 0;
     while (*suffix == '#') {
@@ -154,9 +161,12 @@ int restart_rename(const char *src_filename,
 
     // Ensure tmpl_basename had only a single sequence of '#' characters
     if (strchr(suffix, '#')) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "dst_template '%s' cannot contain multiple nonadjacent '#'s",
+                 dst_template);
         free(buffer);
-        ESIO_ERROR("src_filename cannot contain multiple nonadjacent '#'s",
-                   ESIO_EINVAL);
+        ESIO_ERROR(msg, ESIO_EINVAL);
     }
 
     // Ensure ndigits is big enough to comfortably handle keep_howmany choice
@@ -173,9 +183,12 @@ int restart_rename(const char *src_filename,
     struct dirent **namelist;
     int n = scandir(tmpl_dirname, &namelist, filter, compar);
     if (n < 0) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+                 "Error invoking scandir on '%s' within restart_rename",
+                 tmpl_dirname);
         free(buffer);
-        ESIO_ERROR("Error invoking scandir within restart_rename",
-                   ESIO_EFAILED);
+        ESIO_ERROR(msg, ESIO_EFAILED);
     }
 
     // Allocate buffers in which we'll build source and destination paths
@@ -227,7 +240,7 @@ int restart_rename(const char *src_filename,
         }
 
         // Construct the destination pathname from the template details
-        while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%*d%s",
+        while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%0*d%s",
                                  tmpl_dirname, prefix, ndigits, next, suffix)) {
             dstlen *= 2; // Too little space in dstbuf, enlarge it
             char *p = realloc(dstbuf, dstlen);
@@ -260,7 +273,7 @@ int restart_rename(const char *src_filename,
     free(srcbuf);
 
     // Build the destination for the src_filename rename
-    while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%*d%s",
+    while (dstlen < snprintf(dstbuf, dstlen, "%s/%s%0*d%s",
                              tmpl_dirname, prefix, ndigits, 0, suffix)) {
         dstlen *= 2; // Too little space in dstbuf, enlarge it
         char *p = realloc(dstbuf, dstlen);
@@ -275,7 +288,7 @@ int restart_rename(const char *src_filename,
 
     // Finally, perform the rename we've wanted all along
     if (rename(src_filename, dstbuf)) {
-        char msg[1024];
+        char msg[256];
         snprintf(msg, sizeof(msg),
                  "Error renaming '%s' to '%s'", src_filename, dstbuf);
         free(dstbuf);
