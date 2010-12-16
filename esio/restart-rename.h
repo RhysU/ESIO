@@ -26,9 +26,35 @@
 #ifndef __ESIO_RESTART_RENAME_H
 #define __ESIO_RESTART_RENAME_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * Call <tt>snprintf(*str, *size, format, ...)</tt> and reallocate the buffer
+ * pointed to by <tt>*str</tt> as appropriate to contain the entire result.  On
+ * exit, <tt>*str</tt> and <tt>*size</tt> will contain a pointer to the
+ * <tt>realloc</tt>ed buffer and its maximum usable size, respectively.
+ *
+ * The reallocation scheme attempts to reduce the reallocation calls when the
+ * same <tt>str</tt> and <tt>size</tt> arguments are used repeatedly.  It is
+ * valid to pass <tt>*str == NULL</tt> and <tt>*size == 0</tt> and then have
+ * the buffer allocated to perfectly fit the result.
+ *
+ * @param[in,out] str    Pointer to the buffer in which to write the result.
+ * @param[in,out] size   Pointer to the initial buffer size.
+ * @param[in]     format Format specifier to use in <tt>sprintf</tt> call.
+ * @param[in]     ...    Variable number of arguments corresponding
+ *                       to \c format.
+ *
+ * @return On success, the number of characters (not including the trailing
+ *         '\0') written to <tt>*str</tt>.  On error, a negative value
+ *         is returned, <tt>*str</tt> is <tt>free</tt>d and <tt>*size</tt>
+ *         is set to zero.
+ */
+int snprintf_realloc(char **str, size_t *size, const char *format, ...);
 
 /**
  * Increment any index number found in \c name when it matches \c tmpl.

@@ -42,7 +42,61 @@
 
 FCT_BGN()
 {
-    FCT_FIXTURE_SUITE_BGN(restart_helpers)
+    FCT_FIXTURE_SUITE_BGN(snprintf_realloc)
+    {
+        const char s[] = "1234";
+        char *ptr;
+        size_t size;
+
+        FCT_SETUP_BGN()
+        {
+            ptr  = NULL;
+            size = 0;
+        }
+        FCT_SETUP_END();
+
+        FCT_TEARDOWN_BGN()
+        {
+            if (ptr) free(ptr);
+        }
+        FCT_TEARDOWN_END();
+
+        FCT_TEST_BGN(snprintf_realloc)
+        {
+            // Initial should cause malloc-like behavior
+            fct_chk_eq_int(4, snprintf_realloc(&ptr, &size, "%s", s));
+            fct_chk(ptr);
+            fct_chk_eq_int(size, 5);
+            fct_chk_eq_str(ptr, s);
+
+            // Repeated size should not cause any new buffer allocation
+            {
+                char *last_ptr = ptr;
+                fct_chk_eq_int(4, snprintf_realloc(&ptr, &size, "%s", s));
+                fct_chk(last_ptr == ptr);
+                fct_chk_eq_int(size, 5);
+                fct_chk_eq_str(ptr, s);
+            }
+
+            // Request requiring more than twice the space should
+            // realloc memory to fit exactly.
+            fct_chk_eq_int(12, snprintf_realloc(&ptr, &size, "%s%s%s",
+                                                s, s, s));
+            fct_chk_eq_int(size, 13);
+            fct_chk_eq_str(ptr, "123412341234");
+
+            // Request requiring less than twice the space should
+            // cause a doubling of the buffer size.
+            fct_chk_eq_int(16, snprintf_realloc(&ptr, &size, "%s%s%s%s",
+                                                s, s, s, s));
+            fct_chk_eq_int(size, 26);
+            fct_chk_eq_str(ptr, "1234123412341234");
+        }
+        FCT_TEST_END();
+    }
+    FCT_FIXTURE_SUITE_END();
+
+    FCT_FIXTURE_SUITE_BGN(nextindex)
     {
         FCT_SETUP_BGN()
         {
