@@ -26,7 +26,7 @@
 module testframework
 
 #ifdef __INTEL_COMPILER
-  use ifport, only: abort, unlink
+  use ifport, only: abort
 #endif /* __INTEL_COMPILER */
   use mpi
   use esio
@@ -44,7 +44,8 @@ module testframework
   integer, public, allocatable, dimension(:) :: global, start, local, stride
   logical, public                            :: verbose = .false.
 
-  public :: testframework_setup, testframework_teardown, testframework_assert
+  public :: testframework_setup, testframework_teardown
+  public :: testframework_assert, testframework_unlink
 
 contains
 
@@ -142,8 +143,6 @@ contains
 
   subroutine testframework_teardown ()
 
-    logical :: file_exists
-
 !   Finalize the ESIO handle
     call esio_handle_finalize (h, ierr)
     if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
@@ -161,10 +160,7 @@ contains
     end if
 
 !   Attempt to delete the named temporary file, if it exists
-    if (.not. verbose .and. world_rank == 0) then
-      inquire (file=trim(filename), exist=file_exists)
-      if (file_exists) ierr = unlink(trim(filename))
-    end if
+    call testframework_unlink(filename)
 
 !   Finalize MPI
     call MPI_Finalize (ierr)
@@ -261,6 +257,25 @@ contains
     call esio_c_free(tmp_p)
 
   end function create_testfilename
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine testframework_unlink (filename)
+
+#ifdef __INTEL_COMPILER
+  use ifport, only: unlink
+#endif /* __INTEL_COMPILER */
+
+    character(len=*), intent(in) :: filename
+    logical                      :: file_exists
+
+!   Attempt to delete the named temporary file, if it exists
+    if (.not. verbose .and. world_rank == 0) then
+      inquire (file=trim(filename), exist=file_exists)
+      if (file_exists) ierr = unlink(trim(filename))
+    end if
+
+  end subroutine testframework_unlink
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

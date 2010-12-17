@@ -97,12 +97,8 @@ program basic_f
     ASSERT(      file_exists)
 
 !   Clean up restart files leftover from test
-    if (.not. verbose .and. world_rank == 0) then
-      inquire (file=trim(restart0), exist=file_exists)
-      if (file_exists) ierr = unlink(trim(restart0))
-      inquire (file=trim(restart1), exist=file_exists)
-      if (file_exists) ierr = unlink(trim(restart1))
-    end if
+    call testframework_unlink(restart0)
+    call testframework_unlink(restart1)
 
     call testframework_teardown()
 
