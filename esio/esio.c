@@ -578,7 +578,7 @@ int esio_file_close_restart(esio_handle h,
     if (retain_count < 1) {
         ESIO_ERROR("retain_count < 1", ESIO_EINVAL);
     }
-    if (h->file_id != -1) {
+    if (h->file_id == -1) {
         ESIO_ERROR("No file currently open", ESIO_EINVAL);
     }
 
