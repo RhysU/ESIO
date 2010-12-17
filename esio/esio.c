@@ -42,6 +42,7 @@
 #include "h5utils.h"
 #include "layout.h"
 #include "metadata.h"
+#include "restart-rename.h"
 #include "version.h"
 
 //*********************************************************************
@@ -488,7 +489,7 @@ int esio_file_clone(esio_handle h,
         ESIO_ERROR("dstfile == NULL", ESIO_EFAULT);
     }
 
-    // One rank copies the file synchronously and broadcasts result
+    // One rank copies the file synchronously and broadcasts the result
     const int worker = h->comm_size - 1; // Last rank does work
     int status;
     if (h->comm_rank == worker) {
@@ -506,12 +507,12 @@ int esio_file_clone(esio_handle h,
 char* esio_file_path(const esio_handle h)
 {
     // Sanity check incoming arguments
-    if (h == NULL) ESIO_ERROR_NULL("h == NULL", ESIO_EFAULT);
-
+    if (h == NULL) {
+        ESIO_ERROR_NULL("h == NULL", ESIO_EFAULT);
+    }
     if (h->file_id == -1) {
         return NULL;
     }
-
     if (h->file_path == NULL) {
         ESIO_ERROR_NULL("file_id != -1 but file_path == NULL", ESIO_ESANITY);
     }
@@ -559,6 +560,53 @@ int esio_file_close(esio_handle h)
         h->file_id = -1;
     }
 
+    return ESIO_SUCCESS;
+}
+
+int esio_file_close_restart(esio_handle h,
+                            const char *restart_template,
+                            int retain_count)
+{
+    // Sanity check incoming arguments
+    // Template sanity checking is performed within restart_rename as well
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
+    }
+    if (restart_template == NULL) {
+        ESIO_ERROR("restart_template == NULL", ESIO_EFAULT);
+    }
+    if (retain_count < 1) {
+        ESIO_ERROR("retain_count < 1", ESIO_EINVAL);
+    }
+    if (h->file_id != -1) {
+        ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    }
+
+    // Copy the current file's canonical path and then close the file
+    char *src_filename = esio_file_path(h);
+    if (src_filename == NULL) {
+        ESIO_ERROR("Unable to clone file's canonical path", ESIO_EFAILED);
+    }
+    const int close_status = esio_file_close(h);
+    if (close_status != ESIO_SUCCESS) {
+        ESIO_ERROR("Unable to close current restart file", close_status);
+    }
+
+    // One rank invokes restart_rename and broadcasts the result
+    const int worker = h->comm_size - 1; // Last rank does work
+    int status;
+    if (h->comm_rank == worker) {
+        status = restart_rename(src_filename, restart_template, retain_count);
+    }
+    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
+
+    // Free temporary memory
+    free(src_filename);
+
+    // All ranks return the same status
+    if (status != ESIO_SUCCESS) {
+        ESIO_ERROR("Failure in esio_file_close_restart", status);
+    }
     return ESIO_SUCCESS;
 }
 

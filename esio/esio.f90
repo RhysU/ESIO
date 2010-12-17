@@ -348,6 +348,35 @@ contains
 
   end subroutine esio_file_close
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_file_close_restart (handle, restart_template,  &
+                                      retain_count, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: restart_template
+    integer,           intent(in)            :: retain_count
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, restart_template, retain_count)  &
+                     bind (C, name="esio_file_close_restart")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: restart_template(*)
+        integer(c_int),               intent(in), value :: retain_count
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(handle, esio_f_c_string(restart_template), retain_count)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_file_close_restart
+
 !!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -162,6 +162,38 @@ int esio_file_flush(esio_handle h) ESIO_API;
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int esio_file_close(esio_handle h) ESIO_API;
+
+/**
+ * Close the currently open file and rename it to match the path given in \c
+ * restart_template.  Up to \c retain_count previous restart files will be
+ * retained and will automatically have their index numbers incremented.  Index
+ * numbers are in the range <tt>[0, retain_count-1]</tt> (inclusive) with index
+ * \c 0 being the newest file.
+ *
+ * The \c restart_template path can be an absolute or relative path where the
+ * final filename must contain a sequence of one or more consecutive hash signs
+ * ('#') which will be populated with restart index numbers.  A sufficient
+ * number of leading zeros to accommodate <tt>retain_count - 1</tt> separate
+ * restart files will always be present.  Using additional hash signs will
+ * increase the number of leading zeros appearing in restart file names.
+ *
+ * \warning The currently open file path must not match \c restart_template,
+ *          otherwise this method will fail with mysterious renaming errors.
+ *
+ * \param h                Handle to use.
+ * \param restart_template The restart template to use.  See the information
+ *                         above for what constitutes a valid value.
+ * \param retain_count     The maximum number of old restart files to retain.
+ *                         Value must me strictly positive.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ *         On failure the handle \c h will be in an undefined state and should
+ *         be finalized using esio_handle_finalize().  Applications are advised
+ *         to treat a failure within this method as unrecoverable.
+ */
+int esio_file_close_restart(esio_handle h,
+                            const char *restart_template,
+                            int retain_count) ESIO_API;
 /*\@}*/
 
 
