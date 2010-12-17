@@ -31,9 +31,11 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <mpi.h>
 #include <hdf5.h>
@@ -151,6 +153,9 @@ FCT_BGN()
 
         FCT_TEST_BGN(file_create_and_open)
         {
+            // No open file so esio_file_path is empty
+            fct_req(NULL == esio_file_path(state));
+
             // Create with overwrite should always work
             fct_req(0 == esio_file_create(state, filename, 1 /* overwrite */));
 
@@ -159,11 +164,22 @@ FCT_BGN()
             fct_req(0 == esio_file_flush(state));
             fct_req(0 == esio_file_flush(state));
 
+            // Check that esio_file_path points to a valid canonical location
+            struct stat statbuf;
+            char *file_path = esio_file_path(state);
+            fct_req(file_path != NULL);
+            fct_chk_startswith_str(file_path, "/"); // Absolute?
+            fct_req(0 == stat(file_path, &statbuf));
+            free(file_path);
+
             // Close the file
             fct_req(0 == esio_file_close(state));
 
             // Double closure should silently succeed
             fct_req(0 == esio_file_close(state));
+
+            // No open file so esio_file_path is empty
+            fct_req(NULL == esio_file_path(state));
 
             // Create without overwrite should fail
             H5Eset_auto(H5E_DEFAULT, NULL, NULL);
@@ -200,6 +216,9 @@ FCT_BGN()
         FCT_TEST_BGN(file_clone)
         {
             // Dynamically create the empty.h5 source filename per input_dir
+            if (input_dir == NULL && world_rank == 0) {
+                fprintf(stderr, "\nESIO_TEST_INPUT_DIR not in environment!\n");
+            }
             fct_req(NULL != input_dir /* check ESIO_TEST_INPUT_DIR set */);
             int srcfilelen = strlen(input_dir);
             fct_req(srcfilelen > 0);

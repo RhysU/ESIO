@@ -139,6 +139,7 @@ struct esio_handle_s {
     int       comm_size;    //< Number of ranks within MPI communicator
     MPI_Info  info;         //< Info object used for collective calls
     hid_t     file_id;      //< Active HDF file identifier
+    char     *file_path;    //< Active file's canonical path
     int       layout_index; //< Active field layout_index within HDF5 file
 };
 
@@ -283,6 +284,7 @@ esio_handle_initialize(MPI_Comm comm)
     h->comm_size    = comm_size;
     h->info         = info;
     h->file_id      = -1;
+    h->file_path    = NULL;
     h->layout_index = 0;
 
     if (h->comm == MPI_COMM_NULL) {
@@ -313,6 +315,10 @@ esio_handle_finalize(esio_handle h)
         if (h->info != MPI_INFO_NULL) {
             ESIO_MPICHKR(MPI_Info_free(&h->info));
             h->info = MPI_INFO_NULL;
+        }
+        if (h->file_path) {
+            free(h->file_path);
+            h->file_path = NULL;
         }
         free(h);
     }
@@ -399,11 +405,65 @@ esio_file_create(esio_handle h, const char *file, int overwrite)
         }
     }
 
+    // Clean up temporary HDF5 resources
+    H5Pclose(fapl_id);
+
+    // Duplicate the canonical file name for later use
+    // Canonical chosen so that changes in working directory are irrelevant
+    h->file_path = canonicalize_file_name(file);
+    if (h->file_path == NULL) {
+        ESIO_ERROR("failed to allocate space for file_path", ESIO_ENOMEM);
+    }
+
     // File creation successful: update handle
     h->file_id = file_id;
 
-    // Clean up temporary resources
+    return ESIO_SUCCESS;
+}
+
+int
+esio_file_open(esio_handle h, const char *file, int readwrite)
+{
+    // Sanity check incoming arguments
+    if (h == NULL) {
+        ESIO_ERROR("h == NULL", ESIO_EFAULT);
+    }
+    if (h->file_id != -1) {
+        ESIO_ERROR("Cannot open new file because previous file not closed",
+                   ESIO_EINVAL);
+    }
+    if (file == NULL) {
+        ESIO_ERROR("file == NULL", ESIO_EFAULT);
+    }
+
+    // Initialize file access list property identifier
+    const hid_t fapl_id = esio_H5P_FILE_ACCESS_create(h);
+    if (fapl_id < 0) {
+        ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
+    }
+
+    // Initialize access flags
+    const unsigned flags = readwrite ? H5F_ACC_RDWR : H5F_ACC_RDONLY;
+
+    // Collectively open the file
+    const hid_t file_id = H5Fopen(file, flags, fapl_id);
+    if (file_id < 0) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to open existing file", ESIO_EFAILED);
+    }
+
+    // Clean up temporary HDF5 resources
     H5Pclose(fapl_id);
+
+    // Duplicate the canonical file name for later use
+    // Canonical chosen so that changes in working directory are irrelevant
+    h->file_path = canonicalize_file_name(file);
+    if (h->file_path == NULL) {
+        ESIO_ERROR("failed to allocate space for file_path", ESIO_ENOMEM);
+    }
+
+    // File creation successful: update handle
+    h->file_id = file_id;
 
     return ESIO_SUCCESS;
 }
@@ -443,44 +503,24 @@ int esio_file_clone(esio_handle h,
     return esio_file_open(h, dstfile, 1 /* readwrite */);
 }
 
-int
-esio_file_open(esio_handle h, const char *file, int readwrite)
+char* esio_file_path(const esio_handle h)
 {
     // Sanity check incoming arguments
-    if (h == NULL) {
-        ESIO_ERROR("h == NULL", ESIO_EFAULT);
-    }
-    if (h->file_id != -1) {
-        ESIO_ERROR("Cannot open new file because previous file not closed",
-                   ESIO_EINVAL);
-    }
-    if (file == NULL) {
-        ESIO_ERROR("file == NULL", ESIO_EFAULT);
+    if (h == NULL) ESIO_ERROR_NULL("h == NULL", ESIO_EFAULT);
+
+    if (h->file_id == -1) {
+        return NULL;
     }
 
-    // Initialize file access list property identifier
-    const hid_t fapl_id = esio_H5P_FILE_ACCESS_create(h);
-    if (fapl_id < 0) {
-        ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
+    if (h->file_path == NULL) {
+        ESIO_ERROR_NULL("file_id != -1 but file_path == NULL", ESIO_ESANITY);
     }
 
-    // Initialize access flags
-    const unsigned flags = readwrite ? H5F_ACC_RDWR : H5F_ACC_RDONLY;
-
-    // Collectively open the file
-    const hid_t file_id = H5Fopen(file, flags, fapl_id);
-    if (file_id < 0) {
-        H5Pclose(fapl_id);
-        ESIO_ERROR("Unable to open existing file", ESIO_EFAILED);
+    char *retval = strdup(h->file_path);
+    if (retval == NULL) {
+        ESIO_ERROR_NULL("Unable to allocate space for file_path", ESIO_ENOMEM);
     }
-
-    // File creation successful: update handle
-    h->file_id = file_id;
-
-    // Clean up temporary resources
-    H5Pclose(fapl_id);
-
-    return ESIO_SUCCESS;
+    return retval;
 }
 
 int esio_file_flush(esio_handle h)
@@ -496,7 +536,6 @@ int esio_file_flush(esio_handle h)
     }
 
     return ESIO_SUCCESS;
-
 }
 
 int esio_file_close(esio_handle h)
@@ -509,6 +548,11 @@ int esio_file_close(esio_handle h)
 
         if (H5Fclose(h->file_id) < 0) {
             ESIO_ERROR("Unable to close file", ESIO_EFAILED);
+        }
+
+        if (h->file_path) {
+            free(h->file_path);
+            h->file_path = NULL;
         }
 
         // Close successful: update handle

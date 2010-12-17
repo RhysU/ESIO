@@ -32,7 +32,8 @@ program basic_f
 
     implicit none
 
-    logical :: file_exists
+    logical            :: file_exists
+    character(len=256) :: file_path
 
     call testframework_setup(__FILE__)
 
@@ -43,12 +44,20 @@ program basic_f
 !   Open and close a unique file with overwrite disabled
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
+    call esio_file_path(h, file_path, ierr)
+    ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
 
 !   Check that Fortran thinks the right file exists
     inquire (file=trim(filename), exist=file_exists)
     ASSERT(file_exists)
+
+!   Check that Fortran thinks the absolute file path exists
+    inquire (file=trim(file_path), exist=file_exists)
+    ASSERT(file_exists)
+!   Check that the absolute file path begins with a '/'
+    ASSERT(scan(file_path, "/") == 1)
 
 !   Open, flush, and close an old file with overwrite enabled
     call esio_file_create(h, filename, .true., ierr)

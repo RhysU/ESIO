@@ -44,9 +44,9 @@
 !!   <li>
 !!     The \c intent(in) and \c intent(out) semantics of each call
 !!     are identical to the C version everywhere with the exception
-!!     of esio::esio_handle_initialize(), esio::esio_string_get(),
-!!     and esio::esio_field_layout_get().  These three routines have an
-!!     extra \c intent(out) parameter in Fortran.
+!!     of esio::esio_handle_initialize(), esio::esio_file_path(),
+!!     esio::esio_string_get(), and esio::esio_field_layout_get().
+!!     These routines have an extra \c intent(out) parameter in Fortran.
 !!   </li>
 !!   <li>
 !!     Logical-like \c int arguments within the C API, for example
@@ -205,6 +205,33 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine esio_file_open (handle, file, readwrite, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: file
+    logical,           intent(in)            :: readwrite
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, file, readwrite) bind (C, name="esio_file_open")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: file(*)
+        integer(c_int),               intent(in), value :: readwrite
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(handle, esio_f_c_string(file), esio_f_c_logical(readwrite))
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_file_open
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine esio_file_clone (handle, srcfile, dstfile, overwrite, ierr)
 
     type(esio_handle), intent(in)            :: handle
@@ -238,30 +265,42 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_file_open (handle, file, readwrite, ierr)
+  subroutine esio_file_path (handle, file_path, ierr)
+
+    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
 
     type(esio_handle), intent(in)            :: handle
-    character(len=*),  intent(in)            :: file
-    logical,           intent(in)            :: readwrite
+    character(len=*),  intent(out)           :: file_path
     integer,           intent(out), optional :: ierr
-    integer                                  :: stat
 
+    type(c_ptr)                              :: tmp_p
+
+!   The C implementation returns newly allocated memory
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, file, readwrite) bind (C, name="esio_file_open")
+      function impl (handle) bind (C, name="esio_file_path")
         import
-        integer(c_int)                                  :: impl
-        type(esio_handle),            intent(in), value :: handle
-        character(len=1,kind=c_char), intent(in)        :: file(*)
-        integer(c_int),               intent(in), value :: readwrite
+        type(c_ptr)                          :: impl
+        type(esio_handle), intent(in), value :: handle
       end function impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(file), esio_f_c_logical(readwrite))
-    if (present(ierr)) ierr = stat
+    tmp_p = impl(handle)
+    if (esio_c_f_stringcopy(tmp_p, file_path)) then
+      if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
+    else
+      if (present(ierr)) then
+        ierr = 5  ! 5 == ESIO_EFAILED
+      else
+        call esio_error('esio_file_path failed but ierr was not supplied', &
+                        __FILE__, __LINE__, 5)
+        call abort
+      endif
+    end if
+    call esio_c_free(tmp_p)
 
-  end subroutine esio_file_open
+  end subroutine esio_file_path
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
