@@ -23,6 +23,7 @@ The ESIO library provides:
   <li>Single and double precision floating point storage</li>
   <li>A mechanism for storing both string and numeric metadata</li>
   <li>Support for contiguous and strided in-memory data</li>
+  <li>Support to simplify writing restart file sequences</li>
   <li>Storage within the widely used HDF5 file format</li>
 </ul>
 
@@ -31,10 +32,11 @@ The library's manual is divided into the following subsections:
 <ul>
   <li> \subpage installation </li>
   <li> \subpage linkage</li>
-  <li> \subpage concepts </li>
-  <li> \ref esio.h "C/C++ interface"</li>
-  <li> \ref error.h "C/C++ error handling"</li>
-  <li> \ref esio.f90 "Fortran interface"</li>
+  <li> \subpage concepts</li>
+  <li> \ref esio.h "C/C++ API"</li>
+  <li> \ref error.h "C/C++ error handling API"</li>
+  <li> \ref esio.f90 "Fortran API"</li>
+  <li> \subpage restarts</li>
   <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot test coverage</a> </li>
 </ul>
 

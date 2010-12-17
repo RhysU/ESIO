@@ -32,6 +32,10 @@ concepts2_SOURCES       = concepts2.f90
 concepts2_LDADD         = ../esio/libesiof.la $(HDF5_LDFLAGS)
 concepts2_LIBTOOLFLAGS  = --tag=FC
 
+noinst_PROGRAMS       += restart1
+restart1_SOURCES       = restart1.c
+restart1_LDADD         = ../esio/libesio.la $(HDF5_LDFLAGS)
+
 # Additional files to clean
 CLEANFILES += *.mod *.gcno *.gcda
 

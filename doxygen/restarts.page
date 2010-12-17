@@ -1,0 +1,36 @@
+/*! \page restarts Restart file sequences
+
+ESIO provides several methods that greatly simplify writing a sequence of
+metadata-rich restart files.  Each restart file might contain a simulation
+snapshot at a particular time along with enough information to track how the
+data was generated and to allow data post-processing.
+
+A complete, C-based MPI program using ESIO to write a (trivial) sequence
+of restart files might look like:
+\include restart1.c
+
+This sample prepares a copy of loop-invariant data in the file "template.h5".
+Often this would include the program version, scenario parameters, and grid
+information.  Then, when the code needs to write a new restart file during the
+simulation loop, a new uncommitted restart file called "uncommitted.h5" is
+cloned from "template.h5" using esio_file_clone().  After the program has
+successfully written all the necessary data to the restart file, the restart
+file is committed using esio_file_close_restart().
+
+The documentation for the esio_file_close_restart() method contains several
+important details.  The same functionality is also available in Fortran via the
+methods esio::esio_file_clone() and esio::esio_file_close_restart().
+
+Using such an approach provides several benefits:
+<ol>
+<li>Common metadata is written only once.  In a long-running simulation,
+    this may provide some performance benefits compared to repeatedly
+    writing the same metadata within the simulation loop.</li>
+<li>Incomplete restart data is kept separate from complete restart
+    data.  This prevents a software or hardware failure from destroying
+    your simulation's last known good state.</li>
+<li>A history of restart data is maintained.  This is useful when
+    simulation statistics must be gathered across multiple snapshots.</li>
+</ol>
+
+*/
