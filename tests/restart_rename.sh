@@ -12,7 +12,8 @@ fi
 # Create and change to a temporary directory
 # Automatically clean up this temporary directory on exit
 TMPTMPL=test.`basename $0`.XXXXXXXXXX
-TMPDIR=`mktemp -d --tmpdir $TMPTMPL`
+TMPDIR=`mktemp -d -t $TMPTMPL`
+mkdir -p "$TMPDIR" # For good measure
 trap 'rm -rf "$TMPDIR"' 0
 trap ' exit ' 1 2 15
 cd "$TMPDIR"
