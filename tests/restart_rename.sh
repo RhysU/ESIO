@@ -96,3 +96,56 @@ test `cat test0003` == 'b'
 test `cat test0004` == 'c'
 rm test*
 echo " OK"
+
+echo -n Simple test involving src_filename in a different directory
+mkdir junkdir
+echo b > test0
+echo c > test1
+echo e > test4
+echo junk1 > junkdir/junk
+$CMD junkdir/junk 'test#' 3
+test `cat test0` == 'junk1'
+test `cat test1` == 'b'
+test `cat test2` == 'c'
+test `cat test4` == 'e'
+echo junk2 > junkdir/junk
+$CMD junkdir/junk 'test#' 3
+test `cat test0` == 'junk2'
+test `cat test1` == 'junk1'
+test `cat test2` == 'b'
+test `cat test4` == 'e'
+echo junk3 > junkdir/junk
+$CMD junkdir/junk 'test#' 3
+test `cat test0` == 'junk3'
+test `cat test1` == 'junk2'
+test `cat test2` == 'junk1'
+test `cat test4` == 'e'
+rm test*
+rm -rf junkdir
+echo " OK"
+
+echo -n Simple test involving dst_template in a different directory
+mkdir testdir
+echo b > testdir/test0
+echo c > testdir/test1
+echo e > testdir/test4
+echo junk1 > junk
+$CMD junk 'testdir/test#' 3
+test `cat testdir/test0` == 'junk1'
+test `cat testdir/test1` == 'b'
+test `cat testdir/test2` == 'c'
+test `cat testdir/test4` == 'e'
+echo junk2 > junk
+$CMD junk 'testdir/test#' 3
+test `cat testdir/test0` == 'junk2'
+test `cat testdir/test1` == 'junk1'
+test `cat testdir/test2` == 'b'
+test `cat testdir/test4` == 'e'
+echo junk3 > junk
+$CMD junk 'testdir/test#' 3
+test `cat testdir/test0` == 'junk3'
+test `cat testdir/test1` == 'junk2'
+test `cat testdir/test2` == 'junk1'
+test `cat testdir/test4` == 'e'
+rm -rf testdir
+echo " OK"
