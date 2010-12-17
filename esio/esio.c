@@ -428,12 +428,13 @@ int esio_file_clone(esio_handle h,
         ESIO_ERROR("dstfile == NULL", ESIO_EFAULT);
     }
 
-    // First rank copies the file synchronously and broadcasts result
+    // One rank copies the file synchronously and broadcasts result
+    const int worker = h->comm_size - 1; // Last rank does work
     int status;
-    if (h->comm_rank == 0) {
+    if (h->comm_rank == worker) {
        status = file_copy(srcfile, dstfile, overwrite, 1 /*blockuntilsync*/);
     }
-    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, 0/*root*/, h->comm));
+    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
 
     // Bail now if an error occurred
     if (status) return status;
