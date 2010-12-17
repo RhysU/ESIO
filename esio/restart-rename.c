@@ -150,13 +150,13 @@ static int compar(const struct dirent **a,
 
 int restart_rename(const char *src_filepath,
                    const char *dst_template,
-                   int keep_howmany)
+                   int retain_count)
 {
     char errmsg[256] = ""; // Used to provide fairly extensive error messages
 
     if (src_filepath == NULL) ESIO_ERROR("src_filepath == NULL", ESIO_EFAULT);
     if (dst_template == NULL) ESIO_ERROR("dst_template == NULL", ESIO_EFAULT);
-    if (keep_howmany < 1)     ESIO_ERROR("keep_howmany < 1",     ESIO_EINVAL);
+    if (retain_count < 1)     ESIO_ERROR("retain_count < 1",     ESIO_EINVAL);
 
     // Ensure we can stat src_filepath, which should (mostly) isolate
     // rename(2) ENOENT errors to be related to the destination file.
@@ -208,10 +208,10 @@ int restart_rename(const char *src_filepath,
     // Ensure ndigits is not bigger than INT_MAX would make reasonable
     ndigits = min(ndigits, (int) ceil(log(INT_MAX - 1)/log(10)));
 
-    // Ensure ndigits is big enough to comfortably handle keep_howmany choice
-    ndigits = max(ndigits, (keep_howmany == 1)
+    // Ensure ndigits is big enough to comfortably handle retain_count choice
+    ndigits = max(ndigits, (retain_count == 1)
                            ? 1
-                           : (int) ceil(log(keep_howmany-1)/log(10)));
+                           : (int) ceil(log(retain_count-1)/log(10)));
 
     // Scan the directory tmpl_dirname looking for things matching tmpl_basename
     // Sort is according to strverscmp which does what we need here
@@ -240,7 +240,7 @@ int restart_rename(const char *src_filepath,
             = restart_nextindex(tmpl_basename, namelist[n]->d_name, -1);
 
         // Skip processing any entry which is malformed or out-of-range
-        if (next <= 0 || next >= keep_howmany) {
+        if (next <= 0 || next >= retain_count) {
             free(namelist[n]);
             continue;
         }
