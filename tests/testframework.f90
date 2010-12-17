@@ -42,8 +42,7 @@ module testframework
 
   integer, public, allocatable, dimension(:) :: dims, coords
   integer, public, allocatable, dimension(:) :: global, start, local, stride
-
-  logical :: verbose = .false.
+  logical, public                            :: verbose = .false.
 
   public :: testframework_setup, testframework_teardown, testframework_assert
 

@@ -33,7 +33,7 @@ program basic_f
     implicit none
 
     logical            :: file_exists
-    character(len=256) :: file_path
+    character(len=256) :: file_path, template, restart0, restart1
 
     call testframework_setup(__FILE__)
 
@@ -66,6 +66,43 @@ program basic_f
     ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
+
+!   Prepare to check the restart convenience methods
+    template = trim(filename) // "#"
+    restart0 = trim(filename) // "0"
+    restart1 = trim(filename) // "1"
+
+!   Create with overwrite followed by esio_file_close_restart
+    call esio_file_create(h, filename, .true., ierr)
+    ASSERT(ierr == 0)
+    call esio_file_close_restart(h, template, 2, ierr)
+    ASSERT(ierr == 0)
+    inquire (file=trim(filename), exist=file_exists)
+    ASSERT(.not. file_exists)
+    inquire (file=trim(restart0), exist=file_exists)
+    ASSERT(      file_exists)
+    inquire (file=trim(restart1), exist=file_exists)
+    ASSERT(.not. file_exists)
+
+!   Create without overwrite followed by esio_file_close_restart
+    call esio_file_create(h, filename, .false., ierr)
+    ASSERT(ierr == 0)
+    call esio_file_close_restart(h, template, 2, ierr)
+    ASSERT(ierr == 0)
+    inquire (file=trim(filename), exist=file_exists)
+    ASSERT(.not. file_exists)
+    inquire (file=trim(restart0), exist=file_exists)
+    ASSERT(      file_exists)
+    inquire (file=trim(restart1), exist=file_exists)
+    ASSERT(      file_exists)
+
+!   Clean up restart files leftover from test
+    if (.not. verbose .and. world_rank == 0) then
+      inquire (file=trim(restart0), exist=file_exists)
+      if (file_exists) ierr = unlink(trim(restart0))
+      inquire (file=trim(restart1), exist=file_exists)
+      if (file_exists) ierr = unlink(trim(restart1))
+    end if
 
     call testframework_teardown()
 

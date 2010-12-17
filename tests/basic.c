@@ -258,6 +258,65 @@ FCT_BGN()
         }
         FCT_TEST_END();
 
+        // Much of this functionality is covered in restart_helpers.c
+        // and restart_rename.{sh,c}.  This covers only the public API's
+        // most basic usage.
+        FCT_TEST_BGN(file_close_restart)
+        {
+            struct stat statbuf;
+
+            // Form template and expected file paths from temporary filename
+            char *template = malloc(strlen(filename) + 2);
+            fct_req(template);
+            strcpy(template, filename);
+            strcat(template, "#");
+            char *restart0 = malloc(strlen(filename) + 2);
+            fct_req(restart0);
+            strcpy(restart0, filename);
+            strcat(restart0, "0");
+            char *restart1 = malloc(strlen(filename) + 2);
+            fct_req(restart1);
+            strcpy(restart1, filename);
+            strcat(restart1, "1");
+
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+
+            // No files should exist prior to the test kicking off
+            fct_req(-1 == stat(filename, &statbuf));
+            fct_req(-1 == stat(restart0, &statbuf));
+            fct_req(-1 == stat(restart1, &statbuf));
+
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+
+            // Create with overwrite should always work
+            fct_req( 0 == esio_file_create(state, filename, 1 /* overwrite */));
+            fct_req( 0 == esio_file_close_restart(state, template, 2));
+            fct_req(-1 == stat(filename, &statbuf));
+            fct_req( 0 == stat(restart0, &statbuf));
+            fct_req(-1 == stat(restart1, &statbuf));
+
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+
+            // Create without overwrite should work now
+            fct_req(0 == esio_file_create(state, filename, 0));
+            fct_req(0 == esio_file_close_restart(state, template, 2));
+            fct_req(-1 == stat(filename, &statbuf));
+            fct_req( 0 == stat(restart0, &statbuf));
+            fct_req( 0 == stat(restart1, &statbuf));
+
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+
+            // Clean up
+            if (world_rank == 0) {
+                fct_req(0 == unlink(restart0));
+                fct_req(0 == unlink(restart1));
+            }
+            free(template);
+            free(restart0);
+            free(restart1);
+        }
+        FCT_TEST_END();
+
     }
     FCT_FIXTURE_SUITE_END();
 
