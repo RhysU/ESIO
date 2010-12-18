@@ -625,8 +625,8 @@ hid_t esio_field_create(const esio_handle h,
     // Create the filespace using current layout within handle
     const hid_t filespace
         = (esio_field_layout[h->layout_index].filespace_creator)(cglobal,
-                                                         bglobal,
-                                                         aglobal);
+                                                                 bglobal,
+                                                                 aglobal);
     if (filespace < 0) {
         ESIO_ERROR_VAL("Unable to create filespace", ESIO_ESANITY, -1);
     }
