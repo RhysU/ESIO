@@ -62,17 +62,20 @@ hid_t esio_H5P_FILE_ACCESS_create(const esio_handle h);
 static
 hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
-                        const char *name, hid_t type_id);
+                        const char *name, hid_t type_id,
+                        hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
 
 static
 hid_t esio_plane_create(const esio_handle h,
                         int bglobal, int aglobal,
-                        const char *name, hid_t type_id);
+                        const char *name, hid_t type_id,
+                        hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
 
 static
 hid_t esio_line_create(const esio_handle h,
                        int aglobal,
-                       const char *name, hid_t type_id);
+                       const char *name, hid_t type_id,
+                       hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
 
 static
 int esio_field_close(hid_t dataset_id);
@@ -614,7 +617,8 @@ int esio_file_close_restart(esio_handle h,
 static
 hid_t esio_field_create(const esio_handle h,
                         int cglobal, int bglobal, int aglobal,
-                        const char *name, hid_t type_id)
+                        const char *name, hid_t type_id,
+                        hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
 {
     // Sanity check that the handle's layout_index matches our internal table
     if (esio_field_layout[h->layout_index].index != h->layout_index) {
@@ -632,8 +636,8 @@ hid_t esio_field_create(const esio_handle h,
     }
 
     // Create the dataspace
-    const hid_t dset_id
-        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
+    const hid_t dset_id = H5Dcreate2(h->file_id, name, type_id, filespace,
+                                     lcpl_id, dcpl_id, dapl_id);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
@@ -658,7 +662,8 @@ hid_t esio_field_create(const esio_handle h,
 static
 hid_t esio_plane_create(const esio_handle h,
                         int bglobal, int aglobal,
-                        const char *name, hid_t type_id)
+                        const char *name, hid_t type_id,
+                        hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
 {
     // Create the filespace
     const hsize_t dims[2] = { bglobal, aglobal };
@@ -668,8 +673,8 @@ hid_t esio_plane_create(const esio_handle h,
     }
 
     // Create the dataspace
-    const hid_t dset_id
-        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
+    const hid_t dset_id = H5Dcreate2(h->file_id, name, type_id, filespace,
+                                     lcpl_id, dcpl_id, dapl_id);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
@@ -693,7 +698,8 @@ hid_t esio_plane_create(const esio_handle h,
 static
 hid_t esio_line_create(const esio_handle h,
                        int aglobal,
-                       const char *name, hid_t type_id)
+                       const char *name, hid_t type_id,
+                       hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
 {
     // Create the filespace
     const hsize_t dims[1] = { aglobal };
@@ -703,8 +709,8 @@ hid_t esio_line_create(const esio_handle h,
     }
 
     // Create the dataspace
-    const hid_t dset_id
-        = H5Dcreate1(h->file_id, name, type_id, filespace, H5P_DEFAULT);
+    const hid_t dset_id = H5Dcreate2(h->file_id, name, type_id, filespace,
+                                     lcpl_id, dcpl_id, dapl_id);
     if (dset_id < 0) {
         H5Sclose(filespace);
         ESIO_ERROR_VAL("Unable to create dataspace", ESIO_ESANITY, -1);
@@ -913,7 +919,8 @@ int esio_field_write_internal(const esio_handle h,
 
         // Create dataset and write it with the active field layout
         const hid_t dset_id
-            = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id);
+            = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         const int wstat = (esio_field_layout[h->layout_index].field_writer)(
                 plist_id, dset_id, field,
                 cglobal, cstart, clocal, cstride,
@@ -1224,7 +1231,8 @@ int esio_plane_write_internal(const esio_handle h,
     hid_t dset_id;
     if (mstat != ESIO_SUCCESS) {
         // Plane did not exist so create it
-        dset_id = esio_plane_create(h, bglobal, aglobal, name, type_id);
+        dset_id = esio_plane_create(h, bglobal, aglobal, name, type_id,
+                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new plane", ESIO_EFAILED);
         }
@@ -1486,7 +1494,8 @@ int esio_line_write_internal(const esio_handle h,
     hid_t dset_id;
     if (mstat == ESIO_EINVAL) {
         // Line did not exist so create it
-        dset_id = esio_line_create(h, aglobal, name, type_id);
+        dset_id = esio_line_create(h, aglobal, name, type_id,
+                                   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new line", ESIO_EFAILED);
         }

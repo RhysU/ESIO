@@ -26,6 +26,10 @@
 #ifndef __ESIO_RESTART_RENAME_H
 #define __ESIO_RESTART_RENAME_H
 
+//****************************************************************
+// INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
+//****************************************************************
+
 #include <stddef.h>
 
 #ifdef __cplusplus
