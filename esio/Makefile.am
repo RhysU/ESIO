@@ -27,7 +27,8 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 lib_LTLIBRARIES     += libesio.la
 libesio_la_CFLAGS    = -DESIO_SHARED_EXPORTS
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
-libesio_la_SOURCES   = error.c
+libesio_la_SOURCES   = chunksize.c
+libesio_la_SOURCES  += error.c
 libesio_la_SOURCES  += esio.c
 libesio_la_SOURCES  += file-copy.c
 libesio_la_SOURCES  += h5utils.c
@@ -45,6 +46,7 @@ esio_include_HEADERS += version.h
 esio_include_HEADERS += visibility.h
 
 # Headers internal to the library
+noinst_HEADERS += chunksize.h
 noinst_HEADERS += file-copy.h
 noinst_HEADERS += restart-rename.h
 noinst_HEADERS += h5utils.h

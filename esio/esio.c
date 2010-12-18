@@ -36,6 +36,7 @@
 #include <hdf5_hl.h>
 #include <mpi.h>
 
+#include "chunksize.h"
 #include "error.h"
 #include "esio.h"
 #include "file-copy.h"
