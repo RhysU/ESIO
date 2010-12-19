@@ -52,7 +52,9 @@ TESTS                   += restart_rename.sh
 EXTRA_DIST              += restart_rename.sh
 check_PROGRAMS          += restart_rename
 restart_rename_SOURCES   = restart_rename.c ../esio/restart-rename.c
-restart_rename_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+restart_rename_LDADD     = ../esio/libesio.la
+restart_rename_LDADD    += ../gnulib/libgnu.la $(LTLIBINTL)
+restart_rename_LDADD    += $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 #############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##

@@ -35,7 +35,7 @@ libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 libesio_la_SOURCES  += restart-rename.c
-libesio_la_LDFLAGS  += $(LTLIBINTL) $(LIB_ACL)     # gnulib requirement
+libesio_la_LDFLAGS  += $(LTLIBINTL) # gnulib requirement
 libesio_la_LIBADD    = ../gnulib/libgnu.la
 
 # Headers shipped with the library

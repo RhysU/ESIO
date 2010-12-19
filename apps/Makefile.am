@@ -8,6 +8,7 @@ AM_FCFLAGS     += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = # Append below
 noinst_PROGRAMS = # Append below
+bin_PROGRAMS    = # Append below
 BUILT_DOCS      = # Append below
 BUILT_SOURCES   = # Append below
 CLEANFILES      = # Append below
@@ -26,13 +27,13 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
-# Sample progams
-noinst_PROGRAMS    += hellompi_c
-hellompi_c_SOURCES  = hellompi_c.c
-
-noinst_PROGRAMS           += hellompi_f90
-hellompi_f90_SOURCES       = hellompi_f90.f90
-hellompi_f90_LIBTOOLFLAGS  = --tag=FC
+# C-based benchmarking tool
+bin_PROGRAMS       += esio_bench
+esio_bench_SOURCES  = esio_bench.c
+esio_bench_LDADD    = ../esio/libesio.la
+esio_bench_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
+esio_bench_LDADD   += $(HDF5_LDFLAGS)
+esio_bench_LDADD   += $(GRVY_LIBS)
 
 # PSDNS iokernel test program
 noinst_PROGRAMS   += main

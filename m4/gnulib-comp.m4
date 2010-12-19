@@ -40,6 +40,8 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module fcntl-h:
   # Code from module full-write:
+  # Code from module getopt-posix:
+  # Code from module gettext-h:
   # Code from module include_next:
   # Code from module lstat:
   # Code from module malloc-posix:
@@ -112,6 +114,11 @@ AC_DEFUN([gl_INIT],
   # Code from module fcntl-h:
   gl_FCNTL_H
   # Code from module full-write:
+  # Code from module getopt-posix:
+  gl_FUNC_GETOPT_POSIX
+  # Code from module gettext-h:
+  AC_SUBST([LIBINTL])
+  AC_SUBST([LTLIBINTL])
   # Code from module include_next:
   # Code from module lstat:
   gl_FUNC_LSTAT
@@ -334,6 +341,11 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/fcntl.in.h
   lib/full-write.c
   lib/full-write.h
+  lib/getopt.c
+  lib/getopt.in.h
+  lib/getopt1.c
+  lib/getopt_int.h
+  lib/gettext.h
   lib/lstat.c
   lib/malloc.c
   lib/malloca.c
@@ -381,6 +393,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/extensions.m4
   m4/fcntl-o.m4
   m4/fcntl_h.m4
+  m4/getopt.m4
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/longlong.m4
