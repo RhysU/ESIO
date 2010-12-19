@@ -81,6 +81,13 @@ hid_t esio_field_layout0_filespace_creator(int cglobal,
     return H5Screate_simple(3, dims, NULL);
 }
 
+herr_t esio_field_layout0_dataset_chunker(hid_t dcpl_id,
+                                          int cchunk, int bchunk, int achunk)
+{
+    const hsize_t chunksizes[3] = { cchunk, bchunk, achunk };
+    return H5Pset_chunk(dcpl_id, 3, chunksizes);
+}
+
 #define METHODNAME esio_field_layout0_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
@@ -109,6 +116,13 @@ hid_t esio_field_layout1_filespace_creator(int cglobal,
     return H5Screate_simple(3, dims, NULL);
 }
 
+herr_t esio_field_layout1_dataset_chunker(hid_t dcpl_id,
+                                          int cchunk, int bchunk, int achunk)
+{
+    const hsize_t chunksizes[3] = { cchunk, bchunk, achunk };
+    return H5Pset_chunk(dcpl_id, 3, chunksizes);
+}
+
 #define METHODNAME esio_field_layout1_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
@@ -135,6 +149,13 @@ hid_t esio_field_layout2_filespace_creator(int cglobal,
 {
     const hsize_t dims[2] = { cglobal * bglobal, aglobal };
     return H5Screate_simple(2, dims, NULL);
+}
+
+herr_t esio_field_layout2_dataset_chunker(hid_t dcpl_id,
+                                          int cchunk, int bchunk, int achunk)
+{
+    const hsize_t chunksizes[2] = { cchunk * bchunk, achunk };
+    return H5Pset_chunk(dcpl_id, 2, chunksizes);
 }
 
 #define METHODNAME esio_field_layout2_field_writer

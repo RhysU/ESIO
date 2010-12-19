@@ -156,24 +156,28 @@ struct esio_handle_s {
 static const struct {
     int                      index;
     esio_filespace_creator_t filespace_creator;
+    esio_dataset_chunker_t   dataset_chunker;
     esio_field_writer_t      field_writer;
     esio_field_reader_t      field_reader;
 } esio_field_layout[] = {
     {
         0,
         &esio_field_layout0_filespace_creator,
+        &esio_field_layout0_dataset_chunker,
         &esio_field_layout0_field_writer,
         &esio_field_layout0_field_reader
     },
     {
         1,
         &esio_field_layout1_filespace_creator,
+        &esio_field_layout1_dataset_chunker,
         &esio_field_layout1_field_writer,
         &esio_field_layout1_field_reader
     },
     {
         2,
         &esio_field_layout2_filespace_creator,
+        &esio_field_layout2_dataset_chunker,
         &esio_field_layout2_field_writer,
         &esio_field_layout2_field_reader
     },
@@ -911,16 +915,47 @@ int esio_field_write_internal(const esio_handle h,
     if (mstat != ESIO_SUCCESS) {
         // Field did not exist
 
+        // Determine the chunking parameters to use for dataset creation
+        int cchunk, bchunk, achunk;
+        const int status
+            = chunksize_field(h->comm, cglobal, cstart, clocal, &cchunk,
+                                       bglobal, bstart, blocal, &bchunk,
+                                       aglobal, astart, alocal, &achunk);
+        if (status != ESIO_SUCCESS) {
+            ESIO_ERROR("Error determining chunk size for field decomposition",
+                       status);
+        }
+
+        // Create a dataset creation property list with chunk parameters
+        hid_t dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+        if (dcpl_id < 0) {
+            ESIO_ERROR("Error creating dataset creation property list",
+                       ESIO_EFAILED);
+        }
+        if ((esio_field_layout[h->layout_index].dataset_chunker)(
+                    dcpl_id, cchunk, bchunk, achunk) < 0) {
+            H5Pclose(dcpl_id);
+            ESIO_ERROR("Error setting chunk size information", ESIO_ESANITY);
+        }
+
+        // Create dataset and write it with the active field layout
+        const hid_t dset_id
+            = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id,
+                                H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+        if (dset_id < 0) {
+            ESIO_ERROR("Error creating new field", ESIO_EFAILED);
+        }
+
+        // Close creation property list
+        H5Pclose(dcpl_id);
+
         // Obtain appropriate dataset transfer properties
         const hid_t plist_id = esio_H5P_DATASET_XFER_create(h);
         if (plist_id < 0) {
             ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
         }
 
-        // Create dataset and write it with the active field layout
-        const hid_t dset_id
-            = esio_field_create(h, cglobal, bglobal, aglobal, name, type_id,
-                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        // Write the field using the appropriate layout logic
         const int wstat = (esio_field_layout[h->layout_index].field_writer)(
                 plist_id, dset_id, field,
                 cglobal, cstart, clocal, cstride,
@@ -1230,12 +1265,40 @@ int esio_plane_write_internal(const esio_handle h,
 
     hid_t dset_id;
     if (mstat != ESIO_SUCCESS) {
-        // Plane did not exist so create it
+        // Plane did not exist
+
+        // Determine the chunking parameters to use for dataset creation
+        int bchunk, achunk;
+        const int status
+            = chunksize_plane(h->comm, bglobal, bstart, blocal, &bchunk,
+                                       aglobal, astart, alocal, &achunk);
+        if (status != ESIO_SUCCESS) {
+            ESIO_ERROR("Error determining chunk size for plane decomposition",
+                       status);
+        }
+        const hsize_t chunksizes[2] = { bchunk, achunk };
+
+        // Create a dataset creation property list with chunk parameters
+        hid_t dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+        if (dcpl_id < 0) {
+            ESIO_ERROR("Error creating dataset creation property list",
+                       ESIO_EFAILED);
+        }
+        if (H5Pset_chunk(dcpl_id, 2, chunksizes) < 0) {
+            H5Pclose(dcpl_id);
+            ESIO_ERROR("Error setting chunk size information", ESIO_ESANITY);
+        }
+
+        // Create the plane
         dset_id = esio_plane_create(h, bglobal, aglobal, name, type_id,
-                                    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                                    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new plane", ESIO_EFAILED);
         }
+
+        // Close creation property list
+        H5Pclose(dcpl_id);
+
     } else {
         // Plane already existed
 
@@ -1493,12 +1556,39 @@ int esio_line_write_internal(const esio_handle h,
 
     hid_t dset_id;
     if (mstat == ESIO_EINVAL) {
-        // Line did not exist so create it
+        // Line did not exist
+
+        // Determine the chunking parameters to use for dataset creation
+        int achunk;
+        const int status
+            = chunksize_line(h->comm, aglobal, astart, alocal, &achunk);
+        if (status != ESIO_SUCCESS) {
+            ESIO_ERROR("Error determining chunk size for line decomposition",
+                       status);
+        }
+        const hsize_t chunksizes[1] = { achunk };
+
+        // Create a dataset creation property list with chunk parameters
+        hid_t dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+        if (dcpl_id < 0) {
+            ESIO_ERROR("Error creating dataset creation property list",
+                       ESIO_EFAILED);
+        }
+        if (H5Pset_chunk(dcpl_id, 1, chunksizes) < 0) {
+            H5Pclose(dcpl_id);
+            ESIO_ERROR("Error setting chunk size information", ESIO_ESANITY);
+        }
+
+        // Create the line
         dset_id = esio_line_create(h, aglobal, name, type_id,
-                                   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                                   H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new line", ESIO_EFAILED);
         }
+
+        // Close creation property list
+        H5Pclose(dcpl_id);
+
     } else if (mstat == ESIO_SUCCESS) {
         // Line already existed
 

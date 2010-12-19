@@ -36,19 +36,21 @@ extern "C" {
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
 //*********************************************************************
 
-typedef hid_t (*esio_filespace_creator_t)(int, int, int);
+typedef hid_t  (*esio_filespace_creator_t)(int, int, int);
 
-typedef int   (*esio_field_writer_t)     (hid_t, hid_t, const void *,
-                                          int, int, int, int,
-                                          int, int, int, int,
-                                          int, int, int, int,
-                                          hid_t);
+typedef herr_t (*esio_dataset_chunker_t)  (hid_t, int, int, int);
 
-typedef int   (*esio_field_reader_t)     (hid_t, hid_t, void *,
-                                          int, int, int, int,
-                                          int, int, int, int,
-                                          int, int, int, int,
-                                          hid_t);
+typedef int    (*esio_field_writer_t)     (hid_t, hid_t, const void *,
+                                           int, int, int, int,
+                                           int, int, int, int,
+                                           int, int, int, int,
+                                           hid_t);
+
+typedef int    (*esio_field_reader_t)     (hid_t, hid_t, void *,
+                                           int, int, int, int,
+                                           int, int, int, int,
+                                           int, int, int, int,
+                                           hid_t);
 
 //******************************************************************
 // INTERNAL DECLARATIONS INTERNAL DECLARATIONS INTERNAL DECLARATIONS
@@ -57,6 +59,10 @@ typedef int   (*esio_field_reader_t)     (hid_t, hid_t, void *,
 #define ESIO_LAYOUT_DECLARATIONS(NUM)                      \
 hid_t esio_field_layout ## NUM ## _filespace_creator(      \
         int cglobal, int bglobal, int aglobal);            \
+                                                           \
+herr_t esio_field_layout ## NUM ## _dataset_chunker(       \
+        hid_t dcpl_id,                                     \
+        int cchunk, int bchunk, int achunk);               \
                                                            \
 int esio_field_layout ## NUM ## _field_writer(             \
         hid_t plist_id, hid_t dset_id, const void *field,  \
