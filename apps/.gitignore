@@ -1,6 +1,5 @@
 /.deps
-/hellompi_c
-/hellompi_f90
+/esio_bench
 /.license.stamp
 /main
 /Makefile
