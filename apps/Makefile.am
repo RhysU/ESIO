@@ -29,7 +29,7 @@ AM_FCFLAGS += $(GRVY_FCFLAGS)
 
 # C-based benchmarking tool
 bin_PROGRAMS       += esio_bench
-esio_bench_SOURCES  = esio_bench.c
+esio_bench_SOURCES  = esio_bench.c mpi_argp.c
 esio_bench_LDADD    = ../esio/libesio.la
 esio_bench_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
 esio_bench_LDADD   += $(HDF5_LDFLAGS)
