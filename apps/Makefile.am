@@ -27,6 +27,14 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
+# Restart renaming tool
+bin_PROGRAMS        += esio_rename
+esio_rename_SOURCES  = esio_rename.c ../esio/restart-rename.c mpi_argp.c
+esio_rename_LDADD    = ../esio/libesio.la
+esio_rename_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
+esio_rename_LDADD   += $(HDF5_LDFLAGS)
+esio_rename_LDADD   += $(GRVY_LIBS)
+
 # C-based benchmarking tool
 bin_PROGRAMS       += esio_bench
 esio_bench_SOURCES  = esio_bench.c mpi_argp.c

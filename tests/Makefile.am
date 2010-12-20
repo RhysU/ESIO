@@ -48,13 +48,8 @@ restart_helpers_SOURCES  = restart_helpers.c ../esio/restart-rename.c
 restart_helpers_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
 ## Externally observable restart renaming tets
-TESTS                   += restart_rename.sh
-EXTRA_DIST              += restart_rename.sh
-check_PROGRAMS          += restart_rename
-restart_rename_SOURCES   = restart_rename.c ../esio/restart-rename.c
-restart_rename_LDADD     = ../esio/libesio.la
-restart_rename_LDADD    += ../gnulib/libgnu.la $(LTLIBINTL)
-restart_rename_LDADD    += $(GRVY_LIBS) $(HDF5_LDFLAGS)
+TESTS                   += esio_rename.sh
+EXTRA_DIST              += esio_rename.sh
 
 #############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##

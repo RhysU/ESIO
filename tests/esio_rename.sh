@@ -3,9 +3,9 @@
 # Much, much easier to test these from the shell than from C
 set -e # Fail on first error
 
-CMD=`readlink -f restart_rename`
+CMD=`readlink -f ../apps/esio_rename`
 if ! [ -x "$CMD" ]; then
-    echo "restart_rename binary not found or not executable"
+    echo "esio_rename binary not found or not executable"
     exit 1
 fi
 
@@ -29,19 +29,19 @@ echo b > test0
 echo c > test1
 echo e > test4
 echo junk1 > junk
-$CMD junk 'test#' 3
+$CMD junk 'test#' --retain=3
 test `cat test0` == 'junk1'
 test `cat test1` == 'b'
 test `cat test2` == 'c'
 test `cat test4` == 'e'
 echo junk2 > junk
-$CMD junk 'test#' 3
+$CMD junk 'test#' --retain=3
 test `cat test0` == 'junk2'
 test `cat test1` == 'junk1'
 test `cat test2` == 'b'
 test `cat test4` == 'e'
 echo junk3 > junk
-$CMD junk 'test#' 3
+$CMD junk 'test#' --retain=3
 test `cat test0` == 'junk3'
 test `cat test1` == 'junk2'
 test `cat test2` == 'junk1'
@@ -54,19 +54,19 @@ echo b > test0
 echo c > test1
 echo e > test4
 echo junk1 > junk
-$CMD junk 'test##' 3
+$CMD junk 'test##' --retain=3
 test `cat test00` == 'junk1'
 test `cat test01` == 'b'
 test `cat test02` == 'c'
 test `cat test4` == 'e'
 echo junk2 > junk
-$CMD junk 'test##' 3
+$CMD junk 'test##' --retain=3
 test `cat test00` == 'junk2'
 test `cat test01` == 'junk1'
 test `cat test02` == 'b'
 test `cat test4` == 'e'
 echo junk3 > junk
-$CMD junk 'test##' 3
+$CMD junk 'test##' --retain=3
 test `cat test00` == 'junk3'
 test `cat test01` == 'junk2'
 test `cat test02` == 'junk1'
@@ -78,18 +78,18 @@ echo -n Simple test where keep_howmany sets number of digits retained
 echo b > test0
 echo c > test1
 echo junk1 > junk
-$CMD junk 'test#' 100
+$CMD junk 'test#' --retain=100
 test `cat test00` == 'junk1'
 test `cat test01` == 'b'
 test `cat test02` == 'c'
 echo junk2 > junk
-$CMD junk 'test#' 1000
+$CMD junk 'test#' --retain=1000
 test `cat test000` == 'junk2'
 test `cat test001` == 'junk1'
 test `cat test002` == 'b'
 test `cat test003` == 'c'
 echo junk3 > junk
-$CMD junk 'test#' 10000
+$CMD junk 'test#' --retain=10000
 test `cat test0000` == 'junk3'
 test `cat test0001` == 'junk2'
 test `cat test0002` == 'junk1'
@@ -104,19 +104,19 @@ echo b > test0
 echo c > test1
 echo e > test4
 echo junk1 > junkdir/junk
-$CMD junkdir/junk 'test#' 3
+$CMD junkdir/junk 'test#' --retain=3
 test `cat test0` == 'junk1'
 test `cat test1` == 'b'
 test `cat test2` == 'c'
 test `cat test4` == 'e'
 echo junk2 > junkdir/junk
-$CMD junkdir/junk 'test#' 3
+$CMD junkdir/junk 'test#' --retain=3
 test `cat test0` == 'junk2'
 test `cat test1` == 'junk1'
 test `cat test2` == 'b'
 test `cat test4` == 'e'
 echo junk3 > junkdir/junk
-$CMD junkdir/junk 'test#' 3
+$CMD junkdir/junk 'test#' --retain=3
 test `cat test0` == 'junk3'
 test `cat test1` == 'junk2'
 test `cat test2` == 'junk1'
@@ -131,19 +131,19 @@ echo b > testdir/test0
 echo c > testdir/test1
 echo e > testdir/test4
 echo junk1 > junk
-$CMD junk 'testdir/test#' 3
+$CMD junk 'testdir/test#' --retain=3
 test `cat testdir/test0` == 'junk1'
 test `cat testdir/test1` == 'b'
 test `cat testdir/test2` == 'c'
 test `cat testdir/test4` == 'e'
 echo junk2 > junk
-$CMD junk 'testdir/test#' 3
+$CMD junk 'testdir/test#' --retain=3
 test `cat testdir/test0` == 'junk2'
 test `cat testdir/test1` == 'junk1'
 test `cat testdir/test2` == 'b'
 test `cat testdir/test4` == 'e'
 echo junk3 > junk
-$CMD junk 'testdir/test#' 3
+$CMD junk 'testdir/test#' --retain=3
 test `cat testdir/test0` == 'junk3'
 test `cat testdir/test1` == 'junk2'
 test `cat testdir/test2` == 'junk1'
