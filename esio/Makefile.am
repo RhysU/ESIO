@@ -1,9 +1,10 @@
 ## Process this file with automake to produce Makefile.in
 
 AM_CFLAGS          =
-AM_CPPFLAGS        = -I$(top_srcdir)        -I$(top_builddir)
-AM_CPPFLAGS       += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
-AM_FCFLAGS         = -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_CPPFLAGS        = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
+AM_CPPFLAGS       += -I$(top_builddir)        -I$(top_srcdir)
+AM_FCFLAGS         = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
+AM_FCFLAGS        += -I$(top_builddir)        -I$(top_srcdir)
 AM_LDFLAGS         = # Append below
 BUILT_SOURCES      = # Append below
 check_PROGRAMS     = # Append below

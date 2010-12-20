@@ -23,6 +23,10 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <mpi.h>
 
 #include "error.h"

@@ -23,9 +23,6 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-// See 'feature_test_macros(7) for details'
-#define _GNU_SOURCE
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

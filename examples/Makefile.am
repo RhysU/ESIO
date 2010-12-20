@@ -1,10 +1,15 @@
 ## Process this file with automake to produce Makefile.in
 
+# Note this Makefile.am lacks Gnulib-related -I options like
+#    AM_CPPFLAGS     = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
+#    AM_FCFLAGS      = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
+# This example code deliberately lacks #include <config.h> dependence
+# and therefore cannot rely on Gnulib per
+# http://www.gnu.org/software/gnulib/manual/gnulib.html#Source-changes
+
 AM_CFLAGS       =
-AM_CPPFLAGS     = -I$(top_srcdir)        -I$(top_builddir)
-AM_CPPFLAGS    += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
-AM_FCFLAGS      = -I$(top_srcdir)        -I$(top_builddir)
-AM_FCFLAGS     += -I$(top_srcdir)/gnulib -I$(top_builddir)/gnulib
+AM_CPPFLAGS     = -I$(top_builddir) -I$(top_srcdir)
+AM_FCFLAGS      = -I$(top_builddir) -I$(top_srcdir)
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = # Append below
 noinst_PROGRAMS = # Append below
