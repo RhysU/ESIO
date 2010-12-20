@@ -1,5 +1,6 @@
 /.deps
 /esio_bench
+/esio_rename
 /.license.stamp
 /main
 /Makefile
