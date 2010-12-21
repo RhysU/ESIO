@@ -65,8 +65,8 @@ static const char doc[] =
 ;
 
 static struct argp_option options[] = {
-  { "retain", 'r', "count", 0, "Number of restart files to retain", 0 },
-  { 0,        0,   0,       0,  0,                                  0 }
+    { "retain", 'r', "count", 0, "Number of restart files to retain", 0 },
+    { 0,        0,   0,       0,  0,                                  0 }
 };
 
 // Used by main to communicate with parse_opt

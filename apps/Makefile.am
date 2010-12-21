@@ -27,14 +27,6 @@ AM_FCFLAGS  += $(HDF5_FFLAGS)
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
-# Restart renaming tool
-bin_PROGRAMS        += esio_rename
-esio_rename_SOURCES  = esio_rename.c ../esio/restart-rename.c mpi_argp.c
-esio_rename_LDADD    = ../esio/libesio.la
-esio_rename_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
-esio_rename_LDADD   += $(HDF5_LDFLAGS)
-esio_rename_LDADD   += $(GRVY_LIBS)
-
 # C-based benchmarking tool
 bin_PROGRAMS       += esio_bench
 esio_bench_SOURCES  = esio_bench.c mpi_argp.c
@@ -42,6 +34,11 @@ esio_bench_LDADD    = ../esio/libesio.la
 esio_bench_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
 esio_bench_LDADD   += $(HDF5_LDFLAGS)
 esio_bench_LDADD   += $(GRVY_LIBS)
+
+# Restart renaming tool which has few formal ESIO dependencies
+bin_PROGRAMS        += esio_rename
+esio_rename_SOURCES  = esio_rename.c ../esio/restart-rename.c ../esio/error.c
+esio_rename_LDADD    = ../gnulib/libgnu.la $(LTLIBINTL) -lm
 
 # PSDNS iokernel test program
 noinst_PROGRAMS   += main
