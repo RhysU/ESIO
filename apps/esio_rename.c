@@ -101,7 +101,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
                 const long n
                   = arg ? strtol(arg, NULL, 10) : arguments->retain_count;
                 if (errno || n < 0 || n > INT_MAX) {
-                    argp_failure(state, EX_USAGE, 0,
+                    argp_failure(state, EX_USAGE, errno,
                                  "retain count must be in range [%d, %d]",
                                  1, INT_MAX - 1);
                 } else {
