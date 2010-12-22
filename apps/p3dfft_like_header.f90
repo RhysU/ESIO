@@ -32,7 +32,7 @@
 !!
 !! The variables one likely needs:
 !! u (field), xist,xien,zjst,zjen (coordinates of field)
-module header
+module p3dfft_like_header
 
   use mpi
   implicit none
@@ -250,4 +250,4 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-end module header
+end module p3dfft_like_header

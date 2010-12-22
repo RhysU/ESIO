@@ -40,12 +40,13 @@ bin_PROGRAMS        += esio_rename
 esio_rename_SOURCES  = esio_rename.c ../esio/restart-rename.c ../esio/error.c
 esio_rename_LDADD    = ../gnulib/libgnu.la $(LTLIBINTL) -lm
 
-# PSDNS iokernel test program
-noinst_PROGRAMS   += main
-main_SOURCES       = header.f90 main.f90
-main_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
-main_LIBTOOLFLAGS  = --tag=FC
-main.f90: header.o                       # Explicit module dependence
+# PSDNS iokernel test program based on P3DFFT v2.3 loading patterns
+# See http://code.google.com/p/p3dfft/ for more details on P3DFFT
+noinst_PROGRAMS          += p3dfft_like
+p3dfft_like_SOURCES       = p3dfft_like_header.f90 p3dfft_like.f90
+p3dfft_like_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+p3dfft_like_LIBTOOLFLAGS  = --tag=FC
+p3dfft_like.f90: p3dfft_like_header.o    # Explicit module dependence
 
 # Additional files to clean
 CLEANFILES += *.mod *.gcno *.gcda

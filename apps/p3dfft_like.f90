@@ -28,7 +28,7 @@
 !! to what is currently used in PSDNS.
 !!
 !! This routine will therefore be an early test for the ESIO library.
-program main
+program p3dfft_like
 
   use mpi
   use esio
@@ -36,9 +36,9 @@ program main
 ! The header contains problem size, initial conditions, precision, etc.
 ! The header declares physical space extents but xis{t,z}/zjs{t,z} and
 ! local storage u are allocated using the wave space extents.
-  use header, only: ny, nx, nz, nc,                      & ! Physical space
-                    xist, xisz, zjst, zjsz, u,           & ! Wave space
-                    initialize_problem, initialize_field
+  use p3dfft_like_header, only: ny, nx, nz, nc,            & ! Physical space
+                                xist, xisz, zjst, zjsz, u, & ! Wave space
+                                initialize_problem, initialize_field
   implicit none
 
   integer(4)            :: myid, numprocs, ierr, i
@@ -98,4 +98,4 @@ program main
   call esio_handle_finalize(handle)
   call mpi_finalize(ierr)
 
-end program main
+end program p3dfft_like
