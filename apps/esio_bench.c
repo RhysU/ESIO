@@ -37,6 +37,7 @@
 #include "mpi_argp.h"
 
 #include <mpi.h>
+#include <esio/error.h>
 #include <esio/esio.h>
 
 //*************************************************************
@@ -138,6 +139,12 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'f':
+            if (   arguments->field_cglobal
+                || arguments->field_bglobal
+                || arguments->field_aglobal ) {
+                argp_error(state, "only one of --field-{memory,global}"
+                           " may be specified");
+            }
             if (arg) {
                 arguments->field_bytes = from_human_readable_byte_count(arg);
                 if (arguments->field_bytes < 1)
@@ -147,6 +154,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'p':
+            if (   arguments->plane_bglobal || arguments->plane_aglobal) {
+                argp_error(state, "only one of --plane-{memory,global}"
+                           " may be specified");
+            }
             if (arg) {
                 arguments->plane_bytes = from_human_readable_byte_count(arg);
                 if (arguments->plane_bytes < 1)
@@ -156,6 +167,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'l':
+            if (arguments->line_aglobal) {
+                argp_error(state, "only one of --line-{memory,global}"
+                           " may be specified");
+            }
             if (arg) {
                 arguments->line_bytes = from_human_readable_byte_count(arg);
                 if (arguments->line_bytes < 1)
@@ -213,6 +228,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case FIELD_GLOBAL:
+            if (arguments->field_bytes) {
+                argp_error(state, "only one of --field-{memory,global}"
+                           " may be specified");
+            }
             if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
                             &arguments->field_cglobal,
                             &arguments->field_bglobal,
@@ -233,6 +252,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case PLANE_GLOBAL:
+            if (arguments->plane_bytes) {
+                argp_error(state, "only one of --plane-{memory,global}"
+                           " may be specified");
+            }
             if (2 != sscanf(arg ? arg : "", "%d x %d %c",
                             &arguments->plane_bglobal,
                             &arguments->plane_aglobal, &ignore)) {
@@ -247,6 +270,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case LINE_GLOBAL:
+            if (arguments->line_bytes) {
+                argp_error(state, "only one of --line-{memory,global}"
+                           " may be specified");
+            }
             if (1 != sscanf(arg ? arg : "", "%d %c",
                             &arguments->line_aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
@@ -285,8 +312,28 @@ int main(int argc, char *argv[])
     memset(&arguments, 0, sizeof(struct arguments));
     arguments.ncomponents = 1;
 
-    // Parse arguments
+    // Parse command line arguments
     mpi_argp_parse(world_rank, &argp, argc, argv, 0, 0, &arguments);
+
+    // Determine MPI_Dims_create-based decompositions
+    ESIO_MPICHKQ(MPI_Dims_create(world_size, 3, arguments.field_dims));
+    ESIO_MPICHKQ(MPI_Dims_create(world_size, 2, arguments.plane_dims));
+    ESIO_MPICHKQ(MPI_Dims_create(world_size, 1, arguments.line_dims));
+
+    // Fix field problem size
+    if (arguments.field_bytes) {
+        double field_vectors = world_size * arguments.field_bytes
+                             / arguments.ncomponents;
+        arguments.field_cglobal = arguments.field_bglobal
+                                = arguments.field_aglobal
+                                = ceil(pow(field_vectors, 1.0 / 3.0));
+    } else {
+        arguments.field_bytes = arguments.field_cglobal
+                              * arguments.field_bglobal
+                              * arguments.field_aglobal
+                              * arguments.ncomponents
+                              * 8 * sizeof(double);
+    }
 
     // DEBUG: Dump arguments
     printf("verbose:      %d\n", arguments.verbose);
@@ -332,6 +379,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+
 void trim(char *a)
 {
     char *b = a;
@@ -340,6 +388,7 @@ void trim(char *a)
     *a = '\0';
     while (isspace(*--a)) *a = '\0';
 }
+
 
 static inline int min(int a, int b)
 {
