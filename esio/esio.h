@@ -393,45 +393,146 @@ esio_attribute_sizev(const esio_handle h,
                      int *ncomponents) ESIO_API;
 /*\@}*/
 
+/**
+ * \name Manipulating decompositions for line, plane, and field operations.
+ **/
+/*\@{*/
+
+/**
+ * Establish the parallel decomposition to use for subsequent line operations.
+ *
+ * \param h       Handle to use.
+ * \param aglobal Global number of values within the line.
+ * \param astart  Global starting offset (zero-indexed) handled
+ *                locally by this MPI rank.
+ * \param alocal  Number of values this MPI rank should write.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ * \see \ref conceptslines "Line concepts" for more details.
+ */
+int
+esio_line_establish(esio_handle h,
+                    int aglobal, int astart, int alocal) ESIO_API;
+
+/**
+ * Establish the parallel decomposition to use for subsequent plane operations.
+ *
+ * Global starting offsets are zero-indexed.
+ *
+ * \param h       Handle to use.
+ * \param bglobal Global number of scalars in the slower "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of values in "B" this MPI rank should handle.
+ * \param aglobal Global number of scalars in the faster "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of values in "A" this MPI rank should handle.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ * \see \ref conceptsplanes "Plane concepts" for more details.
+ */
+int
+esio_plane_establish(esio_handle h,
+                     int bglobal, int bstart, int blocal,
+                     int aglobal, int astart, int alocal) ESIO_API;
+
+/**
+ * Establish the parallel decomposition to use for subsequent field operations.
+ *
+ * Global starting offsets are zero-indexed.
+ *
+ * \param h       Handle to use.
+ * \param cglobal Global number of scalars in the "C" slowest direction.
+ * \param cstart  Global starting "C" offset.
+ * \param clocal  Number of scalars in "C" this MPI rank should handle.
+ * \param bglobal Global number of scalars in the "B" direction.
+ * \param bstart  Global starting "B" offset.
+ * \param blocal  Number of scalars in "B" this MPI rank should handle.
+ * \param aglobal Global number of scalars in the fastest "A" direction.
+ * \param astart  Global starting "A" offset.
+ * \param alocal  Number of scalars in "A" this MPI rank should handle.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ * \see \ref conceptsfields "Field concepts" for more details.
+ */
+int
+esio_field_establish(esio_handle h,
+                     int cglobal, int cstart, int clocal,
+                     int bglobal, int bstart, int blocal,
+                     int aglobal, int astart, int alocal) ESIO_API;
+
+/**
+ * Retrieve any parallel decomposition previously established for line
+ * operations.  NULL arguments will be ignored.
+ *
+ * \copydetails esio_line_establish
+ */
+int
+esio_line_established(esio_handle h,
+                      int *aglobal, int *astart, int *alocal) ESIO_API;
+
+/**
+ * Retrieve any parallel decomposition previously established for plane
+ * operations.  NULL arguments will be ignored.
+ *
+ * \copydetails esio_plane_establish
+ */
+int
+esio_plane_established(esio_handle h,
+                       int *bglobal, int *bstart, int *blocal,
+                       int *aglobal, int *astart, int *alocal) ESIO_API;
+
+/**
+ * Retrieve any parallel decomposition previously established for field
+ * operations.  NULL arguments will be ignored.
+ *
+ * \copydetails esio_field_establish
+ */
+int
+esio_field_established(esio_handle h,
+                       int *cglobal, int *cstart, int *clocal,
+                       int *bglobal, int *bstart, int *blocal,
+                       int *aglobal, int *astart, int *alocal) ESIO_API;
+
+/*\@}*/
+
 #undef ESIO_ATTRIBUTE_WRITE_GEN
 #undef ESIO_ATTRIBUTE_READ_GEN
 #undef ESIO_ATTRIBUTE_WRITEV_GEN
 #undef ESIO_ATTRIBUTE_READV_GEN
 
-
 /** \cond INTERNAL */
-#define ESIO_LINE_WRITE_GEN(TYPE)                                         \
-int                                                                       \
-esio_line_write_##TYPE(const esio_handle h,                               \
-                       const char *name,                                  \
-                       const TYPE *line,                                  \
-                       int aglobal, int astart, int alocal, int astride)  \
+#define ESIO_LINE_WRITE_GEN(TYPE)           \
+int                                         \
+esio_line_write_##TYPE(const esio_handle h, \
+                       const char *name,    \
+                       const TYPE *line,    \
+                       int astride)         \
                        ESIO_API;
 
-#define ESIO_LINE_READ_GEN(TYPE)                                          \
-int                                                                       \
-esio_line_read_##TYPE(const esio_handle h,                                \
-                      const char *name,                                   \
-                      TYPE *line,                                         \
-                      int aglobal, int astart, int alocal, int astride)   \
-                       ESIO_API;
+#define ESIO_LINE_READ_GEN(TYPE)           \
+int                                        \
+esio_line_read_##TYPE(const esio_handle h, \
+                      const char *name,    \
+                      TYPE *line,          \
+                      int astride)         \
+                      ESIO_API;
 
-#define ESIO_LINE_WRITEV_GEN(TYPE)                                        \
-int                                                                       \
-esio_line_writev_##TYPE(const esio_handle h,                              \
-                        const char *name,                                 \
-                        const TYPE *line,                                 \
-                        int aglobal, int astart, int alocal, int astride, \
-                        int ncomponents)                                  \
+#define ESIO_LINE_WRITEV_GEN(TYPE)           \
+int                                          \
+esio_line_writev_##TYPE(const esio_handle h, \
+                        const char *name,    \
+                        const TYPE *line,    \
+                        int astride,         \
+                        int ncomponents)     \
                         ESIO_API;
 
-#define ESIO_LINE_READV_GEN(TYPE)                                         \
-int                                                                       \
-esio_line_readv_##TYPE(const esio_handle h,                               \
-                       const char *name,                                  \
-                       TYPE *line,                                        \
-                       int aglobal, int astart, int alocal, int astride,  \
-                       int ncomponents)                                   \
+#define ESIO_LINE_READV_GEN(TYPE)           \
+int                                         \
+esio_line_readv_##TYPE(const esio_handle h, \
+                       const char *name,    \
+                       TYPE *line,          \
+                       int astride,         \
+                       int ncomponents)     \
                        ESIO_API;
 /** \endcond */
 
@@ -443,14 +544,12 @@ esio_line_readv_##TYPE(const esio_handle h,                               \
 
 /**
  * Write a scalar-valued <code>double</code> line.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_line_establish().
  *
  * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer containing the scalars to write.
- * \param aglobal Global number of scalars within the line.
- * \param astart  Global starting offset (zero-indexed) handled
- *                locally by this MPI rank.
- * \param alocal  Number of scalars this MPI rank should write.
  * \param astride Stride between adjacent values in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
@@ -473,14 +572,12 @@ ESIO_LINE_WRITE_GEN(int)
 
 /**
  * Read a scalar-valued <code>double</code> line.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_line_establish().
  *
  * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer to contain the read scalars.
- * \param aglobal Global number of scalars within the line.
- * \param astart  Global starting offset (zero-indexed) handled
- *                locally by this MPI rank.
- * \param alocal  Number of scalars this MPI rank should read.
  * \param astride Stride between adjacent values in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
@@ -525,14 +622,12 @@ esio_line_size(const esio_handle h,
 
 /**
  * Write a vector-valued <code>double</code> line.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_line_establish().
  *
  * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer containing the vectors to write.
- * \param aglobal Global number of vectors within the line.
- * \param astart  Global starting offset (zero-indexed) handled
- *                locally by this MPI rank.
- * \param alocal  Number of vectors this MPI rank should write.
  * \param astride Stride between adjacent vectors in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                It must be an integer multiple of \c ncomponents.
@@ -557,14 +652,12 @@ ESIO_LINE_WRITEV_GEN(int)
 
 /**
  * Read a vector-valued <code>double</code> line.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_line_establish().
  *
  * \param h Handle to use.
  * \param name Null-terminated attribute name.
  * \param line Buffer to contain the read vectors.
- * \param aglobal Global number of vectors within the line.
- * \param astart  Global starting offset (zero-indexed) handled
- *                locally by this MPI rank.
- * \param alocal  Number of vectors this MPI rank should read.
  * \param astride Stride between adjacent vectors in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                It must be an integer multiple of \c ncomponents.
@@ -607,7 +700,7 @@ esio_line_sizev(const esio_handle h,
 /*\@}*/
 
 /**
- * \name Manipulating distributed, one-dimensional data with 
+ * \name Manipulating distributed, one-dimensional data with
  * See \ref conceptslines "line concepts" for more details.
  */
 /*\@{*/

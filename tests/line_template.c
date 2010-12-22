@@ -142,7 +142,7 @@ FCT_BGN()
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
     char * filename = NULL;
-    esio_handle state;
+    esio_handle handle;
 
     FCT_FIXTURE_SUITE_BGN(line_suite)
     {
@@ -172,16 +172,16 @@ FCT_BGN()
                                     0, MPI_COMM_WORLD));
             assert(filename);
 
-            // Initialize ESIO state
-            state = esio_handle_initialize(MPI_COMM_WORLD);
-            assert(state);
+            // Initialize ESIO handle
+            handle = esio_handle_initialize(MPI_COMM_WORLD);
+            assert(handle);
         }
         FCT_SETUP_END();
 
         FCT_TEARDOWN_BGN()
         {
-            // Finalize ESIO state
-            esio_handle_finalize(state);
+            // Finalize ESIO handle
+            esio_handle_finalize(handle);
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
@@ -205,14 +205,27 @@ FCT_BGN()
             line = calloc(nelem, sizeof(REAL));
             fct_req(line);
 
+            // Establish and then check the parallel decomposition
+            fct_req(0 == esio_line_establish(handle, aglobal, astart, alocal));
+            {
+                int tmp_aglobal, tmp_astart, tmp_alocal;
+                fct_req(0 == esio_line_established(handle, &tmp_aglobal,
+                                                           &tmp_astart,
+                                                           &tmp_alocal));
+                fct_chk_eq_int(aglobal, tmp_aglobal);
+                fct_chk_eq_int(astart,  tmp_astart);
+                fct_chk_eq_int(alocal,  tmp_alocal);
+
+                fct_req(0 == esio_line_established(handle, NULL, NULL, NULL));
+            }
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_line_write)(
-                               state, "line", line,
-                               aglobal, astart, alocal, astride));
-            fct_req(0 == esio_file_flush(state));
+                               handle, "line", line, astride));
+            fct_req(0 == esio_file_flush(handle));
 
             // Populate local line with test data
             for (int i = 0; i < alocal; ++i) {
@@ -224,23 +237,21 @@ FCT_BGN()
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_write)(
-                                   state, "line", line,
-                                   aglobal, astart, alocal, astride));
+                                   handle, "line", line, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_write)(
-                                   state, "line", line,
-                                   aglobal, astart, alocal, 0));
+                                   handle, "line", line, 0));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal;
-                fct_req(0 == esio_line_size(state, "line", &tmp_aglobal));
+                fct_req(0 == esio_line_size(handle, "line", &tmp_aglobal));
                 fct_chk_eq_int(aglobal, tmp_aglobal);
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the line
             free(line);
@@ -270,17 +281,15 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             line = calloc(nelem, sizeof(REAL));
             fct_req(line);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_read)(
-                                   state, "line", line,
-                                   aglobal, astart, alocal, astride));
+                                   handle, "line", line, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_read)(
-                                   state, "line", line,
-                                   aglobal, astart, alocal, 0));
+                                   handle, "line", line, 0));
             }
             for (int i = 0; i < alocal; ++i) {
                 const REAL expected = (REAL) 2*((i + astart) +  3);
@@ -288,7 +297,7 @@ FCT_BGN()
                 fct_chk_eq_dbl(value, expected);
             }
             free(line);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 
@@ -306,8 +315,11 @@ FCT_BGN()
             vline = calloc(nelem, sizeof(REAL));
             fct_req(vline);
 
+            // Establish the parallel decomposition
+            fct_req(0 == esio_line_establish(handle, aglobal, astart, alocal));
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Populate local vline with test data
             for (int i = 0; i < alocal; ++i) {
@@ -320,20 +332,18 @@ FCT_BGN()
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_writev)(
-                                   state, "vline", vline,
-                                   aglobal, astart, alocal, astride,
-                                   ncomponents));
+                                   handle, "vline", vline,
+                                   astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_writev)(
-                                   state, "vline", vline,
-                                   aglobal, astart, alocal, 0,
-                                   ncomponents));
+                                   handle, "vline", vline,
+                                   0, ncomponents));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_ncomponents;
-                fct_req(0 == esio_line_sizev(state, "vline",
+                fct_req(0 == esio_line_sizev(handle, "vline",
                                              &tmp_aglobal,
                                              &tmp_ncomponents));
 
@@ -342,7 +352,7 @@ FCT_BGN()
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the vline
             free(vline);
@@ -380,19 +390,17 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             vline = calloc(nelem, sizeof(REAL));
             fct_req(vline);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_readv)(
-                                   state, "vline", vline,
-                                   aglobal, astart, alocal, astride,
-                                   ncomponents));
+                                   handle, "vline", vline,
+                                   astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_readv)(
-                                   state, "vline", vline,
-                                   aglobal, astart, alocal, 0,
-                                   ncomponents));
+                                   handle, "vline", vline,
+                                   0, ncomponents));
             }
             for (int i = 0; i < alocal; ++i) {
                 for (int h = 0; h < ncomponents; ++h) {
@@ -402,7 +410,7 @@ FCT_BGN()
                 }
             }
             free(vline);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 

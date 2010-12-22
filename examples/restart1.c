@@ -17,6 +17,9 @@ int main(int argc, char *argv[])
     esio_string_set(h, "program", argv[0]);
     esio_file_close(h);
 
+    /* Establish the parallel decomposition */
+    esio_line_establish(h, 2*world_size, 2*world_rank, 2);
+
     /* Main simulation loop */
     double example[2];
     for (int i = 0; i < 10; ++i) {
@@ -29,8 +32,7 @@ int main(int argc, char *argv[])
         esio_file_clone(h, "template.h5", "uncommitted.h5", 1 /*overwrite*/);
 
         /* Save the current simulation state in the uncommitted restart */
-        esio_line_write_double(h, "example", example,
-                               2*world_size, 2*world_rank, 2, 1);
+        esio_line_write_double(h, "example", example, 1);
 
         /* Commit the restart file.  Up to 5 older restarts are retained. */
         esio_file_close_restart(h, "committed#.h5", 5 /*retain_count*/);

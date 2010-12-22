@@ -646,12 +646,264 @@ end subroutine esio_attribute_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+!> \name Manipulating decompositions for line, plane, and field operations.
+!!@{
+
+  subroutine esio_line_establish (handle, aglobal, astart, alocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(in)            :: aglobal, astart, alocal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, aglobal, astart, alocal)  &
+                    bind (C, name="esio_line_establish")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        integer(c_int),               intent(in), value :: aglobal, &
+                                                           astart,  &
+                                                           alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+    stat = impl(handle, aglobal, astart - 1, alocal)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_line_establish
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_plane_establish (handle, aglobal, astart, alocal,       &
+                                           bglobal, bstart, blocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(in)            :: aglobal, astart, alocal
+    integer,           intent(in)            :: bglobal, bstart, blocal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, bglobal, bstart, blocal,     &
+                             aglobal, astart, alocal)     &
+                    bind (C, name="esio_plane_establish")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        integer(c_int),               intent(in), value :: bglobal, &
+                                                           bstart,  &
+                                                           blocal
+        integer(c_int),               intent(in), value :: aglobal, &
+                                                           astart,  &
+                                                           alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (a, b) to C's (b, a)
+    stat = impl(handle, bglobal, bstart - 1, blocal,  &
+                        aglobal, astart - 1, alocal)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_plane_establish
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_field_establish (handle, aglobal, astart, alocal,       &
+                                           bglobal, bstart, blocal,       &
+                                           cglobal, cstart, clocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(in)            :: aglobal, astart, alocal
+    integer,           intent(in)            :: bglobal, bstart, blocal
+    integer,           intent(in)            :: cglobal, cstart, clocal
+    integer,           intent(out), optional :: ierr
+    integer                                  :: stat
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, cglobal, cstart, clocal,     &
+                             bglobal, bstart, blocal,     &
+                             aglobal, astart, alocal)     &
+                    bind (C, name="esio_field_establish")
+        import
+        integer(c_int)                                  :: impl
+        type(esio_handle),            intent(in), value :: handle
+        integer(c_int),               intent(in), value :: cglobal, &
+                                                           cstart,  &
+                                                           clocal
+        integer(c_int),               intent(in), value :: bglobal, &
+                                                           bstart,  &
+                                                           blocal
+        integer(c_int),               intent(in), value :: aglobal, &
+                                                           astart,  &
+                                                           alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (a, b, c) to C's (c, b, a)
+    stat = impl(handle, cglobal, cstart - 1, clocal,  &
+                        bglobal, bstart - 1, blocal,  &
+                        aglobal, astart - 1, alocal)
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_field_establish
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_line_established (handle, aglobal, astart, alocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(out)           :: aglobal, astart, alocal
+    integer,           intent(out), optional :: ierr
+
+    integer        :: stat
+    integer(c_int) :: tmp_aglobal, tmp_astart, tmp_alocal
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, aglobal, astart, alocal)  &
+                    bind (C, name="esio_line_established")
+        import
+        integer(c_int)                                    :: impl
+        type(esio_handle),            intent(in),   value :: handle
+        integer(c_int),               intent(inout)       :: aglobal, &
+                                                             astart,  &
+                                                             alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+    stat = impl(handle, tmp_aglobal, tmp_astart, tmp_alocal)
+    aglobal = tmp_aglobal
+    astart  = tmp_astart + 1
+    alocal  = tmp_alocal
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_line_established
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_plane_established (handle, aglobal, astart, alocal,       &
+                                             bglobal, bstart, blocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(out)           :: aglobal, astart, alocal
+    integer,           intent(out)           :: bglobal, bstart, blocal
+    integer,           intent(out), optional :: ierr
+
+    integer        :: stat
+    integer(c_int) :: tmp_aglobal, tmp_astart, tmp_alocal
+    integer(c_int) :: tmp_bglobal, tmp_bstart, tmp_blocal
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, bglobal, bstart, blocal,  &
+                             aglobal, astart, alocal)  &
+                    bind (C, name="esio_plane_established")
+        import
+        integer(c_int)                                    :: impl
+        type(esio_handle),            intent(in),   value :: handle
+        integer(c_int),               intent(inout)       :: bglobal, &
+                                                             bstart,  &
+                                                             blocal
+        integer(c_int),               intent(inout)       :: aglobal, &
+                                                             astart,  &
+                                                             alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (a, b) to C's (b, a)
+    stat = impl(handle, tmp_bglobal, tmp_bstart, tmp_blocal,  &
+                        tmp_aglobal, tmp_astart, tmp_alocal)
+    bglobal = tmp_bglobal
+    bstart  = tmp_bstart + 1
+    blocal  = tmp_blocal
+    aglobal = tmp_aglobal
+    astart  = tmp_astart + 1
+    alocal  = tmp_alocal
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_plane_established
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_field_established (handle, aglobal, astart, alocal,       &
+                                             bglobal, bstart, blocal,       &
+                                             cglobal, cstart, clocal, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(out)           :: aglobal, astart, alocal
+    integer,           intent(out)           :: bglobal, bstart, blocal
+    integer,           intent(out)           :: cglobal, cstart, clocal
+    integer,           intent(out), optional :: ierr
+
+    integer        :: stat
+    integer(c_int) :: tmp_aglobal, tmp_astart, tmp_alocal
+    integer(c_int) :: tmp_bglobal, tmp_bstart, tmp_blocal
+    integer(c_int) :: tmp_cglobal, tmp_cstart, tmp_clocal
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, cglobal, cstart, clocal,  &
+                             bglobal, bstart, blocal,  &
+                             aglobal, astart, alocal)  &
+                    bind (C, name="esio_field_established")
+        import
+        integer(c_int)                                    :: impl
+        type(esio_handle),            intent(in),   value :: handle
+        integer(c_int),               intent(inout)       :: cglobal, &
+                                                             cstart,  &
+                                                             clocal
+        integer(c_int),               intent(inout)       :: bglobal, &
+                                                             bstart,  &
+                                                             blocal
+        integer(c_int),               intent(inout)       :: aglobal, &
+                                                             astart,  &
+                                                             alocal
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+!   Note conversion from one- to zero-based starting offsets
+!   Note reordering Fortran's (a, b, c) to C's (c, b, a)
+    stat = impl(handle, tmp_cglobal, tmp_cstart, tmp_clocal,  &
+                        tmp_bglobal, tmp_bstart, tmp_blocal,  &
+                        tmp_aglobal, tmp_astart, tmp_alocal)
+    cglobal = tmp_cglobal
+    cstart  = tmp_cstart + 1
+    clocal  = tmp_clocal
+    bglobal = tmp_bglobal
+    bstart  = tmp_bstart + 1
+    blocal  = tmp_blocal
+    aglobal = tmp_aglobal
+    astart  = tmp_astart + 1
+    alocal  = tmp_alocal
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_field_established
+
+!!@}
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 !> \name Manipulating distributed, one-dimensional, scalar-valued data
 !! See \ref conceptslines "line concepts" for more details.
 !!@{
 
 subroutine esio_line_write_double (handle, name, line,               &
-                                   aglobal, astart, alocal, astride, &
+                                   astride,                          &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -664,7 +916,7 @@ end subroutine esio_line_write_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_write_single (handle, name, line,               &
-                                   aglobal, astart, alocal, astride, &
+                                   astride,                          &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -677,7 +929,7 @@ end subroutine esio_line_write_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_write_integer (handle, name, line,               &
-                                    aglobal, astart, alocal, astride, &
+                                    astride,                          &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -690,7 +942,7 @@ end subroutine esio_line_write_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_read_double (handle, name, line,               &
-                                  aglobal, astart, alocal, astride, &
+                                  astride,                          &
                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -703,7 +955,7 @@ end subroutine esio_line_read_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_read_single (handle, name, line,               &
-                                  aglobal, astart, alocal, astride, &
+                                  astride,                          &
                                   ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -716,7 +968,7 @@ end subroutine esio_line_read_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_read_integer (handle, name, line,               &
-                                   aglobal, astart, alocal, astride, &
+                                   astride,                          &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -765,7 +1017,7 @@ end subroutine esio_line_read_integer
 !!@{
 
 subroutine esio_line_writev_double (handle, name, line, ncomponents,  &
-                                    aglobal, astart, alocal, astride, &
+                                    astride,                          &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -779,7 +1031,7 @@ end subroutine esio_line_writev_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_writev_single (handle, name, line, ncomponents,  &
-                                    aglobal, astart, alocal, astride, &
+                                    astride,                          &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -793,7 +1045,7 @@ end subroutine esio_line_writev_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_writev_integer (handle, name, line, ncomponents,  &
-                                     aglobal, astart, alocal, astride, &
+                                     astride,                          &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -807,7 +1059,7 @@ end subroutine esio_line_writev_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_readv_double (handle, name, line, ncomponents,  &
-                                   aglobal, astart, alocal, astride, &
+                                   astride,                          &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -821,7 +1073,7 @@ end subroutine esio_line_readv_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_readv_single (handle, name, line, ncomponents,  &
-                                   aglobal, astart, alocal, astride, &
+                                   astride,                          &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -835,7 +1087,7 @@ end subroutine esio_line_readv_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_line_readv_integer (handle, name, line, ncomponents,  &
-                                    aglobal, astart, alocal, astride, &
+                                    astride,                          &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED

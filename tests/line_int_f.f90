@@ -56,20 +56,24 @@ program line_int_f
         value_vector(i,:) = i*value_scalar(:)
     end do
 
+!   Establish the parallel decomposition
+    call esio_line_establish(h, global(1), start(1), local(1), ierr)
+    ASSERT(ierr == 0)
+
 !   Create a file
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
 !   Write a scalar-valued line
-    call esio_line_write_integer(h, "name_scalar", value_scalar,           &
-                                 global(1), start(1), local(1), stride(1), &
+    call esio_line_write_integer(h, "name_scalar", value_scalar,            &
+                                 stride(1),                                 &
                                  ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued line
     call esio_line_writev_integer(h, "name_vector", value_vector,           &
                                   ncomponents,                              &
-                                  global(1), start(1), local(1), stride(1), &
+                                  stride(1),                                &
                                   ierr)
     ASSERT(ierr == 0)
 
@@ -90,7 +94,7 @@ program line_int_f
     ASSERT(i == 1)
     ASSERT(j == global(1))
     call esio_line_read_integer(h, "name_scalar", buffer_scalar,          &
-                                global(1), start(1), local(1), stride(1), &
+                                stride(1),                                &
                                 ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
@@ -102,7 +106,7 @@ program line_int_f
     ASSERT(j == global(1))
     call esio_line_readv_integer(h, "name_vector", buffer_vector,          &
                                  ncomponents,                              &
-                                 global(1), start(1), local(1), stride(1), &
+                                 stride(1),                                &
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))

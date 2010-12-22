@@ -124,14 +124,14 @@ static
 int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
-                             int aglobal, int astart, int alocal, int astride,
+                             int astride,
                              hid_t type_id);
 
 static
 int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
-                            int aglobal, int astart, int alocal, int astride,
+                            int astride,
                             hid_t type_id);
 
 //*********************************************************************
@@ -144,15 +144,33 @@ enum {
     FLAG_CHUNKING_ENABLED   = 1 << 1  //< See features #1246 and #1247
 };
 
+struct line_decomp_s {
+    int aglobal, astart, alocal;
+};
+
+struct plane_decomp_s {
+    int bglobal, bstart, blocal;
+    int aglobal, astart, alocal;
+};
+
+struct field_decomp_s {
+    int cglobal, cstart, clocal;
+    int bglobal, bstart, blocal;
+    int aglobal, astart, alocal;
+};
+
 struct esio_handle_s {
-    MPI_Comm  comm;         //< Communicator used for collective calls
-    int       comm_rank;    //< Process rank within in MPI communicator
-    int       comm_size;    //< Number of ranks within MPI communicator
-    MPI_Info  info;         //< Info object used for collective calls
-    hid_t     file_id;      //< Active HDF file identifier
-    char     *file_path;    //< Active file's canonical path
-    int       layout_index; //< Active field layout_index within HDF5 file
-    int       flags;        //< Miscellaneous bit-based flags
+    MPI_Comm  comm;          //< Communicator used for collective calls
+    int       comm_rank;     //< Process rank within in MPI communicator
+    int       comm_size;     //< Number of ranks within MPI communicator
+    MPI_Info  info;          //< Info object used for collective calls
+    hid_t     file_id;       //< Active HDF file identifier
+    char     *file_path;     //< Active file's canonical path
+    int       layout_index;  //< Active field layout_index within HDF5 file
+    int       flags;         //< Miscellaneous bit-based flags
+    struct line_decomp_s  l; //< Active parallel decomposition for lines
+    struct plane_decomp_s p; //< Active parallel decomposition for planes
+    struct field_decomp_s f; //< Active parallel decomposition for fields
 };
 
 //***************************************************************************
@@ -773,6 +791,146 @@ int esio_line_close(hid_t dataset_id)
 
     return ESIO_SUCCESS;
 }
+
+// *********************************************************************
+// PARALLEL DECOMPOSITION DETAILS PARALLEL DECOMPOSITION DETAILS
+// *********************************************************************
+
+int
+esio_line_establish(esio_handle h,
+                    int aglobal, int astart, int alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL)   ESIO_ERROR("h == NULL",   ESIO_EFAULT);
+    if (aglobal < 1) ESIO_ERROR("aglobal < 1", ESIO_EINVAL);
+    if (astart  < 0) ESIO_ERROR("astart < 0",  ESIO_EINVAL);
+    if (alocal  < 0) ESIO_ERROR("alocal < 0",  ESIO_EINVAL);
+
+    // Save parallel decomposition in handle
+    h->l.aglobal = aglobal;
+    h->l.astart  = astart;
+    h->l.alocal  = alocal;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_line_established(esio_handle h,
+                      int *aglobal, int *astart, int *alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
+
+    // Retrieve parallel decomposition from handle
+    if (aglobal) *aglobal = h->l.aglobal;
+    if (astart ) *astart  = h->l.astart;
+    if (alocal ) *alocal  = h->l.alocal;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_plane_establish(esio_handle h,
+                     int bglobal, int bstart, int blocal,
+                     int aglobal, int astart, int alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL)   ESIO_ERROR("h == NULL",   ESIO_EFAULT);
+    if (bglobal < 1) ESIO_ERROR("bglobal < 1", ESIO_EINVAL);
+    if (bstart  < 0) ESIO_ERROR("bstart < 0",  ESIO_EINVAL);
+    if (blocal  < 0) ESIO_ERROR("blocal < 0",  ESIO_EINVAL);
+    if (aglobal < 1) ESIO_ERROR("aglobal < 1", ESIO_EINVAL);
+    if (astart  < 0) ESIO_ERROR("astart < 0",  ESIO_EINVAL);
+    if (alocal  < 0) ESIO_ERROR("alocal < 0",  ESIO_EINVAL);
+
+    // Save parallel decomposition in handle
+    h->p.bglobal = bglobal;
+    h->p.bstart  = bstart;
+    h->p.blocal  = blocal;
+    h->p.aglobal = aglobal;
+    h->p.astart  = astart;
+    h->p.alocal  = alocal;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_plane_established(esio_handle h,
+                       int *bglobal, int *bstart, int *blocal,
+                       int *aglobal, int *astart, int *alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
+
+    // Retrieve parallel decomposition from handle
+    if (bglobal) *bglobal = h->p.bglobal;
+    if (bstart ) *bstart  = h->p.bstart;
+    if (blocal ) *blocal  = h->p.blocal;
+    if (aglobal) *aglobal = h->p.aglobal;
+    if (astart ) *astart  = h->p.astart;
+    if (alocal ) *alocal  = h->p.alocal;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_field_establish(esio_handle h,
+                     int cglobal, int cstart, int clocal,
+                     int bglobal, int bstart, int blocal,
+                     int aglobal, int astart, int alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL)   ESIO_ERROR("h == NULL",   ESIO_EFAULT);
+    if (cglobal < 1) ESIO_ERROR("cglobal < 1", ESIO_EINVAL);
+    if (cstart  < 0) ESIO_ERROR("cstart < 0",  ESIO_EINVAL);
+    if (clocal  < 0) ESIO_ERROR("clocal < 0",  ESIO_EINVAL);
+    if (bglobal < 1) ESIO_ERROR("bglobal < 1", ESIO_EINVAL);
+    if (bstart  < 0) ESIO_ERROR("bstart < 0",  ESIO_EINVAL);
+    if (blocal  < 0) ESIO_ERROR("blocal < 0",  ESIO_EINVAL);
+    if (aglobal < 1) ESIO_ERROR("aglobal < 1", ESIO_EINVAL);
+    if (astart  < 0) ESIO_ERROR("astart < 0",  ESIO_EINVAL);
+    if (alocal  < 0) ESIO_ERROR("alocal < 0",  ESIO_EINVAL);
+
+    // Save parallel decomposition in handle
+    h->f.cglobal = cglobal;
+    h->f.cstart  = cstart;
+    h->f.clocal  = clocal;
+    h->f.bglobal = bglobal;
+    h->f.bstart  = bstart;
+    h->f.blocal  = blocal;
+    h->f.aglobal = aglobal;
+    h->f.astart  = astart;
+    h->f.alocal  = alocal;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_field_established(esio_handle h,
+                       int *cglobal, int *cstart, int *clocal,
+                       int *bglobal, int *bstart, int *blocal,
+                       int *aglobal, int *astart, int *alocal)
+{
+    // Sanity check incoming arguments
+    if (h == NULL) ESIO_ERROR("h == NULL", ESIO_EFAULT);
+
+    // Retrieve parallel decomposition from handle
+    if (cglobal) *cglobal = h->f.cglobal;
+    if (cstart ) *cstart  = h->f.cstart;
+    if (clocal ) *clocal  = h->f.clocal;
+    if (bglobal) *bglobal = h->f.bglobal;
+    if (bstart ) *bstart  = h->f.bstart;
+    if (blocal ) *blocal  = h->f.blocal;
+    if (aglobal) *aglobal = h->f.aglobal;
+    if (astart ) *astart  = h->f.astart;
+    if (alocal ) *alocal  = h->f.alocal;
+
+    return ESIO_SUCCESS;
+}
+
+// *********************************************************************
+// SIZE SIZEV SIZE SIZEV SIZE SIZEV SIZE SIZEV SIZE SIZEV SIZE SIZEV
+// *********************************************************************
 
 int esio_field_size(const esio_handle h,
                     const char *name,
@@ -1549,7 +1707,7 @@ static
 int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
-                             int aglobal, int astart, int alocal, int astride,
+                             int astride,
                              hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1558,11 +1716,10 @@ int esio_line_write_internal(const esio_handle h,
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
-    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
-    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
-    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+    if (h->l.aglobal == 0)
+        ESIO_ERROR("esio_line_establish() never called", ESIO_EINVAL);
 
     // Provide contiguous defaults whenever the user supplied zero strides.
     // Strides are given in units of type_id; hence astride = 1 is contiguous.
@@ -1581,8 +1738,8 @@ int esio_line_write_internal(const esio_handle h,
         // Determine the chunking parameters to use for dataset creation
         int achunk;
         if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const int status
-                = chunksize_line(h->comm, aglobal, astart, alocal, &achunk);
+            const int status = chunksize_line(
+                    h->comm, h->l.aglobal, h->l.astart, h->l.alocal, &achunk);
             if (status != ESIO_SUCCESS) {
                 ESIO_ERROR("Error determining chunk size for decomposition",
                            status);
@@ -1605,7 +1762,7 @@ int esio_line_write_internal(const esio_handle h,
         }
 
         // Create the line
-        dset_id = esio_line_create(h, aglobal, name, type_id,
+        dset_id = esio_line_create(h, h->l.aglobal, name, type_id,
                                    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new line", ESIO_EFAILED);
@@ -1618,7 +1775,7 @@ int esio_line_write_internal(const esio_handle h,
         // Line already existed
 
         // Ensure caller gave correct size information
-        if (aglobal != line_aglobal) {
+        if (h->l.aglobal != line_aglobal) {
             ESIO_ERROR("request aglobal mismatch with existing line",
                        ESIO_EINVAL);
         }
@@ -1657,9 +1814,9 @@ int esio_line_write_internal(const esio_handle h,
     }
 
     // Write field
-    const int wstat = esio_line_writer(plist_id, dset_id, line,
-                                       aglobal, astart, alocal, astride,
-                                       type_id);
+    const int wstat = esio_line_writer(
+            plist_id, dset_id, line,
+            h->l.aglobal, h->l.astart, h->l.alocal, astride, type_id);
     if (wstat != ESIO_SUCCESS) {
         esio_line_close(dset_id);
         H5Pclose(plist_id);
@@ -1675,7 +1832,7 @@ static
 int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
-                            int aglobal, int astart, int alocal, int astride,
+                            int astride,
                             hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1684,11 +1841,10 @@ int esio_line_read_internal(const esio_handle h,
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
-    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
-    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
-    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+    if (h->l.aglobal == 0)
+        ESIO_ERROR("esio_line_establish() never called", ESIO_EINVAL);
 
     // Provide contiguous defaults whenever the user supplied zero strides.
     // Strides are given in units of type_id; hence astride = 1 is contiguous.
@@ -1704,7 +1860,7 @@ int esio_line_read_internal(const esio_handle h,
     }
 
     // Ensure caller gave correct size information
-    if (aglobal != line_aglobal) {
+    if (h->l.aglobal != line_aglobal) {
         ESIO_ERROR("line read request has incorrect aglobal", ESIO_EINVAL);
     }
 
@@ -1740,9 +1896,9 @@ int esio_line_read_internal(const esio_handle h,
     }
 
     // Read line
-    const int rstat = esio_line_reader(plist_id, dset_id, line,
-                                       aglobal, astart, alocal, astride,
-                                       type_id);
+    const int rstat = esio_line_reader(
+            plist_id, dset_id, line,
+            h->l.aglobal, h->l.astart, h->l.alocal, astride, type_id);
     if (rstat != ESIO_SUCCESS) {
         esio_line_close(dset_id);
         H5Pclose(plist_id);
@@ -1754,16 +1910,16 @@ int esio_line_read_internal(const esio_handle h,
     return ESIO_SUCCESS;
 }
 
-#define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                                    \
-int esio_line_ ## OP ## _ ## TYPE (                                         \
-        const esio_handle h,                                                \
-        const char *name,                                                   \
-        QUAL TYPE *line,                                                    \
-        int aglobal, int astart, int alocal, int astride)                   \
-{                                                                           \
-    return esio_line_ ## OP ## _internal(h, name, line,                     \
-                                         aglobal, astart, alocal, astride,  \
-                                         H5TYPE);                           \
+#define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                \
+int esio_line_ ## OP ## _ ## TYPE (                     \
+        const esio_handle h,                            \
+        const char *name,                               \
+        QUAL TYPE *line,                                \
+        int astride)                                    \
+{                                                       \
+    return esio_line_ ## OP ## _internal(h, name, line, \
+                                         astride,       \
+                                         H5TYPE);       \
 }
 
 GEN_LINE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
@@ -1780,7 +1936,7 @@ int esio_line_ ## OP ## v_ ## TYPE(                                       \
         const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *line,                                                  \
-        int aglobal, int astart, int alocal, int astride,                 \
+        int astride,                                                      \
         int ncomponents)                                                  \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
@@ -1795,7 +1951,7 @@ int esio_line_ ## OP ## v_ ## TYPE(                                       \
     }                                                                     \
     const int retval = esio_line_ ## OP ## _internal(                     \
             h, name, line,                                                \
-            aglobal, astart, alocal, (astride / ncomponents),             \
+            (astride / ncomponents),                                      \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \
