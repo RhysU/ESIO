@@ -606,6 +606,13 @@ esio_line_sizev(const esio_handle h,
                 int *ncomponents) ESIO_API;
 /*\@}*/
 
+/**
+ * \name Manipulating distributed, one-dimensional data with 
+ * See \ref conceptslines "line concepts" for more details.
+ */
+/*\@{*/
+/*\@}*/
+
 #undef ESIO_LINE_WRITE_GEN
 #undef ESIO_LINE_READ_GEN
 #undef ESIO_LINE_WRITEV_GEN
