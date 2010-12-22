@@ -192,7 +192,7 @@ FCT_BGN()
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
     char * filename = NULL;
-    esio_handle state;
+    esio_handle handle;
 
     FCT_FIXTURE_SUITE_BGN(plane_suite)
     {
@@ -222,16 +222,16 @@ FCT_BGN()
                                     0, MPI_COMM_WORLD));
             assert(filename);
 
-            // Initialize ESIO state
-            state = esio_handle_initialize(MPI_COMM_WORLD);
-            assert(state);
+            // Initialize ESIO handle
+            handle = esio_handle_initialize(MPI_COMM_WORLD);
+            assert(handle);
         }
         FCT_SETUP_END();
 
         FCT_TEARDOWN_BGN()
         {
-            // Finalize ESIO state
-            esio_handle_finalize(state);
+            // Finalize ESIO handle
+            esio_handle_finalize(handle);
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
@@ -256,15 +256,36 @@ FCT_BGN()
             plane = calloc(nelem, sizeof(REAL));
             fct_req(plane);
 
+            // Establish and then check the parallel decomposition
+            fct_req(0 == esio_plane_establish(handle, bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
+            {
+                int tmp_bglobal, tmp_bstart, tmp_blocal;
+                int tmp_aglobal, tmp_astart, tmp_alocal;
+                fct_req(0 == esio_plane_established(handle, &tmp_bglobal,
+                                                            &tmp_bstart,
+                                                            &tmp_blocal,
+                                                            &tmp_aglobal,
+                                                            &tmp_astart,
+                                                            &tmp_alocal));
+                fct_chk_eq_int(bglobal, tmp_bglobal);
+                fct_chk_eq_int(bstart,  tmp_bstart);
+                fct_chk_eq_int(blocal,  tmp_blocal);
+                fct_chk_eq_int(aglobal, tmp_aglobal);
+                fct_chk_eq_int(astart,  tmp_astart);
+                fct_chk_eq_int(alocal,  tmp_alocal);
+
+                fct_req(0 == esio_plane_established(handle, NULL, NULL, NULL,
+                                                            NULL, NULL, NULL));
+            }
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_plane_write)(
-                                state, "plane", plane,
-                                bglobal, bstart, blocal, bstride,
-                                aglobal, astart, alocal, astride));
-            fct_req(0 == esio_file_flush(state));
+                                handle, "plane", plane, bstride, astride));
+            fct_req(0 == esio_file_flush(handle));
 
             // Populate local plane with test data
             for (int j = 0; j < blocal; ++j) {
@@ -279,20 +300,16 @@ FCT_BGN()
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_write)(
-                                    state, "plane", plane,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride));
+                                    handle, "plane", plane, bstride, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_write)(
-                                    state, "plane", plane,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0));
+                                    handle, "plane", plane, 0, 0));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_bglobal;
-                fct_req(0 == esio_plane_size(state, "plane",
+                fct_req(0 == esio_plane_size(handle, "plane",
                                              &tmp_bglobal,
                                              &tmp_aglobal));
                 fct_chk_eq_int(bglobal, tmp_bglobal);
@@ -300,7 +317,7 @@ FCT_BGN()
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the plane
             free(plane);
@@ -332,19 +349,15 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             plane = calloc(nelem, sizeof(REAL));
             fct_req(plane);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_read)(
-                                    state, "plane", plane,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride));
+                                    handle, "plane", plane, bstride, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_read)(
-                                    state, "plane", plane,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0));
+                                    handle, "plane", plane, 0, 0));
             }
             for (int j = 0; j < blocal; ++j) {
                 for (int i = 0; i < alocal; ++i) {
@@ -355,7 +368,7 @@ FCT_BGN()
                 }
             }
             free(plane);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 
@@ -374,8 +387,12 @@ FCT_BGN()
             vplane = calloc(nelem, sizeof(REAL));
             fct_req(vplane);
 
+            // Establish the parallel decomposition
+            fct_req(0 == esio_plane_establish(handle, bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Populate local vplane with test data
             for (int j = 0; j < blocal; ++j) {
@@ -393,22 +410,18 @@ FCT_BGN()
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_writev)(
-                                    state, "vplane", vplane,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride,
-                                    ncomponents));
+                                    handle, "vplane", vplane,
+                                    bstride, astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_writev)(
-                                    state, "vplane", vplane,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0,
-                                    ncomponents));
+                                    handle, "vplane", vplane,
+                                    0, 0, ncomponents));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_bglobal, tmp_ncomponents;
-                fct_req(0 == esio_plane_sizev(state, "vplane",
+                fct_req(0 == esio_plane_sizev(handle, "vplane",
                                               &tmp_bglobal,
                                               &tmp_aglobal,
                                               &tmp_ncomponents));
@@ -419,7 +432,7 @@ FCT_BGN()
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the vplane
             free(vplane);
@@ -462,21 +475,17 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             vplane = calloc(nelem, sizeof(REAL));
             fct_req(vplane);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_readv)(
-                                    state, "vplane", vplane,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride,
-                                    ncomponents));
+                                    handle, "vplane", vplane,
+                                    bstride, astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_readv)(
-                                    state, "vplane", vplane,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0,
-                                    ncomponents));
+                                    handle, "vplane", vplane,
+                                    0, 0, ncomponents));
             }
             for (int j = 0; j < blocal; ++j) {
                 for (int i = 0; i < alocal; ++i) {
@@ -490,7 +499,7 @@ FCT_BGN()
                 }
             }
             free(vplane);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 

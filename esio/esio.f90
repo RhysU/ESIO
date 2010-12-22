@@ -1141,8 +1141,7 @@ end subroutine esio_line_readv_integer
 !!@{
 
 subroutine esio_plane_write_double (handle, name, plane,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
+                                    astride, bstride,                 &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1155,8 +1154,7 @@ end subroutine esio_plane_write_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_write_single (handle, name, plane,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
+                                    astride, bstride,                 &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1169,8 +1167,7 @@ end subroutine esio_plane_write_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_write_integer (handle, name, plane,              &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
+                                     astride, bstride,                 &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1183,8 +1180,7 @@ end subroutine esio_plane_write_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_read_double (handle, name, plane,              &
-                                   aglobal, astart, alocal, astride, &
-                                   bglobal, bstart, blocal, bstride, &
+                                   astride, bstride,                 &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1197,8 +1193,7 @@ end subroutine esio_plane_read_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_read_single (handle, name, plane,              &
-                                   aglobal, astart, alocal, astride, &
-                                   bglobal, bstart, blocal, bstride, &
+                                   astride, bstride,                 &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1211,8 +1206,7 @@ end subroutine esio_plane_read_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_read_integer (handle, name, plane,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
+                                    astride, bstride,                 &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1266,8 +1260,7 @@ end subroutine esio_plane_read_integer
 !!@{
 
 subroutine esio_plane_writev_double (handle, name, plane, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
+                                     astride, bstride,                 &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1281,8 +1274,7 @@ end subroutine esio_plane_writev_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_writev_single (handle, name, plane, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
+                                     astride, bstride,                 &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1296,8 +1288,7 @@ end subroutine esio_plane_writev_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_writev_integer (handle, name, plane, ncomponents, &
-                                      aglobal, astart, alocal, astride, &
-                                      bglobal, bstart, blocal, bstride, &
+                                      astride, bstride,                 &
                                       ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1311,8 +1302,7 @@ end subroutine esio_plane_writev_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_readv_double (handle, name, plane, ncomponents, &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
+                                    astride, bstride,                 &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1326,8 +1316,7 @@ end subroutine esio_plane_readv_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_readv_single (handle, name, plane, ncomponents, &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
+                                    astride, bstride,                 &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1341,8 +1330,7 @@ end subroutine esio_plane_readv_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_plane_readv_integer (handle, name, plane, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
+                                     astride, bstride,                 &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED

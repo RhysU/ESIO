@@ -58,22 +58,25 @@ program plane_int_f
         value_vector(i,:,:) = i*value_scalar(:,:)
     end do
 
+!   Establish the parallel decomposition
+    call esio_plane_establish(h, global(1), start(1), local(1),       &
+                                 global(2), start(2), local(2), ierr)
+    ASSERT(ierr == 0)
+
 !   Create a file
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
 !   Write a scalar-valued plane
-    call esio_plane_write_integer(h, "name_scalar", value_scalar,           &
-                                  global(1), start(1), local(1), stride(1), &
-                                  global(2), start(2), local(2), stride(2), &
+    call esio_plane_write_integer(h, "name_scalar", value_scalar,            &
+                                  stride(1), stride(2),                      &
                                   ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued plane
     call esio_plane_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
-                                   global(1), start(1), local(1), stride(1), &
-                                   global(2), start(2), local(2), stride(2), &
+                                   stride(1), stride(2),                     &
                                    ierr)
     ASSERT(ierr == 0)
 
@@ -96,8 +99,7 @@ program plane_int_f
     ASSERT(j == global(1))
     ASSERT(k == global(2))
     call esio_plane_read_integer(h, "name_scalar", buffer_scalar,          &
-                                 global(1), start(1), local(1), stride(1), &
-                                 global(2), start(2), local(2), stride(2), &
+                                 stride(1), stride(2),                     &
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
@@ -110,8 +112,7 @@ program plane_int_f
     ASSERT(k == global(2))
     call esio_plane_readv_integer(h, "name_vector", buffer_vector,          &
                                   ncomponents,                              &
-                                  global(1), start(1), local(1), stride(1), &
-                                  global(2), start(2), local(2), stride(2), &
+                                  stride(1), stride(2),                     &
                                   ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))

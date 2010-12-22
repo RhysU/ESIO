@@ -108,16 +108,14 @@ static
 int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
-                              int bglobal, int bstart, int blocal, int bstride,
-                              int aglobal, int astart, int alocal, int astride,
+                              int bstride, int astride,
                               hid_t type_id);
 
 static
 int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
-                             int bglobal, int bstart, int blocal, int bstride,
-                             int aglobal, int astart, int alocal, int astride,
+                             int bstride, int astride,
                              hid_t type_id);
 
 static
@@ -1403,8 +1401,7 @@ static
 int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
-                              int bglobal, int bstart, int blocal, int bstride,
-                              int aglobal, int astart, int alocal, int astride,
+                              int bstride, int astride,
                               hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1413,20 +1410,16 @@ int esio_plane_write_internal(const esio_handle h,
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
-    if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
-    if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
-    if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
-    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
-    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
-    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+    if (h->p.aglobal == 0)
+        ESIO_ERROR("esio_plane_establish() never called", ESIO_EINVAL);
 
     // Provide contiguous defaults whenever the user supplied zero strides.
     // Strides are given in units of type_id; hence astride = 1 is contiguous.
     if (astride == 0) astride = 1;
-    if (bstride == 0) bstride = astride * alocal;
+    if (bstride == 0) bstride = astride * h->p.alocal;
 
     // Attempt to read metadata for the plane (which may or may not exist)
     int plane_bglobal, plane_aglobal;
@@ -1443,9 +1436,9 @@ int esio_plane_write_internal(const esio_handle h,
         // Determine the chunking parameters to use for dataset creation
         int bchunk, achunk;
         if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const int status
-                = chunksize_plane(h->comm, bglobal, bstart, blocal, &bchunk,
-                                           aglobal, astart, alocal, &achunk);
+            const int status = chunksize_plane(
+                    h->comm, h->p.bglobal, h->p.bstart, h->p.blocal, &bchunk,
+                             h->p.aglobal, h->p.astart, h->p.alocal, &achunk);
             if (status != ESIO_SUCCESS) {
                 ESIO_ERROR("Error determining chunk size for decomposition",
                         status);
@@ -1468,8 +1461,9 @@ int esio_plane_write_internal(const esio_handle h,
         }
 
         // Create the plane
-        dset_id = esio_plane_create(h, bglobal, aglobal, name, type_id,
-                                    H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+        dset_id = esio_plane_create(
+                h, h->p.bglobal, h->p.aglobal, name, type_id,
+                H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dset_id < 0) {
             ESIO_ERROR("Error creating new plane", ESIO_EFAILED);
         }
@@ -1481,11 +1475,11 @@ int esio_plane_write_internal(const esio_handle h,
         // Plane already existed
 
         // Ensure caller gave correct size information
-        if (bglobal != plane_bglobal) {
+        if (h->p.bglobal != plane_bglobal) {
             ESIO_ERROR("request bglobal mismatch with existing plane",
                        ESIO_EINVAL);
         }
-        if (aglobal != plane_aglobal) {
+        if (h->p.aglobal != plane_aglobal) {
             ESIO_ERROR("request aglobal mismatch with existing plane",
                        ESIO_EINVAL);
         }
@@ -1523,10 +1517,11 @@ int esio_plane_write_internal(const esio_handle h,
     }
 
     // Write field
-    const int wstat = esio_plane_writer(plist_id, dset_id, plane,
-                                        bglobal, bstart, blocal, bstride,
-                                        aglobal, astart, alocal, astride,
-                                        type_id);
+    const int wstat = esio_plane_writer(
+            plist_id, dset_id, plane,
+            h->p.bglobal, h->p.bstart, h->p.blocal, bstride,
+            h->p.aglobal, h->p.astart, h->p.alocal, astride,
+            type_id);
     if (wstat != ESIO_SUCCESS) {
         esio_plane_close(dset_id);
         H5Pclose(plist_id);
@@ -1542,8 +1537,7 @@ static
 int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
-                             int bglobal, int bstart, int blocal, int bstride,
-                             int aglobal, int astart, int alocal, int astride,
+                             int bstride, int astride,
                              hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1552,20 +1546,16 @@ int esio_plane_read_internal(const esio_handle h,
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
-    if (bglobal  < 0)     ESIO_ERROR("bglobal < 0",            ESIO_EINVAL);
-    if (bstart < 0)       ESIO_ERROR("bstart < 0",             ESIO_EINVAL);
-    if (blocal < 1)       ESIO_ERROR("blocal < 1",             ESIO_EINVAL);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
-    if (aglobal  < 0)     ESIO_ERROR("aglobal < 0",            ESIO_EINVAL);
-    if (astart < 0)       ESIO_ERROR("astart < 0",             ESIO_EINVAL);
-    if (alocal < 1)       ESIO_ERROR("alocal < 1",             ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
+    if (h->p.aglobal == 0)
+        ESIO_ERROR("esio_plane_establish() never called", ESIO_EINVAL);
 
     // Provide contiguous defaults whenever the user supplied zero strides.
     // Strides are given in units of type_id; hence astride = 1 is contiguous.
     if (astride == 0) astride = 1;
-    if (bstride == 0) bstride = astride * alocal;
+    if (bstride == 0) bstride = astride * h->p.alocal;
 
     // Read metadata for the plane
     int plane_bglobal, plane_aglobal;
@@ -1579,10 +1569,10 @@ int esio_plane_read_internal(const esio_handle h,
     }
 
     // Ensure caller gave correct size information
-    if (bglobal != plane_bglobal) {
+    if (h->p.bglobal != plane_bglobal) {
         ESIO_ERROR("plane read request has incorrect bglobal", ESIO_EINVAL);
     }
-    if (aglobal != plane_aglobal) {
+    if (h->p.aglobal != plane_aglobal) {
         ESIO_ERROR("plane read request has incorrect aglobal", ESIO_EINVAL);
     }
 
@@ -1619,10 +1609,11 @@ int esio_plane_read_internal(const esio_handle h,
     H5Tclose(plane_type_id);
 
     // Read plane
-    const int rstat = esio_plane_reader(plist_id, dset_id, plane,
-                                        bglobal, bstart, blocal, bstride,
-                                        aglobal, astart, alocal, astride,
-                                        type_id);
+    const int rstat = esio_plane_reader(
+            plist_id, dset_id, plane,
+            h->p.bglobal, h->p.bstart, h->p.blocal, bstride,
+            h->p.aglobal, h->p.astart, h->p.alocal, astride,
+            type_id);
     if (rstat != ESIO_SUCCESS) {
         esio_plane_close(dset_id);
         H5Pclose(plist_id);
@@ -1634,18 +1625,16 @@ int esio_plane_read_internal(const esio_handle h,
     return ESIO_SUCCESS;
 }
 
-#define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                                   \
-int esio_plane_ ## OP ## _ ## TYPE (                                        \
-        const esio_handle h,                                                \
-        const char *name,                                                   \
-        QUAL TYPE *plane,                                                   \
-        int bglobal, int bstart, int blocal, int bstride,                   \
-        int aglobal, int astart, int alocal, int astride)                   \
-{                                                                           \
-    return esio_plane_ ## OP ## _internal(h, name, plane,                   \
-                                          bglobal, bstart, blocal, bstride, \
-                                          aglobal, astart, alocal, astride, \
-                                          H5TYPE);                          \
+#define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                   \
+int esio_plane_ ## OP ## _ ## TYPE (                        \
+        const esio_handle h,                                \
+        const char *name,                                   \
+        QUAL TYPE *plane,                                   \
+        int bstride, int astride)                           \
+{                                                           \
+    return esio_plane_ ## OP ## _internal(h, name, plane,   \
+                                          bstride, astride, \
+                                          H5TYPE);          \
 }
 
 GEN_PLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
@@ -1662,8 +1651,7 @@ int esio_plane_ ## OP ## v_ ## TYPE(                                      \
         const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *plane,                                                 \
-        int bglobal, int bstart, int blocal, int bstride,                 \
-        int aglobal, int astart, int alocal, int astride,                 \
+        int bstride, int astride,                                         \
         int ncomponents)                                                  \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
@@ -1683,8 +1671,8 @@ int esio_plane_ ## OP ## v_ ## TYPE(                                      \
     }                                                                     \
     const int retval = esio_plane_ ## OP ## _internal(                    \
             h, name, plane,                                               \
-            bglobal, bstart, blocal, (bstride / ncomponents),             \
-            aglobal, astart, alocal, (astride / ncomponents),             \
+            (bstride / ncomponents),                                      \
+            (astride / ncomponents),                                      \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \

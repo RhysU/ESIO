@@ -713,42 +713,38 @@ esio_line_sizev(const esio_handle h,
 
 
 /** \cond INTERNAL */
-#define ESIO_PLANE_WRITE_GEN(TYPE)                                        \
-int                                                                       \
-esio_plane_write_##TYPE(const esio_handle h,                              \
-                        const char *name,                                 \
-                        const TYPE *plane,                                \
-                        int bglobal, int bstart, int blocal, int bstride, \
-                        int aglobal, int astart, int alocal, int astride) \
+#define ESIO_PLANE_WRITE_GEN(TYPE)                \
+int                                               \
+esio_plane_write_##TYPE(const esio_handle h,      \
+                        const char *name,         \
+                        const TYPE *plane,        \
+                        int bstride, int astride) \
                         ESIO_API;
 
-#define ESIO_PLANE_READ_GEN(TYPE)                                         \
-int                                                                       \
-esio_plane_read_##TYPE(const esio_handle h,                               \
-                       const char *name,                                  \
-                       TYPE *plane,                                       \
-                       int bglobal, int bstart, int blocal, int bstride,  \
-                       int aglobal, int astart, int alocal, int astride)  \
+#define ESIO_PLANE_READ_GEN(TYPE)                \
+int                                              \
+esio_plane_read_##TYPE(const esio_handle h,      \
+                       const char *name,         \
+                       TYPE *plane,              \
+                       int bstride, int astride) \
                        ESIO_API;
 
-#define ESIO_PLANE_WRITEV_GEN(TYPE)                                       \
-int                                                                       \
-esio_plane_writev_##TYPE(const esio_handle h,                             \
-                         const char *name,                                \
-                         const TYPE *plane,                               \
-                         int bglobal, int bstart, int blocal, int bstride,\
-                         int aglobal, int astart, int alocal, int astride,\
-                         int ncomponents)                                 \
+#define ESIO_PLANE_WRITEV_GEN(TYPE)                \
+int                                                \
+esio_plane_writev_##TYPE(const esio_handle h,      \
+                         const char *name,         \
+                         const TYPE *plane,        \
+                         int bstride, int astride, \
+                         int ncomponents)          \
                          ESIO_API;
 
-#define ESIO_PLANE_READV_GEN(TYPE)                                        \
-int                                                                       \
-esio_plane_readv_##TYPE(const esio_handle h,                              \
-                        const char *name,                                 \
-                        TYPE *plane,                                      \
-                        int bglobal, int bstart, int blocal, int bstride, \
-                        int aglobal, int astart, int alocal, int astride, \
-                        int ncomponents)                                  \
+#define ESIO_PLANE_READV_GEN(TYPE)                \
+int                                               \
+esio_plane_readv_##TYPE(const esio_handle h,      \
+                        const char *name,         \
+                        TYPE *plane,              \
+                        int bstride, int astride, \
+                        int ncomponents)          \
                         ESIO_API;
 /** \endcond */
 
@@ -760,22 +756,18 @@ esio_plane_readv_##TYPE(const esio_handle h,                              \
 
 /**
  * Write a scalar-valued <code>double</code> plane.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_plane_establish().
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
- * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
- * indicates that direction is contiguous in memory.
+ * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ * Supplying zero for a stride indicates that direction is contiguous in
+ * memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer containing the scalars to write.
- * \param bglobal Global number of scalars in the slower "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of scalars in "B" this MPI rank should write.
  * \param bstride Stride between adjacent scalars in "B"
  *                within buffer \c plane.
- * \param aglobal Global number of scalars in the faster "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of scalars in "A" this MPI rank should write.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c plane.
  *
@@ -797,22 +789,18 @@ ESIO_PLANE_WRITE_GEN(int)
 
 /**
  * Read a scalar-valued <code>double</code> plane.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_plane_establish().
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
- * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
- * indicates that direction is contiguous in memory.
+ * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ * Supplying zero for a stride indicates that direction is contiguous in
+ * memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer to contain the read scalars.
- * \param bglobal Global number of scalars in the slower "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of scalars in "B" this MPI rank should read.
  * \param bstride Stride between adjacent scalars in "B"
  *                within buffer \c plane.
- * \param aglobal Global number of scalars in the faster "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of scalars in "A" this MPI rank should read.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c plane.
  *
@@ -858,23 +846,18 @@ esio_plane_size(const esio_handle h,
 
 /**
  * Write a vector-valued <code>double</code> plane.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_plane_establish().
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
- * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
- * multiple of \c ncomponents.  Supplying zero for a stride indicates that
- * direction is contiguous in memory.
+ * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ * Strides must be an integer multiple of \c ncomponents.  Supplying zero for a
+ * stride indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer containing the vectors to write.
- * \param bglobal Global number of vectors in the slower "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of vectors in "B" this MPI rank should write.
  * \param bstride Stride between adjacent vectors in "B"
  *                within buffer \c plane.
- * \param aglobal Global number of vectors in the faster "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of vectors in "A" this MPI rank should write.
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c plane.
  * \param ncomponents Number of scalar components within each vector.
@@ -897,23 +880,18 @@ ESIO_PLANE_WRITEV_GEN(int)
 
 /**
  * Read a vector-valued <code>double</code> plane.
+ * The parallel decomposition must have been set by a previous
+ * call to esio_plane_establish().
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
- * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
- * multiple of \c ncomponents.  Supplying zero for a stride indicates that
- * direction is contiguous in memory.
+ * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
+ * Strides must be an integer multiple of \c ncomponents.  Supplying zero for a
+ * stride indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
  * \param plane Buffer to contain the read vectors.
- * \param bglobal Global number of vectors in the slower "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of vectors in "B" this MPI rank should read.
  * \param bstride Stride between adjacent vectors in "B"
  *                within buffer \c plane.
- * \param aglobal Global number of vectors in the faster "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of vectors in "A" this MPI rank should read.
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c plane.
  * \param ncomponents Number of scalar components within each vector.
