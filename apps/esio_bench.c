@@ -27,6 +27,7 @@
 #include "config.h"
 #endif
 
+#include <assert.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
@@ -345,6 +346,16 @@ int main(int argc, char *argv[])
     ESIO_MPICHKQ(MPI_Cart_coords(plane_comm, plane_rank, 2, plane_coords));
     ESIO_MPICHKQ(MPI_Cart_coords(line_comm,  line_rank,  1, line_coords));
 
+    // Create ESIO handles for each of those decompositions.
+    // Ideally a single communicator would suffice, but the MPI
+    // topology details seem to be 1-to-1 with communicators.
+    esio_handle field_h = esio_handle_initialize(field_comm);
+    esio_handle plane_h = esio_handle_initialize(plane_comm);
+    esio_handle line_h  = esio_handle_initialize(line_comm);
+    assert(field_h);
+    assert(plane_h);
+    assert(line_h);
+
     // Establish field problem details and determine local portion
     if (arguments.field_bytes) {
         double field_vectors = world_size * arguments.field_bytes
@@ -371,6 +382,10 @@ int main(int argc, char *argv[])
                                    field_coords[2], 1);
     const int field_astart = start(arguments.field_aglobal, world_size,
                                    field_coords[2], 1);
+    esio_field_establish(
+            field_h, arguments.field_cglobal, field_clocal, field_cstart,
+                     arguments.field_bglobal, field_blocal, field_bstart,
+                     arguments.field_aglobal, field_alocal, field_astart);
 
     // Establish plane problem details and determine local portion
     if (arguments.plane_bytes) {
@@ -392,6 +407,9 @@ int main(int argc, char *argv[])
                                    plane_coords[1], 1);
     const int plane_astart = start(arguments.plane_aglobal, world_size,
                                    plane_coords[1], 1);
+    esio_plane_establish(
+            plane_h, arguments.plane_bglobal, plane_blocal, plane_bstart,
+                     arguments.plane_aglobal, plane_alocal, plane_astart);
 
     // Establish line problem details and determine local portion
     if (arguments.line_bytes) {
@@ -407,6 +425,8 @@ int main(int argc, char *argv[])
                                   line_coords[0], 1);
     const int line_astart = start(arguments.line_aglobal, world_size,
                                   line_coords[0], 1);
+    esio_line_establish(
+            line_h, arguments.line_aglobal, line_alocal, line_astart);
 
 
     // DEBUG: Dump arguments
@@ -449,6 +469,11 @@ int main(int argc, char *argv[])
 
 /*     esio_file_close(h); */
 /*     esio_handle_finalize(h); */
+
+    // Free ESIO handles
+    esio_handle_finalize(field_h);
+    esio_handle_finalize(plane_h);
+    esio_handle_finalize(line_h);
 
     // Free MPI communicators
     if (field_comm != MPI_COMM_NULL) MPI_Comm_free(&field_comm);
