@@ -79,24 +79,25 @@ program layout0_int_f
         value_vector(i,:,:,:) = i*value_scalar(:,:,:)
     end do
 
+!   Establish the parallel decomposition
+    call esio_field_establish(h, global(1), start(1), local(1),       &
+                                 global(2), start(2), local(2),       &
+                                 global(3), start(3), local(3), ierr)
+
 !   Create a file
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
 !   Write a scalar-valued field
     call esio_field_write_integer(h, "name_scalar", value_scalar,           &
-                                  global(1), start(1), local(1), stride(1), &
-                                  global(2), start(2), local(2), stride(2), &
-                                  global(3), start(3), local(3), stride(3), &
+                                  stride(1), stride(2), stride(3),          &
                                   ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued field
     call esio_field_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
-                                   global(1), start(1), local(1), stride(1), &
-                                   global(2), start(2), local(2), stride(2), &
-                                   global(3), start(3), local(3), stride(3), &
+                                   stride(1), stride(2), stride(3),          &
                                    ierr)
     ASSERT(ierr == 0)
 
@@ -121,9 +122,7 @@ program layout0_int_f
     ASSERT(k == global(2))
     ASSERT(l == global(3))
     call esio_field_read_integer(h, "name_scalar", buffer_scalar,          &
-                                 global(1), start(1), local(1), stride(1), &
-                                 global(2), start(2), local(2), stride(2), &
-                                 global(3), start(3), local(3), stride(3), &
+                                 stride(1), stride(2), stride(3),          &
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
@@ -137,9 +136,7 @@ program layout0_int_f
     ASSERT(l == global(3))
     call esio_field_readv_integer(h, "name_vector", buffer_vector,          &
                                   ncomponents,                              &
-                                  global(1), start(1), local(1), stride(1), &
-                                  global(2), start(2), local(2), stride(2), &
-                                  global(3), start(3), local(3), stride(3), &
+                                  stride(1), stride(2), stride(3),          &
                                   ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))

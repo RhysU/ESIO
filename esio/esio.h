@@ -756,12 +756,11 @@ esio_plane_readv_##TYPE(const esio_handle h,      \
 
 /**
  * Write a scalar-valued <code>double</code> plane.
- * The parallel decomposition must have been set by a previous
- * call to esio_plane_establish().
  *
- * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
- * Supplying zero for a stride indicates that direction is contiguous in
- * memory.
+ * The parallel decomposition must have been set by a previous call to
+ * esio_plane_establish().  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -789,12 +788,11 @@ ESIO_PLANE_WRITE_GEN(int)
 
 /**
  * Read a scalar-valued <code>double</code> plane.
- * The parallel decomposition must have been set by a previous
- * call to esio_plane_establish().
  *
- * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
- * Supplying zero for a stride indicates that direction is contiguous in
- * memory.
+ * The parallel decomposition must have been set by a previous call to
+ * esio_plane_establish().  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
+ * indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -846,12 +844,12 @@ esio_plane_size(const esio_handle h,
 
 /**
  * Write a vector-valued <code>double</code> plane.
- * The parallel decomposition must have been set by a previous
- * call to esio_plane_establish().
  *
- * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
- * Strides must be an integer multiple of \c ncomponents.  Supplying zero for a
- * stride indicates that direction is contiguous in memory.
+ * The parallel decomposition must have been set by a previous call to
+ * esio_plane_establish().  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -880,12 +878,12 @@ ESIO_PLANE_WRITEV_GEN(int)
 
 /**
  * Read a vector-valued <code>double</code> plane.
- * The parallel decomposition must have been set by a previous
- * call to esio_plane_establish().
  *
- * All strides are measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
- * Strides must be an integer multiple of \c ncomponents.  Supplying zero for a
- * stride indicates that direction is contiguous in memory.
+ * The parallel decomposition must have been set by a previous call to
+ * esio_plane_establish().  All strides are measured in
+ * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
+ * multiple of \c ncomponents.  Supplying zero for a stride indicates that
+ * direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -941,46 +939,38 @@ esio_plane_sizev(const esio_handle h,
 
 
 /** \cond INTERNAL */
-#define ESIO_FIELD_WRITE_GEN(TYPE)                                        \
-int                                                                       \
-esio_field_write_##TYPE(const esio_handle h,                              \
-                        const char *name,                                 \
-                        const TYPE *field,                                \
-                        int cglobal, int cstart, int clocal, int cstride, \
-                        int bglobal, int bstart, int blocal, int bstride, \
-                        int aglobal, int astart, int alocal, int astride) \
+#define ESIO_FIELD_WRITE_GEN(TYPE)                             \
+int                                                            \
+esio_field_write_##TYPE(const esio_handle h,                   \
+                        const char *name,                      \
+                        const TYPE *field,                     \
+                        int cstride, int bstride, int astride) \
                         ESIO_API;
 
-#define ESIO_FIELD_READ_GEN(TYPE)                                         \
-int                                                                       \
-esio_field_read_##TYPE(const esio_handle h,                               \
-                       const char *name,                                  \
-                       TYPE *field,                                       \
-                       int cglobal, int cstart, int clocal, int cstride,  \
-                       int bglobal, int bstart, int blocal, int bstride,  \
-                       int aglobal, int astart, int alocal, int astride)  \
+#define ESIO_FIELD_READ_GEN(TYPE)                              \
+int                                                            \
+esio_field_read_##TYPE(const esio_handle h,                    \
+                       const char *name,                       \
+                       TYPE *field,                            \
+                       int cstride, int bstride, int astride)  \
                        ESIO_API;
 
-#define ESIO_FIELD_WRITEV_GEN(TYPE)                                       \
-int                                                                       \
-esio_field_writev_##TYPE(const esio_handle h,                             \
-                         const char *name,                                \
-                         const TYPE *field,                               \
-                         int cglobal, int cstart, int clocal, int cstride,\
-                         int bglobal, int bstart, int blocal, int bstride,\
-                         int aglobal, int astart, int alocal, int astride,\
-                         int ncomponents)                                 \
+#define ESIO_FIELD_WRITEV_GEN(TYPE)                             \
+int                                                             \
+esio_field_writev_##TYPE(const esio_handle h,                   \
+                         const char *name,                      \
+                         const TYPE *field,                     \
+                         int cstride, int bstride, int astride, \
+                         int ncomponents)                       \
                          ESIO_API;
 
-#define ESIO_FIELD_READV_GEN(TYPE)                                        \
-int                                                                       \
-esio_field_readv_##TYPE(const esio_handle h,                              \
-                        const char *name,                                 \
-                        TYPE *field,                                      \
-                        int cglobal, int cstart, int clocal, int cstride, \
-                        int bglobal, int bstart, int blocal, int bstride, \
-                        int aglobal, int astart, int alocal, int astride, \
-                        int ncomponents)                                  \
+#define ESIO_FIELD_READV_GEN(TYPE)                             \
+int                                                            \
+esio_field_readv_##TYPE(const esio_handle h,                   \
+                        const char *name,                      \
+                        TYPE *field,                           \
+                        int cstride, int bstride, int astride, \
+                        int ncomponents)                       \
                         ESIO_API;
 /** \endcond */
 
@@ -993,26 +983,18 @@ esio_field_readv_##TYPE(const esio_handle h,                              \
 /**
  * Write a scalar-valued <code>double</code> field.
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
+ * The parallel decomposition must have been set by a previous call to
+ * esio_field_establish().  All strides are measured in
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer containing the scalars to write.
- * \param cglobal Global number of scalars in the "C" slowest direction.
- * \param cstart  Global starting "C" offset.
- * \param clocal  Number of scalars in "C" this MPI rank should write.
  * \param cstride Stride between adjacent scalars in "C"
  *                within buffer \c field.
- * \param bglobal Global number of scalars in the "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of scalars in "B" this MPI rank should write.
  * \param bstride Stride between adjacent scalars in "B"
  *                within buffer \c field.
- * \param aglobal Global number of scalars in the fastest "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of scalars in "A" this MPI rank should write.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c field.
  *
@@ -1035,26 +1017,18 @@ ESIO_FIELD_WRITE_GEN(int)
 /**
  * Read a scalar-valued <code>double</code> field.
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
+ * The parallel decomposition must have been set by a previous call to
+ * esio_field_establish().  All strides are measured in
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Supplying zero for a stride
  * indicates that direction is contiguous in memory.
  *
  * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer to contain the read scalars.
- * \param cglobal Global number of scalars in the "C" slowest direction.
- * \param cstart  Global starting "C" offset.
- * \param clocal  Number of scalars in "C" this MPI rank should read.
  * \param cstride Stride between adjacent scalars in "C"
  *                within buffer \c field.
- * \param bglobal Global number of scalars in the "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of scalars in "B" this MPI rank should read.
  * \param bstride Stride between adjacent scalars in "B"
  *                within buffer \c field.
- * \param aglobal Global number of scalars in the fastest "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of scalars in "A" this MPI rank should read.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c field.
  *
@@ -1104,7 +1078,8 @@ esio_field_size(const esio_handle h,
 /**
  * Write a vector-valued <code>double</code> field.
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
+ * The parallel decomposition must have been set by a previous call to
+ * esio_field_establish().  All strides are measured in
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
@@ -1112,19 +1087,10 @@ esio_field_size(const esio_handle h,
  * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer containing the vectors to write.
- * \param cglobal Global number of vectors in the "C" slowest direction.
- * \param cstart  Global starting "C" offset.
- * \param clocal  Number of vectors in "C" this MPI rank should write.
  * \param cstride Stride between adjacent vectors in "C"
  *                within buffer \c field.
- * \param bglobal Global number of vectors in the "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of vectors in "B" this MPI rank should write.
  * \param bstride Stride between adjacent vectors in "B"
  *                within buffer \c field.
- * \param aglobal Global number of vectors in the fastest "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of vectors in "A" this MPI rank should write.
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c field.
  * \param ncomponents Number of scalar components within each vector.
@@ -1148,7 +1114,8 @@ ESIO_FIELD_WRITEV_GEN(int)
 /**
  * Read a vector-valued <code>double</code> field.
  *
- * Global starting offsets are zero-indexed.  All strides are measured in
+ * The parallel decomposition must have been set by a previous call to
+ * esio_field_establish().  All strides are measured in
  * <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.  Strides must be an integer
  * multiple of \c ncomponents.  Supplying zero for a stride indicates that
  * direction is contiguous in memory.
@@ -1156,19 +1123,10 @@ ESIO_FIELD_WRITEV_GEN(int)
  * \param h Handle to use.
  * \param name Null-terminated field name.
  * \param field Buffer to contain the read vectors.
- * \param cglobal Global number of vectors in the "C" slowest direction.
- * \param cstart  Global starting "C" offset.
- * \param clocal  Number of vectors in "C" this MPI rank should read.
  * \param cstride Stride between adjacent vectors in "C"
  *                within buffer \c field.
- * \param bglobal Global number of vectors in the "B" direction.
- * \param bstart  Global starting "B" offset.
- * \param blocal  Number of vectors in "B" this MPI rank should read.
  * \param bstride Stride between adjacent vectors in "B"
  *                within buffer \c field.
- * \param aglobal Global number of vectors in the fastest "A" direction.
- * \param astart  Global starting "A" offset.
- * \param alocal  Number of vectors in "A" this MPI rank should read.
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c field.
  * \param ncomponents Number of scalar components within each vector.

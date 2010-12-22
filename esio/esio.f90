@@ -1389,9 +1389,7 @@ end subroutine esio_plane_readv_integer
 !!@{
 
 subroutine esio_field_write_double (handle, name, field,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
-                                    cglobal, cstart, clocal, cstride, &
+                                    astride, bstride, cstride,        &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1404,9 +1402,7 @@ end subroutine esio_field_write_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_write_single (handle, name, field,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
-                                    cglobal, cstart, clocal, cstride, &
+                                    astride, bstride, cstride,        &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1419,9 +1415,7 @@ end subroutine esio_field_write_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_write_integer (handle, name, field,              &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
-                                     cglobal, cstart, clocal, cstride, &
+                                     astride, bstride, cstride,        &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
@@ -1434,9 +1428,7 @@ end subroutine esio_field_write_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_read_double (handle, name, field,              &
-                                   aglobal, astart, alocal, astride, &
-                                   bglobal, bstart, blocal, bstride, &
-                                   cglobal, cstart, clocal, cstride, &
+                                   astride, bstride, cstride,        &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1449,9 +1441,7 @@ end subroutine esio_field_read_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_read_single (handle, name, field,              &
-                                   aglobal, astart, alocal, astride, &
-                                   bglobal, bstart, blocal, bstride, &
-                                   cglobal, cstart, clocal, cstride, &
+                                   astride, bstride, cstride,        &
                                    ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1464,9 +1454,7 @@ end subroutine esio_field_read_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_read_integer (handle, name, field,              &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
-                                    cglobal, cstart, clocal, cstride, &
+                                    astride, bstride, cstride,        &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
@@ -1523,9 +1511,7 @@ end subroutine esio_field_read_integer
 !!@{
 
 subroutine esio_field_writev_double (handle, name, field, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
-                                     cglobal, cstart, clocal, cstride, &
+                                     astride, bstride, cstride,        &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1539,9 +1525,7 @@ end subroutine esio_field_writev_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_writev_single (handle, name, field, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
-                                     cglobal, cstart, clocal, cstride, &
+                                     astride, bstride, cstride,        &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1555,9 +1539,7 @@ end subroutine esio_field_writev_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_writev_integer (handle, name, field, ncomponents, &
-                                      aglobal, astart, alocal, astride, &
-                                      bglobal, bstart, blocal, bstride, &
-                                      cglobal, cstart, clocal, cstride, &
+                                      astride, bstride, cstride,        &
                                       ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1571,9 +1553,7 @@ end subroutine esio_field_writev_integer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_readv_double (handle, name, field, ncomponents, &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
-                                    cglobal, cstart, clocal, cstride, &
+                                    astride, bstride, cstride,        &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1587,9 +1567,7 @@ end subroutine esio_field_readv_double
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_readv_single (handle, name, field, ncomponents, &
-                                    aglobal, astart, alocal, astride, &
-                                    bglobal, bstart, blocal, bstride, &
-                                    cglobal, cstart, clocal, cstride, &
+                                    astride, bstride, cstride,        &
                                     ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
@@ -1603,9 +1581,7 @@ end subroutine esio_field_readv_single
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine esio_field_readv_integer (handle, name, field, ncomponents, &
-                                     aglobal, astart, alocal, astride, &
-                                     bglobal, bstart, blocal, bstride, &
-                                     cglobal, cstart, clocal, cstride, &
+                                     astride, bstride, cstride,        &
                                      ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED

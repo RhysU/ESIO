@@ -217,7 +217,7 @@ FCT_BGN()
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
     char * filename = NULL;
-    esio_handle state;
+    esio_handle handle;
 
     FCT_FIXTURE_SUITE_BGN(field_suite)
     {
@@ -247,18 +247,18 @@ FCT_BGN()
                                     0, MPI_COMM_WORLD));
             assert(filename);
 
-            // Initialize ESIO state
-            state = esio_handle_initialize(MPI_COMM_WORLD);
-            assert(state);
+            // Initialize ESIO handle
+            handle = esio_handle_initialize(MPI_COMM_WORLD);
+            assert(handle);
 
-            esio_field_layout_set(state, LAYOUT_TAG);
+            esio_field_layout_set(handle, LAYOUT_TAG);
         }
         FCT_SETUP_END();
 
         FCT_TEARDOWN_BGN()
         {
-            // Finalize ESIO state
-            esio_handle_finalize(state);
+            // Finalize ESIO handle
+            esio_handle_finalize(handle);
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
@@ -272,7 +272,7 @@ FCT_BGN()
         FCT_TEST_BGN(field)
         {
             fct_req(LAYOUT_TAG < esio_field_layout_count());
-            fct_req(LAYOUT_TAG == esio_field_layout_get(state));
+            fct_req(LAYOUT_TAG == esio_field_layout_get(handle));
 
             REAL *field;
 
@@ -287,16 +287,46 @@ FCT_BGN()
             field = calloc(nelem, sizeof(REAL));
             fct_req(field);
 
+            // Establish and then check the parallel decomposition
+            fct_req(0 == esio_field_establish(handle, cglobal, cstart, clocal,
+                                                      bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
+            {
+                int tmp_cglobal, tmp_cstart, tmp_clocal;
+                int tmp_bglobal, tmp_bstart, tmp_blocal;
+                int tmp_aglobal, tmp_astart, tmp_alocal;
+                fct_req(0 == esio_field_established(handle, &tmp_cglobal,
+                                                            &tmp_cstart,
+                                                            &tmp_clocal,
+                                                            &tmp_bglobal,
+                                                            &tmp_bstart,
+                                                            &tmp_blocal,
+                                                            &tmp_aglobal,
+                                                            &tmp_astart,
+                                                            &tmp_alocal));
+                fct_chk_eq_int(cglobal, tmp_cglobal);
+                fct_chk_eq_int(cstart,  tmp_cstart);
+                fct_chk_eq_int(clocal,  tmp_clocal);
+                fct_chk_eq_int(bglobal, tmp_bglobal);
+                fct_chk_eq_int(bstart,  tmp_bstart);
+                fct_chk_eq_int(blocal,  tmp_blocal);
+                fct_chk_eq_int(aglobal, tmp_aglobal);
+                fct_chk_eq_int(astart,  tmp_astart);
+                fct_chk_eq_int(alocal,  tmp_alocal);
+
+                fct_req(0 == esio_field_established(handle, NULL, NULL, NULL,
+                                                            NULL, NULL, NULL,
+                                                            NULL, NULL, NULL));
+            }
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_field_write)(
-                                state, "field", field,
-                                cglobal, cstart, clocal, cstride,
-                                bglobal, bstart, blocal, bstride,
-                                aglobal, astart, alocal, astride));
-            fct_req(0 == esio_file_flush(state));
+                                handle, "field", field,
+                                cstride, bstride, astride));
+            fct_req(0 == esio_file_flush(handle));
 
             // Populate local field with test data
             for (int k = 0; k < clocal; ++k) {
@@ -314,22 +344,17 @@ FCT_BGN()
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_write)(
-                                    state, "field", field,
-                                    cglobal, cstart, clocal, cstride,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride));
+                                    handle, "field", field,
+                                    cstride, bstride, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_write)(
-                                    state, "field", field,
-                                    cglobal, cstart, clocal, 0,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0));
+                                    handle, "field", field, 0, 0, 0));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_bglobal, tmp_cglobal;
-                fct_req(0 == esio_field_size(state, "field",
+                fct_req(0 == esio_field_size(handle, "field",
                                              &tmp_cglobal,
                                              &tmp_bglobal,
                                              &tmp_aglobal));
@@ -339,7 +364,7 @@ FCT_BGN()
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the field
             free(field);
@@ -375,21 +400,17 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             field = calloc(nelem, sizeof(REAL));
             fct_req(field);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_read)(
-                                    state, "field", field,
-                                    cglobal, cstart, clocal, cstride,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride));
+                                    handle, "field", field,
+                                    cstride, bstride, astride));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_read)(
-                                    state, "field", field,
-                                    cglobal, cstart, clocal, 0,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0));
+                                    handle, "field", field,
+                                    0, 0, 0));
             }
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
@@ -404,7 +425,7 @@ FCT_BGN()
                 }
             }
             free(field);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 
@@ -412,7 +433,7 @@ FCT_BGN()
         FCT_TEST_BGN(vfield)
         {
             fct_req(LAYOUT_TAG < esio_field_layout_count());
-            fct_req(LAYOUT_TAG == esio_field_layout_get(state));
+            fct_req(LAYOUT_TAG == esio_field_layout_get(handle));
 
             REAL *vfield;
 
@@ -427,8 +448,13 @@ FCT_BGN()
             vfield = calloc(nelem, sizeof(REAL));
             fct_req(vfield);
 
+            // Establish the parallel decomposition
+            fct_req(0 == esio_field_establish(handle, cglobal, cstart, clocal,
+                                                      bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
+
             // Open file
-            fct_req(0 == esio_file_create(state, filename, 1));
+            fct_req(0 == esio_file_create(handle, filename, 1));
 
             // Populate local vfield with test data
             for (int k = 0; k < clocal; ++k) {
@@ -449,24 +475,18 @@ FCT_BGN()
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_writev)(
-                                    state, "vfield", vfield,
-                                    cglobal, cstart, clocal, cstride,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride,
-                                    ncomponents));
+                                    handle, "vfield", vfield,
+                                    cstride, bstride, astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_writev)(
-                                    state, "vfield", vfield,
-                                    cglobal, cstart, clocal, 0,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0,
-                                    ncomponents));
+                                    handle, "vfield", vfield,
+                                    0, 0, 0, ncomponents));
             }
 
             { // Ensure the global size was written correctly
                 int tmp_aglobal, tmp_bglobal, tmp_cglobal, tmp_ncomponents;
-                fct_req(0 == esio_field_sizev(state, "vfield",
+                fct_req(0 == esio_field_sizev(handle, "vfield",
                                               &tmp_cglobal,
                                               &tmp_bglobal,
                                               &tmp_aglobal,
@@ -479,7 +499,7 @@ FCT_BGN()
             }
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Free the vfield
             free(vfield);
@@ -524,23 +544,17 @@ FCT_BGN()
             // TODO Ensure non-referenced memory locations remain unmodified
             vfield = calloc(nelem, sizeof(REAL));
             fct_req(vfield);
-            fct_req(0 == esio_file_open(state, filename, 0));
+            fct_req(0 == esio_file_open(handle, filename, 0));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_readv)(
-                                    state, "vfield", vfield,
-                                    cglobal, cstart, clocal, cstride,
-                                    bglobal, bstart, blocal, bstride,
-                                    aglobal, astart, alocal, astride,
-                                    ncomponents));
+                                    handle, "vfield", vfield,
+                                    cstride, bstride, astride, ncomponents));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_readv)(
-                                    state, "vfield", vfield,
-                                    cglobal, cstart, clocal, 0,
-                                    bglobal, bstart, blocal, 0,
-                                    aglobal, astart, alocal, 0,
-                                    ncomponents));
+                                    handle, "vfield", vfield,
+                                    0, 0, 0, ncomponents));
             }
             for (int k = 0; k < clocal; ++k) {
                 for (int j = 0; j < blocal; ++j) {
@@ -558,7 +572,7 @@ FCT_BGN()
                 }
             }
             free(vfield);
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 

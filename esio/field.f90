@@ -29,24 +29,22 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
-  type(esio_handle), intent(in) :: handle
-  character(len=*),  intent(in) :: name
-  CTYPE,             FINTENT    :: field(*)
+  type(esio_handle), intent(in)            :: handle
+  character(len=*),  intent(in)            :: name
+  CTYPE,             FINTENT               :: field(*)
 #ifdef VECTORVALUED
-  integer,           intent(in) :: ncomponents
+  integer,           intent(in)            :: ncomponents
 #endif
-  integer,           intent(in) :: aglobal, astart, alocal, astride
-  integer,           intent(in) :: bglobal, bstart, blocal, bstride
-  integer,           intent(in) :: cglobal, cstart, clocal, cstride
+  integer,           intent(in)            :: astride
+  integer,           intent(in)            :: bstride
+  integer,           intent(in)            :: cstride
   integer,           intent(out), optional :: ierr
   integer                                  :: stat
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
     function impl (handle, name, field,              &
-                   cglobal, cstart, clocal, cstride, &
-                   bglobal, bstart, blocal, bstride, &
-                   aglobal, astart, alocal, astride  &
+                   cstride, bstride, astride         &
 #ifdef VECTORVALUED
                    ,ncomponents                      &
 #endif
@@ -56,18 +54,9 @@
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: field(*)
-      integer(c_int),               intent(in), value :: cglobal, &
-                                                         cstart,  &
-                                                         clocal,  &
-                                                         cstride
-      integer(c_int),               intent(in), value :: bglobal, &
-                                                         bstart,  &
-                                                         blocal,  &
-                                                         bstride
-      integer(c_int),               intent(in), value :: aglobal, &
-                                                         astart,  &
-                                                         alocal,  &
-                                                         astride
+      integer(c_int),               intent(in), value :: cstride
+      integer(c_int),               intent(in), value :: bstride
+      integer(c_int),               intent(in), value :: astride
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
 #endif
@@ -75,12 +64,9 @@
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-! Note conversion from one- to zero-based starting offsets
 ! Note reordering Fortran's (a, b, c) to C's (c, b, a)
   stat = impl(handle, esio_f_c_string(name), field, &
-              cglobal, cstart - 1, clocal, cstride, &
-              bglobal, bstart - 1, blocal, bstride, &
-              aglobal, astart - 1, alocal, astride  &
+              cstride, bstride, astride             &
 #ifdef VECTORVALUED
               ,ncomponents                          &
 #endif

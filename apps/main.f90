@@ -75,14 +75,14 @@ program main
 !   call mpi_barrier(mpi_comm_world, ierr)
 ! end do
 
+  call esio_field_establish(handle, ny, 1,    ny,      &
+                                    nx, xist, xisz,    &
+                                    nz, zjst, zjsz)
   stime = mpi_wtime()
   do i = 1, niter
 !   TODO Use generic, precision-agnostic call
 !   Zeros in {a,b,c}stride arguments indicate field is contiguous
-    call esio_field_write_double(handle, fieldname, u, &
-                                 ny, 1,    ny,   0,    &
-                                 nx, xist, xisz, 0,    &
-                                 nz, zjst, zjsz, 0)
+    call esio_field_write_double(handle, fieldname, u, 0, 0, 0)
   end do
   etime = mpi_wtime()
 
