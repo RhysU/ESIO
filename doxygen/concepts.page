@@ -21,6 +21,9 @@ ESIO usage usually involves some variation on the following steps:
       particular MPI communicator.</li>
   <li>Create or open a data file using the handle.</li>
   <li>Write or read some attributes using the handle.</li>
+  <li>Establish the parallel decomposition used for
+      distributed line, plane, or field operations
+      using the handle.</li>
   <li>Write or read one or more distributed lines, planes, or fields
       of data using the handle.</li>
   <li>Close the data file using the handle.</li>
@@ -39,7 +42,7 @@ ESIO's Fortran API is documented, relative to the C API, within the esio.f90
 reference material.
 
 Note that the C sample used the zero-indexed expression <tt>2*world_rank</tt>
-within the call to esio_line_write_double while the Fortran sample used the
+within the call to esio_line_establish while the Fortran sample used the
 one-indexed expression <tt>2*world_rank + 1</tt>.  ESIO's C API respects
 "C-isms" like row-major ordering, zero-based offsets, and calling integers
 <tt>int</tt>s.  ESIO's Fortran API respects "Fortran-isms" like column-major
@@ -47,142 +50,150 @@ ordering, one-based offsets, and calling integers <tt>integer</tt>s.
 
 \section conceptshandles Handles
 
-ESIO maintains state within opaque \ref esio_handle "esio_handles".
-A user creates an \c esio_handle by invoking esio_handle_initialize() with
-an MPI communicator.  All subsequent calls to the ESIO API using that
-particular handle <i>must be made collectively</i> across the MPI
-communicator supplied at the handle's creation time.  When finished
-using a handle, a user calls esio_handle_finalize().
+ESIO maintains state within opaque \ref esio_handle "esio_handles".  A user
+creates an \c esio_handle by invoking esio_handle_initialize() with an MPI
+communicator.  All subsequent calls to the ESIO API using that particular
+handle <i>must be made collectively</i> across the MPI communicator supplied at
+the handle's creation time.  When finished using a handle, a user calls
+esio_handle_finalize().
 
 Multiple \c esio_handle may be created against the same or different MPI
-communicators.  For example, one handle may created against MPI_COMM_WORLD
-and another created against MPI_COMM_SELF.  ESIO calls using the first
-handle must be made collectively across all MPI ranks.  In contrast,
-ESIO calls using the second handle may be made on only a single rank
-(that is, collectively across MPI_COMM_SELF).
+communicators.  For example, one handle may created against MPI_COMM_WORLD and
+another created against MPI_COMM_SELF.  ESIO calls using the first handle must
+be made collectively across all MPI ranks.  In contrast, ESIO calls using the
+second handle may be made on only a single rank (that is, collectively across
+MPI_COMM_SELF).
 
 To the extent allowed by the underlying MPI stack and the parallel HDF5
-implementation, ESIO is thread safe provided that a single \c esio_handle
-is not used concurrently by more than one thread.
+implementation, ESIO is thread safe provided that a single \c esio_handle is
+not used concurrently by more than one thread.
 
 \section conceptsfiles Files
 
 ESIO data files are, for all intents and purposes, simply <a
-href="http://www.hdfgroup.org/HDF5/">HDF5</a> files usable by any
-application conforming to the <a href="http://www.hdfgroup.org/HDF5/">The
-HDF5 Group</a>'s specifications.
+href="http://www.hdfgroup.org/HDF5/">HDF5</a> files usable by any application
+conforming to the <a href="http://www.hdfgroup.org/HDF5/">The HDF5 Group</a>'s
+specifications.
 
-At any time, a \ref esio_handle may have a data file associated with it.
-A file must be associated with a handle before any attributes or data may
-be read or written.  Existing files may be opened using esio_file_open().
-New files may be created using esio_file_create().  When finished using
-a file, a user should call esio_file_close().
+At any time, a \ref esio_handle may have a data file associated with it.  A
+file must be associated with a handle before any attributes or data may be read
+or written.  Existing files may be opened using esio_file_open().  New files
+may be created using esio_file_create().  When finished using a file, a user
+should call esio_file_close().
 
-Information written to a file is <i>always</i> buffered and should
-<i>not</i> be assumed to be on disk while a file is open.  Buffers are
-flushed when a file is closed.  Buffers may explicitly be flushed using
-esio_file_flush().
+Information written to a file is <i>always</i> buffered and should <i>not</i>
+be assumed to be on disk while a file is open.  Buffers are flushed when a file
+is closed.  Buffers may explicitly be flushed using esio_file_flush().
 
 \section conceptsattributes Attributes
 
-ESIO can read or write either numeric or string attributes.
-Attribute access must be done using contiguous memory and each MPI
-rank must write or read the same data.  Attributes are often useful for
-tracking simulation global metadata.  Examples include a program version
-identifier, a Reynolds number, or an array containing collocation point
-values needed on every MPI rank.
+ESIO can read or write either numeric or string attributes.  Attribute access
+must be done using contiguous memory and each MPI rank must write or read the
+same data.  Attributes are often useful for tracking simulation global
+metadata.  Examples include a program version identifier, a Reynolds number, or
+an array containing collocation point values needed on every MPI rank.
 
-Signed integers, single-, and double-precision floating
-point scalar-valued attributes are supported via methods like
-esio_attribute_write_double() and esio_attribute_read_double().
-Vector-valued attributes are manipulated using methods like
-esio_attribute_writev_double() and esio_attribute_readv_double().
-When reading a numeric attribute, the user is responsible for having
-allocated a buffer sufficiently large to hold the information.  The user
-may query the number of components in existing vector-valued data using
-esio_attribute_sizev().  Notice that methods handling vector-valued
-numeric data uniformly contain a <i>v</i>.
+Signed integers, single-, and double-precision floating point scalar-valued
+attributes are supported via methods like esio_attribute_write_double() and
+esio_attribute_read_double().  Vector-valued attributes are manipulated using
+methods like esio_attribute_writev_double() and esio_attribute_readv_double().
+When reading a numeric attribute, the user is responsible for having allocated
+a buffer sufficiently large to hold the information.  The user may query the
+number of components in existing vector-valued data using
+esio_attribute_sizev().  Notice that methods handling vector-valued numeric
+data uniformly contain a <i>v</i>.
 
-Arbitrary length strings can be written and read using
-esio_string_set() and esio_string_get().  Note that, unlike
-numeric attribute's read methods, esio_string_get() allocates space
-for variable length data.  It is the user's responsibility to
-\c free the storage allocated by esio_string_get().
+Arbitrary length strings can be written and read using esio_string_set() and
+esio_string_get().  Note that, unlike numeric attribute's read methods,
+esio_string_get() allocates space for variable length data.  It is the user's
+responsibility to \c free the storage allocated by esio_string_get().
 
 \section conceptslines Lines
 
 ESIO can read or write distributed one-dimensional, numeric data
 (termed "lines").  Though reading or writing a numeric field must be done
 collectively, different ranks can (and often do) manipulate disjoint
-data within a line.  In addition to a type and a memory buffer, when
-manipulating a line each MPI rank must supply
+data within a line.
+
+The parallel decomposition for line operations is established by having all
+ranks collectively invoke esio_line_establish().  Each MPI rank must supply
 <ol>
 <li>the global number of data elements within the line
     (\c aglobal), </li>
 <li>the global starting offset to be handled by this rank
-    (\c astart),</li>
+    (\c astart), and</li>
 <li>the number of data elements to be handled by this rank
-    (\c alocal), and </li>
-<li>the stride to use between adjacent data elements
-    <i>in the local memory buffer</i> (\c astride).</li>
+    (\c alocal).</li>
 </ol>
+The global number of data elements specified must be identical across all
+ranks.  Global offsets start at zero within the C API.  The behavior of a write
+operation is undefined when \c astart and \c alocal do not specify disjoint
+data.  Once established, this parallel decomposition is in effect for all line
+operations until esio_line_establish() is called again.
 
-Global offsets start at zero within the C API.  Strides, which must be
-nonnegative, are specified in terms of the scalar size.  For example,
-when writing \c double precision data strides are expressed in
-units of <tt>sizeof(double)</tt>.  Specifying a zero \c astride
-is equivalent to specifying that the data is stored contiguously
-in memory.  Data is <i>always</i> stored contiguously in the file.
-Example methods for scalar-valued lines are esio_line_write_float()
-and esio_line_read_float().  Information about the size of a line within
-a data file may be obtained using esio_line_size().
+In addition to a type and a memory buffer, when reading or writing a line each
+MPI rank must supply the stride between adjacent data elements <i>in the local
+memory buffer</i> (\c astride).  Strides, which must be nonnegative, are
+specified in terms of the scalar size.  For example, when writing \c double
+precision data strides are expressed in units of <tt>sizeof(double)</tt>.
+Specifying a zero \c astride is equivalent to specifying that the data is
+stored contiguously in memory.  Data is <i>always</i> stored contiguously in
+the file.
 
-Vector-valued lines may also be utilized.  These may be useful
-for storing complex numbers (as a two-component vector) or other
-"interleaved" data.  Vector components must be adjacent in memory.
-Example methods for vector-valued lines are esio_line_writev_float() and
-esio_line_readv_float().  Information about the size of a line within
-a data file, including the number of vector components it contains,
-may be obtained using esio_line_sizev().
+Example methods for scalar-valued lines are esio_line_write_float() and
+esio_line_read_float().  Information about the size of a line within a data
+file may be obtained using esio_line_size().
 
-Strides between vector-valued line data are expressed in terms of the size
-of a single component.  For example, strides for a five-component vector
-in double precision are expressed in terms of <tt>sizeof(double)</tt>.
-This allows the same \c astride value provided to ESIO to be used in other
-pointer arithmetic contexts.  Unfortunately, due to a limitation in HDF5,
-\c astride must be an even multiple of the number of components in use.
+Vector-valued lines may also be utilized.  These may be useful for storing
+complex numbers (as a two-component vector) or other "interleaved" data.
+Vector components must be adjacent in memory.  Example methods for
+vector-valued lines are esio_line_writev_float() and esio_line_readv_float().
+Information about the size of a line within a data file, including the number
+of vector components it contains, may be obtained using esio_line_sizev().
+
+Strides between vector-valued line data are expressed in terms of the size of a
+single component.  For example, strides for a five-component vector in double
+precision are expressed in terms of <tt>sizeof(double)</tt>.  This allows the
+same \c astride value provided to ESIO to be used in other pointer arithmetic
+contexts.  Unfortunately, due to a limitation in HDF5, \c astride must be an
+even multiple of the number of components in use.
 
 \section conceptsplanes Planes
 
 ESIO can read or write distributed two-dimensional, numeric data (termed
-"planes").  Such operations can be thought of as a tensor product of
-two \ref conceptslines "line" operations in all senses.  In addition to
-a line's \c aglobal, \c astart, etc., a plane contains \c bglobal, \c
-bstart, etc.  The "A" direction is the faster index in files and appears
-after the "B" direction in all C API calls.  Typically the "A" direction
-should be the faster direction in memory as well.  Existing plane data
-may be queried using esio_plane_size() or esio_plane_sizev().
+"planes").  Such operations can be thought of as a tensor product of two \ref
+conceptslines "line" operations in all senses.
+In addition to a line's \c aglobal, \c astart, etc., a plane contains \c
+bglobal, \c bstart, etc.  The parallel decomposition used for planes is
+controlled via esio_plane_establish().  The "A" direction is the faster index
+in files and appears after the "B" direction in all C API calls.  Typically the
+"A" direction should be the faster direction in memory as well.
+
+Sample plane routines are esio_plane_write_float(), esio_plane_writev_float(),
+esio_plane_read_float(), and esio_plane_readv_float().  Existing plane data may
+be queried using esio_plane_size() or esio_plane_sizev().
 
 \section conceptsfields Fields
 
-ESIO can read or write distributed three-dimensional, numeric
-data (termed "fields").  Field methods add \c cglobal, \c cstart,
-etc. arguments beyond those found for a \ref conceptsplanes "plane".
-The "A" direction is the fastest index in files and appears rightmost
-in all C API calls.  Typically the "A" direction should be the
-fastest direction in memory as well.  Sample field routines are
-esio_field_write_int(), esio_field_read_int(), esio_field_writev_int(),
-and esio_field_readv_int().  Existing field data may be queried using
-esio_field_size() or esio_field_sizev().
+ESIO can read or write distributed three-dimensional, numeric data (termed
+"fields").  Field methods add \c cglobal, \c cstart, etc. arguments beyond
+those found for a \ref conceptsplanes "plane".  The parallel decomposition used
+for fields is controlled via esio_field_establish().  The "A" direction is the
+fastest index in files and appears rightmost in all C API calls.  Typically the
+"A" direction should be the fastest direction in memory as well.
+
+Sample field routines are esio_field_write_int(), esio_field_read_int(),
+esio_field_writev_int(), and esio_field_readv_int().  Existing field data may
+be queried using esio_field_size() or esio_field_sizev().
 
 \section conceptslayouts Layouts
 
-To provide flexibility and aid IO performance tuning for particular
-HPC platforms, \ref conceptsfields "fields" may be laid out in HDF5
-files in different manners (termed "layouts").  Fields are stored with
-sufficient metadata for ESIO to be able to determine which layout was
-used to write data to file.  Further, operations on any existing field
-will always use the layout with which a field was initially created.
+To provide flexibility and aid IO performance tuning for particular HPC
+platforms, \ref conceptsfields "fields" may be laid out in HDF5 files in
+different manners (termed "layouts").  Fields are stored with sufficient
+metadata for ESIO to be able to determine which layout was used to write data
+to file.  Further, operations on any existing field will always use the layout
+with which a field was initially created.
 
 The total number of field layouts available may be queried using
 esio_field_layout_count().  The default layout associated with a particular
@@ -191,14 +202,13 @@ using esio_field_layout_set().  The default layout is used whenever esio writes
 a new field to file.  Note that any existing layout is preserved when a field
 is overwritten.
 
-Two layouts are available in the current ESIO release.  The first
-(and default) layout 0 provides maximum interoperability with other
-HDF5-based applications.  The second, layout 1, has provided better
-parallel IO throughput on some systems.  Layout 1 is readable by other
-HDF5-based applications but may require additional logic to extract the
-full three dimensional data in, for example, visualization applications.
-Future layout numbers will be monotonically increasing and stable across
-ESIO versions.
+Two layouts are available in the current ESIO release.  The first (and default)
+layout 0 provides maximum interoperability with other HDF5-based applications.
+The second, layout 1, has provided better parallel IO throughput on some
+systems.  Layout 1 is readable by other HDF5-based applications but may require
+additional logic to extract the full three dimensional data in, for example,
+visualization applications.  Future layout numbers will be monotonically
+increasing and stable across ESIO versions.
 
 Users are advised to choose a non-default layout only after having benchmarked
 the available layouts and determined that performance gains offset usability

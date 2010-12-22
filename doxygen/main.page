@@ -37,7 +37,6 @@ The library's manual is divided into the following subsections:
   <li> \ref error.h "C/C++ error handling API"</li>
   <li> \ref esio.f90 "Fortran API"</li>
   <li> \subpage restarts</li>
-  <li> \subpage establish</li>
   <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot test coverage</a> </li>
 </ul>
 
