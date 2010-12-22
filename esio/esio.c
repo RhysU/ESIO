@@ -137,17 +137,20 @@ enum {
 
 struct line_decomp_s {
     int aglobal, astart, alocal;
+    int achunk;                   // Cache for when FLAG_CHUNKING_ENABLED
 };
 
 struct plane_decomp_s {
     int bglobal, bstart, blocal;
     int aglobal, astart, alocal;
+    int bchunk, achunk;           // Cache for when FLAG_CHUNKING_ENABLED
 };
 
 struct field_decomp_s {
     int cglobal, cstart, clocal;
     int bglobal, bstart, blocal;
     int aglobal, astart, alocal;
+    int cchunk, bchunk, achunk;   // Cache for when FLAG_CHUNKING_ENABLED
 };
 
 struct esio_handle_s {
@@ -387,6 +390,11 @@ esio_field_layout_set(esio_handle h, int layout_index)
     }
 
     h->layout_index = layout_index;
+
+    // Changing the layout invalidates the chunksize cache
+    h->f.cchunk = h->f.bchunk = h->f.achunk = 0;
+    h->p.bchunk = h->p.achunk = 0;
+    h->l.achunk = 0;
 
     return ESIO_SUCCESS;
 }
@@ -1062,12 +1070,12 @@ int esio_field_write_internal(const esio_handle h,
         // Field did not exist
 
         // Determine the chunking parameters to use for dataset creation
-        int cchunk, bchunk, achunk;
-        if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const int status = chunksize_field(
-                    h->comm, h->f.cglobal, h->f.cstart, h->f.clocal, &cchunk,
-                             h->f.bglobal, h->f.bstart, h->f.blocal, &bchunk,
-                             h->f.aglobal, h->f.astart, h->f.alocal, &achunk);
+        // if they've not already been computed.  Note values are cached!
+        if (h->flags & FLAG_CHUNKING_ENABLED && h->f.achunk == 0) {
+            const int status = chunksize_field(h->comm, // Expensive
+                    h->f.cglobal, h->f.cstart, h->f.clocal, &h->f.cchunk,
+                    h->f.bglobal, h->f.bstart, h->f.blocal, &h->f.bchunk,
+                    h->f.aglobal, h->f.astart, h->f.alocal, &h->f.achunk);
             if (status != ESIO_SUCCESS) {
                 ESIO_ERROR("Error determining chunk size for decomposition",
                         status);
@@ -1082,7 +1090,7 @@ int esio_field_write_internal(const esio_handle h,
         }
         if (h->flags & FLAG_CHUNKING_ENABLED) {
             if ((esio_field_layout[h->layout_index].dataset_chunker)(
-                        dcpl_id, cchunk, bchunk, achunk) < 0) {
+                        dcpl_id, h->f.cchunk, h->f.bchunk, h->f.achunk) < 0) {
                 H5Pclose(dcpl_id);
                 ESIO_ERROR("Error setting chunk size information",
                         ESIO_ESANITY);
@@ -1399,11 +1407,11 @@ int esio_plane_write_internal(const esio_handle h,
         // Plane did not exist
 
         // Determine the chunking parameters to use for dataset creation
-        int bchunk, achunk;
-        if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const int status = chunksize_plane(
-                    h->comm, h->p.bglobal, h->p.bstart, h->p.blocal, &bchunk,
-                             h->p.aglobal, h->p.astart, h->p.alocal, &achunk);
+        // if they've not already been computed.  Note values are cached!
+        if (h->flags & FLAG_CHUNKING_ENABLED && h->p.achunk == 0) {
+            const int status = chunksize_plane(h->comm, // Expensive
+                    h->p.bglobal, h->p.bstart, h->p.blocal, &h->p.bchunk,
+                    h->p.aglobal, h->p.astart, h->p.alocal, &h->p.achunk);
             if (status != ESIO_SUCCESS) {
                 ESIO_ERROR("Error determining chunk size for decomposition",
                         status);
@@ -1417,7 +1425,7 @@ int esio_plane_write_internal(const esio_handle h,
                        ESIO_EFAILED);
         }
         if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const hsize_t chunksizes[2] = { bchunk, achunk };
+            const hsize_t chunksizes[2] = { h->p.bchunk, h->p.achunk };
             if (H5Pset_chunk(dcpl_id, 2, chunksizes) < 0) {
                 H5Pclose(dcpl_id);
                 ESIO_ERROR("Error setting chunk size information",
@@ -1688,10 +1696,10 @@ int esio_line_write_internal(const esio_handle h,
         // Line did not exist
 
         // Determine the chunking parameters to use for dataset creation
-        int achunk;
-        if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const int status = chunksize_line(
-                    h->comm, h->l.aglobal, h->l.astart, h->l.alocal, &achunk);
+        // if they've not already been computed.  Note values are cached!
+        if (h->flags & FLAG_CHUNKING_ENABLED && h->l.achunk == 0) {
+            const int status = chunksize_line(h->comm, // Expensive
+                    h->l.aglobal, h->l.astart, h->l.alocal, &h->l.achunk);
             if (status != ESIO_SUCCESS) {
                 ESIO_ERROR("Error determining chunk size for decomposition",
                            status);
@@ -1705,7 +1713,7 @@ int esio_line_write_internal(const esio_handle h,
                        ESIO_EFAILED);
         }
         if (h->flags & FLAG_CHUNKING_ENABLED) {
-            const hsize_t chunksizes[1] = { achunk };
+            const hsize_t chunksizes[1] = { h->l.achunk };
             if (H5Pset_chunk(dcpl_id, 1, chunksizes) < 0) {
                 H5Pclose(dcpl_id);
                 ESIO_ERROR("Error setting chunk size information",
