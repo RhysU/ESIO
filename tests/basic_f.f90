@@ -35,7 +35,84 @@ program basic_f
     logical            :: file_exists
     character(len=256) :: file_path, template, restart0, restart1
 
+!   Used only for checking establish/established
+    integer, parameter :: cg = 16, cs = 7, cl = 6
+    integer, parameter :: bg = 13, bs = 4, bl = 5
+    integer, parameter :: ag = 11, as = 2, al = 3
+    integer            :: tmp_cg = 555, tmp_cs, tmp_cl
+    integer            :: tmp_bg = 555, tmp_bs, tmp_bl
+    integer            :: tmp_ag = 555, tmp_as, tmp_al
+
     call testframework_setup(__FILE__)
+
+!   Check that we can establish and retrieve line decomposition details
+    call esio_line_established(h, tmp_ag, tmp_as, tmp_al, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == 0)
+    ASSERT(tmp_as == 1)  ! One-based
+    ASSERT(tmp_al == 0)
+    call esio_line_establish(h, ag, as, al, ierr)
+    ASSERT(ierr == 0)
+    call esio_line_established(h, tmp_ag, tmp_as, tmp_al, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == ag)
+    ASSERT(tmp_as == as)
+    ASSERT(tmp_al == al)
+
+!   Check that we can establish and retrieve plane decomposition details
+    call esio_plane_established(h, tmp_ag, tmp_as, tmp_al,       &
+                                   tmp_bg, tmp_bs, tmp_bl, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == 0)
+    ASSERT(tmp_as == 1)  ! One-based
+    ASSERT(tmp_al == 0)
+    ASSERT(tmp_bg == 0)
+    ASSERT(tmp_bs == 1)  ! One-based
+    ASSERT(tmp_bl == 0)
+    call esio_plane_establish(h, ag, as, al,       &
+                                 bg, bs, bl, ierr)
+    ASSERT(ierr == 0)
+    call esio_plane_established(h, tmp_ag, tmp_as, tmp_al,       &
+                                   tmp_bg, tmp_bs, tmp_bl, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == ag)
+    ASSERT(tmp_as == as)
+    ASSERT(tmp_al == al)
+    ASSERT(tmp_bg == bg)
+    ASSERT(tmp_bs == bs)
+    ASSERT(tmp_bl == bl)
+
+!   Check that we can establish and retrieve field decomposition details
+    call esio_field_established(h, tmp_ag, tmp_as, tmp_al,       &
+                                   tmp_bg, tmp_bs, tmp_bl,       &
+                                   tmp_cg, tmp_cs, tmp_cl, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == 0)
+    ASSERT(tmp_as == 1)  ! One-based
+    ASSERT(tmp_al == 0)
+    ASSERT(tmp_bg == 0)
+    ASSERT(tmp_bs == 1)  ! One-based
+    ASSERT(tmp_bl == 0)
+    ASSERT(tmp_cg == 0)
+    ASSERT(tmp_cs == 1)  ! One-based
+    ASSERT(tmp_cl == 0)
+    call esio_field_establish(h, ag, as, al,       &
+                                 bg, bs, bl,       &
+                                 cg, cs, cl, ierr)
+    ASSERT(ierr == 0)
+    call esio_field_established(h, tmp_ag, tmp_as, tmp_al,       &
+                                   tmp_bg, tmp_bs, tmp_bl,       &
+                                   tmp_cg, tmp_cs, tmp_cl, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(tmp_ag == ag)
+    ASSERT(tmp_as == as)
+    ASSERT(tmp_al == al)
+    ASSERT(tmp_bg == bg)
+    ASSERT(tmp_bs == bs)
+    ASSERT(tmp_bl == bl)
+    ASSERT(tmp_cg == cg)
+    ASSERT(tmp_cs == cs)
+    ASSERT(tmp_cl == cl)
 
 !   Check that Fortran thinks the right file does not (yet) exist
     inquire (file=trim(filename), exist=file_exists)

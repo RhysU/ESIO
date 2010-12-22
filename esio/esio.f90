@@ -787,7 +787,7 @@ end subroutine esio_attribute_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-!   Note conversion from one- to zero-based starting offsets
+!   Note conversion from zero- to one-based starting offsets
     stat = impl(handle, tmp_aglobal, tmp_astart, tmp_alocal)
     aglobal = tmp_aglobal
     astart  = tmp_astart + 1
@@ -828,7 +828,7 @@ end subroutine esio_attribute_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-!   Note conversion from one- to zero-based starting offsets
+!   Note conversion from zero- to one-based starting offsets
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(handle, tmp_bglobal, tmp_bstart, tmp_blocal,  &
                         tmp_aglobal, tmp_astart, tmp_alocal)
@@ -881,7 +881,7 @@ end subroutine esio_attribute_readv_integer
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-!   Note conversion from one- to zero-based starting offsets
+!   Note conversion from zero- to one-based starting offsets
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
     stat = impl(handle, tmp_cglobal, tmp_cstart, tmp_clocal,  &
                         tmp_bglobal, tmp_bstart, tmp_blocal,  &

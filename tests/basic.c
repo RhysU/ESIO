@@ -92,7 +92,7 @@ FCT_BGN()
     const char * const output_dir = getenv("ESIO_TEST_OUTPUT_DIR");
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     char * filename = NULL;
-    esio_handle state;
+    esio_handle handle;
 
     FCT_FIXTURE_SUITE_BGN(esio_file)
     {
@@ -122,16 +122,16 @@ FCT_BGN()
                                     0, MPI_COMM_WORLD));
             assert(filename);
 
-            // Initialize ESIO state
-            state = esio_handle_initialize(MPI_COMM_WORLD);
-            assert(state);
+            // Initialize ESIO handle
+            handle = esio_handle_initialize(MPI_COMM_WORLD);
+            assert(handle);
         }
         FCT_SETUP_END();
 
         FCT_TEARDOWN_BGN()
         {
-            // Finalize ESIO state
-            esio_handle_finalize(state);
+            // Finalize ESIO handle
+            esio_handle_finalize(handle);
 
             // Clean up the unique file and filename
             if (world_rank == 0) {
@@ -151,37 +151,37 @@ FCT_BGN()
         FCT_TEST_BGN(file_create_and_open)
         {
             // No open file so esio_file_path is empty
-            fct_req(NULL == esio_file_path(state));
+            fct_req(NULL == esio_file_path(handle));
 
             // Create with overwrite should always work
-            fct_req(0 == esio_file_create(state, filename, 1 /* overwrite */));
+            fct_req(0 == esio_file_create(handle, filename, 1 /* o/w */));
 
             // Flush flush flush should always work
-            fct_req(0 == esio_file_flush(state));
-            fct_req(0 == esio_file_flush(state));
-            fct_req(0 == esio_file_flush(state));
+            fct_req(0 == esio_file_flush(handle));
+            fct_req(0 == esio_file_flush(handle));
+            fct_req(0 == esio_file_flush(handle));
 
             // Check that esio_file_path points to a valid canonical location
             struct stat statbuf;
-            char *file_path = esio_file_path(state);
+            char *file_path = esio_file_path(handle);
             fct_req(file_path != NULL);
             fct_chk_startswith_str(file_path, "/"); // Absolute?
             fct_req(0 == stat(file_path, &statbuf));
             free(file_path);
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Double closure should silently succeed
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // No open file so esio_file_path is empty
-            fct_req(NULL == esio_file_path(state));
+            fct_req(NULL == esio_file_path(handle));
 
             // Create without overwrite should fail
             H5Eset_auto(H5E_DEFAULT, NULL, NULL);
             esio_set_error_handler_off();
-            fct_req(0 != esio_file_create(state, filename, 0 /* no overwrite */));
+            fct_req(0 != esio_file_create(handle, filename, 0 /* no o/w */));
             esio_set_error_handler(esio_handler);
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
 
@@ -191,22 +191,22 @@ FCT_BGN()
                 fct_req(0 == unlink(filename));
             }
             ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
-            fct_req(0 == esio_file_create(state, filename, 0 /* no overwrite */));
+            fct_req(0 == esio_file_create(handle, filename, 0 /* no o/w */));
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Ensure we can open in read-only mode
-            fct_req(0 == esio_file_open(state, filename, 0 /* read-only */));
+            fct_req(0 == esio_file_open(handle, filename, 0 /* read-only */));
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Ensure we can open in read-write mode
-            fct_req(0 == esio_file_open(state, filename, 1 /* read-write */));
+            fct_req(0 == esio_file_open(handle, filename, 1 /* read-write */));
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
         }
         FCT_TEST_END();
 
@@ -227,15 +227,15 @@ FCT_BGN()
             fct_req(NULL != strcat(srcfile, "/empty.h5"));
 
             // Clone with overwrite should always work
-            fct_req(0 == esio_file_clone(state, srcfile, filename, 1));
+            fct_req(0 == esio_file_clone(handle, srcfile, filename, 1));
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Create without overwrite should fail
             H5Eset_auto(H5E_DEFAULT, NULL, NULL);
             esio_set_error_handler_off();
-            fct_req(0 != esio_file_clone(state, srcfile, filename, 0));
+            fct_req(0 != esio_file_clone(handle, srcfile, filename, 0));
             esio_set_error_handler(esio_handler);
             H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
 
@@ -245,10 +245,10 @@ FCT_BGN()
                 fct_req(0 == unlink(filename));
             }
             ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
-            fct_req(0 == esio_file_clone(state, srcfile, filename, 0));
+            fct_req(0 == esio_file_clone(handle, srcfile, filename, 0));
 
             // Close the file
-            fct_req(0 == esio_file_close(state));
+            fct_req(0 == esio_file_close(handle));
 
             // Deallocate the srcfile name
             if (srcfile) free(srcfile);
@@ -286,8 +286,8 @@ FCT_BGN()
             ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
 
             // Create with overwrite should always work
-            fct_req( 0 == esio_file_create(state, filename, 1 /* overwrite */));
-            fct_req( 0 == esio_file_close_restart(state, template, 2));
+            fct_req( 0 == esio_file_create(handle, filename, 1 /* o/w */));
+            fct_req( 0 == esio_file_close_restart(handle, template, 2));
             fct_req(-1 == stat(filename, &statbuf));
             fct_req( 0 == stat(restart0, &statbuf));
             fct_req(-1 == stat(restart1, &statbuf));
@@ -295,8 +295,8 @@ FCT_BGN()
             ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
 
             // Create without overwrite should work now
-            fct_req(0 == esio_file_create(state, filename, 0));
-            fct_req(0 == esio_file_close_restart(state, template, 2));
+            fct_req(0 == esio_file_create(handle, filename, 0));
+            fct_req(0 == esio_file_close_restart(handle, template, 2));
             fct_req(-1 == stat(filename, &statbuf));
             fct_req( 0 == stat(restart0, &statbuf));
             fct_req( 0 == stat(restart1, &statbuf));
@@ -311,6 +311,111 @@ FCT_BGN()
             free(template);
             free(restart0);
             free(restart1);
+        }
+        FCT_TEST_END();
+
+        FCT_TEST_BGN(established_field)
+        {
+            // Unestablished behavior
+            int tmp_cglobal, tmp_cstart, tmp_clocal;
+            int tmp_bglobal, tmp_bstart, tmp_blocal;
+            int tmp_aglobal, tmp_astart, tmp_alocal;
+            fct_req(0 == esio_field_established(
+                        handle, &tmp_cglobal, &tmp_cstart, &tmp_clocal,
+                                &tmp_bglobal, &tmp_bstart, &tmp_blocal,
+                                &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(0, tmp_cglobal);
+            fct_chk_eq_int(0, tmp_cstart);
+            fct_chk_eq_int(0, tmp_clocal);
+            fct_chk_eq_int(0, tmp_bglobal);
+            fct_chk_eq_int(0, tmp_bstart);
+            fct_chk_eq_int(0, tmp_blocal);
+            fct_chk_eq_int(0, tmp_aglobal);
+            fct_chk_eq_int(0, tmp_astart);
+            fct_chk_eq_int(0, tmp_alocal);
+
+            // Established behavior
+            const int cglobal = 16, cstart = 7, clocal = 6;
+            const int bglobal = 13, bstart = 4, blocal = 5;
+            const int aglobal = 11, astart = 2, alocal = 3;
+
+            fct_req(0 == esio_field_establish(
+                        handle, cglobal, cstart, clocal,
+                                bglobal, bstart, blocal,
+                                aglobal, astart, alocal));
+
+            fct_req(0 == esio_field_established(
+                        handle, &tmp_cglobal, &tmp_cstart, &tmp_clocal,
+                                &tmp_bglobal, &tmp_bstart, &tmp_blocal,
+                                &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(cglobal, tmp_cglobal);
+            fct_chk_eq_int(cstart,  tmp_cstart);
+            fct_chk_eq_int(clocal,  tmp_clocal);
+            fct_chk_eq_int(bglobal, tmp_bglobal);
+            fct_chk_eq_int(bstart,  tmp_bstart);
+            fct_chk_eq_int(blocal,  tmp_blocal);
+            fct_chk_eq_int(aglobal, tmp_aglobal);
+            fct_chk_eq_int(astart,  tmp_astart);
+            fct_chk_eq_int(alocal,  tmp_alocal);
+        }
+        FCT_TEST_END();
+
+        FCT_TEST_BGN(established_plane)
+        {
+            // Unestablished behavior
+            int tmp_bglobal, tmp_bstart, tmp_blocal;
+            int tmp_aglobal, tmp_astart, tmp_alocal;
+            fct_req(0 == esio_plane_established(
+                        handle, &tmp_bglobal, &tmp_bstart, &tmp_blocal,
+                                &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(0, tmp_bglobal);
+            fct_chk_eq_int(0, tmp_bstart);
+            fct_chk_eq_int(0, tmp_blocal);
+            fct_chk_eq_int(0, tmp_aglobal);
+            fct_chk_eq_int(0, tmp_astart);
+            fct_chk_eq_int(0, tmp_alocal);
+
+            // Established behavior
+            const int bglobal = 13, bstart = 4, blocal = 5;
+            const int aglobal = 11, astart = 2, alocal = 3;
+
+            fct_req(0 == esio_plane_establish(
+                        handle, bglobal, bstart, blocal,
+                                aglobal, astart, alocal));
+
+            fct_req(0 == esio_plane_established(
+                        handle, &tmp_bglobal, &tmp_bstart, &tmp_blocal,
+                                &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(bglobal, tmp_bglobal);
+            fct_chk_eq_int(bstart,  tmp_bstart);
+            fct_chk_eq_int(blocal,  tmp_blocal);
+            fct_chk_eq_int(aglobal, tmp_aglobal);
+            fct_chk_eq_int(astart,  tmp_astart);
+            fct_chk_eq_int(alocal,  tmp_alocal);
+        }
+        FCT_TEST_END();
+
+        FCT_TEST_BGN(established_line)
+        {
+            // Unestablished behavior
+            int tmp_aglobal, tmp_astart, tmp_alocal;
+            fct_req(0 == esio_line_established(
+                        handle, &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(0, tmp_aglobal);
+            fct_chk_eq_int(0, tmp_astart);
+            fct_chk_eq_int(0, tmp_alocal);
+
+            // Established behavior
+            const int aglobal = 11, astart = 2, alocal = 3;
+
+            fct_req(0 == esio_line_establish(
+                        handle, aglobal, astart, alocal));
+
+            fct_req(0 == esio_line_established(
+                        handle, &tmp_aglobal, &tmp_astart, &tmp_alocal));
+            fct_chk_eq_int(aglobal, tmp_aglobal);
+            fct_chk_eq_int(astart,  tmp_astart);
+            fct_chk_eq_int(alocal,  tmp_alocal);
         }
         FCT_TEST_END();
 
