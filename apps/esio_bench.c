@@ -55,6 +55,10 @@ static void to_human_readable_byte_count(long bytes,
 
 static long from_human_readable_byte_count(const char *str);
 
+static int local(int nglobal, int nranks, int rank, int extralow);
+
+static int start(int nglobal, int nranks, int rank, int extralow);
+
 //*******************************************************************
 // ARGP DETAILS: http://www.gnu.org/s/libc/manual/html_node/Argp.html
 //*******************************************************************
@@ -315,25 +319,95 @@ int main(int argc, char *argv[])
     // Parse command line arguments
     mpi_argp_parse(world_rank, &argp, argc, argv, 0, 0, &arguments);
 
-    // Determine MPI_Dims_create-based decompositions
+    // Determine MPI_Dims_create-based parallel decompositions
     ESIO_MPICHKQ(MPI_Dims_create(world_size, 3, arguments.field_dims));
     ESIO_MPICHKQ(MPI_Dims_create(world_size, 2, arguments.plane_dims));
     ESIO_MPICHKQ(MPI_Dims_create(world_size, 1, arguments.line_dims));
 
-    // Fix field problem size
+    // Create MPI communicators for each decomposition and obtain ranks
+    MPI_Comm field_comm, plane_comm, line_comm;
+    {
+        int periods[3] = { 0, 0, 0 };
+        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 3, arguments.field_dims,
+                                     periods, 1, &field_comm));
+        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 2, arguments.plane_dims,
+                                     periods, 1, &plane_comm));
+        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 1, arguments.line_dims,
+                                     periods, 1, &line_comm));
+    }
+    // Determine this rank's position within each of those decompositions
+    int field_rank, plane_rank, line_rank;
+    ESIO_MPICHKQ(MPI_Comm_rank(field_comm, &field_rank));
+    ESIO_MPICHKQ(MPI_Comm_rank(plane_comm, &plane_rank));
+    ESIO_MPICHKQ(MPI_Comm_rank(line_comm,  &line_rank));
+    int field_coords[3], plane_coords[2], line_coords[1];
+    ESIO_MPICHKQ(MPI_Cart_coords(field_comm, field_rank, 3, field_coords));
+    ESIO_MPICHKQ(MPI_Cart_coords(plane_comm, plane_rank, 2, plane_coords));
+    ESIO_MPICHKQ(MPI_Cart_coords(line_comm,  line_rank,  1, line_coords));
+
+    // Establish field problem details and determine local portion
     if (arguments.field_bytes) {
         double field_vectors = world_size * arguments.field_bytes
                              / arguments.ncomponents;
-        arguments.field_cglobal = arguments.field_bglobal
-                                = arguments.field_aglobal
-                                = ceil(pow(field_vectors, 1.0 / 3.0));
+        arguments.field_cglobal = arguments.field_bglobal // Uniform
+                                = arguments.field_aglobal // Uniform
+                                = ceil(cbrt(field_vectors));
     } else {
         arguments.field_bytes = arguments.field_cglobal
                               * arguments.field_bglobal
                               * arguments.field_aglobal
                               * arguments.ncomponents
-                              * 8 * sizeof(double);
+                              * sizeof(double);
     }
+    const int field_clocal = local(arguments.field_cglobal, world_size,
+                                   field_coords[0], 1);
+    const int field_cstart = start(arguments.field_cglobal, world_size,
+                                   field_coords[0], 1);
+    const int field_blocal = local(arguments.field_bglobal, world_size,
+                                   field_coords[1], 0);
+    const int field_bstart = start(arguments.field_bglobal, world_size,
+                                   field_coords[1], 0);
+    const int field_alocal = local(arguments.field_aglobal, world_size,
+                                   field_coords[2], 1);
+    const int field_astart = start(arguments.field_aglobal, world_size,
+                                   field_coords[2], 1);
+
+    // Establish plane problem details and determine local portion
+    if (arguments.plane_bytes) {
+        double plane_vectors = world_size * arguments.plane_bytes
+                             / arguments.ncomponents;
+        arguments.plane_bglobal = arguments.plane_aglobal // Uniform
+                                = ceil(sqrt(plane_vectors));
+    } else {
+        arguments.plane_bytes = arguments.plane_bglobal
+                              * arguments.plane_aglobal
+                              * arguments.ncomponents
+                              * sizeof(double);
+    }
+    const int plane_blocal = local(arguments.plane_bglobal, world_size,
+                                   plane_coords[0], 0);
+    const int plane_bstart = start(arguments.plane_bglobal, world_size,
+                                   plane_coords[0], 0);
+    const int plane_alocal = local(arguments.plane_aglobal, world_size,
+                                   plane_coords[1], 1);
+    const int plane_astart = start(arguments.plane_aglobal, world_size,
+                                   plane_coords[1], 1);
+
+    // Establish line problem details and determine local portion
+    if (arguments.line_bytes) {
+        double line_vectors = world_size * arguments.line_bytes
+                            / arguments.ncomponents;
+        arguments.line_aglobal = ceil(line_vectors);
+    } else {
+        arguments.line_bytes = arguments.line_aglobal
+                             * arguments.ncomponents
+                             * sizeof(double);
+    }
+    const int line_alocal = local(arguments.line_aglobal, world_size,
+                                  line_coords[0], 1);
+    const int line_astart = start(arguments.line_aglobal, world_size,
+                                  line_coords[0], 1);
+
 
     // DEBUG: Dump arguments
     printf("verbose:      %d\n", arguments.verbose);
@@ -375,6 +449,11 @@ int main(int argc, char *argv[])
 
 /*     esio_file_close(h); */
 /*     esio_handle_finalize(h); */
+
+    // Free MPI communicators
+    if (field_comm != MPI_COMM_NULL) MPI_Comm_free(&field_comm);
+    if (plane_comm != MPI_COMM_NULL) MPI_Comm_free(&plane_comm);
+    if (line_comm != MPI_COMM_NULL)  MPI_Comm_free(&line_comm);
 
     return 0;
 }
@@ -483,4 +562,27 @@ static long from_human_readable_byte_count(const char *str)
 
 done:
     return exp ? coeff * pow(unit, exp / 3) : coeff;
+}
+
+// Compute rank's portion of nglobal elements distributed uniformly across
+// nranks ranks.  Any "extra" elements are spread across the lower ranks
+// when extralow is set.
+static int local(int nglobal, int nranks, int rank, int extralow)
+{
+    if (extralow) {
+        return nglobal / nranks + (rank < nglobal % nranks);
+    } else {
+        return nglobal / nranks + ((nranks - rank - 1) < nglobal % nranks);
+    }
+}
+
+// Determine the starting, zero-based offset for a particular rank.
+// Not particularly efficient, but effective.
+static int start(int nglobal, int nranks, int rank, int extralow)
+{
+    int offset = -1;
+    for (int i = 0; i < rank; ++i) {
+        offset += local(nglobal, nranks, rank, extralow);
+    }
+    return offset;
 }
