@@ -43,6 +43,8 @@
 // STATIC PROTOTYPES STATIC PROTOTYPES STATIC PROTOTYPES STATIC 
 //*************************************************************
 
+static void trim(char *a);
+
 static inline int min(int a, int b);
 
 static void to_human_readable_byte_count(long bytes,
@@ -110,14 +112,21 @@ parse_opt(int key, char *arg, struct argp_state *state)
     // Get the input argument from argp_parse.
     struct arguments *arguments = state->input;
 
+    // Trim any leading/trailing whitespace from arg
+    if (arg) trim(arg);
+
+    // Want to ensure we consume the entire argument for many options
+    // Many sscanf calls provide an extra sentinel %c dumping into &ignore
+    char ignore = '\0';
+
     switch (key) {
         case 'v':
             arguments->verbose = 1;
             break;
 
         case 'n':
-            if (1 != sscanf(arg ? arg : "", " %d ",
-                            &(arguments->ncomponents))) {
+            if (1 != sscanf(arg ? arg : "", "%d %c",
+                            &arguments->ncomponents, &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "ncomponents option is malformed: '%s'", arg);
             }
@@ -156,10 +165,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'F':
-            if (3 != sscanf(arg ? arg : "", " %d x %d x %d ",
-                            &(arguments->field_dims[0]),
-                            &(arguments->field_dims[1]),
-                            &(arguments->field_dims[2]))) {
+            if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
+                            &arguments->field_dims[0],
+                            &arguments->field_dims[1],
+                            &arguments->field_dims[2], &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "field-dims option is malformed: '%s'", arg);
             }
@@ -176,9 +185,9 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case 'P':
-            if (2 != sscanf(arg ? arg : "", " %d x %d ",
-                            &(arguments->plane_dims[0]),
-                            &(arguments->plane_dims[1]))) {
+            if (2 != sscanf(arg ? arg : "", "%d x %d %c",
+                            &arguments->plane_dims[0],
+                            &arguments->plane_dims[1], &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "plane-dims option is malformed: '%s'", arg);
             }
@@ -191,8 +200,8 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case 'L':
-            if (1 != sscanf(arg ? arg : "", " %d ",
-                            &(arguments->line_dims[0]))) {
+            if (1 != sscanf(arg ? arg : "", "%d %c",
+                            &arguments->line_dims[0], &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "line-global option is malformed: '%s'", arg);
             }
@@ -204,10 +213,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case FIELD_GLOBAL:
-            if (3 != sscanf(arg ? arg : "", " %d x %d x %d ",
-                            &(arguments->field_cglobal),
-                            &(arguments->field_bglobal),
-                            &(arguments->field_aglobal))) {
+            if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
+                            &arguments->field_cglobal,
+                            &arguments->field_bglobal,
+                            &arguments->field_aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "field-global option not of form CxBxA: '%s'", arg);
             }
@@ -224,9 +233,9 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case PLANE_GLOBAL:
-            if (2 != sscanf(arg ? arg : "", " %d x %d ",
-                            &(arguments->plane_bglobal),
-                            &(arguments->plane_aglobal))) {
+            if (2 != sscanf(arg ? arg : "", "%d x %d %c",
+                            &arguments->plane_bglobal,
+                            &arguments->plane_aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "plane-global option not of form BxA: '%s'", arg);
             }
@@ -238,8 +247,8 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case LINE_GLOBAL:
-            if (1 != sscanf(arg ? arg : "", " %d ",
-                            &(arguments->line_aglobal))) {
+            if (1 != sscanf(arg ? arg : "", "%d %c",
+                            &arguments->line_aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, 0,
                         "line-global option is malformed: '%s'", arg);
             }
@@ -289,6 +298,13 @@ int main(int argc, char *argv[])
                                            arguments.field_dims[1],
                                            arguments.field_dims[2]);
     printf("field_bytes:  %ld\n", arguments.field_bytes);
+    {
+        double coeff;
+        const char *units;
+        to_human_readable_byte_count(arguments.field_bytes, 0, &coeff, &units);
+        printf("field_bytes:  %.1f %s\n", coeff, units);
+
+    }
     printf("plane_global: %d x %d\n", arguments.plane_bglobal,
                                       arguments.plane_aglobal);
     printf("plane_dims:   %d x %d\n", arguments.plane_dims[0],
@@ -316,6 +332,15 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+void trim(char *a)
+{
+    char *b = a;
+    while (isspace(*b))   ++b;
+    while (*b)            *a++ = *b++;
+    *a = '\0';
+    while (isspace(*--a)) *a = '\0';
+}
+
 static inline int min(int a, int b)
 {
     return a < b ? a : b;
@@ -338,9 +363,12 @@ static void to_human_readable_byte_count(long bytes,
                                        { "EB", "EiB" },
                                        { "ZB", "ZiB" },
                                        { "YB", "YiB" } };
-    const int unit = si ? 1000 : 1024;
-    const int exp  = min( (int) (log(bytes) / log(unit)),
-                          (int) sizeof(suffix) / sizeof(suffix[0]) );
+    int unit = si ? 1000 : 1024;
+    int exp = 0;
+    if (bytes > 0) {
+        exp = min( (int) (log(bytes) / log(unit)),
+                   (int) sizeof(suffix) / sizeof(suffix[0]) - 1);
+    }
     *coeff = bytes / pow(unit, exp);
     *units  = suffix[exp][!!si];
 }
