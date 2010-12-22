@@ -63,6 +63,11 @@
 !!     within Fortran as opposed to the C API's zero-based indexing.
 !!   </li>
 !!   <li>
+!!     Stride arguments are optional within Fortran and default to zero.
+!!     As in a C API, a zero stride is shorthand for specifying that
+!!     the associated data is contiguous in memory.
+!!   </li>
+!!   <li>
 !!     All subroutines contain an optional \c intent(out) \c ierr parameter
 !!     that will be zero on successful return and non-zero on failure.
 !!     All methods in this module also invoke ESIO's \ref error.h

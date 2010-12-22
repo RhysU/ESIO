@@ -35,10 +35,11 @@
 #ifdef VECTORVALUED
   integer,           intent(in)            :: ncomponents
 #endif
-  integer,           intent(in)            :: astride
-  integer,           intent(in)            :: bstride
+  integer,           intent(in),  optional :: astride
+  integer,           intent(in),  optional :: bstride
   integer,           intent(out), optional :: ierr
-  integer                                  :: stat
+
+  integer :: stat, tmp_astride, tmp_bstride
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
@@ -62,9 +63,14 @@
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
+  tmp_astride = 0
+  if (present(astride)) tmp_astride = astride
+  tmp_bstride = 0
+  if (present(bstride)) tmp_bstride = bstride
+
 ! Note reordering Fortran's (a, b) to C's (b, a)
   stat = impl(handle, esio_f_c_string(name), plane, &
-              bstride, astride                      &
+              tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
               ,ncomponents                          &
 #endif

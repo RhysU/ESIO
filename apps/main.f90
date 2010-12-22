@@ -81,8 +81,7 @@ program main
   stime = mpi_wtime()
   do i = 1, niter
 !   TODO Use generic, precision-agnostic call
-!   Zeros in {a,b,c}stride arguments indicate field is contiguous
-    call esio_field_write_double(handle, fieldname, u, 0, 0, 0)
+    call esio_field_write_double(handle, fieldname, u)
   end do
   etime = mpi_wtime()
 
