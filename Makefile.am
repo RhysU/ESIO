@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 # Build in these directories:
-SUBDIRS = gnulib esio examples tests apps doxygen
+SUBDIRS = gnulib esio examples apps tests doxygen
 
 # Distribute these items:
 DIST_SUBDIRS = gnulib esio examples tests apps doxygen
