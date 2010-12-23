@@ -94,6 +94,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
         case ARGP_KEY_END:
             if (state->arg_num < 2) argp_usage(state);
+            break;
 
         case 'r':
             {
