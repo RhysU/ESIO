@@ -41,6 +41,52 @@
 #include <esio/error.h>
 #include <esio/esio.h>
 
+//****************************************************************
+// DATA STRUCTURES DATA STRUCTURES DATA STRUCTURES DATA STRUCTURES
+//****************************************************************
+
+struct field_details {
+    MPI_Comm comm;
+    esio_handle h;
+    int cglobal, cstart, clocal;
+    int bglobal, bstart, blocal;
+    int aglobal, astart, alocal;
+    int dims[3], coords[3], rank;
+    long bytes;
+    void *data;
+};
+
+struct plane_details {
+    MPI_Comm comm;
+    esio_handle h;
+    int bglobal, bstart, blocal;
+    int aglobal, astart, alocal;
+    int dims[2], coords[2], rank;
+    long bytes;
+    void *data;
+};
+
+struct line_details {
+    MPI_Comm comm;
+    esio_handle h;
+    int aglobal, astart, alocal;
+    int dims[1], coords[1], rank;
+    long bytes;
+    void *data;
+};
+
+struct details {
+    int world_rank;
+    int world_size;
+    int verbose;
+    int repeat;
+    int ncomponents;
+    int nfields, nplanes, nlines;
+    struct field_details *f;
+    struct plane_details *p;
+    struct line_details  *l;
+};
+
 //*************************************************************
 // STATIC PROTOTYPES STATIC PROTOTYPES STATIC PROTOTYPES STATIC 
 //*************************************************************
@@ -59,6 +105,12 @@ static long from_human_readable_byte_count(const char *str);
 static int local(int nglobal, int nranks, int rank, int extralow);
 
 static int start(int nglobal, int nranks, int rank, int extralow);
+
+static int field_initialize(const struct details *d, struct field_details *f);
+
+static int plane_initialize(const struct details *d, struct plane_details *p);
+
+static int line_initialize( const struct details *d, struct line_details  *l);
 
 //*******************************************************************
 // ARGP DETAILS: http://www.gnu.org/s/libc/manual/html_node/Argp.html
@@ -82,9 +134,9 @@ enum {
 };
 
 static struct argp_option options[] = {
-    {"verbose",     'v', 0,       0, "Produce verbose output", -1 },
-    {"repeat",      'r', "count", 0, "Number of repetitions", -1 },
-    {"ncomponents", 'n', "count", 0, "Number of components",   0 },
+    {"verbose",     'v', 0,       0, "produce verbose output", -1 },
+    {"repeat",      'r', "count", 0, "number of repetitions", -1 },
+    {"ncomponents", 'n', "count", 0, "number of components",   0 },
     {0, 0, 0, 0,
      "Controlling field problem size (specify at most one)", 0 },
     {"field-memory", 'f',          "bytes", 0, "per-rank field memory", 0 },
@@ -105,25 +157,12 @@ static struct argp_option options[] = {
     { 0, 0, 0, 0,  0, 0 }
 };
 
-// Used by main to communicate with parse_opt
-struct arguments {
-    int verbose;
-    int repeat;
-    int ncomponents;
-    int nfields, nplanes, nlines;
-    int field_cglobal, field_bglobal, field_aglobal;
-    int plane_bglobal, plane_aglobal;
-    int line_aglobal;
-    int field_dims[3], plane_dims[2], line_dims[1];
-    long field_bytes, plane_bytes, line_bytes;
-};
-
 // Parse a single option following Argp semantics
 static error_t
 parse_opt(int key, char *arg, struct argp_state *state)
 {
     // Get the input argument from argp_parse.
-    struct arguments *arguments = state->input;
+    struct details *d = state->input;
 
     // Trim any leading/trailing whitespace from arg
     if (arg) trim(arg);
@@ -137,9 +176,9 @@ parse_opt(int key, char *arg, struct argp_state *state)
             {
                 int *n;
                 switch (state->arg_num) {
-                    case 0:  n = &arguments->nfields; break;
-                    case 1:  n = &arguments->nplanes; break;
-                    case 2:  n = &arguments->nlines;  break;
+                    case 0:  n = &d->nfields; break;
+                    case 1:  n = &d->nplanes; break;
+                    case 2:  n = &d->nlines;  break;
                     default: argp_usage(state);
                 }
                 errno = 0;
@@ -160,9 +199,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
             if (state->arg_num < 3) {
                 argp_usage(state);
             }
-            if (    arguments->nfields <= 0
-                 && arguments->nfields <= 0
-                 && arguments->nplanes <= 0) {
+            if (d->nfields <= 0 && d->nfields <= 0 && d->nplanes <= 0) {
                 argp_error(state,
                            "At least one of %s must be strictly positive",
                            args_doc);
@@ -170,73 +207,70 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'v':
-            arguments->verbose = 1;
+            d->verbose = 1;
             break;
 
         case 'r':
             errno = 0;
-            if (1 != sscanf(arg ? arg : "", "%d %c",
-                            &arguments->repeat, &ignore)) {
+            if (1 != sscanf(arg ? arg : "", "%d %c", &d->repeat, &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "repeat option is malformed: '%s'", arg);
             }
-            if (arguments->repeat < 1) {
+            if (d->repeat < 1) {
                 argp_failure(state, EX_USAGE, 0,
                         "repeat value %d must be strictly positive",
-                        arguments->repeat);
+                        d->repeat);
             }
             break;
 
         case 'n':
             errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
-                            &arguments->ncomponents, &ignore)) {
+                            &d->ncomponents, &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "ncomponents option is malformed: '%s'", arg);
             }
-            if (arguments->ncomponents < 1) {
+            if (d->ncomponents < 1) {
                 argp_failure(state, EX_USAGE, 0,
                         "ncomponents value %d must be strictly positive",
-                        arguments->ncomponents);
+                        d->ncomponents);
             }
             break;
 
         case 'f':
-            if (   arguments->field_cglobal
-                || arguments->field_bglobal
-                || arguments->field_aglobal ) {
+            if (d->f->cglobal || d->f->bglobal || d->f->aglobal ) {
                 argp_error(state, "only one of --field-{memory,global}"
                            " may be specified");
             }
             if (arg) {
-                arguments->field_bytes = from_human_readable_byte_count(arg);
-                if (arguments->field_bytes < 1)
+                d->f->bytes = from_human_readable_byte_count(arg);
+                if (d->f->bytes < 1)
                     argp_failure(state, EX_USAGE, 0,
                             "field-memory option is malformed: '%s'", arg);
             }
             break;
 
         case 'p':
-            if (   arguments->plane_bglobal || arguments->plane_aglobal) {
+            if (   d->p->bglobal || d->p->aglobal) {
                 argp_error(state, "only one of --plane-{memory,global}"
                            " may be specified");
             }
             if (arg) {
-                arguments->plane_bytes = from_human_readable_byte_count(arg);
-                if (arguments->plane_bytes < 1)
+                d->p->bytes = from_human_readable_byte_count(arg);
+                if (d->p->bytes < 1)
                     argp_failure(state, EX_USAGE, 0,
                             "plane-memory option is malformed: '%s'", arg);
             }
             break;
 
         case 'l':
-            if (arguments->line_aglobal) {
+            if (d->l->aglobal) {
                 argp_error(state, "only one of --line-{memory,global}"
                            " may be specified");
             }
             if (arg) {
-                arguments->line_bytes = from_human_readable_byte_count(arg);
-                if (arguments->line_bytes < 1)
+                d->l->bytes = from_human_readable_byte_count(arg);
+                if (d->l->bytes < 1)
                     argp_failure(state, EX_USAGE, 0,
                             "line-memory option is malformed: '%s'", arg);
             }
@@ -245,20 +279,15 @@ parse_opt(int key, char *arg, struct argp_state *state)
         case 'F':
             errno = 0;
             if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
-                            &arguments->field_dims[0],
-                            &arguments->field_dims[1],
-                            &arguments->field_dims[2], &ignore)) {
+                            &d->f->dims[0], &d->f->dims[1],
+                            &d->f->dims[2], &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "field-dims option is malformed: '%s'", arg);
             }
-            if (    arguments->field_dims[0] < 0
-                 || arguments->field_dims[1] < 0
-                 || arguments->field_dims[2] < 0) {
+            if (d->f->dims[0] < 0 || d->f->dims[1] < 0 || d->f->dims[2] < 0) {
                 argp_failure(state, EX_USAGE, 0,
                         "field-dims values %dx%dx%d must be nonnegative",
-                        arguments->field_dims[0],
-                        arguments->field_dims[1],
-                        arguments->field_dims[2]);
+                        d->f->dims[0], d->f->dims[1], d->f->dims[2]);
             }
             break;
 
@@ -266,15 +295,14 @@ parse_opt(int key, char *arg, struct argp_state *state)
         case 'P':
             errno = 0;
             if (2 != sscanf(arg ? arg : "", "%d x %d %c",
-                            &arguments->plane_dims[0],
-                            &arguments->plane_dims[1], &ignore)) {
+                            &d->p->dims[0], &d->p->dims[1], &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "plane-dims option is malformed: '%s'", arg);
             }
-            if (arguments->plane_dims[0] < 0 || arguments->plane_dims[1] < 0) {
+            if (d->p->dims[0] < 0 || d->p->dims[1] < 0) {
                 argp_failure(state, EX_USAGE, 0,
                         "plane-dims values %dx%d must be nonnegative",
-                        arguments->plane_dims[0], arguments->plane_dims[1]);
+                        d->p->dims[0], d->p->dims[1]);
             }
             break;
 
@@ -282,76 +310,70 @@ parse_opt(int key, char *arg, struct argp_state *state)
         case 'L':
             errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
-                            &arguments->line_dims[0], &ignore)) {
+                            &d->l->dims[0], &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "line-global option is malformed: '%s'", arg);
             }
-            if (arguments->line_dims[0] < 0) {
+            if (d->l->dims[0] < 0) {
                 argp_failure(state, EX_USAGE, 0,
                         "line-dims value '%d' must be nonnegative",
-                        arguments->line_dims[0]);
+                        d->l->dims[0]);
             }
             break;
 
         case FIELD_GLOBAL:
-            if (arguments->field_bytes) {
+            if (d->f->bytes) {
                 argp_error(state, "only one of --field-{memory,global}"
                            " may be specified");
             }
             errno = 0;
             if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
-                            &arguments->field_cglobal,
-                            &arguments->field_bglobal,
-                            &arguments->field_aglobal, &ignore)) {
+                            &d->f->cglobal, &d->f->bglobal,
+                            &d->f->aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "field-global option not of form CxBxA: '%s'", arg);
             }
-            if (    arguments->field_cglobal < 1
-                 || arguments->field_bglobal < 1
-                 || arguments->field_aglobal < 1) {
+            if (d->f->cglobal < 1 || d->f->bglobal < 1 || d->f->aglobal < 1) {
                 argp_failure(state, EX_USAGE, 0,
                         "field-global values %dx%dx%d must be strictly positive",
-                        arguments->field_cglobal,
-                        arguments->field_bglobal,
-                        arguments->field_aglobal);
+                        d->f->cglobal, d->f->bglobal, d->f->aglobal);
             }
             break;
 
 
         case PLANE_GLOBAL:
-            if (arguments->plane_bytes) {
+            if (d->p->bytes) {
                 argp_error(state, "only one of --plane-{memory,global}"
                            " may be specified");
             }
             errno = 0;
             if (2 != sscanf(arg ? arg : "", "%d x %d %c",
-                            &arguments->plane_bglobal,
-                            &arguments->plane_aglobal, &ignore)) {
+                            &d->p->bglobal, &d->p->aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "plane-global option not of form BxA: '%s'", arg);
             }
-            if (arguments->plane_bglobal < 1 || arguments->plane_aglobal < 1) {
+            if (d->p->bglobal < 1 || d->p->aglobal < 1) {
                 argp_failure(state, EX_USAGE, 0,
                         "plane-global values %dx%d must be strictly positive",
-                        arguments->plane_bglobal, arguments->plane_aglobal);
+                        d->p->bglobal, d->p->aglobal);
             }
             break;
 
         case LINE_GLOBAL:
-            if (arguments->line_bytes) {
+            if (d->l->bytes) {
                 argp_error(state, "only one of --line-{memory,global}"
                            " may be specified");
             }
             errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
-                            &arguments->line_aglobal, &ignore)) {
+                             &d->l->aglobal, &ignore)) {
                 argp_failure(state, EX_USAGE, errno,
                         "line-global option is malformed: '%s'", arg);
             }
-            if (arguments->line_aglobal < 0) {
+            if (d->l->aglobal < 0) {
                 argp_failure(state, EX_USAGE, 0,
                         "line-global value %d must be strictly positive",
-                        arguments->line_aglobal);
+                        d->l->aglobal);
             }
             break;
 
@@ -367,158 +389,70 @@ static struct argp argp = {
     0 /*children*/, 0 /*help_filter*/, 0 /*argp_domain*/
 };
 
+// Rank-dependent output streams established in main().
+static FILE *rankout, *rankerr;
+
 int main(int argc, char *argv[])
 {
+    // Initialize default argument storage and default values
+    struct details d;        memset(&d, 0, sizeof(struct details));
+    struct field_details f;  memset(&f, 0, sizeof(struct field_details));
+    struct plane_details p;  memset(&p, 0, sizeof(struct plane_details));
+    struct line_details  l;  memset(&l, 0, sizeof(struct line_details));
+    d.repeat = 1;
+    d.ncomponents = 1;
+    d.f = &f;
+    d.p = &p;
+    d.l = &l;
+    f.comm = p.comm = l.comm = MPI_COMM_NULL;
+
     // Initialize/finalize MPI
     MPI_Init(&argc, &argv);
     atexit((void (*) ()) MPI_Finalize);
-    int world_size, world_rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &d.world_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &d.world_rank);
 
-    // Initialize default argument values
-    struct arguments arguments;
-    memset(&arguments, 0, sizeof(struct arguments));
-    arguments.repeat = 1;
-    arguments.ncomponents = 1;
-
-    // Parse command line arguments
-    mpi_argp_parse(world_rank, &argp, argc, argv, 0, 0, &arguments);
-
-    // Determine MPI_Dims_create-based parallel decompositions
-    ESIO_MPICHKQ(MPI_Dims_create(world_size, 3, arguments.field_dims));
-    ESIO_MPICHKQ(MPI_Dims_create(world_size, 2, arguments.plane_dims));
-    ESIO_MPICHKQ(MPI_Dims_create(world_size, 1, arguments.line_dims));
-
-    // Create MPI communicators for each decomposition and obtain ranks
-    MPI_Comm field_comm, plane_comm, line_comm;
-    {
-        int periods[3] = { 0, 0, 0 };
-        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 3, arguments.field_dims,
-                                     periods, 1, &field_comm));
-        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 2, arguments.plane_dims,
-                                     periods, 1, &plane_comm));
-        ESIO_MPICHKQ(MPI_Cart_create(MPI_COMM_WORLD, 1, arguments.line_dims,
-                                     periods, 1, &line_comm));
-    }
-    // Determine this rank's position within each of those decompositions
-    int field_rank, plane_rank, line_rank;
-    ESIO_MPICHKQ(MPI_Comm_rank(field_comm, &field_rank));
-    ESIO_MPICHKQ(MPI_Comm_rank(plane_comm, &plane_rank));
-    ESIO_MPICHKQ(MPI_Comm_rank(line_comm,  &line_rank));
-    int field_coords[3], plane_coords[2], line_coords[1];
-    ESIO_MPICHKQ(MPI_Cart_coords(field_comm, field_rank, 3, field_coords));
-    ESIO_MPICHKQ(MPI_Cart_coords(plane_comm, plane_rank, 2, plane_coords));
-    ESIO_MPICHKQ(MPI_Cart_coords(line_comm,  line_rank,  1, line_coords));
-
-    // Create ESIO handles for each of those decompositions.
-    // Ideally a single communicator would suffice, but the MPI
-    // topology details seem to be 1-to-1 with communicators.
-    esio_handle field_h = esio_handle_initialize(field_comm);
-    esio_handle plane_h = esio_handle_initialize(plane_comm);
-    esio_handle line_h  = esio_handle_initialize(line_comm);
-    assert(field_h);
-    assert(plane_h);
-    assert(line_h);
-
-    // Establish field problem details and determine local portion
-    if (arguments.field_bytes) {
-        double field_vectors = world_size * arguments.field_bytes
-                             / arguments.ncomponents;
-        arguments.field_cglobal = arguments.field_bglobal // Uniform
-                                = arguments.field_aglobal // Uniform
-                                = ceil(cbrt(field_vectors));
+    // Establish rank-dependent output streams
+    errno   = 0;
+    if (d.world_rank == 0) {
+        rankout = stdout;
+        rankerr = stderr;
     } else {
-        arguments.field_bytes = arguments.field_cglobal
-                              * arguments.field_bglobal
-                              * arguments.field_aglobal
-                              * arguments.ncomponents
-                              * sizeof(double);
+        rankout = fopen("/dev/null", "w");
+        rankerr = rankout;
     }
-    const int field_clocal = local(arguments.field_cglobal, world_size,
-                                   field_coords[0], 1);
-    const int field_cstart = start(arguments.field_cglobal, world_size,
-                                   field_coords[0], 1);
-    const int field_blocal = local(arguments.field_bglobal, world_size,
-                                   field_coords[1], 0);
-    const int field_bstart = start(arguments.field_bglobal, world_size,
-                                   field_coords[1], 0);
-    const int field_alocal = local(arguments.field_aglobal, world_size,
-                                   field_coords[2], 1);
-    const int field_astart = start(arguments.field_aglobal, world_size,
-                                   field_coords[2], 1);
-    esio_field_establish(
-            field_h, arguments.field_cglobal, field_clocal, field_cstart,
-                     arguments.field_bglobal, field_blocal, field_bstart,
-                     arguments.field_aglobal, field_alocal, field_astart);
-
-    // Establish plane problem details and determine local portion
-    if (arguments.plane_bytes) {
-        double plane_vectors = world_size * arguments.plane_bytes
-                             / arguments.ncomponents;
-        arguments.plane_bglobal = arguments.plane_aglobal // Uniform
-                                = ceil(sqrt(plane_vectors));
-    } else {
-        arguments.plane_bytes = arguments.plane_bglobal
-                              * arguments.plane_aglobal
-                              * arguments.ncomponents
-                              * sizeof(double);
+    if (!rankout) {
+        perror("Unable to open rank-dependent output streams"),
+        MPI_Abort(MPI_COMM_WORLD, 1);
     }
-    const int plane_blocal = local(arguments.plane_bglobal, world_size,
-                                   plane_coords[0], 0);
-    const int plane_bstart = start(arguments.plane_bglobal, world_size,
-                                   plane_coords[0], 0);
-    const int plane_alocal = local(arguments.plane_aglobal, world_size,
-                                   plane_coords[1], 1);
-    const int plane_astart = start(arguments.plane_aglobal, world_size,
-                                   plane_coords[1], 1);
-    esio_plane_establish(
-            plane_h, arguments.plane_bglobal, plane_blocal, plane_bstart,
-                     arguments.plane_aglobal, plane_alocal, plane_astart);
 
-    // Establish line problem details and determine local portion
-    if (arguments.line_bytes) {
-        double line_vectors = world_size * arguments.line_bytes
-                            / arguments.ncomponents;
-        arguments.line_aglobal = ceil(line_vectors);
-    } else {
-        arguments.line_bytes = arguments.line_aglobal
-                             * arguments.ncomponents
-                             * sizeof(double);
-    }
-    const int line_alocal = local(arguments.line_aglobal, world_size,
-                                  line_coords[0], 1);
-    const int line_astart = start(arguments.line_aglobal, world_size,
-                                  line_coords[0], 1);
-    esio_line_establish(
-            line_h, arguments.line_aglobal, line_alocal, line_astart);
+    // Parse command line arguments using MPI-savvy argp extension
+    mpi_argp_parse(d.world_rank, &argp, argc, argv, 0, 0, &d);
 
+    // Initialize the field, plane, and line problems
+    if (d.nfields) field_initialize(&d, &f);
+    if (d.nplanes) plane_initialize(&d, &p);
+    if (d.nlines)  line_initialize( &d, &l);
 
     // DEBUG: Dump arguments
-    printf("verbose:      %d\n", arguments.verbose);
-    printf("ncomponents:  %d\n", arguments.ncomponents);
-    printf("field_global: %d x %d x %d\n", arguments.field_cglobal,
-                                           arguments.field_bglobal,
-                                           arguments.field_aglobal);
-    printf("field_dims:   %d x %d x %d\n", arguments.field_dims[0],
-                                           arguments.field_dims[1],
-                                           arguments.field_dims[2]);
-    printf("field_bytes:  %ld\n", arguments.field_bytes);
+    printf("verbose:      %d\n", d.verbose);
+    printf("ncomponents:  %d\n", d.ncomponents);
+    printf("f.global: %d x %d x %d\n", f.cglobal, f.bglobal, f.aglobal);
+    printf("f.dims:   %d x %d x %d\n", f.dims[0], f.dims[1], f.dims[2]);
+    printf("f.bytes:  %ld\n", f.bytes);
     {
         double coeff;
         const char *units;
-        to_human_readable_byte_count(arguments.field_bytes, 0, &coeff, &units);
-        printf("field_bytes:  %.1f %s\n", coeff, units);
+        to_human_readable_byte_count(f.bytes, 0, &coeff, &units);
+        printf("f.bytes:  %.1f %s\n", coeff, units);
 
     }
-    printf("plane_global: %d x %d\n", arguments.plane_bglobal,
-                                      arguments.plane_aglobal);
-    printf("plane_dims:   %d x %d\n", arguments.plane_dims[0],
-                                      arguments.plane_dims[1]);
-    printf("plane_bytes:  %ld\n", arguments.plane_bytes);
-    printf("line_global:  %d\n", arguments.line_aglobal);
-    printf("line_dims:    %d\n", arguments.line_dims[0]);
-    printf("line_bytes:   %ld\n", arguments.line_bytes);
+    printf("p.global: %d x %d\n", p.bglobal, p.aglobal);
+    printf("p.dims:   %d x %d\n", p.dims[0], p.dims[1]);
+    printf("p.bytes:  %ld\n", p.bytes);
+    printf("l.global: %d\n", l.aglobal);
+    printf("l.dims:   %d\n", l.dims[0]);
+    printf("l.bytes:  %ld\n", l.bytes);
 
 /*     esio_handle h = esio_handle_initialize(MPI_COMM_WORLD); */
 /*     esio_file_create(h, "data.h5", 1 |+ overwrite +|); */
@@ -529,21 +463,21 @@ int main(int argc, char *argv[])
 /*     esio_attribute_write_int(h, "version", &version); */
 
 /*     double example[2] = { 2.0 * world_rank, 2.0 * world_rank + 1 }; */
-/*     esio_line_write_double(h, "example", example, */
+/*     esio_l.write_double(h, "example", example, */
 /*                            2*world_size, 2*world_rank, 2, 1); */
 
 /*     esio_file_close(h); */
 /*     esio_handle_finalize(h); */
 
     // Free ESIO handles
-    esio_handle_finalize(field_h);
-    esio_handle_finalize(plane_h);
-    esio_handle_finalize(line_h);
+    esio_handle_finalize(f.h);
+    esio_handle_finalize(p.h);
+    esio_handle_finalize(l.h);
 
     // Free MPI communicators
-    if (field_comm != MPI_COMM_NULL) MPI_Comm_free(&field_comm);
-    if (plane_comm != MPI_COMM_NULL) MPI_Comm_free(&plane_comm);
-    if (line_comm != MPI_COMM_NULL)  MPI_Comm_free(&line_comm);
+    if (f.comm != MPI_COMM_NULL) MPI_Comm_free(&f.comm);
+    if (p.comm != MPI_COMM_NULL) MPI_Comm_free(&p.comm);
+    if (l.comm != MPI_COMM_NULL) MPI_Comm_free(&l.comm);
 
     return 0;
 }
@@ -675,4 +609,95 @@ static int start(int nglobal, int nranks, int rank, int extralow)
         offset += local(nglobal, nranks, rank, extralow);
     }
     return offset;
+}
+
+static int field_initialize(const struct details *d, struct field_details *f)
+{
+    // Establish MPI topology for field problem
+    ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 3, f->dims));
+    int periods[3] = { 0, 0, 0 };
+    ESIO_MPICHKQ(MPI_Cart_create(
+                MPI_COMM_WORLD, 3, f->dims, periods, 1, &f->comm));
+    ESIO_MPICHKQ(MPI_Comm_rank(f->comm, &f->rank));
+    ESIO_MPICHKQ(MPI_Cart_coords(f->comm, f->rank, 3, f->coords));
+
+    // Compute global problem size and local portion
+    if (f->bytes) {
+        const double vectors = d->world_size * f->bytes / d->ncomponents;
+        f->cglobal = f->bglobal = f->aglobal = ceil(cbrt(vectors));
+    } else {
+        f->bytes = f->cglobal * f->bglobal * f->aglobal * d->ncomponents
+                 * sizeof(double);
+    }
+    f->clocal = local(f->cglobal, d->world_size, f->coords[0], 1);
+    f->cstart = start(f->cglobal, d->world_size, f->coords[0], 1);
+    f->blocal = local(f->bglobal, d->world_size, f->coords[1], 0);
+    f->bstart = start(f->bglobal, d->world_size, f->coords[1], 0);
+    f->alocal = local(f->aglobal, d->world_size, f->coords[2], 1);
+    f->astart = start(f->aglobal, d->world_size, f->coords[2], 1);
+
+    // Initialize ESIO to carry out problem
+    f->h = esio_handle_initialize(f->comm);
+    esio_field_establish(f->h, f->cglobal, f->clocal, f->cstart,
+                               f->bglobal, f->blocal, f->bstart,
+                               f->aglobal, f->alocal, f->astart);
+
+    return ESIO_SUCCESS;
+}
+
+static int plane_initialize(const struct details *d, struct plane_details *p)
+{
+    // Establish MPI topology for plane problem
+    ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 2, p->dims));
+    int periods[2] = { 0, 0 };
+    ESIO_MPICHKQ(MPI_Cart_create(
+                MPI_COMM_WORLD, 2, p->dims, periods, 1, &p->comm));
+    ESIO_MPICHKQ(MPI_Comm_rank(p->comm, &p->rank));
+    ESIO_MPICHKQ(MPI_Cart_coords(p->comm, p->rank, 2, p->coords));
+
+    // Compute global problem size and local portion
+    if (p->bytes) {
+        const double vectors = d->world_size * p->bytes / d->ncomponents;
+        p->bglobal = p->aglobal = ceil(sqrt(vectors));
+    } else {
+        p->bytes = p->bglobal * p->aglobal * d->ncomponents * sizeof(double);
+    }
+    p->blocal = local(p->bglobal, d->world_size, p->coords[0], 0);
+    p->bstart = start(p->bglobal, d->world_size, p->coords[0], 0);
+    p->alocal = local(p->aglobal, d->world_size, p->coords[1], 1);
+    p->astart = start(p->aglobal, d->world_size, p->coords[1], 1);
+
+    // Initialize ESIO to carry out problem
+    p->h = esio_handle_initialize(p->comm);
+    esio_plane_establish(p->h, p->bglobal, p->blocal, p->bstart,
+                               p->aglobal, p->alocal, p->astart);
+
+    return ESIO_SUCCESS;
+}
+
+static int line_initialize(const struct details *d, struct line_details  *l)
+{
+    // Establish MPI topology for line problem
+    ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 1, l->dims));
+    int periods[1] = { 0 };
+    ESIO_MPICHKQ(MPI_Cart_create(
+                MPI_COMM_WORLD, 1, l->dims, periods, 1, &l->comm));
+    ESIO_MPICHKQ(MPI_Comm_rank(l->comm, &l->rank));
+    ESIO_MPICHKQ(MPI_Cart_coords(l->comm, l->rank, 1, l->coords));
+
+    // Compute global problem size and local portion
+    if (l->bytes) {
+        const double vectors = d->world_size * l->bytes / d->ncomponents;
+        l->aglobal = ceil(vectors);
+    } else {
+        l->bytes = l->aglobal * d->ncomponents * sizeof(double);
+    }
+    l->alocal = local(l->aglobal, d->world_size, l->coords[0], 1);
+    l->astart = start(l->aglobal, d->world_size, l->coords[0], 1);
+
+    // Initialize ESIO to carry out problem
+    l->h = esio_handle_initialize(l->comm);
+    esio_line_establish(l->h, l->aglobal, l->alocal, l->astart);
+
+    return ESIO_SUCCESS;
 }
