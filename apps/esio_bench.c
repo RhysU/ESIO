@@ -66,10 +66,14 @@ static int start(int nglobal, int nranks, int rank, int extralow);
 
 const char *argp_program_version      = "esio_bench " PACKAGE_VERSION;
 const char *argp_program_bug_address  = PACKAGE_BUGREPORT;
-static const char doc[]               = "ESIO Benchmarking Tool" // Brief
-                                        // "\v"                  // Separator
-                                        "";                      // Details
-static const char args_doc[]          = "";
+static const char doc[]               =
+"Simulate and benchmark ESIO-based application restart write operations."
+"\v"
+"Write NFIELDS fields, NPLANES planes, and NLINES lines with the "
+"specified problem sizes and parallel decompositions using ESIO's "
+"restart writing capabilities.  Timing information is collected over "
+"one or more iterations.\n";
+static const char args_doc[]          = "NFIELDS NPLANES NLINES";
 
 enum {
     FIELD_GLOBAL = 255 /* isascii */,
@@ -79,6 +83,7 @@ enum {
 
 static struct argp_option options[] = {
     {"verbose",     'v', 0,       0, "Produce verbose output", -1 },
+    {"repeat",      'r', "count", 0, "Number of repetitions", -1 },
     {"ncomponents", 'n', "count", 0, "Number of components",   0 },
     {0, 0, 0, 0,
      "Controlling field problem size (specify at most one)", 0 },
@@ -103,12 +108,14 @@ static struct argp_option options[] = {
 // Used by main to communicate with parse_opt
 struct arguments {
     int verbose;
+    int repeat;
+    int ncomponents;
+    int nfields, nplanes, nlines;
     int field_cglobal, field_bglobal, field_aglobal;
     int plane_bglobal, plane_aglobal;
     int line_aglobal;
     int field_dims[3], plane_dims[2], line_dims[1];
     long field_bytes, plane_bytes, line_bytes;
-    int ncomponents;
 };
 
 // Parse a single option following Argp semantics
@@ -126,14 +133,65 @@ parse_opt(int key, char *arg, struct argp_state *state)
     char ignore = '\0';
 
     switch (key) {
+        case ARGP_KEY_ARG:
+            {
+                int *n;
+                switch (state->arg_num) {
+                    case 0:  n = &arguments->nfields; break;
+                    case 1:  n = &arguments->nplanes; break;
+                    case 2:  n = &arguments->nlines;  break;
+                    default: argp_usage(state);
+                }
+                errno = 0;
+                if (1 != sscanf(arg ? arg : "", "%d %c", n, &ignore)) {
+                    argp_failure(state, EX_USAGE, errno,
+                            "argument %d is malformed: '%s'",
+                            state->arg_num + 1, arg);
+                }
+                if (*n < 0) {
+                    argp_failure(state, EX_USAGE, 0,
+                            "argument %d value %d must be nonnegative",
+                            state->arg_num + 1, *n);
+                }
+            }
+            break;
+
+        case ARGP_KEY_END:
+            if (state->arg_num < 3) {
+                argp_usage(state);
+            }
+            if (    arguments->nfields <= 0
+                 && arguments->nfields <= 0
+                 && arguments->nplanes <= 0) {
+                argp_error(state,
+                           "At least one of %s must be strictly positive",
+                           args_doc);
+            }
+            break;
+
         case 'v':
             arguments->verbose = 1;
             break;
 
+        case 'r':
+            errno = 0;
+            if (1 != sscanf(arg ? arg : "", "%d %c",
+                            &arguments->repeat, &ignore)) {
+                argp_failure(state, EX_USAGE, errno,
+                        "repeat option is malformed: '%s'", arg);
+            }
+            if (arguments->repeat < 1) {
+                argp_failure(state, EX_USAGE, 0,
+                        "repeat value %d must be strictly positive",
+                        arguments->repeat);
+            }
+            break;
+
         case 'n':
+            errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
                             &arguments->ncomponents, &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "ncomponents option is malformed: '%s'", arg);
             }
             if (arguments->ncomponents < 1) {
@@ -185,11 +243,12 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case 'F':
+            errno = 0;
             if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
                             &arguments->field_dims[0],
                             &arguments->field_dims[1],
                             &arguments->field_dims[2], &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "field-dims option is malformed: '%s'", arg);
             }
             if (    arguments->field_dims[0] < 0
@@ -205,10 +264,11 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case 'P':
+            errno = 0;
             if (2 != sscanf(arg ? arg : "", "%d x %d %c",
                             &arguments->plane_dims[0],
                             &arguments->plane_dims[1], &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "plane-dims option is malformed: '%s'", arg);
             }
             if (arguments->plane_dims[0] < 0 || arguments->plane_dims[1] < 0) {
@@ -220,9 +280,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
 
 
         case 'L':
+            errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
                             &arguments->line_dims[0], &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "line-global option is malformed: '%s'", arg);
             }
             if (arguments->line_dims[0] < 0) {
@@ -237,11 +298,12 @@ parse_opt(int key, char *arg, struct argp_state *state)
                 argp_error(state, "only one of --field-{memory,global}"
                            " may be specified");
             }
+            errno = 0;
             if (3 != sscanf(arg ? arg : "", "%d x %d x %d %c",
                             &arguments->field_cglobal,
                             &arguments->field_bglobal,
                             &arguments->field_aglobal, &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "field-global option not of form CxBxA: '%s'", arg);
             }
             if (    arguments->field_cglobal < 1
@@ -261,10 +323,11 @@ parse_opt(int key, char *arg, struct argp_state *state)
                 argp_error(state, "only one of --plane-{memory,global}"
                            " may be specified");
             }
+            errno = 0;
             if (2 != sscanf(arg ? arg : "", "%d x %d %c",
                             &arguments->plane_bglobal,
                             &arguments->plane_aglobal, &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "plane-global option not of form BxA: '%s'", arg);
             }
             if (arguments->plane_bglobal < 1 || arguments->plane_aglobal < 1) {
@@ -279,9 +342,10 @@ parse_opt(int key, char *arg, struct argp_state *state)
                 argp_error(state, "only one of --line-{memory,global}"
                            " may be specified");
             }
+            errno = 0;
             if (1 != sscanf(arg ? arg : "", "%d %c",
                             &arguments->line_aglobal, &ignore)) {
-                argp_failure(state, EX_USAGE, 0,
+                argp_failure(state, EX_USAGE, errno,
                         "line-global option is malformed: '%s'", arg);
             }
             if (arguments->line_aglobal < 0) {
@@ -315,6 +379,7 @@ int main(int argc, char *argv[])
     // Initialize default argument values
     struct arguments arguments;
     memset(&arguments, 0, sizeof(struct arguments));
+    arguments.repeat = 1;
     arguments.ncomponents = 1;
 
     // Parse command line arguments
