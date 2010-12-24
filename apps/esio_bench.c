@@ -530,6 +530,13 @@ int main(int argc, char *argv[])
     // Parse command line arguments using MPI-savvy argp extension
     mpi_argp_parse(d.world_rank, &argp, argc, argv, 0, 0, &d);
 
+    // Print program banner that shows version and program arguments
+    fprintf(rankout, "%s invoked as\n\t", argp_program_version);
+    for (int i = 0; i < argc; ++i) {
+        fprintf(rankout, " %s", argv[i]);
+    }
+    fprintf(rankout, "\n");
+
     // Initialize ESIO handle
     d.h = esio_handle_initialize(MPI_COMM_WORLD);
 
@@ -565,7 +572,7 @@ int main(int argc, char *argv[])
         double coeff;
         const char *units;
         to_human_readable_byte_count(globalbytes, 0, &coeff, &units);
-        fprintf(rankout, "Global combined problem size is %.3f %s\n",
+        fprintf(rankout, "Global overall problem size is %.3f %s\n",
                 coeff, units);
     }
 
@@ -603,7 +610,7 @@ int main(int argc, char *argv[])
 
     char *n;
     for (int i = 0; i < d.repeat; ++i) {
-        fprintf(rankout, "Iteration %d\n", i);
+        fprintf(rankout, "\tIteration %d\n", i);
 
         GRVY_TIMER_BEGIN("esio_file_create");
         esio_file_create(d.h, d.uncommitted, 1 /*overwrite*/);
@@ -665,7 +672,8 @@ int main(int argc, char *argv[])
                 coeff, units);
     }
 
-    GRVY_TIMER_SUMMARIZE();
+    // TODO Get timing information back from multiple ranks
+    if (d.world_rank == 0) GRVY_TIMER_SUMMARIZE();
 
     // Finalize the field, plane, and line problems
     if (d.nfields) field_finalize(&d, &f);
@@ -836,7 +844,8 @@ static int field_initialize(struct details *d, struct field_details *f)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, f->rank, 3, f->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
-    fprintf(rankout, "Field spread across (%d x %d x %d)-rank MPI topology\n",
+    fprintf(rankout,
+            "\tField spread across (%d x %d x %d)-rank MPI topology\n",
             f->dims[0], f->dims[1], f->dims[2]);
 
     // Compute global problem size, if necessary, from memory constraint
@@ -848,7 +857,7 @@ static int field_initialize(struct details *d, struct field_details *f)
 
         to_human_readable_byte_count(f->bytes, 0, &coeff, &units);
         fprintf(rankout,
-            "Per-rank %.2f %s memory requested => %d x %d x %d problem\n",
+            "\tPer-rank %.2f %s memory requested => %d x %d x %d problem\n",
             coeff, units, f->cglobal, f->bglobal, f->aglobal);
     }
 
@@ -876,17 +885,17 @@ static int field_initialize(struct details *d, struct field_details *f)
     long minbytes, maxbytes;
     global_minmax(f->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "Minimum per-rank field memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank field memory is %.2f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "Maximum per-rank field memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank field memory is %.2f %s\n",
             coeff, units);
 
     // Establish field problem decomposition within ESIO handle
-    fprintf(rankout, "Establishing field problem within ESIO\n");
-    esio_field_establish(d->h, f->cglobal, f->clocal, f->cstart,
-                               f->bglobal, f->blocal, f->bstart,
-                               f->aglobal, f->alocal, f->astart);
+    fprintf(rankout, "\tEstablishing field problem within ESIO\n");
+    esio_field_establish(d->h, f->cglobal, f->cstart, f->clocal,
+                               f->bglobal, f->bstart, f->blocal,
+                               f->aglobal, f->astart, f->alocal);
 
     fprintf(rankout, "Problem contains %d field(s) of size %d x %d x %d"
             " each with %d %zu-byte component(s)\n", d->nfields,
@@ -913,7 +922,7 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, p->rank, 2, p->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
-    fprintf(rankout, "Plane spread across (%d x %d)-rank MPI topology\n",
+    fprintf(rankout, "\tPlane spread across (%d x %d)-rank MPI topology\n",
             p->dims[0], p->dims[1]);
 
     // Compute global problem size, if necessary, from memory constraint
@@ -925,7 +934,7 @@ static int plane_initialize(struct details *d, struct plane_details *p)
 
         to_human_readable_byte_count(p->bytes, 0, &coeff, &units);
         fprintf(rankout,
-            "Per-rank %.2f %s memory requested => %d x %d problem\n",
+            "\tPer-rank %.2f %s memory requested => %d x %d problem\n",
             coeff, units, p->bglobal, p->aglobal);
     }
 
@@ -950,16 +959,16 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     long minbytes, maxbytes;
     global_minmax(p->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "Minimum per-rank plane memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank plane memory is %.2f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "Maximum per-rank plane memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank plane memory is %.2f %s\n",
             coeff, units);
 
     // Establish plane problem decomposition within ESIO handle
-    fprintf(rankout, "Establishing plane problem within ESIO\n");
-    esio_plane_establish(d->h, p->bglobal, p->blocal, p->bstart,
-                               p->aglobal, p->alocal, p->astart);
+    fprintf(rankout, "\tEstablishing plane problem within ESIO\n");
+    esio_plane_establish(d->h, p->bglobal, p->bstart, p->blocal,
+                               p->aglobal, p->astart, p->alocal);
 
     fprintf(rankout, "Problem contains %d plane(s) of size %d x %d"
             " each with %d %zu-byte component(s)\n", d->nplanes,
@@ -985,7 +994,7 @@ static int line_initialize(struct details *d, struct line_details  *l)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, l->rank, 1, l->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
-    fprintf(rankout, "Line spread across %d-rank MPI topology\n",
+    fprintf(rankout, "\tLine spread across %d-rank MPI topology\n",
             l->dims[0]);
 
     // Compute global problem size, if necessary, from memory constraint
@@ -997,7 +1006,7 @@ static int line_initialize(struct details *d, struct line_details  *l)
 
         to_human_readable_byte_count(l->bytes, 0, &coeff, &units);
         fprintf(rankout,
-            "Per-rank %.2f %s memory requested => %d problem\n",
+            "\tPer-rank %.2f %s memory requested => %d problem\n",
             coeff, units, l->aglobal);
     }
 
@@ -1020,15 +1029,15 @@ static int line_initialize(struct details *d, struct line_details  *l)
     long minbytes, maxbytes;
     global_minmax(l->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "Minimum per-rank line memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank line memory is %.2f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "Maximum per-rank line memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank line memory is %.2f %s\n",
             coeff, units);
 
     // Establish line problem decomposition within ESIO handle
-    fprintf(rankout, "Establishing line problem within ESIO\n");
-    esio_line_establish(d->h, l->aglobal, l->alocal, l->astart);
+    fprintf(rankout, "\tEstablishing line problem within ESIO\n");
+    esio_line_establish(d->h, l->aglobal, l->astart, l->alocal);
 
     fprintf(rankout, "Problem contains %d line(s) of size %d"
             " each with %d %zu-byte component(s)\n", d->nlines,
