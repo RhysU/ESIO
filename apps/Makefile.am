@@ -8,6 +8,7 @@ AM_FCFLAGS     += -I$(top_builddir)        -I$(top_srcdir)
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = # Append below
 noinst_PROGRAMS = # Append below
+noinst_HEADERS  = mpi_argp.h
 bin_PROGRAMS    = # Append below
 BUILT_DOCS      = # Append below
 BUILT_SOURCES   = # Append below
