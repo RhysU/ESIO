@@ -160,7 +160,13 @@ static const char doc[]               =
 "With one argument, a restart file named FILENAME is written.  With two "
 "arguments, uncommitted restart files are written to UNCOMMITTED and "
 "then renamed to match DESTTEMPLATE.  Timing information is collected "
-"over one or more iterations.\n";
+"over one or more iterations.\n"
+"\n"
+"Options taking a 'bytes' parameter can be given common byte-related "
+"units.  For example --field-memory=5G indicates that approximately "
+"5 gigabytes of memory should be used on each rank to store field data. "
+"SI units like 'Ki' or 'MiB' are also accepted.\n"
+;
 static const char args_doc[] = "FILENAME\nUNCOMMITTED DESTTEMPLATE";
 
 enum {
@@ -180,9 +186,9 @@ static struct argp_option options[] = {
     {"verbose",     'v', 0,       0, "produce verbose output",            0 },
     {"repeat",      'r', "count", 0, "number of repetitions",             0 },
     {"retain",      'R', "count", 0, "number of restart files to retain", 0 },
-    {"nfields",      NFIELDS,      "count", 0, "number of fields",    0},
-    {"nplanes",      NPLANES,      "count", 0, "number of planes",    0},
-    {"nlines",       NLINES,       "count", 0, "number of lines",     0},
+    {"nfields",      NFIELDS,      "count", 0, "number of fields",    1},
+    {"nplanes",      NPLANES,      "count", 0, "number of planes",    1},
+    {"nlines",       NLINES,       "count", 0, "number of lines",     1},
     {"field-layout", FIELD_LAYOUT, "index", 0, "field layout to use", 0},
     {0, 0, 0, 0,
      "Controlling field problem size (specify at most one)", 0 },

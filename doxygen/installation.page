@@ -1,56 +1,60 @@
 /*! \page installation Installation
 
-ESIO uses the GNU autotools suite (autoconf, automake, and libtool)
-for its development build system.  This system is popular among the
-Linux development community and provides a familiar build environment
-for end users.
+ESIO uses the GNU autotools suite (autoconf, automake, and libtool) for its
+development build system.  This system is popular among the Linux development
+community and provides a familiar build environment for end users.
 
-To build ESIO starting from a release distribution, untar the distribution
-and enter the top-level directory.
+To build ESIO starting from a release distribution, untar the distribution and
+enter the top-level directory.
 
 <div class="fragment"><pre class="fragment">
  > tar xvfz esio-$(VERSION).tar.gz
- > cd esio-$(VERSION)/            
+ > cd esio-$(VERSION)/
 </pre></div>
 
 <h2>Configuration Requirements</h2>
 
 <b>HDF5 dependency</b>: ESIO requires that the <a
-href="http://www.hdfgroup.org/HDF5/">HDF5</a> library be
-available locally.  HDF5 must have been configured with both
-Fortran and MPI parallel support (<code>--enable-fortran</code> and
-<code>--enable-parallel</code>, respectively).  The same MPI stack and
-Fortran compiler used to compile HDF5 should be used to build ESIO.
+href="http://www.hdfgroup.org/HDF5/">HDF5</a> library be available locally.
+HDF5 must have been configured with both Fortran and MPI parallel support
+(<code>--enable-fortran</code> and <code>--enable-parallel</code>,
+respectively).  The same MPI stack and Fortran compiler used to compile HDF5
+should be used to build ESIO.
 
-ESIO's configuration script should detect the appropriate information
-if HDF5's <code>h5pcc</code> compiler wrapper is in your path.
-If your HDF5 installation is not detected correctly, you may use ESIO's
-<code>--with-hdf5</code> option to specify a location.
+ESIO's configuration script should detect the appropriate information if HDF5's
+<code>h5pcc</code> compiler wrapper is in your path.  If your HDF5 installation
+is not detected correctly, you may use ESIO's <code>--with-hdf5</code> option
+to specify a location.
 
-<b>Installation Directory</b>: Use the <tt>--prefix</tt> option to
-specify your desired top-level installation directory for ESIO.
+ESIO can optionally use The Groovy Toolkit (GRVY) if it is detected at
+configure time.  If your GRVY installation is not detected correctly, you may
+use ESIO's <code>--with-grvy</code> option to specify a location.
+
+<b>Installation Directory</b>: Use the <tt>--prefix</tt> option to specify your
+desired top-level installation directory for ESIO.
 
 <h2> Library Build </h2>
 
-Once configured, issue a <tt>make</tt> to build the software. If
-successful, this will build the ESIO library (static and dynamic versions)
-and several examples.
+Once configured, issue a <tt>make</tt> to build the software. If successful,
+this will build the ESIO library (static and dynamic versions), several
+examples, and some additional ESIO-related utilities.
 
 \code > make \endcode
 
 <b>Verifying the build:</b> To verify that the software is working properly, a
-test option is provided to run a short suite of functionality tests against the
-local build.  To run, issue a <tt>make check</tt> to run the tests.  Many of
-the tests require your MPI installation's <code>mpiexec</code> command to be
-available.
+test option is provided to run a suite of functionality tests against the local
+build.  To run these tests, issue <tt>make check</tt>.  Many of the tests
+require your MPI installation's <code>mpiexec</code> command to be usable and
+may not be usable on many public high performance computing platform login
+nodes.
 
 <h2> Installation </h2>
 
 After the build is complete, issue
 
-\code > make \endcode
+\code > make install \endcode
 
-to install the library.  The installation will consist of two top-level
-directories housing ESIO's library and include files.
+to install the library.  The installation will consist of three top-level
+directories housing ESIO's include files, compiled libraries, and utilities.
 
 */

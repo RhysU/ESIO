@@ -1,0 +1,12 @@
+/*! \page benchmark Benchmarking
+
+ESIO provides an MPI-based benchmarking utility named \c esio_bench.
+
+\c esio_bench is built and installed alongside the library.  It can simulate
+various combinations of writing fields, planes, and lines to disk to simplify
+measuring ESIO's weak- and strong-scaling write throughput on your favorite
+system.  When ESIO is configured to use GRVY (see \subpage installation), \c
+esio_bench provides much more detailed performance information.  See
+<tt>esio_bench --help</tt> for more details.
+
+*/

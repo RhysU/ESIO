@@ -1,4 +1,4 @@
-/*! \page restarts Restart file sequences
+/*! \page restarts Restart files
 
 ESIO provides several methods that greatly simplify writing a sequence of
 metadata-rich restart files.  Each restart file might contain a simulation
@@ -32,5 +32,9 @@ Using such an approach provides several benefits:
 <li>A history of restart data is maintained.  This is useful when
     simulation statistics must be gathered across multiple snapshots.</li>
 </ol>
+
+ESIO also provides a standalone, non-HDF5 utility named \c esio_restart which
+can be used to test ESIO's restart file management capabilities.  See
+<tt>esio_rename --help</tt> for more details.
 
 */
