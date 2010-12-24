@@ -44,13 +44,17 @@
 
 #ifdef HAVE_GRVY
 #include <grvy.h>
-#define GRVY_TIMER_BEGIN(id)   grvy_timer_begin(#id)
-#define GRVY_TIMER_END(id)     grvy_timer_end(#id)
+#define GRVY_TIMER_INIT(id)    grvy_timer_init(id)
+#define GRVY_TIMER_BEGIN(id)   grvy_timer_begin(id)
+#define GRVY_TIMER_END(id)     grvy_timer_end(id)
+#define GRVY_TIMER_FINALIZE()  grvy_timer_finalize()
 #define GRVY_TIMER_SUMMARIZE() grvy_timer_summarize()
 #else
+#define GRVY_TIMER_INIT(id)
 #define GRVY_TIMER_BEGIN(id)
 #define GRVY_TIMER_END(id)
 #define GRVY_TIMER_SUMMARIZE()
+#define GRVY_TIMER_FINALIZE()
 #endif
 
 //****************************************************************
@@ -65,6 +69,7 @@ struct field_details {
     int dims[3], coords[3], rank;
     long bytes;
     void *data;
+    long stride;
 };
 
 struct plane_details {
@@ -74,6 +79,7 @@ struct plane_details {
     int ncomponents;
     long bytes;
     void *data;
+    long stride;
 };
 
 struct line_details {
@@ -82,6 +88,7 @@ struct line_details {
     int ncomponents;
     long bytes;
     void *data;
+    long stride;
 };
 
 struct details {
@@ -485,6 +492,8 @@ static FILE *rankout, *rankerr;
 
 int main(int argc, char *argv[])
 {
+    GRVY_TIMER_INIT(argp_program_version);
+
     // Initialize default argument storage and default values
     struct details d;        memset(&d, 0, sizeof(struct details));
     struct field_details f;  memset(&f, 0, sizeof(struct field_details));
@@ -529,6 +538,24 @@ int main(int argc, char *argv[])
     if (d.nplanes) plane_initialize(&d, &p);
     if (d.nlines)  line_initialize( &d, &l);
 
+    // Prepare scratch space to hold names for fields, planes, and lines
+    char  *names   = NULL;
+    size_t namelen = 0;    // Includes null terminator
+    {
+        int m = d.nfields;
+        m     = (m > d.nplanes) ? m : d.nplanes;
+        m     = (m > d.nlines)  ? m : d.nlines;
+        int ndigits = ceil(log(m)/log(10));
+        namelen = 1 /* f|p|l */ + ndigits + 1 /* null */;
+        names = malloc(m * namelen);
+        assert(names);
+        char *n = names;
+        for (int i = 0; i < m; ++i) {
+            sprintf(n, "X%0*d", ndigits, i);
+            n += namelen;
+        }
+    }
+
     // Determine combined size of problem across all ranks
     long localbytes = f.bytes + p.bytes + l.bytes;
     long globalbytes;
@@ -547,15 +574,80 @@ int main(int argc, char *argv[])
     if (d.nplanes) p.data = malloc_and_fill(&d, p.bytes);
     if (d.nlines)  l.data = malloc_and_fill(&d, l.bytes);
 
+    // Determine which functions to invoke below based on d.typesize
+    int (*p_esio_field_writev)(const esio_handle, const char *,
+                               const void *, int, int, int, int) = NULL;
+    int (*p_esio_plane_writev)(const esio_handle, const char *,
+                               const void *, int, int, int) = NULL;
+    int (*p_esio_line_writev)(const esio_handle, const char *,
+                              const void *, int, int) = NULL;
+    switch (d.typesize)
+    {
+        case sizeof(double):
+            p_esio_field_writev = &esio_field_writev_double;
+            p_esio_plane_writev = &esio_plane_writev_double;
+            p_esio_line_writev  = &esio_line_writev_double;
+            break;
+        case sizeof(float):
+            p_esio_field_writev = &esio_field_writev_float;
+            p_esio_plane_writev = &esio_plane_writev_float;
+            p_esio_line_writev  = &esio_line_writev_float;
+            break;
+        default:
+            MPI_Abort(MPI_COMM_WORLD, 1); // Sanity failure
+    }
+
     fprintf(rankout, "Beginning benchmark...\n");
     ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
     const double start = MPI_Wtime();
 
+    char *n;
     for (int i = 0; i < d.repeat; ++i) {
         fprintf(rankout, "Iteration %d\n", i);
 
-        // TODO Implement logic
-        sleep(2);
+        GRVY_TIMER_BEGIN("esio_file_create");
+        esio_file_create(d.h, d.uncommitted, 1 /*overwrite*/);
+        GRVY_TIMER_END("esio_file_create");
+
+        if (d.nfields) {
+            GRVY_TIMER_BEGIN("esio_field_write");
+            n = names;
+            for (int j = 0; j < d.nfields; ++j) {
+                *n = 'f';
+                p_esio_field_writev(d.h, n,
+                        f.data + j * f.stride, 0, 0, 0, f.ncomponents);
+                n += namelen;
+            }
+            GRVY_TIMER_END("esio_field_write");
+        }
+
+        if (d.nplanes) {
+            GRVY_TIMER_BEGIN("esio_plane_write");
+            n = names;
+            for (int j = 0; j < d.nplanes; ++j) {
+                *n = 'p';
+                p_esio_plane_writev(d.h, n,
+                        p.data + j * p.stride, 0, 0, p.ncomponents);
+                n += namelen;
+            }
+            GRVY_TIMER_END("esio_plane_write");
+        }
+
+        if (d.nlines) {
+            GRVY_TIMER_BEGIN("esio_line_write");
+            n = names;
+            for (int j = 0; j < d.nlines; ++j) {
+                *n = 'l';
+                p_esio_line_writev(d.h, n,
+                        l.data + j * l.stride, 0, l.ncomponents);
+                n += namelen;
+            }
+            GRVY_TIMER_END("esio_line_write");
+        }
+
+        GRVY_TIMER_BEGIN("esio_file_close_restart");
+        esio_file_close_restart(d.h, d.dst_template, d.retain);
+        GRVY_TIMER_END("esio_file_close_restart");
     }
 
     const double end = MPI_Wtime();
@@ -572,6 +664,8 @@ int main(int argc, char *argv[])
         fprintf(rankout, "Mean global transfer rate was %.4f %s/s\n",
                 coeff, units);
     }
+
+    GRVY_TIMER_SUMMARIZE();
 
     // Finalize the field, plane, and line problems
     if (d.nfields) field_finalize(&d, &f);
@@ -774,8 +868,9 @@ static int field_initialize(struct details *d, struct field_details *f)
     f->astart = start(f->aglobal, d->world_size, f->coords[2], 1);
 
     // Compute memory requirement for local portion
-    f->bytes = f->clocal * f->blocal * f->alocal
-             * f->ncomponents * d->typesize * d->nfields;
+    f->stride = f->clocal * f->blocal * f->alocal
+              * f->ncomponents * d->typesize;
+    f->bytes  = f->stride * d->nfields;
 
     // Output minimum and maximum memory required across all ranks
     long minbytes, maxbytes;
@@ -848,8 +943,8 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     p->astart = start(p->aglobal, d->world_size, p->coords[1], 1);
 
     // Compute memory requirement for local portion
-    p->bytes = p->bglobal * p->aglobal
-             * p->ncomponents * d->typesize * d->nplanes;
+    p->stride = p->bglobal * p->aglobal * p->ncomponents * d->typesize;
+    p->bytes  = p->stride * d->nplanes;
 
     // Output minimum and maximum memory required across all ranks
     long minbytes, maxbytes;
@@ -918,7 +1013,8 @@ static int line_initialize(struct details *d, struct line_details  *l)
     l->astart = start(l->aglobal, d->world_size, l->coords[0], 1);
 
     // Compute memory requirement for local portion
-    l->bytes = l->aglobal * l->ncomponents * d->typesize * d->nlines;
+    l->stride = l->aglobal * l->ncomponents * d->typesize;
+    l->bytes  = l->stride * d->nlines;
 
     // Output minimum and maximum memory required across all ranks
     long minbytes, maxbytes;
