@@ -47,10 +47,6 @@ check_PROGRAMS          += restart_helpers
 restart_helpers_SOURCES  = restart_helpers.c ../esio/restart-rename.c
 restart_helpers_LDADD    = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 
-## Externally observable restart renaming tets
-TESTS                   += esio_rename.sh
-EXTRA_DIST              += esio_rename.sh
-
 #############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##
 #############################################################################
@@ -263,6 +259,14 @@ EXTRA_DIST           += layout2_int.sh         # NB Wrapper script
 check_PROGRAMS       += layout2_int
 layout2_int_SOURCES   = layout2_int.c testutils.c
 layout2_int_LDADD     = ../esio/libesio.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
+
+#############################################################################
+### INSTALLED APPLICATIONS INSTALLED APPLICATIONS INSTALLED APPLICATIONS  ###
+#############################################################################
+
+## Externally observable restart renaming tets
+TESTS      += esio_rename.sh
+EXTRA_DIST += esio_rename.sh
 
 #############################################################################
 ### MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS ###
