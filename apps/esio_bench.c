@@ -66,7 +66,7 @@ struct field_details {
     int bglobal, bstart, blocal;
     int aglobal, astart, alocal;
     int ncomponents;
-    int dims[3], coords[3], rank;
+    int layout, dims[3], coords[3], rank;
     long bytes;
     void *data;
     long stride;
@@ -160,7 +160,8 @@ static const char args_doc[]
     = "NFIELDS NPLANES NLINES UNCOMMITTED DESTTEMPLATE";
 
 enum {
-    FIELD_GLOBAL = 255 /* isascii */,
+    FIELD_LAYOUT = 255 /* !isascii */,
+    FIELD_GLOBAL,
     PLANE_GLOBAL,
     LINE_GLOBAL,
     FIELD_NCOMPONENTS,
@@ -172,6 +173,7 @@ static struct argp_option options[] = {
     {"verbose",     'v', 0,       0, "produce verbose output",            0 },
     {"repeat",      'r', "count", 0, "number of repetitions",             0 },
     {"retain",      'R', "count", 0, "number of restart files to retain", 0 },
+    {"field-layout", FIELD_LAYOUT, "index", 0, "field layout to use", 0},
     {0, 0, 0, 0,
      "Controlling field problem size (specify at most one)", 0 },
     {"field-memory", 'f',          "bytes", 0, "per-rank field memory", 0 },
@@ -282,6 +284,19 @@ parse_opt(int key, char *arg, struct argp_state *state)
                 argp_failure(state, EX_USAGE, 0,
                         "retain value %d must be strictly positive",
                         d->retain);
+            }
+            break;
+
+        case FIELD_LAYOUT:
+            errno = 0;
+            if (1 != sscanf(arg ? arg : "", "%d %c", &d->f->layout, &ignore)) {
+                argp_failure(state, EX_USAGE, errno,
+                        "field-layout option is malformed: '%s'", arg);
+            }
+            if (d->f->layout < 0 || d->f->layout > esio_field_layout_count()) {
+                argp_failure(state, EX_USAGE, 0,
+                        "field-layout value %d must be in range [%d, %d]",
+                        d->f->layout, 0, esio_field_layout_count());
             }
             break;
 
@@ -588,6 +603,8 @@ int main(int argc, char *argv[])
                                const void *, int, int, int) = NULL;
     int (*p_esio_line_writev)(const esio_handle, const char *,
                               const void *, int, int) = NULL;
+    // TODO Understand "warning: assignment from incompatible pointer type"
+    // which arise from the function pointer assignments that follow.
     switch (d.typesize)
     {
         case sizeof(double):
@@ -869,12 +886,12 @@ static int field_initialize(struct details *d, struct field_details *f)
     }
 
     // Compute local portion of global problem
-    f->clocal = local(f->cglobal, d->world_size, f->coords[0], 1);
-    f->cstart = start(f->cglobal, d->world_size, f->coords[0], 1);
-    f->blocal = local(f->bglobal, d->world_size, f->coords[1], 0);
-    f->bstart = start(f->bglobal, d->world_size, f->coords[1], 0);
-    f->alocal = local(f->aglobal, d->world_size, f->coords[2], 1);
-    f->astart = start(f->aglobal, d->world_size, f->coords[2], 1);
+    f->clocal = local(f->cglobal, f->dims[0], f->coords[0], 1);
+    f->cstart = start(f->cglobal, f->dims[0], f->coords[0], 1);
+    f->blocal = local(f->bglobal, f->dims[1], f->coords[1], 0);
+    f->bstart = start(f->bglobal, f->dims[1], f->coords[1], 0);
+    f->alocal = local(f->aglobal, f->dims[2], f->coords[2], 1);
+    f->astart = start(f->aglobal, f->dims[2], f->coords[2], 1);
 
     // Compute memory requirement for local portion
     f->stride = f->clocal * f->blocal * f->alocal
@@ -885,14 +902,17 @@ static int field_initialize(struct details *d, struct field_details *f)
     long minbytes, maxbytes;
     global_minmax(f->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMinimum per-rank field memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank field memory is %.3f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMaximum per-rank field memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank field memory is %.3f %s\n",
             coeff, units);
 
     // Establish field problem decomposition within ESIO handle
-    fprintf(rankout, "\tEstablishing field problem within ESIO\n");
+    fprintf(rankout,
+            "\tEstablishing field problem within ESIO using layout %d\n",
+            f->layout);
+    esio_field_layout_set(d->h, f->layout);
     esio_field_establish(d->h, f->cglobal, f->cstart, f->clocal,
                                f->bglobal, f->bstart, f->blocal,
                                f->aglobal, f->astart, f->alocal);
@@ -946,10 +966,10 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     }
 
     // Compute local portion of global problem
-    p->blocal = local(p->bglobal, d->world_size, p->coords[0], 0);
-    p->bstart = start(p->bglobal, d->world_size, p->coords[0], 0);
-    p->alocal = local(p->aglobal, d->world_size, p->coords[1], 1);
-    p->astart = start(p->aglobal, d->world_size, p->coords[1], 1);
+    p->blocal = local(p->bglobal, p->dims[0], p->coords[0], 0);
+    p->bstart = start(p->bglobal, p->dims[0], p->coords[0], 0);
+    p->alocal = local(p->aglobal, p->dims[1], p->coords[1], 1);
+    p->astart = start(p->aglobal, p->dims[1], p->coords[1], 1);
 
     // Compute memory requirement for local portion
     p->stride = p->bglobal * p->aglobal * p->ncomponents * d->typesize;
@@ -959,10 +979,10 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     long minbytes, maxbytes;
     global_minmax(p->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMinimum per-rank plane memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank plane memory is %.3f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMaximum per-rank plane memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank plane memory is %.3f %s\n",
             coeff, units);
 
     // Establish plane problem decomposition within ESIO handle
@@ -1018,8 +1038,8 @@ static int line_initialize(struct details *d, struct line_details  *l)
     }
 
     // Compute local portion of global problem
-    l->alocal = local(l->aglobal, d->world_size, l->coords[0], 1);
-    l->astart = start(l->aglobal, d->world_size, l->coords[0], 1);
+    l->alocal = local(l->aglobal, l->dims[0], l->coords[0], 1);
+    l->astart = start(l->aglobal, l->dims[0], l->coords[0], 1);
 
     // Compute memory requirement for local portion
     l->stride = l->aglobal * l->ncomponents * d->typesize;
@@ -1029,10 +1049,10 @@ static int line_initialize(struct details *d, struct line_details  *l)
     long minbytes, maxbytes;
     global_minmax(l->bytes, &minbytes, &maxbytes); // Allreduce
     to_human_readable_byte_count(minbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMinimum per-rank line memory is %.2f %s\n",
+    fprintf(rankout, "\tMinimum per-rank line memory is %.3f %s\n",
             coeff, units);
     to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
-    fprintf(rankout, "\tMaximum per-rank line memory is %.2f %s\n",
+    fprintf(rankout, "\tMaximum per-rank line memory is %.3f %s\n",
             coeff, units);
 
     // Establish line problem decomposition within ESIO handle
