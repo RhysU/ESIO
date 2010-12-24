@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
+#include <unistd.h>
 
 #include "argp.h"
 #include "mpi_argp.h"
@@ -40,6 +41,17 @@
 #include <mpi.h>
 #include <esio/error.h>
 #include <esio/esio.h>
+
+#ifdef HAVE_GRVY
+#include <grvy.h>
+#define GRVY_TIMER_BEGIN(id)   grvy_timer_begin(#id)
+#define GRVY_TIMER_END(id)     grvy_timer_end(#id)
+#define GRVY_TIMER_SUMMARIZE() grvy_timer_summarize()
+#else
+#define GRVY_TIMER_BEGIN(id)
+#define GRVY_TIMER_END(id)
+#define GRVY_TIMER_SUMMARIZE()
+#endif
 
 //****************************************************************
 // DATA STRUCTURES DATA STRUCTURES DATA STRUCTURES DATA STRUCTURES
@@ -80,13 +92,16 @@ struct details {
     int verbose;
     int repeat;
     int nfields, nplanes, nlines;
+    char *uncommitted;
+    char *dst_template;
+    int   retain;
     struct field_details *f;
     struct plane_details *p;
     struct line_details  *l;
 };
 
 //*************************************************************
-// STATIC PROTOTYPES STATIC PROTOTYPES STATIC PROTOTYPES STATIC 
+// STATIC PROTOTYPES STATIC PROTOTYPES STATIC PROTOTYPES STATIC
 //*************************************************************
 
 static void trim(char *a);
@@ -112,6 +127,8 @@ static int plane_initialize(struct details *d, struct plane_details *p);
 
 static int line_initialize( struct details *d, struct line_details  *l);
 
+static void* malloc_and_fill(struct details *d, const long bytes);
+
 static int field_finalize(struct details *d, struct field_details *f);
 
 static int plane_finalize(struct details *d, struct plane_details *p);
@@ -129,9 +146,11 @@ static const char doc[]               =
 "\v"
 "Write NFIELDS fields, NPLANES planes, and NLINES lines with the "
 "specified problem sizes and parallel decompositions using ESIO's "
-"restart writing capabilities.  Timing information is collected over "
-"one or more iterations.\n";
-static const char args_doc[]          = "NFIELDS NPLANES NLINES";
+"restart writing capabilities.  Uncommitted restart files are written "
+"to UNCOMMITTED and then renamed to match DESTTEMPLATE.  Timing "
+"information is collected over one or more iterations.\n";
+static const char args_doc[]
+    = "NFIELDS NPLANES NLINES UNCOMMITTED DESTTEMPLATE";
 
 enum {
     FIELD_GLOBAL = 255 /* isascii */,
@@ -143,8 +162,9 @@ enum {
 };
 
 static struct argp_option options[] = {
-    {"verbose",     'v', 0,       0, "produce verbose output", 0 },
-    {"repeat",      'r', "count", 0, "number of repetitions",  0 },
+    {"verbose",     'v', 0,       0, "produce verbose output",            0 },
+    {"repeat",      'r', "count", 0, "number of repetitions",             0 },
+    {"retain",      'R', "count", 0, "number of restart files to retain", 0 },
     {0, 0, 0, 0,
      "Controlling field problem size (specify at most one)", 0 },
     {"field-memory", 'f',          "bytes", 0, "per-rank field memory", 0 },
@@ -169,7 +189,6 @@ static struct argp_option options[] = {
      "Changing the type of data written", 0 },
     {"single",      's', 0,       0, "write single-precision data", 0 },
     {"double",      'd', 0,       0, "write double-precision data", 0 },
-    {"integer",     'i', 0,       0, "write integer data", 0 },
     {0, 0, 0, 0,
      "Controlling parallel decomposition per MPI_Dims_create semantics", 0 },
     {"field-dims", 'F', "NCxNBxNA", 0, "field parallel decomposition",   0 },
@@ -200,6 +219,8 @@ parse_opt(int key, char *arg, struct argp_state *state)
                     case 0:  n = &d->nfields; break;
                     case 1:  n = &d->nplanes; break;
                     case 2:  n = &d->nlines;  break;
+                    case 3:  d->uncommitted  = arg; return 0;
+                    case 4:  d->dst_template = arg; return 0;
                     default: argp_usage(state);
                 }
                 errno = 0;
@@ -217,7 +238,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
             break;
 
         case ARGP_KEY_END:
-            if (state->arg_num < 3) {
+            if (state->arg_num < 5) {
                 argp_usage(state);
             }
             if (d->nfields <= 0 && d->nplanes <= 0 && d->nlines <= 0) {
@@ -244,16 +265,25 @@ parse_opt(int key, char *arg, struct argp_state *state)
             }
             break;
 
+        case 'R':
+            errno = 0;
+            if (1 != sscanf(arg ? arg : "", "%d %c", &d->retain, &ignore)) {
+                argp_failure(state, EX_USAGE, errno,
+                        "retain option is malformed: '%s'", arg);
+            }
+            if (d->retain < 1) {
+                argp_failure(state, EX_USAGE, 0,
+                        "retain value %d must be strictly positive",
+                        d->retain);
+            }
+            break;
+
         case 'd':
             d->typesize = sizeof(double);
             break;
 
         case 's':
             d->typesize = sizeof(float);
-            break;
-
-        case 'i':
-            d->typesize = sizeof(int);
             break;
 
         case FIELD_NCOMPONENTS:
@@ -462,6 +492,7 @@ int main(int argc, char *argv[])
     struct line_details  l;  memset(&l, 0, sizeof(struct line_details));
     d.typesize = sizeof(double);
     d.repeat = 1;
+    d.retain = 1;
     f.ncomponents = p.ncomponents = l.ncomponents = 1;
     d.f = &f;
     d.p = &p;
@@ -498,7 +529,49 @@ int main(int argc, char *argv[])
     if (d.nplanes) plane_initialize(&d, &p);
     if (d.nlines)  line_initialize( &d, &l);
 
-    // TODO Implement logic
+    // Determine combined size of problem across all ranks
+    long localbytes = f.bytes + p.bytes + l.bytes;
+    long globalbytes;
+    ESIO_MPICHKQ(MPI_Allreduce(&localbytes, &globalbytes, 1,
+                               MPI_LONG, MPI_SUM, MPI_COMM_WORLD));
+    {
+        double coeff;
+        const char *units;
+        to_human_readable_byte_count(globalbytes, 0, &coeff, &units);
+        fprintf(rankout, "Global combined problem size is %.3f %s\n",
+                coeff, units);
+    }
+
+    fprintf(rankout, "Allocating and filling required memory buffers\n");
+    if (d.nfields) f.data = malloc_and_fill(&d, f.bytes);
+    if (d.nplanes) p.data = malloc_and_fill(&d, p.bytes);
+    if (d.nlines)  l.data = malloc_and_fill(&d, l.bytes);
+
+    fprintf(rankout, "Beginning benchmark...\n");
+    ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+    const double start = MPI_Wtime();
+
+    for (int i = 0; i < d.repeat; ++i) {
+        fprintf(rankout, "Iteration %d\n", i);
+
+        // TODO Implement logic
+        sleep(2);
+    }
+
+    const double end = MPI_Wtime();
+    ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD)); // Synchronize
+    fprintf(rankout, "Ending benchmark...\n");
+
+    const double elapsed = end - start;
+    const double mean = elapsed / d.repeat;
+    {
+        double coeff;
+        const char *units;
+        to_human_readable_byte_count(
+                floor(globalbytes / mean), 0, &coeff, &units);
+        fprintf(rankout, "Mean global transfer rate was %.4f %s/s\n",
+                coeff, units);
+    }
 
     // Finalize the field, plane, and line problems
     if (d.nfields) field_finalize(&d, &f);
@@ -866,6 +939,44 @@ static int line_initialize(struct details *d, struct line_details  *l)
             l->aglobal, l->ncomponents, d->typesize);
 
     return ESIO_SUCCESS;
+}
+
+static void* malloc_and_fill(struct details *d, const long bytes)
+{
+    // Malloc
+    void *p = malloc(bytes);
+    if (!p) {
+        double coeff;
+        const char *units;
+        to_human_readable_byte_count(bytes, 0, &coeff, &units);
+        fprintf(stderr, "Unable to malloc %.2f %s bytes on rank %d\n",
+                coeff, units, d->world_rank);
+        MPI_Abort(MPI_COMM_WORLD, 1);
+    }
+
+    // Store previous random seed and provide a new one
+    char state[64];
+    initstate(d->world_rank, state, sizeof(state)/sizeof(state[0]));
+    char *previous = setstate(state);
+
+    // Fill
+    const size_t count = bytes / d->typesize;
+    switch (d->typesize)
+    {
+        case sizeof(double):
+            for (size_t i = 0; i < count; ++i)
+                ((double *) p)[i] = (double) random();
+            break;
+        case sizeof(float):
+            for (size_t i = 0; i < count; ++i)
+                ((float *) p)[i] = (float) random();
+            break;
+    }
+
+    // Restore previous random state
+    setstate(previous);
+
+    return p;
 }
 
 static int field_finalize(struct details *d, struct field_details *f)
