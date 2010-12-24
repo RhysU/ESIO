@@ -104,6 +104,8 @@ static int local(int nglobal, int nranks, int rank, int extralow);
 
 static int start(int nglobal, int nranks, int rank, int extralow);
 
+static int global_minmax(long val, long *min, long *max);
+
 static int field_initialize(struct details *d, struct field_details *f);
 
 static int plane_initialize(struct details *d, struct plane_details *p);
@@ -218,7 +220,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
             if (state->arg_num < 3) {
                 argp_usage(state);
             }
-            if (d->nfields <= 0 && d->nfields <= 0 && d->nplanes <= 0) {
+            if (d->nfields <= 0 && d->nplanes <= 0 && d->nlines <= 0) {
                 argp_error(state,
                            "At least one of %s must be strictly positive",
                            args_doc);
@@ -638,8 +640,25 @@ static int start(int nglobal, int nranks, int rank, int extralow)
     return offset;
 }
 
+static int global_minmax(long val, long *min, long *max)
+{
+    long send[2] = { -val, val };
+    long recv[2];
+    ESIO_MPICHKQ(MPI_Allreduce(
+                send, recv, 2, MPI_LONG, MPI_MAX, MPI_COMM_WORLD));
+    *min = -recv[0];
+    *max =  recv[1];
+
+    return ESIO_SUCCESS;
+}
+
 static int field_initialize(struct details *d, struct field_details *f)
 {
+    double coeff;
+    const char *units;
+
+    fprintf(rankout, "Initializing field problem...\n");
+
     // Use MPI (temporarily) to find topology for field problem
     ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 3, f->dims));
     MPI_Comm tmp;
@@ -650,12 +669,27 @@ static int field_initialize(struct details *d, struct field_details *f)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, f->rank, 3, f->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
+    fprintf(rankout, "Field spread across (%d x %d x %d)-rank MPI topology\n",
+            f->dims[0], f->dims[1], f->dims[2]);
+
     // Compute global problem size, if necessary, from memory constraint
     if (f->bytes) {
         const double nvectors = (f->bytes * d->world_size)
                               / ((double) f->ncomponents * d->typesize)
                               / ((double) d->nfields);
         f->cglobal = f->bglobal = f->aglobal = ceil(cbrt(nvectors));
+
+        to_human_readable_byte_count(f->bytes, 0, &coeff, &units);
+        fprintf(rankout,
+            "Per-rank %.2f %s memory requested => %d x %d x %d problem\n",
+            coeff, units, f->cglobal, f->bglobal, f->aglobal);
+    }
+
+    // Ensure a non-trivial problem was requested
+    if (!f->cglobal || !f->bglobal || !f->aglobal) {
+        fprintf(rankout,
+                "You must specify a non-trivial field when nfields > 0!\n");
+        MPI_Abort(MPI_COMM_WORLD, EX_USAGE);
     }
 
     // Compute local portion of global problem
@@ -670,22 +704,37 @@ static int field_initialize(struct details *d, struct field_details *f)
     f->bytes = f->clocal * f->blocal * f->alocal
              * f->ncomponents * d->typesize * d->nfields;
 
+    // Output minimum and maximum memory required across all ranks
+    long minbytes, maxbytes;
+    global_minmax(f->bytes, &minbytes, &maxbytes); // Allreduce
+    to_human_readable_byte_count(minbytes, 0, &coeff, &units);
+    fprintf(rankout, "Minimum per-rank field memory is %.2f %s\n",
+            coeff, units);
+    to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
+    fprintf(rankout, "Maximum per-rank field memory is %.2f %s\n",
+            coeff, units);
+
     // Establish field problem decomposition within ESIO handle
+    fprintf(rankout, "Establishing field problem within ESIO\n");
     esio_field_establish(d->h, f->cglobal, f->clocal, f->cstart,
                                f->bglobal, f->blocal, f->bstart,
                                f->aglobal, f->alocal, f->astart);
 
-    // Allocate memory to hold problem "data"
-    f->data = malloc(f->bytes);
-    if (!f->data) {
-        ESIO_ERROR("Unable to allocate field-related memory", ESIO_ENOMEM);
-    }
+    fprintf(rankout, "Problem contains %d field(s) of size %d x %d x %d"
+            " each with %d %zu-byte component(s)\n", d->nfields,
+            f->cglobal, f->bglobal, f->aglobal, f->ncomponents,
+            d->typesize);
 
     return ESIO_SUCCESS;
 }
 
 static int plane_initialize(struct details *d, struct plane_details *p)
 {
+    double coeff;
+    const char *units;
+
+    fprintf(rankout, "Initializing plane problem...\n");
+
     // Use MPI (temporarily) to find topology for field problem
     ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 2, p->dims));
     MPI_Comm tmp;
@@ -696,12 +745,27 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, p->rank, 2, p->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
+    fprintf(rankout, "Plane spread across (%d x %d)-rank MPI topology\n",
+            p->dims[0], p->dims[1]);
+
     // Compute global problem size, if necessary, from memory constraint
     if (p->bytes) {
         const double nvectors = (p->bytes * d->world_size)
                               / ((double) p->ncomponents * d->typesize)
                               / ((double) d->nplanes);
         p->bglobal = p->aglobal = ceil(sqrt(nvectors));
+
+        to_human_readable_byte_count(p->bytes, 0, &coeff, &units);
+        fprintf(rankout,
+            "Per-rank %.2f %s memory requested => %d x %d problem\n",
+            coeff, units, p->bglobal, p->aglobal);
+    }
+
+    // Ensure a non-trivial problem was requested
+    if (!p->bglobal || !p->aglobal) {
+        fprintf(rankout,
+                "You must specify a non-trivial plane when nplanes > 0!\n");
+        MPI_Abort(MPI_COMM_WORLD, EX_USAGE);
     }
 
     // Compute local portion of global problem
@@ -714,21 +778,35 @@ static int plane_initialize(struct details *d, struct plane_details *p)
     p->bytes = p->bglobal * p->aglobal
              * p->ncomponents * d->typesize * d->nplanes;
 
-    // Initialize ESIO to carry out problem
+    // Output minimum and maximum memory required across all ranks
+    long minbytes, maxbytes;
+    global_minmax(p->bytes, &minbytes, &maxbytes); // Allreduce
+    to_human_readable_byte_count(minbytes, 0, &coeff, &units);
+    fprintf(rankout, "Minimum per-rank plane memory is %.2f %s\n",
+            coeff, units);
+    to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
+    fprintf(rankout, "Maximum per-rank plane memory is %.2f %s\n",
+            coeff, units);
+
+    // Establish plane problem decomposition within ESIO handle
+    fprintf(rankout, "Establishing plane problem within ESIO\n");
     esio_plane_establish(d->h, p->bglobal, p->blocal, p->bstart,
                                p->aglobal, p->alocal, p->astart);
 
-    // Allocate memory for plane "data"
-    p->data = malloc(p->bytes);
-    if (!p->data) {
-        ESIO_ERROR("Unable to allocate plane-related memory", ESIO_ENOMEM);
-    }
+    fprintf(rankout, "Problem contains %d plane(s) of size %d x %d"
+            " each with %d %zu-byte component(s)\n", d->nplanes,
+            p->bglobal, p->aglobal, p->ncomponents, d->typesize);
 
     return ESIO_SUCCESS;
 }
 
 static int line_initialize(struct details *d, struct line_details  *l)
 {
+    double coeff;
+    const char *units;
+
+    fprintf(rankout, "Initializing line problem...\n");
+
     // Use MPI (temporarily) to find topology for field problem
     ESIO_MPICHKQ(MPI_Dims_create(d->world_size, 1, l->dims));
     MPI_Comm tmp;
@@ -739,12 +817,27 @@ static int line_initialize(struct details *d, struct line_details  *l)
     ESIO_MPICHKQ(MPI_Cart_coords(tmp, l->rank, 1, l->coords));
     ESIO_MPICHKQ(MPI_Comm_free(&tmp));
 
+    fprintf(rankout, "Line spread across %d-rank MPI topology\n",
+            l->dims[0]);
+
     // Compute global problem size, if necessary, from memory constraint
     if (l->bytes) {
         const double nvectors = (l->bytes * d->world_size)
                               / ((double) l->ncomponents * d->typesize)
                               / ((double) d->nlines);
         l->aglobal = ceil(nvectors);
+
+        to_human_readable_byte_count(l->bytes, 0, &coeff, &units);
+        fprintf(rankout,
+            "Per-rank %.2f %s memory requested => %d problem\n",
+            coeff, units, l->aglobal);
+    }
+
+    // Ensure a non-trivial problem was requested
+    if (!l->aglobal) {
+        fprintf(rankout,
+                "You must specify a non-trivial line when nlines > 0!\n");
+        MPI_Abort(MPI_COMM_WORLD, EX_USAGE);
     }
 
     // Compute local portion of global problem
@@ -754,14 +847,23 @@ static int line_initialize(struct details *d, struct line_details  *l)
     // Compute memory requirement for local portion
     l->bytes = l->aglobal * l->ncomponents * d->typesize * d->nlines;
 
-    // Initialize ESIO to carry out problem
+    // Output minimum and maximum memory required across all ranks
+    long minbytes, maxbytes;
+    global_minmax(l->bytes, &minbytes, &maxbytes); // Allreduce
+    to_human_readable_byte_count(minbytes, 0, &coeff, &units);
+    fprintf(rankout, "Minimum per-rank line memory is %.2f %s\n",
+            coeff, units);
+    to_human_readable_byte_count(maxbytes, 0, &coeff, &units);
+    fprintf(rankout, "Maximum per-rank line memory is %.2f %s\n",
+            coeff, units);
+
+    // Establish line problem decomposition within ESIO handle
+    fprintf(rankout, "Establishing line problem within ESIO\n");
     esio_line_establish(d->h, l->aglobal, l->alocal, l->astart);
 
-    // Allocate memory for line "data"
-    l->data = malloc(l->bytes);
-    if (!l->data) {
-        ESIO_ERROR("Unable to allocate line-related memory", ESIO_ENOMEM);
-    }
+    fprintf(rankout, "Problem contains %d line(s) of size %d"
+            " each with %d %zu-byte component(s)\n", d->nlines,
+            l->aglobal, l->ncomponents, d->typesize);
 
     return ESIO_SUCCESS;
 }
