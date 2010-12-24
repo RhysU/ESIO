@@ -7,7 +7,7 @@ data was generated and to allow data post-processing.
 
 A complete, C-based MPI program using ESIO to write a (trivial) sequence
 of restart files might look like:
-\include restart1.c
+\includelineno restart1.c
 
 This sample prepares a copy of loop-invariant data in the file "template.h5".
 Often this would include the program version, scenario parameters, and grid

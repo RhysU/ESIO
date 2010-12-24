@@ -32,12 +32,12 @@ ESIO usage usually involves some variation on the following steps:
 
 A complete, C-based MPI program using ESIO to write some (trivial) data
 might look like:
-\include concepts1.c
+\includelineno concepts1.c
 ESIO's C API is documented within the esio.h reference material.
 
 A complete, Fortran-based MPI program using ESIO to perform the same
 task would look like:
-\include concepts2.f90
+\includelineno concepts2.f90
 ESIO's Fortran API is documented, relative to the C API, within the esio.f90
 reference material.
 
