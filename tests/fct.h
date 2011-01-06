@@ -59,7 +59,7 @@ with a standard logger. */
 
 #define FCT_VERSION_MAJOR 1
 #define FCT_VERSION_MINOR 4
-#define FCT_VERSION_MICRO 1
+#define FCT_VERSION_MICRO 2
 
 #define _FCT_QUOTEME(x) #x
 #define FCT_QUOTEME(x) _FCT_QUOTEME(x)
@@ -3255,7 +3255,7 @@ int main(int argc, char* argv[])\
         );\
         exit(EXIT_FAILURE);\
    }\
-
+ 
 /* Silence Intel complaints about unspecified operand order in user's code */
 #ifndef __INTEL_COMPILER
 # define FCT_END_WARNINGFIX_BGN
