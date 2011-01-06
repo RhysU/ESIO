@@ -15,7 +15,7 @@
 #
 # LAST MODIFICATION
 #
-#   $Id: grvy_new.m4 14257 2010-09-27 13:02:50Z karl $
+#   $Id: grvy_new.m4 15545 2010-11-09 16:39:48Z roystgnr $
 #
 # COPYLEFT
 #
@@ -35,7 +35,7 @@ AC_DEFUN([AX_PATH_GRVY_NEW],
 
 AC_ARG_VAR(GRVY_DIR,[root directory of GRVY installation])
 
-AC_ARG_WITH(grvy, 
+AC_ARG_WITH(grvy,
   [AS_HELP_STRING([--with-grvy[=DIR]],[root directory of GRVY installation (default = GRVY_DIR)])],
   [with_grvy=$withval
 if test "${with_grvy}" != yes; then
@@ -55,7 +55,10 @@ is_package_required=ifelse([$2], ,no, $2 )
 
 HAVE_GRVY=0
 
-if test "${with_grvy}" != no ; then
+# logic change: if the user called the macro, check for package,
+# decide what to do based on whether the package is required or not.
+
+# if test "${with_grvy}" != no ; then
 
     if test -d "${GRVY_PREFIX}/lib" ; then
        GRVY_LIBS="-L${GRVY_PREFIX}/lib -lgrvy -Wl,-rpath,${GRVY_PREFIX}/lib"
@@ -81,7 +84,7 @@ if test "${with_grvy}" != no ; then
     # Minimum version check
     #----------------------
 
-    min_grvy_version=ifelse([$1], ,0.29, $1)	
+    min_grvy_version=ifelse([$1], ,0.29, $1)
 
     # looking for major.minor.micro style versioning
 
@@ -107,13 +110,15 @@ if test "${with_grvy}" != no ; then
         AC_MSG_CHECKING(for grvy - version >= $min_grvy_version)
         version_succeeded=no
 
-    	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-       	@%:@include <grvy.h>
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+        @%:@include <grvy.h>
             ]], [[
             #if GRVY_MAJOR_VERSION > $MAJOR_VER
             /* Sweet nibblets */
-            #elif (GRVY_MAJOR_VERSION >= $MAJOR_VER) && (GRVY_MINOR_VERSION >= $MINOR_VER) && (GRVY_MICRO_VERSION >= $MICRO_VER)
+            #elif (GRVY_MAJOR_VERSION >= $MAJOR_VER) && (GRVY_MINOR_VERSION > $MINOR_VER)
             /* Winner winner, chicken dinner */
+            #elif (GRVY_MAJOR_VERSION >= $MAJOR_VER) && (GRVY_MINOR_VERSION >= $MINOR_VER) && (GRVY_MICRO_VERSION >= $MICRO_VER)
+            /* I feel like chicken tonight, like chicken tonight? */
             #else
             #  error version is too old
             #endif
@@ -125,16 +130,16 @@ if test "${with_grvy}" != no ; then
         ])
 
     if test "$version_succeeded" != "yes";then
-       if test "$is_package_required" = yes; then	
-       	  AC_MSG_ERROR([
+       if test "$is_package_required" = yes; then
+          AC_MSG_ERROR([
 
    Your GRVY library version does not meet the minimum versioning
    requirements ($min_grvy_version).  Please use --with-grvy to specify the location
    of an updated installation or consider upgrading the system version.
 
-          ]) 
-       fi 
-    fi     
+          ])
+       fi
+    fi
 
     # Library availability
 
@@ -154,30 +159,33 @@ if test "${with_grvy}" != no ; then
     succeeded=no
     if test "$found_header" = yes; then
         if test "$version_succeeded" = yes; then
-	   if test "$found_library" = yes; then
+           if test "$found_library" = yes; then
               succeeded=yes
-      	   fi	
+           fi
         fi
     fi
 
     if test "$succeeded" = no; then
        if test "$is_package_required" = yes; then
-       	  AC_MSG_ERROR([libGRVY not found.  Try either --with-grvy or setting GRVY_DIR.])
-       else			
-       	  AC_MSG_NOTICE([optional GRVY library not found])	
+          AC_MSG_ERROR([libGRVY not found.  Try either --with-grvy or setting GRVY_DIR.])
+       else
+          AC_MSG_NOTICE([optional GRVY library not found])
+          GRVY_CFLAGS=""   # GRVY_CFLAGS empty on failure
+          GRVY_FCFLAGS=""  # GRVY_FCFLAGS empty on failure
+          GRVY_LIBS=""     # GRVY_LIBS empty on failure
        fi
     else
-        HAVE_GRVY=0
+        HAVE_GRVY=1
         AC_DEFINE(HAVE_GRVY,1,[Define if GRVY is available])
         AC_SUBST(GRVY_CFLAGS)
         AC_SUBST(GRVY_FCFLAGS)
         AC_SUBST(GRVY_LIBS)
-	AC_SUBST(GRVY_PREFIX)
+        AC_SUBST(GRVY_PREFIX)
     fi
 
     AC_SUBST(HAVE_GRVY)
 
-fi
+# fi
 
 AM_CONDITIONAL(GRVY_ENABLED,test x$HAVE_GRVY = x1)
 
