@@ -22,7 +22,7 @@ EXTRA_DIST      = layout_template.c      \
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
-TESTS_ENVIRONMENT += ESIO_TEST_OUTPUT_DIR=.
+TESTS_ENVIRONMENT += ESIO_TEST_OUTPUT_DIR=$(builddir)
 
 # Use MPI compiler wrappers since HDF5 wrappers break autodependencies.
 CC=@MPICC@
