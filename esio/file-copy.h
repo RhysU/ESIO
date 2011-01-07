@@ -36,6 +36,7 @@ extern "C" {
 
 /**
  * Copy a regular file from \c src_filename to \c dest_filename.
+ * Neither permissions nor ownership details are preserved.
  *
  * \param src_filename Source filename
  * \param dest_filename Destination filename
@@ -46,10 +47,10 @@ extern "C" {
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
-int file_copy (const char *src_filename,
-               const char *dest_filename,
-               int overwrite,
-               int blockuntilsync);
+int file_copy(const char *src_filename,
+              const char *dest_filename,
+              int overwrite,
+              int blockuntilsync);
 
 #ifdef __cplusplus
 }

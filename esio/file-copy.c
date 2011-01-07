@@ -31,7 +31,6 @@
 #include <fcntl.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "binary-io.h"
@@ -43,10 +42,10 @@
 #include "file-copy.h"
 
 int
-file_copy (const char *src_filename,
-           const char *dest_filename,
-           int overwrite,
-           int blockuntilsync)
+file_copy(const char *src_filename,
+          const char *dest_filename,
+          int overwrite,
+          int blockuntilsync)
 {
     /* Allocate working buffer */
     const int OPSIZE = 32 * 1024;
@@ -61,11 +60,6 @@ file_copy (const char *src_filename,
     if (src < 0) {
         ESIO_ERROR("Error opening copy source for reading", ESIO_EFAILED);
     }
-    struct stat statbuf;
-    if (fstat(src, &statbuf) < 0) {
-        ESIO_ERROR("Error opening copy source details", ESIO_EFAILED);
-    }
-    const int mode = statbuf.st_mode & 07777;
 
     /* Open a new file or truncate an existing one based on overwrite */
     int dst;
@@ -117,14 +111,6 @@ file_copy (const char *src_filename,
     if (close(src) < 0) {
         ESIO_ERROR("Error closing source file", ESIO_EFAILED);
     }
-
-#if HAVE_CHOWN
-    /* Preserve ownership and group  */
-    chown(dest_filename, statbuf.st_uid, statbuf.st_gid);
-#endif
-
-    /* Preserve permissions */
-    chmod(dest_filename, mode);
 
     return ESIO_SUCCESS;
 }
