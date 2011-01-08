@@ -62,10 +62,10 @@ snprintf_realloc(char **str, size_t *size, const char *format, ...)
     va_list ap;
     va_start(ap, format);
     while (   0     <= (retval = vsnprintf(*str, *size, format, ap)) // Error?
-           && *size <  (needed = retval + 1)) {                      // Space?
+           && *size <  (size_t) (needed = retval + 1)) {             // Space?
         va_end(ap);
         *size *= 2;                                                  // Space?
-        if (*size < needed) *size = needed;                          // Space!
+        if (*size < (size_t) needed) *size = needed;                 // Space!
         char *p = realloc(*str, *size);                              // Alloc
         if (p) {
             *str = p;

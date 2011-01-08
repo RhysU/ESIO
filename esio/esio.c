@@ -2013,7 +2013,7 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     }                                                                         \
                                                                               \
     /* Ensure the user is getting what he/she requested */                    \
-    if (ncomponents != dims[0]) {                                             \
+    if ((hsize_t) ncomponents != dims[0]) {                                   \
         ESIO_ERROR("requested ncomponents mismatch with stored ncomponents",  \
                    ESIO_EINVAL);                                              \
     }                                                                         \
