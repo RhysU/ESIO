@@ -39,11 +39,15 @@ libesio_la_SOURCES  += restart-rename.c
 libesio_la_LDFLAGS  += $(LTLIBINTL) # gnulib requirement
 libesio_la_LIBADD    = ../gnulib/libgnu.la
 
+# Config-time details saved using AX_PREFIX_CONFIG_H
+BUILT_SOURCES += esio-config.h
+
 # Headers shipped with the library
 esio_includedir       = $(includedir)/esio
 esio_include_HEADERS  = error.h
 esio_include_HEADERS += esio.h
 esio_include_HEADERS += version.h
+esio_include_HEADERS += esio-config.h
 esio_include_HEADERS += visibility.h
 
 # Headers internal to the library

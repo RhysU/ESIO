@@ -15,6 +15,7 @@ AC_CONFIG_SRCDIR([esio/esio.h])
 AM_CONFIG_HEADER(esio/config.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
+AX_PREFIX_CONFIG_H([esio/esio-config.h])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE(1.11 no-define tar-ustar -Wall -Werror foreign)
 AC_PREREQ([2.61])
