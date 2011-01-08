@@ -24,7 +24,7 @@ The ESIO library provides:
   <li>A mechanism for storing both string and numeric metadata</li>
   <li>Support for contiguous and strided in-memory data</li>
   <li>Support to simplify writing restart file sequences</li>
-  <li>Storage within the widely used HDF5 file format</li>
+  <li>Storage within the widely-used HDF5 file format</li>
 </ul>
 
 The library's manual is divided into the following subsections:

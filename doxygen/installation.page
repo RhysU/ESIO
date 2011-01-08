@@ -41,12 +41,21 @@ examples, and some additional ESIO-related utilities.
 
 \code > make \endcode
 
-<b>Verifying the build:</b> To verify that the software is working properly, a
-test option is provided to run a suite of functionality tests against the local
-build.  To run these tests, issue <tt>make check</tt>.  Many of the tests
-require your MPI installation's <code>mpiexec</code> command to be usable and
-may not be usable on many public high performance computing platform login
-nodes.
+Please note that it is highly, highly improbable that anything besides GNU Make
+will be able to build ESIO as the build system relies on several GNU
+extensions.
+
+<h2> Build Verification (Optional) </h2>
+
+To optionally verify that the software is working properly, a check target is
+provided to run a suite of functionality tests against the local build.  To run
+these tests, issue
+
+\code > make check \endcode
+
+Many of the tests require your MPI installation's <code>mpiexec</code> command
+to be usable and may not be usable on many public high performance computing
+platform login nodes.
 
 <h2> Installation </h2>
 
