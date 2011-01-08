@@ -1,6 +1,7 @@
 /config.h
 /config.h.in
 /.deps
+/esio-config.h
 /.license.stamp
 /Makefile
 /Makefile.dep
