@@ -1,4 +1,42 @@
 What's new in ESIO 0.1.0
 ------------------------
 
-Initial public release!
+Initial public release of ESIO!
+
+This release contains the following
+
+    * Feature # 837: Add save/load of scalar/vector metadata
+    * Feature #1069: add single and double precision for esio
+    * Feature #1080: add esio_register_variable function
+    * Feature #1108: Implement esio_attribute_{read/write/size}
+    * Feature #1109: Implement esio_string_{get,set}
+    * Feature #1110: Public C API Doxygen
+    * Feature #1111: GRVY-like documentation intro page
+    * Feature #1112: High-level concepts documentation
+    * Feature #1113: Provide C example/use case
+    * Feature #1114: Verify make distcheck target works
+    * Feature #1115: Update Fortran API to match C API
+    * Feature #1116: Add basic Fortran unit tests
+    * Feature #1122: Roll C-based field performance benchmark
+    * Feature #1123: Create Fortran-based field performance benchmark
+    * Feature #1133: Optimize write selection for contiguous data
+    * Feature #1154: Conform to automake's --gnu standards
+    * Feature #1156: Add explicit IO buffer flushing
+    * Feature #1161: Add linkage documentation
+    * Feature #1167: Support templated metadata
+    * Feature #1168: Support dropping a sequence of restart files
+    * Feature #1173: Add automatic .h5 suffix if not supplied
+    * Feature #1174: Move HDF5 driver selection into esio.c
+    * Feature #1186: Document Fortran API
+    * Feature #1234: Enable HDF5 chunking in field creation
+    * Feature #1245: Establish parallel decomposition and allow repeated reuse
+    * Feature #1247: Turn off HDF5 chunking for now
+    * Feature #1248: Make restart_rename into installable utility
+    * Feature #1259: Install esio-config.h using AX_PREFIX_CONFIG
+    * Bug     #1178: esio_layout_get doxygen is wrong
+    * Bug     #1189: Use regular hyperslab section in layout 1
+    * Bug     #1241: Run distcheck cleanly for 0.1.0 release
+    * Bug     #1242: Rewrite file-copy implementation
+    * Bug     #1257: Linking GRVY into unit tests causing infinite loop error on tear down
+
+with numbers referring to PECOS Redmine tickets at https://red.ices.utexas.edu/projects/esio
