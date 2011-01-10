@@ -7,7 +7,7 @@ installation's \c include directory and \c lib directory must be added to your
 C/C++ compiler's include and library search paths, respectively.  You will need
 to supply flags to link against ESIO <i>and</i> HDF5's basic and high-level
 libraries.  Note that you will either need to use your MPI implementation's
-C/C++ compiler wrapper script, denoted here by <tt>$(MPICC)</tt>, or you will
+C/C++ compiler wrapper script, denoted here by <tt>\$(MPICC)</tt>, or you will
 additionally need to provide MPI-related flags within the sample commands
 below.
 
@@ -46,7 +46,7 @@ provide \c lib within the search path you will see error messages stating that
 <tt>esio.mod</tt> is missing.  You will need to supply flags to link against
 ESIO <i>and</i> HDF5's basic and high-level Fortran libraries.  Note that you
 will either need to use your MPI implementation's Fortran compiler wrapper
-script, denoted here by <tt>$(MPIFC)</tt>, or you will additionally need to
+script, denoted here by <tt>\$(MPIFC)</tt>, or you will additionally need to
 provide MPI-related flags within the sample commands below.
 
 Assuming the same installation detailed in the C/C++ examples just above, you
