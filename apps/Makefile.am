@@ -18,11 +18,6 @@ EXTRA_DIST      = # Append below
 CC=@MPICC@
 FC=@MPIFC@
 
-## Pick up HDF5 library includes
-AM_CFLAGS   += $(HDF5_CFLAGS)
-AM_CPPFLAGS += $(HDF5_CPPFLAGS)
-AM_FCFLAGS  += $(HDF5_FFLAGS)
-
 ## Pick up GRVY library includes
 AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)

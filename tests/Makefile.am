@@ -27,7 +27,7 @@ TESTS_ENVIRONMENT += ESIO_TEST_OUTPUT_DIR=$(builddir)
 CC=@MPICC@
 FC=@MPIFC@
 
-## Pick up HDF5 library includes
+## Use HDF5 includes as many tests use HDF5 API calls to verify functionality
 AM_CFLAGS   += $(HDF5_CFLAGS)
 AM_CPPFLAGS += $(HDF5_CPPFLAGS)
 AM_FCFLAGS  += $(HDF5_FFLAGS)

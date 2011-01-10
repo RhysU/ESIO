@@ -97,8 +97,8 @@ ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for Fortran, e.g. mpf
 MPIFC_LOCATION=$(eval command -v $MPIFC)
 AC_SUBST([MPIFC_LOCATION])
 if test "x$with_hdf5_fortran" != "xyes"; then
-    dnl TODO Build C-only portions when Fortran not detected
-    AC_MSG_WARN([Did not detect HDF5 Fortran support!])
+    AC_MSG_WARN([HDF5 Fortran support not detected])
+    AC_MSG_NOTICE([ESIO Fortran support does not require HDF5 Fortran support])
 fi
 AC_LANG_POP([Fortran])
 AC_CACHE_SAVE
