@@ -29,7 +29,12 @@ pkgconfig_DATA = esio.pc esio-hdf5.pc
 
 # Files to be deleted by make clean variants
 MOSTLYCLEANFILES =  $(DX_CLEANFILES)
-DISTCLEANFILES = aminclude.am _configs.sed esio/esio-config.h
+DISTCLEANFILES =           \
+    aminclude.am           \
+    _configs.sed           \
+    esio/esio-config.h     \
+    *__genmod.f90          \
+    *__genmod.mod
 MAINTAINERCLEANFILES =     \
     aclocal.m4             \
     autom4te.cache/*       \
