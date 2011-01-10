@@ -44,14 +44,14 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (handle, name, field,              &
-                   cstride, bstride, astride         &
+    function field_impl (handle, name, field,        &
+                         cstride, bstride, astride   &
 #ifdef VECTORVALUED
-                   ,ncomponents                      &
+                         ,ncomponents                &
 #endif
-                   ) bind (C, name=CBINDNAME)
+                        ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: impl
+      integer(c_int)                                  :: field_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: field(*)
@@ -61,7 +61,7 @@
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function impl
+    end function field_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -73,12 +73,12 @@
   if (present(cstride)) tmp_cstride = cstride
 
 ! Note reordering Fortran's (a, b, c) to C's (c, b, a)
-  stat = impl(handle, esio_f_c_string(name), field, &
-              tmp_cstride, tmp_bstride, tmp_astride &
+  stat = field_impl(handle, esio_f_c_string(name), field, &
+                    tmp_cstride, tmp_bstride, tmp_astride &
 #ifdef VECTORVALUED
-              ,ncomponents                          &
+                    ,ncomponents                          &
 #endif
-             )
+                   )
   if (present(ierr)) ierr = stat
 
 #undef FINTENT

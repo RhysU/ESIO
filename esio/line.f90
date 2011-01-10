@@ -42,14 +42,14 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (handle, name, line,               &
-                   astride                           &
+    function line_impl (handle, name, line,          &
+                        astride                      &
 #ifdef VECTORVALUED
-                   ,ncomponents                      &
+                        ,ncomponents                 &
 #endif
-                   ) bind (C, name=CBINDNAME)
+                       ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: impl
+      integer(c_int)                                  :: line_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: line(*)
@@ -57,19 +57,19 @@
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function impl
+    end function line_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   tmp_astride = 0
   if (present(astride)) tmp_astride = astride
 
-  stat = impl(handle, esio_f_c_string(name), line,  &
-              tmp_astride                           &
+  stat = line_impl(handle, esio_f_c_string(name), line,  &
+                   tmp_astride                           &
 #ifdef VECTORVALUED
-              ,ncomponents                          &
+                   ,ncomponents                          &
 #endif
-             )
+                  )
   if (present(ierr)) ierr = stat
 
 #undef FINTENT

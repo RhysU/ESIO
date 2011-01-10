@@ -134,15 +134,16 @@ contains
     ! for details on MPI communicator interoperation
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (comm) bind (C, name="esio_handle_initialize_fortran")
+      function handle_impl (comm)  &
+                           bind (C, name="esio_handle_initialize_fortran")
         import
-        type(esio_handle)          :: impl
+        type(esio_handle)          :: handle_impl
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
-      end function impl
+      end function handle_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    handle = impl(comm)
+    handle = handle_impl(comm)
     if (present(ierr)) then
       if (c_associated(handle)) then
         ierr = 0  ! 0 == ESIO_SUCCESS
@@ -162,15 +163,16 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle) bind (C, name="esio_handle_finalize")
+      function handle_impl (handle)  &
+                           bind (C, name="esio_handle_finalize")
         import
-        integer(c_int)                       :: impl
+        integer(c_int)                       :: handle_impl
         type(esio_handle), intent(in), value :: handle
-      end function impl
+      end function handle_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle)
+    stat = handle_impl(handle)
     if (present(ierr)) ierr = stat
 
   end subroutine esio_handle_finalize
@@ -193,17 +195,20 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, file, overwrite) bind (C, name="esio_file_create")
+      function file_impl (handle, file, overwrite)  &
+                         bind (C, name="esio_file_create")
         import
-        integer(c_int)                                  :: impl
+        integer(c_int)                                  :: file_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: overwrite
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(file), esio_f_c_logical(overwrite))
+    stat = file_impl(handle,                       &
+                     esio_f_c_string(file),        &
+                     esio_f_c_logical(overwrite))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_create
@@ -220,17 +225,20 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, file, readwrite) bind (C, name="esio_file_open")
+      function file_impl (handle, file, readwrite)  &
+                         bind (C, name="esio_file_open")
         import
-        integer(c_int)                                  :: impl
+        integer(c_int)                                  :: file_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: readwrite
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(file), esio_f_c_logical(readwrite))
+    stat = file_impl(handle,                       &
+                     esio_f_c_string(file),        &
+                     esio_f_c_logical(readwrite))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_open
@@ -248,22 +256,22 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, srcfile, dstfile, overwrite)  &
-                    bind (C, name="esio_file_clone")
+      function file_impl (handle, srcfile, dstfile, overwrite)  &
+                         bind (C, name="esio_file_clone")
         import
-        integer(c_int)                                  :: impl
+        integer(c_int)                                  :: file_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: srcfile(*)
         character(len=1,kind=c_char), intent(in)        :: dstfile(*)
         integer(c_int),               intent(in), value :: overwrite
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle,                      &
-                esio_f_c_string(srcfile),    &
-                esio_f_c_string(dstfile),    &
-                esio_f_c_logical(overwrite))
+    stat = file_impl(handle,                      &
+                     esio_f_c_string(srcfile),    &
+                     esio_f_c_string(dstfile),    &
+                     esio_f_c_logical(overwrite))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_clone
@@ -283,15 +291,15 @@ contains
 !   The C implementation returns newly allocated memory
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle) bind (C, name="esio_file_path")
+      function file_impl (handle) bind (C, name="esio_file_path")
         import
-        type(c_ptr)                          :: impl
+        type(c_ptr)                          :: file_impl
         type(esio_handle), intent(in), value :: handle
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    tmp_p = impl(handle)
+    tmp_p = file_impl(handle)
     if (esio_c_f_stringcopy(tmp_p, file_path)) then
       if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
     else
@@ -317,15 +325,15 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle) bind (C, name="esio_file_flush")
+      function file_impl (handle) bind (C, name="esio_file_flush")
         import
-        integer(c_int)                       :: impl
+        integer(c_int)                       :: file_impl
         type(esio_handle), intent(in), value :: handle
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle)
+    stat = file_impl(handle)
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_flush
@@ -340,15 +348,15 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle) bind (C, name="esio_file_close")
+      function file_impl (handle) bind (C, name="esio_file_close")
         import
-        integer(c_int)                       :: impl
+        integer(c_int)                       :: file_impl
         type(esio_handle), intent(in), value :: handle
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle)
+    stat = file_impl(handle)
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_close
@@ -366,18 +374,18 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, restart_template, retain_count)  &
-                     bind (C, name="esio_file_close_restart")
+      function file_impl (handle, restart_template, retain_count)  &
+                         bind (C, name="esio_file_close_restart")
         import
-        integer(c_int)                                  :: impl
+        integer(c_int)                                  :: file_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: restart_template(*)
         integer(c_int),               intent(in), value :: retain_count
-      end function impl
+      end function file_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(restart_template), retain_count)
+    stat = file_impl(handle, esio_f_c_string(restart_template), retain_count)
     if (present(ierr)) ierr = stat
 
   end subroutine esio_file_close_restart
@@ -400,17 +408,18 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, name, value) bind (C, name="esio_string_set")
+      function string_impl (handle, name, value)  &
+                           bind (C, name="esio_string_set")
         import
-        integer(c_int)                                  :: impl
+        integer(c_int)                                  :: string_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
         character(len=1,kind=c_char), intent(in)        :: value(*)
-      end function impl
+      end function string_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(name), esio_f_c_string(value))
+    stat = string_impl(handle, esio_f_c_string(name), esio_f_c_string(value))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_string_set
@@ -431,16 +440,16 @@ contains
 !   The C implementation returns newly allocated memory
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, name) bind (C, name="esio_string_get")
+      function string_impl (handle, name) bind (C, name="esio_string_get")
         import
-        type(c_ptr)                                     :: impl
+        type(c_ptr)                                     :: string_impl
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
-      end function impl
+      end function string_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    tmp_p = impl(handle, esio_f_c_string(name))
+    tmp_p = string_impl(handle, esio_f_c_string(name))
     if (esio_c_f_stringcopy(tmp_p, value)) then
       if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
     else

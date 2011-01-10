@@ -43,14 +43,14 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (handle, name, plane,              &
-                   bstride, astride                  &
+    function plane_impl (handle, name, plane,        &
+                         bstride, astride            &
 #ifdef VECTORVALUED
-                   ,ncomponents                      &
+                         ,ncomponents                &
 #endif
-                   ) bind (C, name=CBINDNAME)
+                        ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: impl
+      integer(c_int)                                  :: plane_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: plane(*)
@@ -59,7 +59,7 @@
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function impl
+    end function plane_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -69,12 +69,12 @@
   if (present(bstride)) tmp_bstride = bstride
 
 ! Note reordering Fortran's (a, b) to C's (b, a)
-  stat = impl(handle, esio_f_c_string(name), plane, &
-              tmp_bstride, tmp_astride              &
+  stat = plane_impl(handle, esio_f_c_string(name), plane, &
+                    tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
-              ,ncomponents                          &
+                    ,ncomponents                          &
 #endif
-             )
+                   )
   if (present(ierr)) ierr = stat
 
 #undef FINTENT

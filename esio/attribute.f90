@@ -42,13 +42,13 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function impl (handle, name, value               &
+    function attribute_impl (handle, name, value              &
 #ifdef VECTORVALUED
-                   ,ncomponents                      &
+                             ,ncomponents                     &
 #endif
-                   ) bind (C, name=CBINDNAME)
+                            ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: impl
+      integer(c_int)                                  :: attribute_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
 #ifndef VECTORVALUED
@@ -57,15 +57,15 @@
       CTYPE,                        FINTENT           :: value(*)
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function impl
+    end function attribute_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = impl(handle, esio_f_c_string(name), value  &
+  stat = attribute_impl(handle, esio_f_c_string(name), value  &
 #ifdef VECTORVALUED
-              ,ncomponents                          &
+                        ,ncomponents                          &
 #endif
-             )
+                       )
   if (present(ierr)) ierr = stat
 
 #undef FINTENT
