@@ -3,8 +3,7 @@
 AM_CFLAGS       =
 AM_CPPFLAGS     = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
 AM_CPPFLAGS    += -I$(top_builddir)        -I$(top_srcdir)
-AM_FCFLAGS      = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
-AM_FCFLAGS     += -I$(top_builddir)        -I$(top_srcdir)
+AM_FCFLAGS      = -I$(top_builddir)        -I$(top_srcdir)
 AM_FCFLAGS     += -I$(top_builddir)/esio
 AM_LDFLAGS      = # Append below
 check_PROGRAMS  = # Append below
