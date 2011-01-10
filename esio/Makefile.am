@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS          = -DESIO_SHARED_EXPORTS     # Build public APIs
+AM_CFLAGS          = # Append below
 AM_CPPFLAGS        = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
 AM_CPPFLAGS       += -I$(top_builddir)        -I$(top_srcdir)
 AM_FCFLAGS         = -I$(top_builddir)        -I$(top_srcdir)
@@ -18,6 +18,14 @@ EXTRA_DIST         = # Append below
 CC=@MPICC@
 FC=@MPIFC@
 
+# Make HDF5 C APIs visible during compilation
+# Notice HDF5 Fortran APIs are not used and so AM_FCFLAGS is not modified
+AM_CFLAGS   += $(HDF5_CFLAGS)
+AM_CPPFLAGS += $(HDF5_CPPFLAGS)
+
+# Make public C APIs visible in resulting libraries-- see visibility.h
+AM_CPPFLAGS += -DESIO_SHARED_EXPORTS
+
 # Public ESIO C library
 lib_LTLIBRARIES     += libesio.la
 libesio_la_SOURCES   = chunksize.c
@@ -28,8 +36,6 @@ libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 libesio_la_SOURCES  += restart-rename.c
-libesio_la_CFLAGS    = $(AM_CFLAGS)   $(HDF5_CFLAGS)
-libesio_la_CPPFLAGS  = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_LDFLAGS  += $(LTLIBINTL) # gnulib requirement
 libesio_la_LIBADD    = ../gnulib/libgnu.la
@@ -65,7 +71,6 @@ EXTRA_DIST += line.f90
 EXTRA_DIST += plane.f90
 
 # Public Fortran library is a superset of libesio.la
-# HDF5 Fortran API never used because we purely wrap ESIO's C API
 lib_LTLIBRARIES          += libesiof.la
 libesiof_la_LIBTOOLFLAGS  = --tag=FC
 libesiof_la_SOURCES       = esio_c_binding.f90

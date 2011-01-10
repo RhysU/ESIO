@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS       =
+AM_CFLAGS       = # Append below
 AM_CPPFLAGS     = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
 AM_CPPFLAGS    += -I$(top_builddir)        -I$(top_srcdir)
 AM_FCFLAGS      = -I$(top_builddir)        -I$(top_srcdir)
