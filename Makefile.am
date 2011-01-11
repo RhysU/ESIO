@@ -29,6 +29,14 @@ AUX_DIST += build-aux/missing
 pkgconfigdir   = $(libdir)/pkgconfig
 pkgconfig_DATA = esio.pc esio-hdf5.pc
 
+# Install selected manual pages when Doxygen man output is enabled
+if DX_COND_man
+BUILT_SOURCES = @DX_DOCDIR@/man/man3/esio.h.3
+@DX_DOCDIR@/man/man3/esio.h.3: esio/esio.h
+	$(MAKE) $(AM_MAKEFLAGS) doxygen-doc
+man3_MANS = @DX_DOCDIR@/man/man3/esio.h.3
+endif DX_COND_man
+
 # Files to be deleted by make clean variants
 MOSTLYCLEANFILES =  $(DX_CLEANFILES)
 DISTCLEANFILES =           \
