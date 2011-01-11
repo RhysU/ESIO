@@ -23,12 +23,13 @@ AM_CFLAGS  += $(GRVY_CFLAGS)
 AM_FCFLAGS += $(GRVY_FCFLAGS)
 
 # C-based benchmarking tool
-bin_PROGRAMS       += esio_bench
-esio_bench_SOURCES  = esio_bench.c mpi_argp.c
-esio_bench_LDADD    = ../esio/libesio.la
-esio_bench_LDADD   += ../gnulib/libgnu.la $(LTLIBINTL)
-esio_bench_LDADD   += $(HDF5_LDFLAGS)
-esio_bench_LDADD   += $(GRVY_LIBS)
+bin_PROGRAMS        += esio_bench
+esio_bench_SOURCES   = esio_bench.c mpi_argp.c
+esio_bench_CPPFLAGS  = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
+esio_bench_LDADD     = ../esio/libesio.la
+esio_bench_LDADD    += ../gnulib/libgnu.la $(LTLIBINTL)
+esio_bench_LDADD    += $(HDF5_LDFLAGS)
+esio_bench_LDADD    += $(GRVY_LIBS)
 
 # Restart renaming tool which has few formal ESIO dependencies
 bin_PROGRAMS        += esio_rename

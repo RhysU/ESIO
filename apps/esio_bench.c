@@ -38,6 +38,7 @@
 #include "argp.h"
 #include "mpi_argp.h"
 
+#include <H5public.h>
 #include <mpi.h>
 #include <esio/error.h>
 #include <esio/esio.h>
@@ -113,6 +114,8 @@ struct details {
 // STATIC PROTOTYPES STATIC PROTOTYPES STATIC PROTOTYPES STATIC
 //*************************************************************
 
+static void print_version(FILE *stream, struct argp_state *state);
+
 static void trim(char *a);
 
 static inline int min(int a, int b);
@@ -151,6 +154,8 @@ static int line_finalize( struct details *d, struct line_details  *l);
 //*******************************************************************
 
 const char *argp_program_version      = "esio_bench " PACKAGE_VERSION;
+void (*argp_program_version_hook)(FILE *stream, struct argp_state *state)
+                                      = &print_version;
 const char *argp_program_bug_address  = PACKAGE_BUGREPORT;
 static const char doc[]               =
 "Simulate and benchmark ESIO-based application restart write operations."
@@ -759,6 +764,23 @@ int main(int argc, char *argv[])
     esio_handle_finalize(d.h);
 
     return 0;
+}
+
+void print_version(FILE *stream, struct argp_state *state)
+{
+    (void) state; // Unused
+
+    fputs(argp_program_version, stream);
+    unsigned majnum, minnum, relnum;
+    if (H5get_libversion(&majnum, &minnum, &relnum) >= 0) {
+        fprintf(stream, " linked against HDF5 %u.%u.%u",
+                         majnum, minnum, relnum);
+    }
+    int version, subversion;
+    if (MPI_SUCCESS == MPI_Get_version(&version, &subversion)) {
+        fprintf(stream, " running atop MPI %d.%d", version, subversion);
+    }
+    fputc('\n', stream);
 }
 
 
