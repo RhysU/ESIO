@@ -7,31 +7,60 @@ community and provides a familiar build environment for end users.
 To build ESIO starting from a release distribution, untar the distribution and
 enter the top-level directory.
 
-<div class="fragment"><pre class="fragment">
+\code
  > tar xvfz esio-$(VERSION).tar.gz
  > cd esio-$(VERSION)/
-</pre></div>
+\endcode
 
 <h2>Configuration Requirements</h2>
 
-<b>HDF5 dependency</b>: ESIO requires that the <a
-href="http://www.hdfgroup.org/HDF5/">HDF5</a> library be available locally.
-HDF5 must have been configured with both Fortran and MPI parallel support
-(<code>--enable-fortran</code> and <code>--enable-parallel</code>,
-respectively).  The same MPI stack and Fortran compiler used to compile HDF5
-should be used to build ESIO.
+<dl>
+  <dt>GNU Make</dt>
+  <dd>You must have <a href="http://www.gnu.org/software/make/">GNU
+      Make</a> installed as ESIO's build system relies on many GNU
+      extensions.
+  </dd>
+  <dt>Compilers</dt>
+  <dd>You must have a working C and Fortran 90 compiler from the
+      same vendor.  Currently the GNU (<tt>gcc</tt>/<tt>gfortran</tt>)
+      and Intel (<tt>icc</tt>/<tt>ifort</tt>) compilers are supported. If
+      ESIO's configure script cannot automatically detect the correct
+      compiler location, try setting \$CC and \$FC environment
+      variables prior to running configure.
+  </dd>
+  <dt>MPI</dt>
+  <dd>You must have a working Message Passing Interface (MPI)
+      implementation.  If ESIO's configure script cannot automatically
+      detect your MPI installation, try setting the \$MPICC and \$MPIFC
+      environment variables prior to running configure.
+  </dd>
+  <dt>HDF5</dt>
+  <dd>You must have a working <a
+      href="http://www.hdfgroup.org/HDF5/">HDF5</a>
+      installation compiled with MPI parallel support (see HDF5
+      configure's <code>--enable-parallel</code> option for details).
+      HDF5 Fortran support  is <i>not</i>required.  The same MPI stack and
+      Fortran compiler used to compile HDF5 must be used to build ESIO.
+      ESIO's configure script should detect the appropriate information
+      if HDF5's <code>h5pcc</code> compiler wrapper is in your path.
+      If your HDF5 installation is not detected correctly, you may use
+      ESIO's <code>--with-hdf5</code> option to specify a location.
+  </dd>
+  <dt>GRVY (optional)</dt>
+  <dd>ESIO can optionally use The Groovy Toolkit (GRVY) if it is
+      detected at configure time.  If your GRVY installation is not
+      detected correctly, you may use ESIO's <code>--with-grvy</code>
+      option to specify a location.
+  </dd>
+</dl>
 
-ESIO's configuration script should detect the appropriate information if HDF5's
-<code>h5pcc</code> compiler wrapper is in your path.  If your HDF5 installation
-is not detected correctly, you may use ESIO's <code>--with-hdf5</code> option
-to specify a location.
-
-ESIO can optionally use The Groovy Toolkit (GRVY) if it is detected at
-configure time.  If your GRVY installation is not detected correctly, you may
-use ESIO's <code>--with-grvy</code> option to specify a location.
-
-<b>Installation Directory</b>: Use the <tt>--prefix</tt> option to specify your
-desired top-level installation directory for ESIO.
+To configure ESIO, within the esio-$(VERSION) directory issue
+\code
+ > ./configure
+\endcode
+where you should add any additional configure options at the end of
+the command.  One very useful option is the <code>--prefix=DIR</code>
+which sets your desired top-level installation directory for ESIO.
 
 <h2> Library Build </h2>
 
@@ -41,10 +70,6 @@ examples, and some additional ESIO-related utilities.
 
 \code > make \endcode
 
-Please note that it is highly, highly improbable that anything besides GNU Make
-will be able to build ESIO as the build system relies on several GNU
-extensions.
-
 <h2> Build Verification (Optional) </h2>
 
 To optionally verify that the software is working properly, a check target is
@@ -53,9 +78,9 @@ these tests, issue
 
 \code > make check \endcode
 
-Many of the tests require your MPI installation's <code>mpiexec</code> command
-to be usable and may not be usable on many public high performance computing
-platform login nodes.
+Many of the tests require your MPI installation's <code>mpiexec</code>
+command to be usable.  Such tests may not be executable on many public
+high performance computing platform login nodes.
 
 <h2> Installation </h2>
 
