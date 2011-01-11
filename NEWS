@@ -1,3 +1,19 @@
+What's new in ESIO 0.1.1
+------------------------
+
+Bug fix release to fix Intel 11.1 compiler issues.
+
+This release contains the following
+
+    * Bug     #1262: ESIO configure should fail when no HDF5 detected
+    * Bug     #1263: esio-0.1.0-intel-11.1-mpich2-1.2.1 hangs during make
+    * Feature #1265: Add HDF5 version information to esio_bench
+    * Support #1271: Roll ESIO 0.1.1 release
+
+Plus generated documentation ships within the release tarball.  This simplifies
+keeping Doxygen and README/INSTALL contents synchronized.
+
+
 What's new in ESIO 0.1.0
 ------------------------
 
