@@ -49,6 +49,9 @@ MPICC_LOCATION=$(eval command -v $MPICC)
 AC_SUBST([MPICC_LOCATION])
 AX_MPIP()
 AX_LIB_HDF5([parallel])
+if test "x$with_hdf5" != "xyes"; then
+    AC_MSG_ERROR([Parallel HDF5 installation not detected.])
+fi
 AX_VISIBILITY([hidden])
 AX_TLS()
 AX_COMPILER_VENDOR()
