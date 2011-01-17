@@ -27,7 +27,6 @@
 #include "config.h"
 #endif
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -120,11 +119,11 @@ FCT_BGN()
             }
             ESIO_MPICHKR(MPI_Bcast(filename, filenamelen, MPI_CHAR,
                                     0, MPI_COMM_WORLD));
-            assert(filename);
+            fct_req(filename);
 
             // Initialize ESIO handle
             handle = esio_handle_initialize(MPI_COMM_WORLD);
-            assert(handle);
+            fct_req(handle);
         }
         FCT_SETUP_END();
 
