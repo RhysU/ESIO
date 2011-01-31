@@ -44,6 +44,7 @@
 #include "layout.h"
 #include "metadata.h"
 #include "restart-rename.h"
+#include "uri.h"
 #include "version.h"
 
 //*********************************************************************
@@ -444,9 +445,9 @@ esio_file_create(esio_handle h, const char *file, int overwrite)
     // Clean up temporary HDF5 resources
     H5Pclose(fapl_id);
 
-    // Duplicate the canonical file name for later use
+    // Duplicate the (prefix-less) canonical file name for later use
     // Canonical chosen so that changes in working directory are irrelevant
-    h->file_path = canonicalize_file_name(file);
+    h->file_path = canonicalize_file_name(file + scheme_prefix_len(file));
     if (h->file_path == NULL) {
         ESIO_ERROR("failed to allocate space for file_path", ESIO_ENOMEM);
     }
@@ -491,9 +492,9 @@ esio_file_open(esio_handle h, const char *file, int readwrite)
     // Clean up temporary HDF5 resources
     H5Pclose(fapl_id);
 
-    // Duplicate the canonical file name for later use
+    // Duplicate the (prefix-less) canonical file name for later use
     // Canonical chosen so that changes in working directory are irrelevant
-    h->file_path = canonicalize_file_name(file);
+    h->file_path = canonicalize_file_name(file + scheme_prefix_len(file));
     if (h->file_path == NULL) {
         ESIO_ERROR("failed to allocate space for file_path", ESIO_ENOMEM);
     }
@@ -528,7 +529,10 @@ int esio_file_clone(esio_handle h,
     const int worker = h->comm_size - 1; // Last rank does work
     int status;
     if (h->comm_rank == worker) {
-       status = file_copy(srcfile, dstfile, overwrite, 1 /*blockuntilsync*/);
+       status = file_copy(srcfile + scheme_prefix_len(srcfile),
+                          dstfile + scheme_prefix_len(srcfile),
+                          overwrite,
+                          1 /*blockuntilsync*/);
     }
     ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
 
@@ -552,6 +556,7 @@ char* esio_file_path(const esio_handle h)
         ESIO_ERROR_NULL("file_id != -1 but file_path == NULL", ESIO_ESANITY);
     }
 
+    // h->file_path has already had any leading URI scheme removed
     char *retval = strdup(h->file_path);
     if (retval == NULL) {
         ESIO_ERROR_NULL("Unable to allocate space for file_path", ESIO_ENOMEM);
@@ -631,7 +636,10 @@ int esio_file_close_restart(esio_handle h,
     const int worker = h->comm_size - 1; // Last rank does work
     int status;
     if (h->comm_rank == worker) {
-        status = restart_rename(src_filename, restart_template, retain_count);
+        status = restart_rename(
+                src_filename, // No URI scheme prefix munging required
+                restart_template + scheme_prefix_len(restart_template),
+                retain_count);
     }
     ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
 

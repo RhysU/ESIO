@@ -96,6 +96,8 @@ int esio_handle_finalize(esio_handle h) ESIO_API;
  *
  * \param h Handle to use.
  * \param file Name of the file to open.
+ *             It may contain a leading URI scheme or host name
+ *             (e.g. "ufs:", "machine.univ.edu:").
  * \param overwrite If zero, fail if an existing file is detected.
  *                  If nonzero, clobber any existing file.
  *
@@ -108,6 +110,8 @@ int esio_file_create(esio_handle h, const char *file, int overwrite) ESIO_API;
  *
  * \param h Handle to use.
  * \param file Name of the file to open.
+ *             It may contain a leading URI scheme or host name
+ *             (e.g. "ufs:", "machine.univ.edu:").
  * \param readwrite If zero, open the file in read-only mode.
  *                  If nonzero, open the file in read-write mode.
  *
@@ -117,6 +121,8 @@ int esio_file_open(esio_handle h, const char *file, int readwrite) ESIO_API;
 
 /**
  * Create and open a new file by cloning the contents of an existing file.
+ * Either or both of \c srcfile and \c dstfile may contain a leading
+ * URI scheme or host name (e.g. "ufs:", "machine.univ.edu:").
  *
  * \param h Handle to use.
  * \param srcfile Name of the existing file to be cloned.
@@ -135,12 +141,18 @@ int esio_file_clone(esio_handle h,
  * Get the canonical path to the currently open file.
  * The routine allocates sufficient storage to hold the string and returns it.
  * The caller <i>must</i> <code>free</code> the memory to avoid resource leaks.
- * If no file is currently open, the routine returns \c NULL.
+ * If no file is currently open, the routine returns \c NULL.  The returned
+ * value will not contain a MPI-IO scheme or host prefix (e.g. "ufs:",
+ * "machine.univ.edu:") if one was supplied when the file was opened.
  *
  * \param h Handle to use.
  *
  * \return A newly allocated buffer containing the null-terminated string
  *         on success.  \c NULL on failure.
+ *
+ * \see The MPI standard's advice to implementors discussion for
+ *      \c MPI_FILE_OPEN regarding MPI-IO scheme prefixes and RFC 3986
+ *      section 3 for the recognized URI scheme syntax.
  */
 char* esio_file_path(const esio_handle h) ESIO_API;
 
@@ -183,6 +195,7 @@ int esio_file_close(esio_handle h) ESIO_API;
  * \param h                Handle to use.
  * \param restart_template The restart template to use.  See the information
  *                         above for what constitutes a valid value.
+ *                         It may contain a leading URI scheme (e.g. "ufs:").
  * \param retain_count     The maximum number of old restart files to retain.
  *                         Value must me strictly positive.
  *
