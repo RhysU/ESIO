@@ -42,6 +42,12 @@ check_PROGRAMS          += restart_helpers
 restart_helpers_SOURCES  = restart_helpers.c ../esio/restart-rename.c
 restart_helpers_LDADD    = ../esio/libesio.la $(HDF5_LDFLAGS)
 
+## Internal restart renaming logic tests
+TESTS             += uri_tests
+check_PROGRAMS    += uri_tests
+uri_tests_SOURCES  = uri_tests.c ../esio/uri.c
+uri_tests_LDADD    = ../esio/libesio.la $(HDF5_LDFLAGS)
+
 #############################################################################
 ## BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC BASIC ##
 #############################################################################

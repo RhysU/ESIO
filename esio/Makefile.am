@@ -36,6 +36,7 @@ libesio_la_SOURCES  += h5utils.c
 libesio_la_SOURCES  += layout.c
 libesio_la_SOURCES  += metadata.c
 libesio_la_SOURCES  += restart-rename.c
+libesio_la_SOURCES  += uri.c
 libesio_la_LDFLAGS   = -release $(PACKAGE_VERSION)
 libesio_la_LDFLAGS  += $(LTLIBINTL) # gnulib requirement
 libesio_la_LIBADD    = ../gnulib/libgnu.la
@@ -54,20 +55,21 @@ esio_include_HEADERS += esio-config.h
 # Headers internal to the library
 noinst_HEADERS += chunksize.h
 noinst_HEADERS += file-copy.h
-noinst_HEADERS += restart-rename.h
 noinst_HEADERS += h5utils.h
 noinst_HEADERS += layout.h
 noinst_HEADERS += metadata.h
+noinst_HEADERS += restart-rename.h
+noinst_HEADERS += uri.h
 
 # Templated implementation files necessary for building the library
+EXTRA_DIST += attribute.f90
+EXTRA_DIST += field.f90
 EXTRA_DIST += layout0.c
 EXTRA_DIST += layout1.c
 EXTRA_DIST += layout2.c
 EXTRA_DIST += line.c
-EXTRA_DIST += plane.c
-EXTRA_DIST += attribute.f90
-EXTRA_DIST += field.f90
 EXTRA_DIST += line.f90
+EXTRA_DIST += plane.c
 EXTRA_DIST += plane.f90
 
 # Public Fortran library is a superset of libesio.la
