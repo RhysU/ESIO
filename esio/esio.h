@@ -263,6 +263,14 @@ esio_attribute_write(const esio_handle h,             \
                      const char *name,                \
                      const TYPE *value)               \
 { return esio_attribute_write_##TYPE(h,name,value); }
+
+/* Writing scalar attributes by value is too handy to skip. */
+#define ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(TYPE)    \
+extern "C++" inline int                                \
+esio_attribute_write(const esio_handle h,              \
+                     const char *name,                 \
+                     const TYPE value)                 \
+{ return esio_attribute_write_##TYPE(h,name,&value); }
 #endif
 
 #define ESIO_ATTRIBUTE_READ_GEN(TYPE)             \
@@ -342,6 +350,9 @@ ESIO_ATTRIBUTE_WRITE_GEN(double)
 #ifdef __cplusplus
 /** \copydoc esio_attribute_write_double */
 ESIO_ATTRIBUTE_WRITE_GEN_CXX(double)
+
+/** \copydoc esio_attribute_write_double */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(double)
 #endif
 
 /**
@@ -353,6 +364,9 @@ ESIO_ATTRIBUTE_WRITE_GEN(float)
 #ifdef __cplusplus
 /** \copydoc esio_attribute_write_float */
 ESIO_ATTRIBUTE_WRITE_GEN_CXX(float)
+
+/** \copydoc esio_attribute_write_float */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(float)
 #endif
 
 /**
@@ -364,6 +378,9 @@ ESIO_ATTRIBUTE_WRITE_GEN(int)
 #ifdef __cplusplus
 /** \copydoc esio_attribute_write_int */
 ESIO_ATTRIBUTE_WRITE_GEN_CXX(int)
+
+/** \copydoc esio_attribute_write_int */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(int)
 #endif
 
 /**
