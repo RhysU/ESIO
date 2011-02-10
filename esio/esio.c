@@ -61,6 +61,9 @@ static
 hid_t esio_H5P_FILE_ACCESS_create(const esio_handle h);
 
 static
+int esio_CONFIGURE_METADATA_CACHING(hid_t plist_id);
+
+static
 hid_t esio_field_create(const esio_handle h,
                         const char *name, hid_t type_id,
                         hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
@@ -287,6 +290,33 @@ hid_t esio_H5P_FILE_ACCESS_create(const esio_handle h)
     return fapl_id;
 }
 
+static
+int esio_CONFIGURE_METADATA_CACHING(hid_t plist_id)
+{
+    // http://www.hdfgroup.org/pubs/papers/howison_hdf5_lustre_iasds2010.pdf
+    // contains a discussion of this logic on pages 3 and 4.  The logic
+    // is given (sans error checking) in figure 5.
+
+    // See this question on Hdf-form regarding the H5C_flash_incr__off setting
+    // http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-February/004199.html
+
+    H5AC_cache_config_t mdc_config;
+    mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+
+    if (H5Pget_mdc_config(plist_id, &mdc_config) < 0) {
+        ESIO_ERROR_VAL("Error calling H5Pget_mdc_config", ESIO_ESANITY, -1);
+    }
+    mdc_config.evictions_enabled = 0 /* FALSE */;
+    mdc_config.incr_mode         = H5C_incr__off;
+    mdc_config.flash_incr_mode   = H5C_flash_incr__off;
+    mdc_config.decr_mode         = H5C_decr__off;
+    if (H5Pset_mdc_config(plist_id, &mdc_config) < 0) {
+        ESIO_ERROR_VAL("Error calling H5Pset_mdc_config", ESIO_ESANITY, -1);
+    }
+
+    return ESIO_SUCCESS;
+}
+
 esio_handle
 esio_handle_initialize(MPI_Comm comm)
 {
@@ -424,6 +454,12 @@ esio_file_create(esio_handle h, const char *file, int overwrite)
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
     }
 
+    // Set metadata caching options on the file access list property identifier
+    if (esio_CONFIGURE_METADATA_CACHING(fapl_id) != ESIO_SUCCESS) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to configure metadata caching", ESIO_ESANITY);
+    }
+
     // Collectively create the file
     hid_t file_id;
     if (overwrite) {
@@ -477,6 +513,12 @@ esio_file_open(esio_handle h, const char *file, int readwrite)
     const hid_t fapl_id = esio_H5P_FILE_ACCESS_create(h);
     if (fapl_id < 0) {
         ESIO_ERROR("Unable to create fapl_id", ESIO_ESANITY);
+    }
+
+    // Set metadata caching options on the file access list property identifier
+    if (esio_CONFIGURE_METADATA_CACHING(fapl_id) != ESIO_SUCCESS) {
+        H5Pclose(fapl_id);
+        ESIO_ERROR("Unable to configure metadata caching", ESIO_ESANITY);
     }
 
     // Initialize access flags
