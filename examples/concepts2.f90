@@ -18,7 +18,7 @@ program main
     call esio_file_create (h, "data.h5", .true.)
 
     call get_command_argument (0, str)
-    call esio_string_set (h, "program", trim(str))
+    call esio_string_set (h, "/", "program", trim(str))
 
     version = 1
     call esio_attribute_write_integer (h, "/", "version", version)

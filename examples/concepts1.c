@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     esio_handle h = esio_handle_initialize(MPI_COMM_WORLD);
     esio_file_create(h, "data.h5", 1 /* overwrite */);
 
-    esio_string_set(h, "program", argv[0]);
+    esio_string_set(h, "/", "program", argv[0]);
 
     int version = 1;
     esio_attribute_write_int(h, "/", "version", &version);

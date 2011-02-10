@@ -2089,24 +2089,28 @@ GEN_ATTRIBUTE_READ(int)
 // *********************************************************************
 
 int esio_string_set(const esio_handle h,
+                    const char *location,
                     const char *name,
                     const char *value)
 {
     // Sanity check incoming arguments
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (location == NULL) ESIO_ERROR("location == NULL",       ESIO_EFAULT);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);
 
-    const herr_t err = H5LTset_attribute_string(h->file_id, "/", name, value);
+    const herr_t err = H5LTset_attribute_string(
+            h->file_id, location, name, value);
     if (err < 0) {
-        ESIO_ERROR("unable to write attribute", ESIO_EFAILED);
+        ESIO_ERROR("unable to write attribute at location", ESIO_EFAILED);
     }
 
     return ESIO_SUCCESS;
 }
 
 char* esio_string_get(const esio_handle h,
+                      const char *location,
                       const char *name)
 {
     // Sanity check incoming arguments
@@ -2114,6 +2118,8 @@ char* esio_string_get(const esio_handle h,
         ESIO_ERROR_NULL("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1)
         ESIO_ERROR_NULL("No file currently open", ESIO_EINVAL);
+    if (location == NULL)
+        ESIO_ERROR_NULL("location == NULL",       ESIO_EFAULT);
     if (name == NULL)
         ESIO_ERROR_NULL("name == NULL",           ESIO_EFAULT);
 
@@ -2122,10 +2128,10 @@ char* esio_string_get(const esio_handle h,
 
     // Attempt to open the requested attribute
     const hid_t aid = H5Aopen_by_name(
-            h->file_id, "/", name, H5P_DEFAULT, H5P_DEFAULT);
+            h->file_id, location, name, H5P_DEFAULT, H5P_DEFAULT);
     if (aid < 0) {
         ENABLE_HDF5_ERROR_HANDLER
-        ESIO_ERROR_NULL("unable to interrogate requested attribute",
+        ESIO_ERROR_NULL("unable to interrogate requested attribute at location",
                         ESIO_EINVAL);
     }
 
@@ -2153,7 +2159,8 @@ char* esio_string_get(const esio_handle h,
     if (size == 0) {
         H5Tclose(tid);
         H5Aclose(aid);
-        ESIO_ERROR_NULL("unable to obtain request string length", ESIO_EINVAL);
+        ESIO_ERROR_NULL("unable to obtain requested string length",
+                ESIO_EINVAL);
     }
 
     // Allocate storage for the string (already includes null termination)

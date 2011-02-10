@@ -40,7 +40,7 @@ program string_f
 !   Create a file, write a string, and close it
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
-    call esio_string_set(h, "name", value, ierr)
+    call esio_string_set(h, "/", "name", value, ierr)
     ASSERT(ierr == 0)
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
@@ -48,7 +48,7 @@ program string_f
 !   Re-open the file read-only, check the string, and close it
     call esio_file_open(h, filename, .false., ierr)
     ASSERT(ierr == 0)
-    call esio_string_get(h, "name", buffer, ierr)
+    call esio_string_get(h, "/", "name", buffer, ierr)
     ASSERT(ierr == 0)
     ASSERT(value == trim(buffer))
     call esio_file_close(h, ierr)

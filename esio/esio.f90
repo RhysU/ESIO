@@ -398,9 +398,10 @@ contains
 !! See \ref conceptsattributes "attributes concepts" for more details.
 !!@{
 
-  subroutine esio_string_set (handle, name, value, ierr)
+  subroutine esio_string_set (handle, location, name, value, ierr)
 
     type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: location
     character(len=*),  intent(in)            :: name
     character(len=*),  intent(in)            :: value
     integer,           intent(out), optional :: ierr
@@ -408,29 +409,34 @@ contains
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function string_impl (handle, name, value)  &
+      function string_impl (handle, location, name, value)  &
                            bind (C, name="esio_string_set")
         import
         integer(c_int)                                  :: string_impl
         type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: location(*)
         character(len=1,kind=c_char), intent(in)        :: name(*)
         character(len=1,kind=c_char), intent(in)        :: value(*)
       end function string_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = string_impl(handle, esio_f_c_string(name), esio_f_c_string(value))
+    stat = string_impl(handle,                    &
+                       esio_f_c_string(location), &
+                       esio_f_c_string(name),     &
+                       esio_f_c_string(value))
     if (present(ierr)) ierr = stat
 
   end subroutine esio_string_set
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_string_get (handle, name, value, ierr)
+  subroutine esio_string_get (handle, location, name, value, ierr)
 
     use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
 
     type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: location
     character(len=*),  intent(in)            :: name
     character(len=*),  intent(out)           :: value
     integer,           intent(out), optional :: ierr
@@ -440,16 +446,20 @@ contains
 !   The C implementation returns newly allocated memory
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function string_impl (handle, name) bind (C, name="esio_string_get")
+      function string_impl (handle, location, name)  &
+                           bind (C, name="esio_string_get")
         import
         type(c_ptr)                                     :: string_impl
         type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: location(*)
         character(len=1,kind=c_char), intent(in)        :: name(*)
       end function string_impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    tmp_p = string_impl(handle, esio_f_c_string(name))
+    tmp_p = string_impl(handle,                    &
+                        esio_f_c_string(location), &
+                        esio_f_c_string(name))
     if (esio_c_f_stringcopy(tmp_p, value)) then
       if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
     else

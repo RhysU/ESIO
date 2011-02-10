@@ -219,14 +219,18 @@ int esio_file_close_restart(esio_handle h,
  * Set a string-valued attribute.
  * Any existing attribute will be overwritten.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
- * \param value Null-terminated attribute value to set.
+ * \param h        Handle to use.
+ * \param location Null-terminated attribute location.
+ *                 Must be either "/" to specify a file-level attribute or
+ *                 be the name an existing line, plane, or field.
+ * \param name     Null-terminated attribute name.
+ * \param value    Null-terminated attribute value to set.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
 int
 esio_string_set(const esio_handle h,
+                const char *location,
                 const char *name,
                 const char *value) ESIO_API;
 
@@ -236,14 +240,18 @@ esio_string_set(const esio_handle h,
  * it.  The caller <i>must</i> <code>free</code> the memory to avoid
  * resource leaks.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
+ * \param h        Handle to use.
+ * \param location Null-terminated attribute location.
+ *                 Must be either "/" to specify a file-level attribute or
+ *                 be the name an existing line, plane, or field.
+ * \param name     Null-terminated attribute name.
  *
  * \return A newly allocated buffer containing the null-terminated string
  *         on success.  \c NULL on failure.
  */
 char*
 esio_string_get(const esio_handle h,
+                const char *location,
                 const char *name) ESIO_API;
 /*\@}*/
 

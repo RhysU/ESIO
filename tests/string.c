@@ -151,17 +151,17 @@ FCT_BGN()
             fct_req(0 == esio_file_create(state, filename, 1));
 
             // Write empty message to disk
-            fct_req(0 == esio_string_set(state, "msg1", ""));
+            fct_req(0 == esio_string_set(state, "/", "msg1", ""));
 
             // Overwrite message with test data
-            fct_req(0 == esio_string_set(state, "msg1", msg1));
+            fct_req(0 == esio_string_set(state, "/", "msg1", msg1));
 
             // Write a second message to disk
-            fct_req(0 == esio_string_set(state, "msg2", msg2));
+            fct_req(0 == esio_string_set(state, "/", "msg2", msg2));
 
             // Retrieve the first and ensure it comes back cleanly
             {
-                char *retrieved1 = esio_string_get(state, "msg1");
+                char *retrieved1 = esio_string_get(state, "/", "msg1");
                 fct_req(retrieved1);
                 fct_chk_eq_str(retrieved1, msg1);
                 fct_chk(retrieved1 != msg1);
@@ -170,7 +170,7 @@ FCT_BGN()
 
             // Retrieve the first and ensure it comes back cleanly
             {
-                char *retrieved2 = esio_string_get(state, "msg2");
+                char *retrieved2 = esio_string_get(state, "/", "msg2");
                 fct_req(retrieved2);
                 fct_chk_eq_str(retrieved2, msg2);
                 fct_chk(retrieved2 != msg2);
