@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     esio_string_set(h, "program", argv[0]);
 
     int version = 1;
-    esio_attribute_write_int(h, "version", &version);
+    esio_attribute_write_int(h, "/", "version", &version);
 
     double example[2] = { 2.0 * world_rank, 2.0 * world_rank + 1 };
     esio_line_establish(h, 2*world_size, 2*world_rank, 2);

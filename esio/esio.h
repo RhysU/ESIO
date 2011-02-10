@@ -252,77 +252,86 @@ esio_string_get(const esio_handle h,
 #define ESIO_ATTRIBUTE_WRITE_GEN(TYPE)            \
 int                                               \
 esio_attribute_write_##TYPE(const esio_handle h,  \
+                            const char *location, \
                             const char *name,     \
                             const TYPE *value)    \
                             ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_ATTRIBUTE_WRITE_GEN_CXX(TYPE)            \
-extern "C++" inline int                               \
-esio_attribute_write(const esio_handle h,             \
-                     const char *name,                \
-                     const TYPE *value)               \
-{ return esio_attribute_write_##TYPE(h,name,value); }
+#define ESIO_ATTRIBUTE_WRITE_GEN_CXX(TYPE)                     \
+extern "C++" inline int                                        \
+esio_attribute_write(const esio_handle h,                      \
+                     const char *location,                     \
+                     const char *name,                         \
+                     const TYPE *value)                        \
+{ return esio_attribute_write_##TYPE(h,location,name,value); }
 
 /* Writing scalar attributes by value is too handy to skip. */
-#define ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(TYPE)    \
-extern "C++" inline int                                \
-esio_attribute_write(const esio_handle h,              \
-                     const char *name,                 \
-                     const TYPE value)                 \
-{ return esio_attribute_write_##TYPE(h,name,&value); }
+#define ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(TYPE)             \
+extern "C++" inline int                                         \
+esio_attribute_write(const esio_handle h,                       \
+                     const char *location,                      \
+                     const char *name,                          \
+                     const TYPE value)                          \
+{ return esio_attribute_write_##TYPE(h,location,name,&value); }
 #endif
 
 #define ESIO_ATTRIBUTE_READ_GEN(TYPE)             \
 int                                               \
 esio_attribute_read_##TYPE(const esio_handle h,   \
+                           const char *location,  \
                            const char *name,      \
                            TYPE *value)           \
                            ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_ATTRIBUTE_READ_GEN_CXX(TYPE)            \
-extern "C++" inline int                              \
-esio_attribute_read(const esio_handle h,             \
-                    const char *name,                \
-                    TYPE *value)                     \
-{ return esio_attribute_read_##TYPE(h,name,value); }
+#define ESIO_ATTRIBUTE_READ_GEN_CXX(TYPE)                     \
+extern "C++" inline int                                       \
+esio_attribute_read(const esio_handle h,                      \
+                    const char *location,                     \
+                    const char *name,                         \
+                    TYPE *value)                              \
+{ return esio_attribute_read_##TYPE(h,location,name,value); }
 #endif
 
-#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)           \
-int                                               \
-esio_attribute_writev_##TYPE(const esio_handle h, \
-                             const char *name,    \
-                             const TYPE *value,   \
-                             int ncomponents)     \
+#define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)            \
+int                                                \
+esio_attribute_writev_##TYPE(const esio_handle h,  \
+                             const char *location, \
+                             const char *name,     \
+                             const TYPE *value,    \
+                             int ncomponents)      \
                              ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_ATTRIBUTE_WRITEV_GEN_CXX(TYPE)                        \
-extern "C++" inline int                                            \
-esio_attribute_writev(const esio_handle h,                         \
-                      const char *name,                            \
-                      const TYPE *value,                           \
-                      int ncomponents)                             \
-{ return esio_attribute_writev_##TYPE(h,name,value,ncomponents); }
+#define ESIO_ATTRIBUTE_WRITEV_GEN_CXX(TYPE)                                 \
+extern "C++" inline int                                                     \
+esio_attribute_writev(const esio_handle h,                                  \
+                      const char *location,                                 \
+                      const char *name,                                     \
+                      const TYPE *value,                                    \
+                      int ncomponents)                                      \
+{ return esio_attribute_writev_##TYPE(h,location,name,value,ncomponents); }
 #endif
 
 #define ESIO_ATTRIBUTE_READV_GEN(TYPE)            \
 int                                               \
 esio_attribute_readv_##TYPE(const esio_handle h,  \
+                            const char *location, \
                             const char *name,     \
                             TYPE *value,          \
                             int ncomponents)      \
                             ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_ATTRIBUTE_READV_GEN_CXX(TYPE)                        \
-extern "C++" inline int                                           \
-esio_attribute_readv(const esio_handle h,                         \
-                     const char *name,                            \
-                     TYPE *value,                                 \
-                     int ncomponents)                             \
-{ return esio_attribute_readv_##TYPE(h,name,value,ncomponents); }
+#define ESIO_ATTRIBUTE_READV_GEN_CXX(TYPE)                                 \
+extern "C++" inline int                                                    \
+esio_attribute_readv(const esio_handle h,                                  \
+                     const char *location,                                 \
+                     const char *name,                                     \
+                     TYPE *value,                                          \
+                     int ncomponents)                                      \
+{ return esio_attribute_readv_##TYPE(h,location,name,value,ncomponents); }
 #endif
 /** \endcond */
 
@@ -339,9 +348,12 @@ esio_attribute_readv(const esio_handle h,                         \
  * Write a scalar-valued <code>double</code> attribute.
  * Any existing attribute value will be overwritten.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
- * \param value Buffer containing the scalar to write.
+ * \param h        Handle to use.
+ * \param location Null-terminated attribute location.
+ *                 Must be either "/" to specify a file-level attribute or
+ *                 be the name an existing line, plane, or field.
+ * \param name     Null-terminated attribute name.
+ * \param value    Buffer containing the scalar to write.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -386,9 +398,12 @@ ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(int)
 /**
  * Read a scalar-valued <code>double</code> attribute.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
- * \param value Buffer to contain the read value.
+ * \param h        Handle to use.
+ * \param location Null-terminated attribute location.
+ *                 Must be either "/" to specify a file-level attribute or
+ *                 be the name an existing line, plane, or field.
+ * \param name     Null-terminated attribute name.
+ * \param value    Buffer to contain the read value.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -435,9 +450,12 @@ ESIO_ATTRIBUTE_READ_GEN_CXX(int)
  * Write a vector-valued <code>double</code> attribute.
  * Any existing attribute value will be overwritten.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
- * \param value Buffer containing the scalar to write.
+ * \param h           Handle to use.
+ * \param location    Null-terminated attribute location.
+ *                    Must be either "/" to specify a file-level attribute or
+ *                    be the name an existing line, plane, or field.
+ * \param name        Null-terminated attribute name.
+ * \param value       Buffer containing the scalar to write.
  * \param ncomponents Number of vector components.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
@@ -474,9 +492,12 @@ ESIO_ATTRIBUTE_WRITEV_GEN_CXX(int)
 /**
  * Read a vector-valued <code>double</code> attribute.
  *
- * \param h Handle to use.
- * \param name Null-terminated attribute name.
- * \param value Buffer to contain the read value.
+ * \param h           Handle to use.
+ * \param location    Null-terminated attribute location.
+ *                    Must be either "/" to specify a file-level attribute or
+ *                    be the name an existing line, plane, or field.
+ * \param name        Null-terminated attribute name.
+ * \param value       Buffer to contain the read value.
  * \param ncomponents Number of vector components.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
@@ -515,6 +536,9 @@ ESIO_ATTRIBUTE_READV_GEN_CXX(int)
  * Scalar-valued attributes have <code>*ncomponents == 1</code>.
  *
  * \param h Handle to use.
+ * \param location Null-terminated attribute location.
+ *                 Must be either "/" to specify a file-level attribute or
+ *                 be the name an existing line, plane, or field.
  * \param name Null-terminated attribute name.
  * \param ncomponents Buffer to contain the number of components.
  *
@@ -522,6 +546,7 @@ ESIO_ATTRIBUTE_READV_GEN_CXX(int)
  */
 int
 esio_attribute_sizev(const esio_handle h,
+                     const char *location,
                      const char *name,
                      int *ncomponents) ESIO_API;
 /*\@}*/

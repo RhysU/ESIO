@@ -473,7 +473,7 @@ contains
 !! See \ref conceptsattributes "attribute concepts" for more details.
 !!@{
 
-subroutine esio_attribute_write_double (handle, name, value, ierr)
+subroutine esio_attribute_write_double (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
@@ -484,7 +484,7 @@ end subroutine esio_attribute_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_write_single (handle, name, value, ierr)
+subroutine esio_attribute_write_single (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
@@ -495,7 +495,7 @@ end subroutine esio_attribute_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_write_integer (handle, name, value, ierr)
+subroutine esio_attribute_write_integer (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
@@ -506,7 +506,7 @@ end subroutine esio_attribute_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_read_double (handle, name, value, ierr)
+subroutine esio_attribute_read_double (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
 #  define CTYPE real(c_double)
@@ -517,7 +517,7 @@ end subroutine esio_attribute_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_read_single (handle, name, value, ierr)
+subroutine esio_attribute_read_single (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
 #  define CTYPE real(c_float)
@@ -528,7 +528,7 @@ end subroutine esio_attribute_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_read_integer (handle, name, value, ierr)
+subroutine esio_attribute_read_integer (handle, location, name, value, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define FINTENT intent(out)
 #  define CTYPE integer(c_int)
@@ -549,8 +549,8 @@ end subroutine esio_attribute_read_integer
 !! See \ref conceptsattributes "attributes concepts" for more details.
 !!@{
 
-subroutine esio_attribute_writev_double (handle, name, value, ncomponents,  &
-                                         ierr)
+subroutine esio_attribute_writev_double (handle, location, name, value, &
+                                         ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(in)
@@ -562,8 +562,8 @@ end subroutine esio_attribute_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_writev_single (handle, name, value, ncomponents,  &
-                                         ierr)
+subroutine esio_attribute_writev_single (handle, location, name, value, &
+                                         ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(in)
@@ -575,8 +575,8 @@ end subroutine esio_attribute_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_writev_integer (handle, name, value, ncomponents,  &
-                                          ierr)
+subroutine esio_attribute_writev_integer (handle, location, name, value, &
+                                          ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(in)
@@ -588,8 +588,8 @@ end subroutine esio_attribute_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_readv_double (handle, name, value, ncomponents,  &
-                                        ierr)
+subroutine esio_attribute_readv_double (handle, location, name, value, &
+                                        ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(out)
@@ -601,8 +601,8 @@ end subroutine esio_attribute_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_readv_single (handle, name, value, ncomponents,  &
-                                        ierr)
+subroutine esio_attribute_readv_single (handle, location, name, value, &
+                                        ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(out)
@@ -614,8 +614,8 @@ end subroutine esio_attribute_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine esio_attribute_readv_integer (handle, name, value, ncomponents,  &
-                                         ierr)
+subroutine esio_attribute_readv_integer (handle, location, name, value, &
+                                         ncomponents, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
 #  define FINTENT intent(out)
@@ -627,9 +627,10 @@ end subroutine esio_attribute_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine esio_attribute_sizev (handle, name, ncomponents, ierr)
+  subroutine esio_attribute_sizev (handle, location, name, ncomponents, ierr)
 
     type(esio_handle), intent(in)            :: handle
+    character(len=*),  intent(in)            :: location
     character(len=*),  intent(in)            :: name
     integer,           intent(out)           :: ncomponents
     integer,           intent(out), optional :: ierr
@@ -639,18 +640,22 @@ end subroutine esio_attribute_readv_integer
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     interface
-      function impl (handle, name, ncomponents)  &
+      function impl (handle, location, name, ncomponents)  &
                     bind (C, name="esio_attribute_sizev")
         import
         integer(c_int)                                  :: impl
         type(esio_handle),            intent(in), value :: handle
+        character(len=1,kind=c_char), intent(in)        :: location(*)
         character(len=1,kind=c_char), intent(in)        :: name(*)
         integer(c_int),               intent(inout)     :: ncomponents
       end function impl
     end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-    stat = impl(handle, esio_f_c_string(name), tmp_ncomponents)
+    stat = impl(handle,                    &
+                esio_f_c_string(location), &
+                esio_f_c_string(name),     &
+                tmp_ncomponents)
     ncomponents = tmp_ncomponents
     if (present(ierr)) ierr = stat
 

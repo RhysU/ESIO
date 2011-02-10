@@ -1939,12 +1939,14 @@ GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
 // *********************************************************************
 
 int esio_attribute_sizev(const esio_handle h,
+                         const char *location,
                          const char *name,
                          int *ncomponents)
 {
     // Sanity check incoming arguments
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
+    if (location == NULL) ESIO_ERROR("location == NULL",           ESIO_EFAULT);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     // Attempt to retrieve information on the attribute
@@ -1953,13 +1955,19 @@ int esio_attribute_sizev(const esio_handle h,
     H5T_class_t type_class;
     size_t type_size;
     DISABLE_HDF5_ERROR_HANDLER
-    const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id, "/", name,
+    const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id,
+                                                         location,
+                                                         name,
                                                          &rank, dims,
                                                          &type_class,
                                                          &type_size);
     ENABLE_HDF5_ERROR_HANDLER
-    if (err  <  0) ESIO_ERROR("No such attribute found",         ESIO_EINVAL);
-    if (rank != 1) ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EINVAL);
+    if (err  <  0) {
+        ESIO_ERROR("No such attribute found at that location", ESIO_EINVAL);
+    }
+    if (rank != 1) {
+        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EINVAL);
+    }
 
     // Ensure we won't overflow the return value type
     if (dims[0] > INT_MAX) {
@@ -1974,6 +1982,7 @@ int esio_attribute_sizev(const esio_handle h,
 
 #define GEN_ATTRIBUTE_WRITEV(TYPE)                                            \
 int esio_attribute_writev_##TYPE(const esio_handle h,                         \
+                                 const char *location,                        \
                                  const char *name,                            \
                                  const TYPE *value,                           \
                                  int ncomponents)                             \
@@ -1981,14 +1990,15 @@ int esio_attribute_writev_##TYPE(const esio_handle h,                         \
     /* Sanity check incoming arguments */                                     \
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);  \
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
+    if (location == NULL) ESIO_ERROR("location == NULL",       ESIO_EFAULT);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
                                                                               \
     const herr_t err = H5LTset_attribute_##TYPE(                              \
-            h->file_id, "/", name, value, ncomponents);                       \
+            h->file_id, location, name, value, ncomponents);                  \
     if (err < 0) {                                                            \
-        ESIO_ERROR("unable to write attribute", ESIO_EFAILED);                \
+        ESIO_ERROR("unable to write attribute at location", ESIO_EFAILED);    \
     }                                                                         \
                                                                               \
     return ESIO_SUCCESS;                                                      \
@@ -1996,6 +2006,7 @@ int esio_attribute_writev_##TYPE(const esio_handle h,                         \
 
 #define GEN_ATTRIBUTE_READV(TYPE)                                             \
 int esio_attribute_readv_##TYPE(const esio_handle h,                          \
+                                const char *location,                         \
                                 const char *name,                             \
                                 TYPE *value,                                  \
                                 int ncomponents)                              \
@@ -2003,6 +2014,7 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     /* Sanity check incoming arguments */                                     \
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);  \
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
+    if (location == NULL) ESIO_ERROR("location == NULL",       ESIO_EFAULT);  \
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);  \
     if (value == NULL)    ESIO_ERROR("value == NULL",          ESIO_EFAULT);  \
     if (ncomponents < 1)  ESIO_ERROR("ncomponents < 1",        ESIO_EINVAL);  \
@@ -2014,10 +2026,12 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     size_t type_size;                                                         \
     DISABLE_HDF5_ERROR_HANDLER                                                \
     const herr_t err1 = esio_H5LTget_attribute_ndims_info(                    \
-            h->file_id, "/", name, &rank, dims, &type_class, &type_size);     \
+            h->file_id, location, name, &rank, dims,                          \
+            &type_class, &type_size);                                         \
     ENABLE_HDF5_ERROR_HANDLER                                                 \
     if (err1 < 0) {                                                           \
-        ESIO_ERROR("unable to interrogate requested attribute", ESIO_EINVAL); \
+        ESIO_ERROR("unable to interrogate requested attribute at location",   \
+                ESIO_EINVAL);                                                 \
     }                                                                         \
                                                                               \
     /* Ensure the user is getting what he/she requested */                    \
@@ -2028,9 +2042,10 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
                                                                               \
     /* Read the attribute's data */                                           \
     const herr_t err2 = H5LTget_attribute_##TYPE(                             \
-            h->file_id, "/", name, value);                                    \
+            h->file_id, location, name, value);                               \
     if (err2 < 0) {                                                           \
-        ESIO_ERROR("unable to retrieve requested attribute", ESIO_EFAILED);   \
+        ESIO_ERROR("unable to retrieve requested attribute at location",      \
+                ESIO_EFAILED);                                                \
     }                                                                         \
                                                                               \
     return ESIO_SUCCESS;                                                      \
@@ -2038,18 +2053,20 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
 
 #define GEN_ATTRIBUTE_WRITE(TYPE)                                             \
 int esio_attribute_write_##TYPE(const esio_handle h,                          \
+                                const char *location,                         \
                                 const char *name,                             \
                                 const TYPE *value)                            \
 {                                                                             \
-    return esio_attribute_writev_##TYPE(h, name, value, 1);                   \
+    return esio_attribute_writev_##TYPE(h, location, name, value, 1);         \
 }
 
 #define GEN_ATTRIBUTE_READ(TYPE)                                              \
 int esio_attribute_read_##TYPE(const esio_handle h,                           \
+                               const char *location,                          \
                                const char *name,                              \
                                TYPE *value)                                   \
 {                                                                             \
-    return esio_attribute_readv_##TYPE(h, name, value, 1);                    \
+    return esio_attribute_readv_##TYPE(h, location, name, value, 1);          \
 }
 
 GEN_ATTRIBUTE_WRITEV(double)

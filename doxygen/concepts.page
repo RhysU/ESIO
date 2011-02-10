@@ -89,9 +89,11 @@ is closed.  Buffers may explicitly be flushed using esio_file_flush().
 
 ESIO can read or write either numeric or string attributes.  Attribute access
 must be done using contiguous memory and each MPI rank must write or read the
-same data.  Attributes are often useful for tracking simulation global
-metadata.  Examples include a program version identifier, a Reynolds number, or
-an array containing collocation point values needed on every MPI rank.
+same data.  Attributes are often useful for tracking simulation metadata.
+Examples include a program version identifier, a Reynolds number, or an array
+containing collocation point values needed on every MPI rank.  Attributes may
+be attached to the entire file (by specifying a location of "/") or to an
+existing line, plane, or field (by specifying the object's name).
 
 Signed integers, single-, and double-precision floating point scalar-valued
 attributes are supported via methods like esio_attribute_write_double() and

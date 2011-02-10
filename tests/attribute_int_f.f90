@@ -43,12 +43,13 @@ program attribute_int_f
     ASSERT(ierr == 0)
 
 !   Write a scalar-valued attribute
-    call esio_attribute_write_integer(h, "name_scalar", value_scalar, ierr)
+    call esio_attribute_write_integer(  &
+            h, "/", "name_scalar", value_scalar, ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued attribute
-    call esio_attribute_writev_integer(h, "name_vector", value_vector, &
-                                       size(value_vector), ierr)
+    call esio_attribute_writev_integer(  &
+            h, "/", "name_vector", value_vector, size(value_vector), ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
@@ -60,18 +61,18 @@ program attribute_int_f
     ASSERT(ierr == 0)
 
 !   Check the scalar-valued attribute's size and data
-    call esio_attribute_sizev(h, "name_scalar", buffer(1), ierr)
+    call esio_attribute_sizev(h, "/", "name_scalar", buffer(1), ierr)
     ASSERT(ierr == 0)
     ASSERT(buffer(1) == 1)
-    call esio_attribute_read_integer(h, "name_scalar", buffer(1), ierr)
+    call esio_attribute_read_integer(h, "/", "name_scalar", buffer(1), ierr)
     ASSERT(ierr == 0)
     ASSERT(buffer(1) == 123)
 
 !   Check the vector-valued attribute's size and data
-    call esio_attribute_sizev(h, "name_vector", buffer(1), ierr)
+    call esio_attribute_sizev(h, "/", "name_vector", buffer(1), ierr)
     ASSERT(buffer(1) == size(value_vector))
-    call esio_attribute_readv_integer(h, "name_vector", buffer, &
-                                      size(value_vector), ierr)
+    call esio_attribute_readv_integer(  &
+            h, "/", "name_vector", buffer, size(value_vector), ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer == value_vector))
 

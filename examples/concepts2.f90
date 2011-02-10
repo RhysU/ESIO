@@ -21,7 +21,7 @@ program main
     call esio_string_set (h, "program", trim(str))
 
     version = 1
-    call esio_attribute_write_integer (h, "version", version)
+    call esio_attribute_write_integer (h, "/", "version", version)
 
     example = [2d0 * world_rank, 2d0 * world_rank + 1]
     call esio_line_establish (h, 2*world_size, 2*world_rank + 1, 2)

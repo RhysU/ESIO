@@ -30,6 +30,7 @@
 #endif
 
   type(esio_handle), intent(in) :: handle
+  character(len=*),  intent(in) :: location
   character(len=*),  intent(in) :: name
 #ifndef VECTORVALUED
   CTYPE,             FINTENT    :: value
@@ -42,7 +43,7 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function attribute_impl (handle, name, value              &
+    function attribute_impl (handle, location, name, value    &
 #ifdef VECTORVALUED
                              ,ncomponents                     &
 #endif
@@ -50,6 +51,7 @@
       import
       integer(c_int)                                  :: attribute_impl
       type(esio_handle),            intent(in), value :: handle
+      character(len=1,kind=c_char), intent(in)        :: location(*)
       character(len=1,kind=c_char), intent(in)        :: name(*)
 #ifndef VECTORVALUED
       CTYPE,                        FINTENT           :: value
@@ -61,7 +63,10 @@
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = attribute_impl(handle, esio_f_c_string(name), value  &
+  stat = attribute_impl(handle,                               &
+                        esio_f_c_string(location),            &
+                        esio_f_c_string(name),                &
+                        value  &
 #ifdef VECTORVALUED
                         ,ncomponents                          &
 #endif

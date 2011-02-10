@@ -168,7 +168,8 @@ FCT_BGN()
 
             // Write zero to disk and flush the buffers
             value = 0;
-            fct_req(0 == AFFIX(esio_attribute_write)(state, "attribute", &value));
+            fct_req(0 == AFFIX(esio_attribute_write)(
+                        state, "/", "attribute", &value));
             fct_req(0 == esio_file_flush(state));
 
             // Populate value with non-zero data
@@ -176,14 +177,16 @@ FCT_BGN()
             value = 5678;
 
             // Overwrite zeros on disk with test data
-            fct_req(0 == AFFIX(esio_attribute_write)(state, "attribute", &value));
+            fct_req(0 == AFFIX(esio_attribute_write)(
+                        state, "/", "attribute", &value));
 
             // Clear storage in memory
             value = 0;
 
             { // Ensure we can retrieve the size correctly
                 int count;
-                fct_req(0 == esio_attribute_sizev(state, "attribute", &count));
+                fct_req(0 == esio_attribute_sizev(
+                            state, "/", "attribute", &count));
                 fct_chk_eq_int(count, 1);
             }
 
@@ -213,7 +216,8 @@ FCT_BGN()
 
             // Re-read the file in a distributed manner and verify contents
             fct_req(0 == esio_file_open(state, filename, 0));
-            fct_req(0 == AFFIX(esio_attribute_read)(state, "attribute", &value));
+            fct_req(0 == AFFIX(esio_attribute_read)(
+                        state, "/", "attribute", &value));
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:1572)
 #endif
@@ -243,12 +247,13 @@ FCT_BGN()
             }
 
             // Write attribute to file
-            fct_req(0 == AFFIX(esio_attribute_writev)(state, "attribute",
-                                                      value, ncomponents));
+            fct_req(0 == AFFIX(esio_attribute_writev)(
+                        state, "/", "attribute", value, ncomponents));
 
             { // Ensure we can retrieve the size correctly
                 int count;
-                fct_req(0 == esio_attribute_sizev(state, "attribute", &count));
+                fct_req(0 == esio_attribute_sizev(
+                            state, "/", "attribute", &count));
                 fct_chk_eq_int(count, ncomponents);
             }
 
@@ -284,8 +289,8 @@ FCT_BGN()
             value = calloc(ncomponents, sizeof(TYPE));
             fct_req(value);
             fct_req(0 == esio_file_open(state, filename, 0));
-            fct_req(0 == AFFIX(esio_attribute_readv)(state, "attribute",
-                                                     value, ncomponents));
+            fct_req(0 == AFFIX(esio_attribute_readv)(
+                        state, "/", "attribute", value, ncomponents));
             for (int i = 0; i < ncomponents; ++i) {
 #ifdef __INTEL_COMPILER
 #pragma warning(push,disable:1572)
