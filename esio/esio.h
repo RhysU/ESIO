@@ -212,7 +212,6 @@ int esio_file_close_restart(esio_handle h,
 
 /**
  * \name Manipulating string-valued attributes
- * See \ref conceptsattributes "attributes concepts" for more details.
  */
 /*\@{*/
 
@@ -257,12 +256,30 @@ esio_attribute_write_##TYPE(const esio_handle h,  \
                             const TYPE *value)    \
                             ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_ATTRIBUTE_WRITE_GEN_CXX(TYPE)            \
+extern "C++" inline int                               \
+esio_attribute_write(const esio_handle h,             \
+                     const char *name,                \
+                     const TYPE *value)               \
+{ return esio_attribute_write_##TYPE(h,name,value); }
+#endif
+
 #define ESIO_ATTRIBUTE_READ_GEN(TYPE)             \
 int                                               \
 esio_attribute_read_##TYPE(const esio_handle h,   \
                            const char *name,      \
                            TYPE *value)           \
                            ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_ATTRIBUTE_READ_GEN_CXX(TYPE)            \
+extern "C++" inline int                              \
+esio_attribute_read(const esio_handle h,             \
+                    const char *name,                \
+                    TYPE *value)                     \
+{ return esio_attribute_read_##TYPE(h,name,value); }
+#endif
 
 #define ESIO_ATTRIBUTE_WRITEV_GEN(TYPE)           \
 int                                               \
@@ -272,6 +289,16 @@ esio_attribute_writev_##TYPE(const esio_handle h, \
                              int ncomponents)     \
                              ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_ATTRIBUTE_WRITEV_GEN_CXX(TYPE)                        \
+extern "C++" inline int                                            \
+esio_attribute_writev(const esio_handle h,                         \
+                      const char *name,                            \
+                      const TYPE *value,                           \
+                      int ncomponents)                             \
+{ return esio_attribute_writev_##TYPE(h,name,value,ncomponents); }
+#endif
+
 #define ESIO_ATTRIBUTE_READV_GEN(TYPE)            \
 int                                               \
 esio_attribute_readv_##TYPE(const esio_handle h,  \
@@ -279,11 +306,24 @@ esio_attribute_readv_##TYPE(const esio_handle h,  \
                             TYPE *value,          \
                             int ncomponents)      \
                             ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_ATTRIBUTE_READV_GEN_CXX(TYPE)                        \
+extern "C++" inline int                                           \
+esio_attribute_readv(const esio_handle h,                         \
+                     const char *name,                            \
+                     TYPE *value,                                 \
+                     int ncomponents)                             \
+{ return esio_attribute_readv_##TYPE(h,name,value,ncomponents); }
+#endif
 /** \endcond */
 
 /**
  * \name Manipulating scalar-valued attributes
  * See \ref conceptsattributes "attribute concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_attribute_write()</tt> and
+ * <tt>esio_attribute_read()</tt> provide overloaded, type-safe versions of
+ * these methods.
  **/
 /*\@{*/
 
@@ -299,17 +339,32 @@ esio_attribute_readv_##TYPE(const esio_handle h,  \
  */
 ESIO_ATTRIBUTE_WRITE_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_write_double */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX(double)
+#endif
+
 /**
  * Write a scalar-valued <code>float</code> attribute.
  * \copydetails esio_attribute_write_double
  */
 ESIO_ATTRIBUTE_WRITE_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_write_float */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX(float)
+#endif
+
 /**
  * Write an scalar-valued <code>int</code> attribute.
  * \copydetails esio_attribute_write_double
  */
 ESIO_ATTRIBUTE_WRITE_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_attribute_write_int */
+ESIO_ATTRIBUTE_WRITE_GEN_CXX(int)
+#endif
 
 /**
  * Read a scalar-valued <code>double</code> attribute.
@@ -322,22 +377,40 @@ ESIO_ATTRIBUTE_WRITE_GEN(int)
  */
 ESIO_ATTRIBUTE_READ_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_read_double */
+ESIO_ATTRIBUTE_READ_GEN_CXX(double)
+#endif
+
 /**
  * Read a scalar-valued <code>float</code> attribute.
  * \copydetails esio_attribute_read_double
  */
 ESIO_ATTRIBUTE_READ_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_read_float */
+ESIO_ATTRIBUTE_READ_GEN_CXX(float)
+#endif
+
 /**
  * Read a scalar-valued <code>int</code> attribute.
  * \copydetails esio_attribute_read_double
  */
 ESIO_ATTRIBUTE_READ_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_attribute_read_int */
+ESIO_ATTRIBUTE_READ_GEN_CXX(int)
+#endif
 /*\@}*/
 
 /**
  * \name Manipulating vector-valued attributes
  * See \ref conceptsattributes "attributes concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_attribute_writev()</tt> and
+ * <tt>esio_attribute_readv()</tt> provide overloaded, type-safe versions of
+ * these methods.
  */
 /*\@{*/
 
@@ -354,17 +427,32 @@ ESIO_ATTRIBUTE_READ_GEN(int)
  */
 ESIO_ATTRIBUTE_WRITEV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_writev_double */
+ESIO_ATTRIBUTE_WRITEV_GEN_CXX(double)
+#endif
+
 /**
  * Write a vector-valued <code>float</code> attribute.
  * \copydetails esio_attribute_writev_double
  */
 ESIO_ATTRIBUTE_WRITEV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_writev_float */
+ESIO_ATTRIBUTE_WRITEV_GEN_CXX(float)
+#endif
+
 /**
  * Write a vector-valued <code>int</code> attribute.
  * \copydetails esio_attribute_writev_double
  */
 ESIO_ATTRIBUTE_WRITEV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_attribute_writev_int */
+ESIO_ATTRIBUTE_WRITEV_GEN_CXX(int)
+#endif
 
 /**
  * Read a vector-valued <code>double</code> attribute.
@@ -378,17 +466,32 @@ ESIO_ATTRIBUTE_WRITEV_GEN(int)
  */
 ESIO_ATTRIBUTE_READV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_readv_double */
+ESIO_ATTRIBUTE_READV_GEN_CXX(double)
+#endif
+
 /**
  * Read a vector-valued <code>float</code> attribute.
  * \copydetails esio_attribute_readv_double
  */
 ESIO_ATTRIBUTE_READV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_attribute_readv_float */
+ESIO_ATTRIBUTE_READV_GEN_CXX(float)
+#endif
+
 /**
  * Read a vector-valued <code>int</code> attribute.
  * \copydetails esio_attribute_readv_double
  */
 ESIO_ATTRIBUTE_READV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_attribute_readv_int */
+ESIO_ATTRIBUTE_READV_GEN_CXX(int)
+#endif
 
 /**
  * Query the number of components in a numeric attribute.
@@ -508,12 +611,18 @@ esio_field_established(esio_handle h,
 
 /*\@}*/
 
+/** \cond INTERNAL */
 #undef ESIO_ATTRIBUTE_WRITE_GEN
 #undef ESIO_ATTRIBUTE_READ_GEN
 #undef ESIO_ATTRIBUTE_WRITEV_GEN
 #undef ESIO_ATTRIBUTE_READV_GEN
+#ifdef __cplusplus
+#undef ESIO_ATTRIBUTE_WRITE_GEN_CXX
+#undef ESIO_ATTRIBUTE_READ_GEN_CXX
+#undef ESIO_ATTRIBUTE_WRITEV_GEN_CXX
+#undef ESIO_ATTRIBUTE_READV_GEN_CXX
+#endif
 
-/** \cond INTERNAL */
 #define ESIO_LINE_WRITE_GEN(TYPE)           \
 int                                         \
 esio_line_write_##TYPE(const esio_handle h, \
@@ -522,6 +631,16 @@ esio_line_write_##TYPE(const esio_handle h, \
                        int astride)         \
                        ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_LINE_WRITE_GEN_CXX(TYPE)                   \
+extern "C++" inline int                                 \
+esio_line_write(const esio_handle h,                    \
+                const char *name,                       \
+                const TYPE *line,                       \
+                int astride)                            \
+{ return esio_line_write_##TYPE(h,name,line,astride); }
+#endif
+
 #define ESIO_LINE_READ_GEN(TYPE)           \
 int                                        \
 esio_line_read_##TYPE(const esio_handle h, \
@@ -529,6 +648,16 @@ esio_line_read_##TYPE(const esio_handle h, \
                       TYPE *line,          \
                       int astride)         \
                       ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_LINE_READ_GEN_CXX(TYPE)                   \
+extern "C++" inline int                                \
+esio_line_read(const esio_handle h,                    \
+               const char *name,                       \
+               TYPE *line,                             \
+               int astride)                            \
+{ return esio_line_read_##TYPE(h,name,line,astride); }
+#endif
 
 #define ESIO_LINE_WRITEV_GEN(TYPE)           \
 int                                          \
@@ -539,6 +668,17 @@ esio_line_writev_##TYPE(const esio_handle h, \
                         int ncomponents)     \
                         ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_LINE_WRITEV_GEN_CXX(TYPE)                               \
+extern "C++" inline int                                              \
+esio_line_writev(const esio_handle h,                                \
+                 const char *name,                                   \
+                 const TYPE *line,                                   \
+                 int astride,                                        \
+                 int ncomponents)                                    \
+{ return esio_line_writev_##TYPE(h,name,line,astride,ncomponents); }
+#endif
+
 #define ESIO_LINE_READV_GEN(TYPE)           \
 int                                         \
 esio_line_readv_##TYPE(const esio_handle h, \
@@ -547,11 +687,25 @@ esio_line_readv_##TYPE(const esio_handle h, \
                        int astride,         \
                        int ncomponents)     \
                        ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_LINE_READV_GEN_CXX(TYPE)                               \
+extern "C++" inline int                                             \
+esio_line_readv(const esio_handle h,                                \
+                const char *name,                                   \
+                TYPE *line,                                         \
+                int astride,                                        \
+                int ncomponents)                                    \
+{ return esio_line_readv_##TYPE(h,name,line,astride,ncomponents); }
+#endif
 /** \endcond */
 
 /**
  * \name Manipulating distributed, one-dimensional, scalar-valued data
  * See \ref conceptslines "line concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_line_write()</tt> and
+ * <tt>esio_line_read()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -571,17 +725,32 @@ esio_line_readv_##TYPE(const esio_handle h, \
  */
 ESIO_LINE_WRITE_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_write_double */
+ESIO_LINE_WRITE_GEN_CXX(double)
+#endif
+
 /**
  * Write a scalar-valued <code>float</code> line.
  * \copydetails esio_line_write_double
  */
 ESIO_LINE_WRITE_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_write_float */
+ESIO_LINE_WRITE_GEN_CXX(float)
+#endif
+
 /**
  * Write a scalar-valued <code>int</code> line.
  * \copydetails esio_line_write_double
  */
 ESIO_LINE_WRITE_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_line_write_int */
+ESIO_LINE_WRITE_GEN_CXX(int)
+#endif
 
 /**
  * Read a scalar-valued <code>double</code> line.
@@ -599,17 +768,32 @@ ESIO_LINE_WRITE_GEN(int)
  */
 ESIO_LINE_READ_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_read_double */
+ESIO_LINE_READ_GEN_CXX(double)
+#endif
+
 /**
  * Read a scalar-valued <code>float</code> line.
  * \copydetails esio_line_read_double
  */
 ESIO_LINE_READ_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_read_float */
+ESIO_LINE_READ_GEN_CXX(float)
+#endif
+
 /**
  * Read a scalar-valued <code>int</code> line.
  * \copydetails esio_line_read_double
  */
 ESIO_LINE_READ_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_line_read_int */
+ESIO_LINE_READ_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of scalars within a line.
@@ -630,6 +814,9 @@ esio_line_size(const esio_handle h,
 /**
  * \name Manipulating distributed, one-dimensional, vector-valued data
  * See \ref conceptslines "line concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_line_writev()</tt> and
+ * <tt>esio_line_readv()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -651,17 +838,32 @@ esio_line_size(const esio_handle h,
  */
 ESIO_LINE_WRITEV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_writev_double */
+ESIO_LINE_WRITEV_GEN_CXX(double)
+#endif
+
 /**
  * Write a vector-valued <code>float</code> line.
  * \copydetails esio_line_writev_double
  **/
 ESIO_LINE_WRITEV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_writev_float */
+ESIO_LINE_WRITEV_GEN_CXX(float)
+#endif
+
 /**
  * Write a vector-valued <code>int</code> line.
  * \copydetails esio_line_writev_double
  **/
 ESIO_LINE_WRITEV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_line_writev_int */
+ESIO_LINE_WRITEV_GEN_CXX(int)
+#endif
 
 /**
  * Read a vector-valued <code>double</code> line.
@@ -681,17 +883,32 @@ ESIO_LINE_WRITEV_GEN(int)
  */
 ESIO_LINE_READV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_readv_double */
+ESIO_LINE_READV_GEN_CXX(double)
+#endif
+
 /**
  * Read a vector-valued <code>float</code> line.
  * \copydetails esio_line_readv_double
  **/
 ESIO_LINE_READV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_line_readv_float */
+ESIO_LINE_READV_GEN_CXX(float)
+#endif
+
 /**
  * Read a vector-valued <code>int</code> line.
  * \copydetails esio_line_readv_double
  **/
 ESIO_LINE_READV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_line_readv_int */
+ESIO_LINE_READV_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of vectors and components within a line.
@@ -712,20 +929,18 @@ esio_line_sizev(const esio_handle h,
                 int *ncomponents) ESIO_API;
 /*\@}*/
 
-/**
- * \name Manipulating distributed, one-dimensional data with
- * See \ref conceptslines "line concepts" for more details.
- */
-/*\@{*/
-/*\@}*/
-
+/** \cond INTERNAL */
 #undef ESIO_LINE_WRITE_GEN
 #undef ESIO_LINE_READ_GEN
 #undef ESIO_LINE_WRITEV_GEN
 #undef ESIO_LINE_READV_GEN
+#ifdef __cplusplus
+#undef ESIO_LINE_WRITE_GEN_CXX
+#undef ESIO_LINE_READ_GEN_CXX
+#undef ESIO_LINE_WRITEV_GEN_CXX
+#undef ESIO_LINE_READV_GEN_CXX
+#endif
 
-
-/** \cond INTERNAL */
 #define ESIO_PLANE_WRITE_GEN(TYPE)                \
 int                                               \
 esio_plane_write_##TYPE(const esio_handle h,      \
@@ -734,6 +949,16 @@ esio_plane_write_##TYPE(const esio_handle h,      \
                         int bstride, int astride) \
                         ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_PLANE_WRITE_GEN_CXX(TYPE)                            \
+extern "C++" inline int                                           \
+esio_plane_write(const esio_handle h,                             \
+                 const char *name,                                \
+                 const TYPE *plane,                               \
+                 int bstride, int astride)                        \
+{ return esio_plane_write_##TYPE(h,name,plane,bstride,astride); }
+#endif
+
 #define ESIO_PLANE_READ_GEN(TYPE)                \
 int                                              \
 esio_plane_read_##TYPE(const esio_handle h,      \
@@ -741,6 +966,16 @@ esio_plane_read_##TYPE(const esio_handle h,      \
                        TYPE *plane,              \
                        int bstride, int astride) \
                        ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_PLANE_READ_GEN_CXX(TYPE)                            \
+extern "C++" inline int                                          \
+esio_plane_read(const esio_handle h,                             \
+                const char *name,                                \
+                TYPE *plane,                                     \
+                int bstride, int astride)                        \
+{ return esio_plane_read_##TYPE(h,name,plane,bstride,astride); }
+#endif
 
 #define ESIO_PLANE_WRITEV_GEN(TYPE)                \
 int                                                \
@@ -751,6 +986,17 @@ esio_plane_writev_##TYPE(const esio_handle h,      \
                          int ncomponents)          \
                          ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_PLANE_WRITEV_GEN_CXX(TYPE)                                        \
+extern "C++" inline int                                                      \
+esio_plane_writev(const esio_handle h,                                         \
+                  const char *name,                                            \
+                  const TYPE *plane,                                           \
+                  int bstride, int astride,                                    \
+                  int ncomponents)                                             \
+{ return esio_plane_writev_##TYPE(h,name,plane,bstride,astride,ncomponents); }
+#endif
+
 #define ESIO_PLANE_READV_GEN(TYPE)                \
 int                                               \
 esio_plane_readv_##TYPE(const esio_handle h,      \
@@ -759,11 +1005,25 @@ esio_plane_readv_##TYPE(const esio_handle h,      \
                         int bstride, int astride, \
                         int ncomponents)          \
                         ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_PLANE_READV_GEN_CXX(TYPE)                                        \
+extern "C++" inline int                                                       \
+esio_plane_readv(const esio_handle h,                                         \
+                 const char *name,                                            \
+                 TYPE *plane,                                                 \
+                 int bstride, int astride,                                    \
+                 int ncomponents)                                             \
+{ return esio_plane_readv_##TYPE(h,name,plane,bstride,astride,ncomponents); }
+#endif
 /** \endcond */
 
 /**
  * \name Manipulating distributed, two-dimensional, scalar-valued data
  * See \ref conceptsplanes "plane concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_plane_write()</tt> and
+ * <tt>esio_plane_read()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -787,17 +1047,32 @@ esio_plane_readv_##TYPE(const esio_handle h,      \
  */
 ESIO_PLANE_WRITE_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_write_double */
+ESIO_PLANE_WRITE_GEN_CXX(double)
+#endif
+
 /**
  * Write a scalar-valued <code>float</code> plane.
  * \copydetails esio_plane_write_double
  */
 ESIO_PLANE_WRITE_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_write_float */
+ESIO_PLANE_WRITE_GEN_CXX(float)
+#endif
+
 /**
  * Write a scalar-valued <code>int</code> plane.
  * \copydetails esio_plane_write_double
  */
 ESIO_PLANE_WRITE_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_plane_write_int */
+ESIO_PLANE_WRITE_GEN_CXX(int)
+#endif
 
 /**
  * Read a scalar-valued <code>double</code> plane.
@@ -819,17 +1094,32 @@ ESIO_PLANE_WRITE_GEN(int)
  */
 ESIO_PLANE_READ_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_read_double */
+ESIO_PLANE_READ_GEN_CXX(double)
+#endif
+
 /**
  * Read a scalar-valued <code>float</code> plane.
  * \copydetails esio_plane_read_double
  */
 ESIO_PLANE_READ_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_read_float */
+ESIO_PLANE_READ_GEN_CXX(float)
+#endif
+
 /**
  * Read a scalar-valued <code>int</code> plane.
  * \copydetails esio_plane_read_double
  */
 ESIO_PLANE_READ_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_plane_read_int */
+ESIO_PLANE_READ_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of scalars within a plane.
@@ -852,6 +1142,9 @@ esio_plane_size(const esio_handle h,
 /**
  * \name Manipulating distributed, two-dimensional, vector-valued data
  * See \ref conceptsplanes "plane concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_plane_writev()</tt> and
+ * <tt>esio_plane_readv()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -877,17 +1170,32 @@ esio_plane_size(const esio_handle h,
  */
 ESIO_PLANE_WRITEV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_writev_double */
+ESIO_PLANE_WRITEV_GEN_CXX(double)
+#endif
+
 /**
  * Write a vector-valued <code>float</code> plane.
  * \copydetails esio_plane_writev_double
  */
 ESIO_PLANE_WRITEV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_writev_float */
+ESIO_PLANE_WRITEV_GEN_CXX(float)
+#endif
+
 /**
  * Write a vector-valued <code>int</code> plane.
  * \copydetails esio_plane_writev_double
  */
 ESIO_PLANE_WRITEV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_plane_writev_int */
+ESIO_PLANE_WRITEV_GEN_CXX(int)
+#endif
 
 /**
  * Read a vector-valued <code>double</code> plane.
@@ -911,17 +1219,32 @@ ESIO_PLANE_WRITEV_GEN(int)
  */
 ESIO_PLANE_READV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_readv_double */
+ESIO_PLANE_READV_GEN_CXX(double)
+#endif
+
 /**
  * Read a vector-valued <code>float</code> plane.
  * \copydetails esio_plane_readv_double
  */
 ESIO_PLANE_READV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_plane_readv_double */
+ESIO_PLANE_READV_GEN_CXX(float)
+#endif
+
 /**
  * Read a vector-valued <code>int</code> plane.
  * \copydetails esio_plane_readv_double
  */
 ESIO_PLANE_READV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_plane_readv_int */
+ESIO_PLANE_READV_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of vectors and components within a plane.
@@ -945,13 +1268,18 @@ esio_plane_sizev(const esio_handle h,
                  int *ncomponents) ESIO_API;
 /*\@}*/
 
+/** \cond INTERNAL */
 #undef ESIO_PLANE_WRITE_GEN
 #undef ESIO_PLANE_READ_GEN
 #undef ESIO_PLANE_WRITEV_GEN
 #undef ESIO_PLANE_READV_GEN
+#ifdef __cplusplus
+#undef ESIO_PLANE_WRITE_GEN_CXX
+#undef ESIO_PLANE_READ_GEN_CXX
+#undef ESIO_PLANE_WRITEV_GEN_CXX
+#undef ESIO_PLANE_READV_GEN_CXX
+#endif
 
-
-/** \cond INTERNAL */
 #define ESIO_FIELD_WRITE_GEN(TYPE)                             \
 int                                                            \
 esio_field_write_##TYPE(const esio_handle h,                   \
@@ -960,6 +1288,16 @@ esio_field_write_##TYPE(const esio_handle h,                   \
                         int cstride, int bstride, int astride) \
                         ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_FIELD_WRITE_GEN_CXX(TYPE)                                    \
+extern "C++" inline int                                                   \
+esio_field_write(const esio_handle h,                                     \
+                 const char *name,                                        \
+                 const TYPE *field,                                       \
+                 int cstride, int bstride, int astride)                   \
+{ return esio_field_write_##TYPE(h,name,field,cstride,bstride,astride); }
+#endif
+
 #define ESIO_FIELD_READ_GEN(TYPE)                              \
 int                                                            \
 esio_field_read_##TYPE(const esio_handle h,                    \
@@ -967,6 +1305,16 @@ esio_field_read_##TYPE(const esio_handle h,                    \
                        TYPE *field,                            \
                        int cstride, int bstride, int astride)  \
                        ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_FIELD_READ_GEN_CXX(TYPE)                                    \
+extern "C++" inline int                                                  \
+esio_field_read(const esio_handle h,                                     \
+                const char *name,                                        \
+                TYPE *field,                                             \
+                int cstride, int bstride, int astride)                   \
+{ return esio_field_read_##TYPE(h,name,field,cstride,bstride,astride); }
+#endif
 
 #define ESIO_FIELD_WRITEV_GEN(TYPE)                             \
 int                                                             \
@@ -977,6 +1325,18 @@ esio_field_writev_##TYPE(const esio_handle h,                   \
                          int ncomponents)                       \
                          ESIO_API;
 
+#ifdef __cplusplus
+#define ESIO_FIELD_WRITEV_GEN_CXX(TYPE)                                   \
+extern "C++" inline int                                                   \
+esio_field_writev(const esio_handle h,                                    \
+                  const char *name,                                       \
+                  const TYPE *field,                                      \
+                  int cstride, int bstride, int astride,                  \
+                  int ncomponents)                                        \
+{ return esio_field_writev_##TYPE(h,name,field,cstride,bstride,astride,   \
+                                  ncomponents);                         }
+#endif
+
 #define ESIO_FIELD_READV_GEN(TYPE)                             \
 int                                                            \
 esio_field_readv_##TYPE(const esio_handle h,                   \
@@ -985,11 +1345,26 @@ esio_field_readv_##TYPE(const esio_handle h,                   \
                         int cstride, int bstride, int astride, \
                         int ncomponents)                       \
                         ESIO_API;
+
+#ifdef __cplusplus
+#define ESIO_FIELD_READV_GEN_CXX(TYPE)                                    \
+extern "C++" inline int                                                   \
+esio_field_readv(const esio_handle h,                                     \
+                 const char *name,                                        \
+                 TYPE *field,                                             \
+                 int cstride, int bstride, int astride,                   \
+                 int ncomponents)                                         \
+{ return esio_field_readv_##TYPE(h,name,field,cstride,bstride,astride,    \
+                                 ncomponents);                         }
+#endif
 /** \endcond */
 
 /**
  * \name Manipulating distributed, three-dimensional, scalar-valued data
  * See \ref conceptsfields "field concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_field_write()</tt> and
+ * <tt>esio_field_read()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -1015,17 +1390,32 @@ esio_field_readv_##TYPE(const esio_handle h,                   \
  */
 ESIO_FIELD_WRITE_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_write_double */
+ESIO_FIELD_WRITE_GEN_CXX(double)
+#endif
+
 /**
  * Write a scalar-valued <code>float</code> field.
  * \copydetails esio_field_write_double
  */
 ESIO_FIELD_WRITE_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_write_float */
+ESIO_FIELD_WRITE_GEN_CXX(float)
+#endif
+
 /**
  * Write a scalar-valued <code>int</code> field.
  * \copydetails esio_field_write_double
  */
 ESIO_FIELD_WRITE_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_field_write_int */
+ESIO_FIELD_WRITE_GEN_CXX(int)
+#endif
 
 /**
  * Read a scalar-valued <code>double</code> field.
@@ -1049,17 +1439,32 @@ ESIO_FIELD_WRITE_GEN(int)
  */
 ESIO_FIELD_READ_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_read_double */
+ESIO_FIELD_READ_GEN_CXX(double)
+#endif
+
 /**
  * Read a scalar-valued <code>float</code> field.
  * \copydetails esio_field_read_double
  */
 ESIO_FIELD_READ_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_read_float */
+ESIO_FIELD_READ_GEN_CXX(float)
+#endif
+
 /**
  * Read a scalar-valued <code>int</code> field.
  * \copydetails esio_field_read_double
  */
 ESIO_FIELD_READ_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_field_read_int */
+ESIO_FIELD_READ_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of scalars within a field.
@@ -1085,6 +1490,9 @@ esio_field_size(const esio_handle h,
 /**
  * \name Manipulating distributed, three-dimensional, vector-valued data
  * See \ref conceptsfields "field concepts" for more details.
+ * Additionally, the C++-only functions <tt>esio_field_writev()</tt> and
+ * <tt>esio_field_readv()</tt> provide overloaded, type-safe versions of these
+ * methods.
  */
 /*\@{*/
 
@@ -1112,17 +1520,32 @@ esio_field_size(const esio_handle h,
  */
 ESIO_FIELD_WRITEV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_writev_double */
+ESIO_FIELD_WRITEV_GEN_CXX(double)
+#endif
+
 /**
  * Write a vector-valued <code>float</code> field.
  * \copydetails esio_field_writev_double
  */
 ESIO_FIELD_WRITEV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_writev_float */
+ESIO_FIELD_WRITEV_GEN_CXX(float)
+#endif
+
 /**
  * Write a vector-valued <code>int</code> field.
  * \copydetails esio_field_writev_double
  */
 ESIO_FIELD_WRITEV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_field_writev_int */
+ESIO_FIELD_WRITEV_GEN_CXX(int)
+#endif
 
 /**
  * Read a vector-valued <code>double</code> field.
@@ -1148,17 +1571,32 @@ ESIO_FIELD_WRITEV_GEN(int)
  */
 ESIO_FIELD_READV_GEN(double)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_readv_double */
+ESIO_FIELD_READV_GEN_CXX(double)
+#endif
+
 /**
  * Read a vector-valued <code>float</code> field.
  * \copydetails esio_field_readv_double
  */
 ESIO_FIELD_READV_GEN(float)
 
+#ifdef __cplusplus
+/** \copydoc esio_field_readv_float */
+ESIO_FIELD_READV_GEN_CXX(float)
+#endif
+
 /**
  * Read a vector-valued <code>int</code> field.
  * \copydetails esio_field_readv_double
  */
 ESIO_FIELD_READV_GEN(int)
+
+#ifdef __cplusplus
+/** \copydoc esio_field_readv_int */
+ESIO_FIELD_READV_GEN_CXX(int)
+#endif
 
 /**
  * Query the global number of vectors and components within a field.
@@ -1184,11 +1622,18 @@ esio_field_sizev(const esio_handle h,
                  int *ncomponents) ESIO_API;
 /*\@}*/
 
+/** \cond INTERNAL */
 #undef ESIO_FIELD_WRITE_GEN
 #undef ESIO_FIELD_READ_GEN
 #undef ESIO_FIELD_WRITEV_GEN
 #undef ESIO_FIELD_READV_GEN
-
+#ifdef __cplusplus
+#undef ESIO_FIELD_WRITE_GEN_CXX
+#undef ESIO_FIELD_READ_GEN_CXX
+#undef ESIO_FIELD_WRITEV_GEN_CXX
+#undef ESIO_FIELD_READV_GEN_CXX
+#endif
+/** \endcond */
 
 /**
  * \name Querying and controlling field layout
@@ -1203,7 +1648,6 @@ esio_field_sizev(const esio_handle h,
  * @return The number of layouts available within ESIO.
  */
 int esio_field_layout_count(void) ESIO_API;
-
 
 /**
  * Get the default layout associated with the given handle.
