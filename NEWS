@@ -1,3 +1,22 @@
+What's new in ESIO 0.1.2
+------------------------
+
+Precision-agnostic APIs for C++/F90 plus esio_bench bugfixes.
+Beware of BREAKING API CHANGES in esio_{attribute,line,plane}.
+
+This release contains the following
+
+    * Feature #1213: Add precision agnostic API for C++
+    * Feature #1214: Add precision agnostic API for Fortran
+    * Feature #1223: Add parameter information to Fortran API
+    * Feature #1275: Add human-readable descriptions using H5Oset_comment
+    * Feature #1378: Investigate tweaking metadata caching settings
+    * Feature #1379: Allow setting attributes on non-root locations
+    * Support #1381: Roll ESIO 0.1.2 release
+    * Bug #1264: 'mpiexec -np 4 esio_bench -f 100M foo.h5' bombs
+    * Bug #1328: Allow leading URI in file paths
+
+
 What's new in ESIO 0.1.1
 ------------------------
 
