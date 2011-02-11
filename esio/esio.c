@@ -92,6 +92,7 @@ int esio_field_write_internal(const esio_handle h,
                               const char *name,
                               const void *field,
                               int cstride, int bstride, int astride,
+                              const char *comment,
                               hid_t type_id);
 
 static
@@ -99,6 +100,7 @@ int esio_field_read_internal(const esio_handle h,
                              const char *name,
                              void *field,
                              int cstride, int bstride, int astride,
+                             const char *comment,
                              hid_t type_id);
 
 static
@@ -106,6 +108,7 @@ int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
                               int bstride, int astride,
+                              const char *comment,
                               hid_t type_id);
 
 static
@@ -113,6 +116,7 @@ int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
                              int bstride, int astride,
+                             const char *comment,
                              hid_t type_id);
 
 static
@@ -120,6 +124,7 @@ int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
                              int astride,
+                             const char *comment,
                              hid_t type_id);
 
 static
@@ -127,7 +132,14 @@ int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
                             int astride,
+                            const char *comment,
                             hid_t type_id);
+
+// Used in some of the macro-based code generation for conditional arguments
+#define WCMTPAR    , const char *comment
+#define WCMTARG    , comment
+#define RCMTPAR    /* NOP */
+#define RCMTARG    , 0
 
 //*********************************************************************
 // INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL TYPES INTERNAL
@@ -1084,6 +1096,7 @@ int esio_field_write_internal(const esio_handle h,
                               const char *name,
                               const void *field,
                               int cstride, int bstride, int astride,
+                              const char *comment,
                               hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1095,6 +1108,7 @@ int esio_field_write_internal(const esio_handle h,
     if (cstride < 0)      ESIO_ERROR("cstride < 0",            ESIO_EINVAL);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    // (comment == NULL) is valid input
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
     if (h->f.aglobal == 0)
         ESIO_ERROR("esio_field_establish() never called", ESIO_EINVAL);
@@ -1175,8 +1189,16 @@ int esio_field_write_internal(const esio_handle h,
             H5Pclose(plist_id);
             ESIO_ERROR_VAL("Error writing new field", ESIO_EFAILED, wstat);
         }
-        esio_field_close(dset_id);
         H5Pclose(plist_id);
+
+        // Optionally write a comment about the new field
+        if (comment && *comment) {
+            if (H5Oset_comment(dset_id, comment) < 0) {
+                esio_field_close(dset_id);
+                ESIO_ERROR("Error setting comment on new field", ESIO_EFAILED);
+            }
+        }
+        esio_field_close(dset_id);
 
     } else {
         // Field already existed
@@ -1237,8 +1259,17 @@ int esio_field_write_internal(const esio_handle h,
             H5Pclose(plist_id);
             ESIO_ERROR_VAL("Error overwriting field", ESIO_EFAILED, wstat);
         }
-        esio_field_close(dset_id);
         H5Pclose(plist_id);
+
+        // Optionally write a comment about the field
+        if (comment && *comment) {
+            if (H5Oset_comment(dset_id, comment) < 0) {
+                esio_field_close(dset_id);
+                ESIO_ERROR("Error setting comment on existing field",
+                        ESIO_EFAILED);
+            }
+        }
+        esio_field_close(dset_id);
 
     }
 
@@ -1250,8 +1281,12 @@ int esio_field_read_internal(const esio_handle h,
                              const char *name,
                              void *field,
                              int cstride, int bstride, int astride,
+                             const char *comment,
                              hid_t type_id)
 {
+    (void) comment; // Present for consistency with esio_field_write_internal
+    assert(comment == 0);
+
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
@@ -1347,35 +1382,38 @@ int esio_field_read_internal(const esio_handle h,
     return ESIO_SUCCESS;
 }
 
-#define GEN_FIELD_OP(OP,QUAL,TYPE,H5TYPE)                            \
+#define GEN_FIELD_OP(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)              \
 int esio_field_ ## OP ## _ ## TYPE (                                 \
         const esio_handle h,                                         \
         const char *name,                                            \
         QUAL TYPE *field,                                            \
-        int cstride, int bstride, int astride)                       \
+        int cstride, int bstride, int astride                        \
+        CMTPAR)                                                      \
 {                                                                    \
     return esio_field_ ## OP ## _internal(h, name, field,            \
-                                          cstride, bstride, astride, \
+                                          cstride, bstride, astride  \
+                                          CMTARG,                    \
                                           H5TYPE);                   \
 }
 
-GEN_FIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_FIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_FIELD_OP(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_FIELD_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_FIELD_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_FIELD_OP(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_FIELD_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_FIELD_OP(write, const,       int, H5T_NATIVE_INT)
-GEN_FIELD_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_FIELD_OP(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_FIELD_OP(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
 
-#define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE)                                \
+#define GEN_FIELD_OPV(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)                  \
 int esio_field_ ## OP ## v_ ## TYPE(                                      \
         const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *field,                                                 \
         int cstride, int bstride, int astride,                            \
-        int ncomponents)                                                  \
+        int ncomponents                                                   \
+        CMTPAR)                                                           \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
                                                                           \
@@ -1401,20 +1439,21 @@ int esio_field_ ## OP ## v_ ## TYPE(                                      \
             h, name, field,                                               \
             (cstride / ncomponents),                                      \
             (bstride / ncomponents),                                      \
-            (astride / ncomponents),                                      \
+            (astride / ncomponents)                                       \
+            CMTARG,                                                       \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \
 }
 
-GEN_FIELD_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_FIELD_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_FIELD_OPV(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_FIELD_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_FIELD_OPV(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_FIELD_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_FIELD_OPV(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_FIELD_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_FIELD_OPV(write, const,       int, H5T_NATIVE_INT)
-GEN_FIELD_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_FIELD_OPV(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_FIELD_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
 // *******************************************************************
 // PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE PLANE READ WRITE
@@ -1425,6 +1464,7 @@ int esio_plane_write_internal(const esio_handle h,
                               const char *name,
                               const void *plane,
                               int bstride, int astride,
+                              const char *comment,
                               hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1435,6 +1475,7 @@ int esio_plane_write_internal(const esio_handle h,
     if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
+    // (comment == NULL) is valid input
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
     if (h->p.aglobal == 0)
         ESIO_ERROR("esio_plane_establish() never called", ESIO_EINVAL);
@@ -1538,7 +1579,7 @@ int esio_plane_write_internal(const esio_handle h,
         ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
     }
 
-    // Write field
+    // Write plane
     const int wstat = esio_plane_writer(
             plist_id, dset_id, plane,
             h->p.bglobal, h->p.bstart, h->p.blocal, bstride,
@@ -1549,8 +1590,16 @@ int esio_plane_write_internal(const esio_handle h,
         H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error writing plane", ESIO_EFAILED, wstat);
     }
-    esio_plane_close(dset_id);
     H5Pclose(plist_id);
+
+    // Optionally write a comment about the plane
+    if (comment && *comment) {
+        if (H5Oset_comment(dset_id, comment) < 0) {
+            esio_plane_close(dset_id);
+            ESIO_ERROR("Error setting comment on plane", ESIO_EFAILED);
+        }
+    }
+    esio_plane_close(dset_id);
 
     return ESIO_SUCCESS;
 }
@@ -1560,8 +1609,12 @@ int esio_plane_read_internal(const esio_handle h,
                              const char *name,
                              void *plane,
                              int bstride, int astride,
+                             const char *comment,
                              hid_t type_id)
 {
+    (void) comment; // Present for consistency with esio_field_write_internal
+    assert(comment == 0);
+
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
@@ -1647,34 +1700,37 @@ int esio_plane_read_internal(const esio_handle h,
     return ESIO_SUCCESS;
 }
 
-#define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE)                   \
+#define GEN_PLANE_OP(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)     \
 int esio_plane_ ## OP ## _ ## TYPE (                        \
         const esio_handle h,                                \
         const char *name,                                   \
         QUAL TYPE *plane,                                   \
-        int bstride, int astride)                           \
+        int bstride, int astride                            \
+        CMTPAR)                                             \
 {                                                           \
     return esio_plane_ ## OP ## _internal(h, name, plane,   \
-                                          bstride, astride, \
+                                          bstride, astride  \
+                                          CMTARG,           \
                                           H5TYPE);          \
 }
 
-GEN_PLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_PLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_PLANE_OP(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_PLANE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_PLANE_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_PLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_PLANE_OP(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_PLANE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_PLANE_OP(write, const,       int, H5T_NATIVE_INT)
-GEN_PLANE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_PLANE_OP(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_PLANE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
-#define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE)                                \
+#define GEN_PLANE_OPV(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)                  \
 int esio_plane_ ## OP ## v_ ## TYPE(                                      \
         const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *plane,                                                 \
         int bstride, int astride,                                         \
-        int ncomponents)                                                  \
+        int ncomponents                                                   \
+        CMTPAR)                                                           \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
                                                                           \
@@ -1694,20 +1750,21 @@ int esio_plane_ ## OP ## v_ ## TYPE(                                      \
     const int retval = esio_plane_ ## OP ## _internal(                    \
             h, name, plane,                                               \
             (bstride / ncomponents),                                      \
-            (astride / ncomponents),                                      \
+            (astride / ncomponents)                                       \
+            CMTARG,                                                       \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \
 }
 
-GEN_PLANE_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_PLANE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_PLANE_OPV(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_PLANE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_PLANE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_PLANE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_PLANE_OPV(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_PLANE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_PLANE_OPV(write, const,       int, H5T_NATIVE_INT)
-GEN_PLANE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_PLANE_OPV(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_PLANE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
 // *******************************************************************
 // LINE READ WRITE LINE READ WRITE LINE READ WRITE LINE READ WRITE
@@ -1718,6 +1775,7 @@ int esio_line_write_internal(const esio_handle h,
                              const char *name,
                              const void *line,
                              int astride,
+                             const char *comment,
                              hid_t type_id)
 {
     // Sanity check incoming arguments
@@ -1823,7 +1881,7 @@ int esio_line_write_internal(const esio_handle h,
         ESIO_ERROR("Error setting IO transfer properties", ESIO_EFAILED);
     }
 
-    // Write field
+    // Write line
     const int wstat = esio_line_writer(
             plist_id, dset_id, line,
             h->l.aglobal, h->l.astart, h->l.alocal, astride, type_id);
@@ -1832,8 +1890,16 @@ int esio_line_write_internal(const esio_handle h,
         H5Pclose(plist_id);
         ESIO_ERROR_VAL("Error writing line", ESIO_EFAILED, wstat);
     }
-    esio_line_close(dset_id);
     H5Pclose(plist_id);
+
+    // Optionally write a comment about the line
+    if (comment && *comment) {
+        if (H5Oset_comment(dset_id, comment) < 0) {
+            esio_line_close(dset_id);
+            ESIO_ERROR("Error setting comment on line", ESIO_EFAILED);
+        }
+    }
+    esio_line_close(dset_id);
 
     return ESIO_SUCCESS;
 }
@@ -1843,8 +1909,12 @@ int esio_line_read_internal(const esio_handle h,
                             const char *name,
                             void *line,
                             int astride,
+                            const char *comment,
                             hid_t type_id)
 {
+    (void) comment; // Present for consistency with esio_field_write_internal
+    assert(comment == 0);
+
     // Sanity check incoming arguments
     // Strides must be nonnegative because hsize_t is unsigned
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
@@ -1920,34 +1990,37 @@ int esio_line_read_internal(const esio_handle h,
     return ESIO_SUCCESS;
 }
 
-#define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE)                \
+#define GEN_LINE_OP(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)  \
 int esio_line_ ## OP ## _ ## TYPE (                     \
         const esio_handle h,                            \
         const char *name,                               \
         QUAL TYPE *line,                                \
-        int astride)                                    \
+        int astride                                     \
+        CMTPAR)                                         \
 {                                                       \
     return esio_line_ ## OP ## _internal(h, name, line, \
-                                         astride,       \
+                                         astride        \
+                                         CMTARG,        \
                                          H5TYPE);       \
 }
 
-GEN_LINE_OP(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_LINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_LINE_OP(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_LINE_OP(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_LINE_OP(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_LINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_LINE_OP(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_LINE_OP(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_LINE_OP(write, const,       int, H5T_NATIVE_INT)
-GEN_LINE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_LINE_OP(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_LINE_OP(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
-#define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE)                                 \
+#define GEN_LINE_OPV(OP,QUAL,TYPE,H5TYPE,CMTPAR,CMTARG)                   \
 int esio_line_ ## OP ## v_ ## TYPE(                                       \
         const esio_handle h,                                              \
         const char *name,                                                 \
         QUAL TYPE *line,                                                  \
         int astride,                                                      \
-        int ncomponents)                                                  \
+        int ncomponents                                                   \
+        CMTPAR)                                                           \
 {                                                                         \
     const hid_t array_type_id = esio_type_arrayify(H5TYPE, ncomponents);  \
                                                                           \
@@ -1961,20 +2034,21 @@ int esio_line_ ## OP ## v_ ## TYPE(                                       \
     }                                                                     \
     const int retval = esio_line_ ## OP ## _internal(                     \
             h, name, line,                                                \
-            (astride / ncomponents),                                      \
+            (astride / ncomponents)                                       \
+            CMTARG,                                                       \
             array_type_id);                                               \
     H5Tclose(array_type_id);                                              \
     return retval;                                                        \
 }
 
-GEN_LINE_OPV(write, const,       double, H5T_NATIVE_DOUBLE)
-GEN_LINE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE)
+GEN_LINE_OPV(write, const,       double, H5T_NATIVE_DOUBLE, WCMTPAR, WCMTARG)
+GEN_LINE_OPV(read,  /*mutable*/, double, H5T_NATIVE_DOUBLE, RCMTPAR, RCMTARG)
 
-GEN_LINE_OPV(write, const,       float, H5T_NATIVE_FLOAT)
-GEN_LINE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT)
+GEN_LINE_OPV(write, const,       float, H5T_NATIVE_FLOAT, WCMTPAR, WCMTARG)
+GEN_LINE_OPV(read,  /*mutable*/, float, H5T_NATIVE_FLOAT, RCMTPAR, RCMTARG)
 
-GEN_LINE_OPV(write, const,       int, H5T_NATIVE_INT)
-GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT)
+GEN_LINE_OPV(write, const,       int, H5T_NATIVE_INT, WCMTPAR, WCMTARG)
+GEN_LINE_OPV(read,  /*mutable*/, int, H5T_NATIVE_INT, RCMTPAR, RCMTARG)
 
 // *********************************************************************
 // ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE ATTRIBUTE

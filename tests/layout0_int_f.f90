@@ -91,14 +91,14 @@ program layout0_int_f
 !   Write a scalar-valued field
     call esio_field_write_integer(h, "name_scalar", value_scalar,           &
                                   stride(1), stride(2), stride(3),          &
-                                  ierr)
+                                  "scalar-valued field", ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued field
     call esio_field_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
                                    stride(1), stride(2), stride(3),          &
-                                   ierr)
+                                   "vector-valued field", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file

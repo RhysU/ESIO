@@ -70,14 +70,14 @@ program plane_int_f
 !   Write a scalar-valued plane
     call esio_plane_write_integer(h, "name_scalar", value_scalar,            &
                                   stride(1), stride(2),                      &
-                                  ierr)
+                                  "scalar-valued plane", ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued plane
     call esio_plane_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
                                    stride(1), stride(2),                     &
-                                   ierr)
+                                   "vector-valued plane", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file

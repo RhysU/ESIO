@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         esio_file_clone(h, "template.h5", "uncommitted.h5", 1 /*overwrite*/);
 
         /* Save the current simulation state in the uncommitted restart */
-        esio_line_write_double(h, "example", example, 1);
+        esio_line_write_double(h, "example", example, 1, NULL);
 
         /* Commit the restart file.  Up to 5 older restarts are retained. */
         esio_file_close_restart(h, "committed#.h5", 5 /*retain_count*/);

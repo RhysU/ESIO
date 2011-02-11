@@ -36,6 +36,9 @@
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride
+#ifdef HASCOMMENT
+  character(len=*),  intent(in),  optional :: comment
+#endif
   integer,           intent(out), optional :: ierr
 
   integer :: stat, tmp_astride
@@ -47,6 +50,9 @@
 #ifdef VECTORVALUED
                         ,ncomponents                 &
 #endif
+#ifdef HASCOMMENT
+                        ,comment                     &
+#endif
                        ) bind (C, name=CBINDNAME)
       import
       integer(c_int)                                  :: line_impl
@@ -57,6 +63,9 @@
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
 #endif
+#ifdef HASCOMMENT
+      character(len=1,kind=c_char), intent(in)        :: comment(*)
+#endif
     end function line_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
@@ -64,17 +73,41 @@
   tmp_astride = 0
   if (present(astride)) tmp_astride = astride
 
+#ifndef HASCOMMENT
   stat = line_impl(handle, esio_f_c_string(name), line,  &
                    tmp_astride                           &
 #ifdef VECTORVALUED
                    ,ncomponents                          &
 #endif
                   )
+#else  /* HASCOMMENT */
+  if (present(comment)) then
+    stat = line_impl(handle, esio_f_c_string(name), line,  &
+                     tmp_astride                           &
+#ifdef VECTORVALUED
+                     ,ncomponents                          &
+#endif
+                     ,esio_f_c_string(comment)             &
+                    )
+  else
+    stat = line_impl(handle, esio_f_c_string(name), line,  &
+                     tmp_astride                           &
+#ifdef VECTORVALUED
+                     ,ncomponents                          &
+#endif
+                     ,c_null_char                          &
+                    )
+  end if
+#endif /* HASCOMMENT */
+
   if (present(ierr)) ierr = stat
 
 #undef FINTENT
 #undef CTYPE
 #undef CBINDNAME
+#ifdef HASCOMMENT
+#undef HASCOMMENT
+#endif
 #ifdef VECTORVALUED
 #undef VECTORVALUED
 #endif

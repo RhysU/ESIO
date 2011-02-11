@@ -678,17 +678,19 @@ int                                         \
 esio_line_write_##TYPE(const esio_handle h, \
                        const char *name,    \
                        const TYPE *line,    \
-                       int astride)         \
+                       int astride,         \
+                       const char *comment) \
                        ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_LINE_WRITE_GEN_CXX(TYPE)                   \
-extern "C++" inline int                                 \
-esio_line_write(const esio_handle h,                    \
-                const char *name,                       \
-                const TYPE *line,                       \
-                int astride)                            \
-{ return esio_line_write_##TYPE(h,name,line,astride); }
+#define ESIO_LINE_WRITE_GEN_CXX(TYPE)                           \
+extern "C++" inline int                                         \
+esio_line_write(const esio_handle h,                            \
+                const char *name,                               \
+                const TYPE *line,                               \
+                int astride,                                    \
+                const char *comment = 0)                        \
+{ return esio_line_write_##TYPE(h,name,line,astride,comment); }
 #endif
 
 #define ESIO_LINE_READ_GEN(TYPE)           \
@@ -715,7 +717,8 @@ esio_line_writev_##TYPE(const esio_handle h, \
                         const char *name,    \
                         const TYPE *line,    \
                         int astride,         \
-                        int ncomponents)     \
+                        int ncomponents,     \
+                        const char *comment) \
                         ESIO_API;
 
 #ifdef __cplusplus
@@ -725,8 +728,10 @@ esio_line_writev(const esio_handle h,                                \
                  const char *name,                                   \
                  const TYPE *line,                                   \
                  int astride,                                        \
-                 int ncomponents)                                    \
-{ return esio_line_writev_##TYPE(h,name,line,astride,ncomponents); }
+                 int ncomponents,                                    \
+                 const char *comment = 0)                            \
+{ return esio_line_writev_##TYPE(h,name,line,astride,ncomponents,    \
+                                 comment); }
 #endif
 
 #define ESIO_LINE_READV_GEN(TYPE)           \
@@ -770,6 +775,8 @@ esio_line_readv(const esio_handle h,                                \
  * \param astride Stride between adjacent values in buffer \c line
  *                measured in <tt>sizeof(</tt><i>scalar</i><tt>)</tt>.
  *                Supplying zero indicates contiguous data.
+ * \param comment Comment to associate with the line.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -883,6 +890,8 @@ esio_line_size(const esio_handle h,
  *                It must be an integer multiple of \c ncomponents.
  *                Supplying zero indicates contiguous data.
  * \param ncomponents Number of scalar components within each vector.
+ * \param comment Comment to associate with the line.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -996,17 +1005,19 @@ int                                               \
 esio_plane_write_##TYPE(const esio_handle h,      \
                         const char *name,         \
                         const TYPE *plane,        \
-                        int bstride, int astride) \
+                        int bstride, int astride, \
+                        const char *comment)      \
                         ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_PLANE_WRITE_GEN_CXX(TYPE)                            \
-extern "C++" inline int                                           \
-esio_plane_write(const esio_handle h,                             \
-                 const char *name,                                \
-                 const TYPE *plane,                               \
-                 int bstride, int astride)                        \
-{ return esio_plane_write_##TYPE(h,name,plane,bstride,astride); }
+#define ESIO_PLANE_WRITE_GEN_CXX(TYPE)                                    \
+extern "C++" inline int                                                   \
+esio_plane_write(const esio_handle h,                                     \
+                 const char *name,                                        \
+                 const TYPE *plane,                                       \
+                 int bstride, int astride,                                \
+                 const char *comment = 0)                                 \
+{ return esio_plane_write_##TYPE(h,name,plane,bstride,astride,comment); }
 #endif
 
 #define ESIO_PLANE_READ_GEN(TYPE)                \
@@ -1033,17 +1044,19 @@ esio_plane_writev_##TYPE(const esio_handle h,      \
                          const char *name,         \
                          const TYPE *plane,        \
                          int bstride, int astride, \
-                         int ncomponents)          \
+                         int ncomponents,          \
+                         const char *comment)      \
                          ESIO_API;
 
 #ifdef __cplusplus
-#define ESIO_PLANE_WRITEV_GEN_CXX(TYPE)                                        \
-extern "C++" inline int                                                      \
-esio_plane_writev(const esio_handle h,                                         \
-                  const char *name,                                            \
-                  const TYPE *plane,                                           \
-                  int bstride, int astride,                                    \
-                  int ncomponents)                                             \
+#define ESIO_PLANE_WRITEV_GEN_CXX(TYPE)                                       \
+extern "C++" inline int                                                       \
+esio_plane_writev(const esio_handle h,                                        \
+                  const char *name,                                           \
+                  const TYPE *plane,                                          \
+                  int bstride, int astride,                                   \
+                  int ncomponents,                                            \
+                  const char *comment = 0)                                    \
 { return esio_plane_writev_##TYPE(h,name,plane,bstride,astride,ncomponents); }
 #endif
 
@@ -1092,6 +1105,8 @@ esio_plane_readv(const esio_handle h,                                         \
  *                within buffer \c plane.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c plane.
+ * \param comment Comment to associate with the plane.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -1215,6 +1230,8 @@ esio_plane_size(const esio_handle h,
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c plane.
  * \param ncomponents Number of scalar components within each vector.
+ * \param comment Comment to associate with the plane.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -1335,7 +1352,8 @@ int                                                            \
 esio_field_write_##TYPE(const esio_handle h,                   \
                         const char *name,                      \
                         const TYPE *field,                     \
-                        int cstride, int bstride, int astride) \
+                        int cstride, int bstride, int astride, \
+                        const char *comment)                   \
                         ESIO_API;
 
 #ifdef __cplusplus
@@ -1344,8 +1362,10 @@ extern "C++" inline int                                                   \
 esio_field_write(const esio_handle h,                                     \
                  const char *name,                                        \
                  const TYPE *field,                                       \
-                 int cstride, int bstride, int astride)                   \
-{ return esio_field_write_##TYPE(h,name,field,cstride,bstride,astride); }
+                 int cstride, int bstride, int astride,                   \
+                 const char *comment = 0)                                 \
+{ return esio_field_write_##TYPE(h,name,field,cstride,bstride,astride,    \
+                                 comment); }
 #endif
 
 #define ESIO_FIELD_READ_GEN(TYPE)                              \
@@ -1372,7 +1392,8 @@ esio_field_writev_##TYPE(const esio_handle h,                   \
                          const char *name,                      \
                          const TYPE *field,                     \
                          int cstride, int bstride, int astride, \
-                         int ncomponents)                       \
+                         int ncomponents,                       \
+                         const char *comment)                   \
                          ESIO_API;
 
 #ifdef __cplusplus
@@ -1382,9 +1403,10 @@ esio_field_writev(const esio_handle h,                                    \
                   const char *name,                                       \
                   const TYPE *field,                                      \
                   int cstride, int bstride, int astride,                  \
-                  int ncomponents)                                        \
+                  int ncomponents,                                        \
+                  const char *comment = 0)                                \
 { return esio_field_writev_##TYPE(h,name,field,cstride,bstride,astride,   \
-                                  ncomponents);                         }
+                                  ncomponents,comment);                 }
 #endif
 
 #define ESIO_FIELD_READV_GEN(TYPE)                             \
@@ -1435,6 +1457,8 @@ esio_field_readv(const esio_handle h,                                     \
  *                within buffer \c field.
  * \param astride Stride between adjacent scalars in "A"
  *                within buffer \c field.
+ * \param comment Comment to associate with the field.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */
@@ -1565,6 +1589,8 @@ esio_field_size(const esio_handle h,
  * \param astride Stride between adjacent vectors in "A"
  *                within buffer \c field.
  * \param ncomponents Number of scalar components within each vector.
+ * \param comment Comment to associate with the line.  Providing NULL or the
+ *                empty string indicates that no comment should be written.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  */

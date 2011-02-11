@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     double example[2] = { 2.0 * world_rank, 2.0 * world_rank + 1 };
     esio_line_establish(h, 2*world_size, 2*world_rank, 2);
-    esio_line_write_double(h, "example", example, 1);
+    esio_line_write_double(h, "example", example, 1, NULL);
 
     esio_file_close(h);
     esio_handle_finalize(h);

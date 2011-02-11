@@ -223,7 +223,7 @@ FCT_BGN()
 
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_line_write)(
-                               handle, "line", line, astride));
+                               handle, "line", line, astride, NULL));
             fct_req(0 == esio_file_flush(handle));
 
             // Populate local line with test data
@@ -236,11 +236,11 @@ FCT_BGN()
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_write)(
-                                   handle, "line", line, astride));
+                                   handle, "line", line, astride, "comment!"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_write)(
-                                   handle, "line", line, 0));
+                                   handle, "line", line, 0, "comment!"));
             }
 
             { // Ensure the global size was written correctly
@@ -271,6 +271,12 @@ FCT_BGN()
                     const REAL value    = *p_line++;
                     fct_chk_eq_dbl(value, expected);
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "line", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment!", buf);
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(line);
@@ -332,12 +338,12 @@ FCT_BGN()
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_writev)(
                                    handle, "vline", vline,
-                                   astride, ncomponents));
+                                   astride, ncomponents, "comment?"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_line_writev)(
                                    handle, "vline", vline,
-                                   0, ncomponents));
+                                   0, ncomponents, "comment?"));
             }
 
             { // Ensure the global size was written correctly
@@ -380,6 +386,12 @@ FCT_BGN()
                         fct_chk_eq_dbl(value, (REAL) 2*(i+3)-h);
                     }
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "vline", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment?", buf);
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(vline);

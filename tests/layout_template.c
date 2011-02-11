@@ -324,7 +324,7 @@ FCT_BGN()
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_field_write)(
                                 handle, "field", field,
-                                cstride, bstride, astride));
+                                cstride, bstride, astride, NULL));
             fct_req(0 == esio_file_flush(handle));
 
             // Populate local field with test data
@@ -343,12 +343,12 @@ FCT_BGN()
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_write)(
-                                    handle, "field", field,
-                                    cstride, bstride, astride));
+                        handle, "field", field,
+                        cstride, bstride, astride, "comment!"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_write)(
-                                    handle, "field", field, 0, 0, 0));
+                    handle, "field", field, 0, 0, 0, "comment!"));
             }
 
             { // Ensure the global size was written correctly
@@ -390,6 +390,13 @@ FCT_BGN()
                         }
                     }
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "field", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment!", buf);
+
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(field);
@@ -474,13 +481,13 @@ FCT_BGN()
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_writev)(
-                                    handle, "vfield", vfield,
-                                    cstride, bstride, astride, ncomponents));
+                            handle, "vfield", vfield,
+                            cstride, bstride, astride, ncomponents, "comment?"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_field_writev)(
                                     handle, "vfield", vfield,
-                                    0, 0, 0, ncomponents));
+                                    0, 0, 0, ncomponents, "comment?"));
             }
 
             { // Ensure the global size was written correctly
@@ -534,6 +541,13 @@ FCT_BGN()
                         }
                     }
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "vfield", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment?", buf);
+
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(vfield);

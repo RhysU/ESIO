@@ -283,7 +283,7 @@ FCT_BGN()
 
             // Write zeros to disk and flush the buffers
             fct_req(0 == AFFIX(esio_plane_write)(
-                                handle, "plane", plane, bstride, astride));
+                        handle, "plane", plane, bstride, astride, NULL));
             fct_req(0 == esio_file_flush(handle));
 
             // Populate local plane with test data
@@ -299,11 +299,11 @@ FCT_BGN()
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_write)(
-                                    handle, "plane", plane, bstride, astride));
+                    handle, "plane", plane, bstride, astride, "comment!"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_write)(
-                                    handle, "plane", plane, 0, 0));
+                    handle, "plane", plane, 0, 0, "comment!"));
             }
 
             { // Ensure the global size was written correctly
@@ -339,6 +339,12 @@ FCT_BGN()
                         fct_chk_eq_dbl(value, expected);
                     }
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "plane", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment!", buf);
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(plane);
@@ -410,12 +416,12 @@ FCT_BGN()
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_writev)(
                                     handle, "vplane", vplane,
-                                    bstride, astride, ncomponents));
+                                    bstride, astride, ncomponents, "comment?"));
             } else {
                 // Contiguous; exercise default stride arguments
                 fct_req(0 == AFFIX(esio_plane_writev)(
                                     handle, "vplane", vplane,
-                                    0, 0, ncomponents));
+                                    0, 0, ncomponents, "comment?"));
             }
 
             { // Ensure the global size was written correctly
@@ -465,6 +471,13 @@ FCT_BGN()
                         }
                     }
                 }
+
+                char buf[64];
+                const int bufsize = sizeof(buf)/sizeof(buf[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "vplane", buf,
+                                                   bufsize, H5P_DEFAULT));
+                fct_chk_eq_str("comment?", buf);
+
 
                 fct_req(0 <= H5Fclose(file_id));
                 free(vplane);

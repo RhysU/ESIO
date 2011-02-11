@@ -933,8 +933,9 @@ end subroutine esio_attribute_readv_integer
 
 subroutine esio_line_write_double (handle, name, line,               &
                                    astride,                          &
-                                   ierr)
+                                   comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_write_double"
@@ -946,8 +947,9 @@ end subroutine esio_line_write_double
 
 subroutine esio_line_write_single (handle, name, line,               &
                                    astride,                          &
-                                   ierr)
+                                   comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_write_float"
@@ -959,8 +961,9 @@ end subroutine esio_line_write_single
 
 subroutine esio_line_write_integer (handle, name, line,               &
                                     astride,                          &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_write_int"
@@ -1047,9 +1050,10 @@ end subroutine esio_line_read_integer
 
 subroutine esio_line_writev_double (handle, name, line, ncomponents,  &
                                     astride,                          &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_line_writev_double"
@@ -1061,9 +1065,10 @@ end subroutine esio_line_writev_double
 
 subroutine esio_line_writev_single (handle, name, line, ncomponents,  &
                                     astride,                          &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_line_writev_float"
@@ -1075,9 +1080,10 @@ end subroutine esio_line_writev_single
 
 subroutine esio_line_writev_integer (handle, name, line, ncomponents,  &
                                      astride,                          &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_line_writev_int"
@@ -1171,8 +1177,9 @@ end subroutine esio_line_readv_integer
 
 subroutine esio_plane_write_double (handle, name, plane,              &
                                     astride, bstride,                 &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_write_double"
@@ -1184,8 +1191,9 @@ end subroutine esio_plane_write_double
 
 subroutine esio_plane_write_single (handle, name, plane,              &
                                     astride, bstride,                 &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_write_float"
@@ -1197,8 +1205,9 @@ end subroutine esio_plane_write_single
 
 subroutine esio_plane_write_integer (handle, name, plane,              &
                                      astride, bstride,                 &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_write_int"
@@ -1290,9 +1299,10 @@ end subroutine esio_plane_read_integer
 
 subroutine esio_plane_writev_double (handle, name, plane, ncomponents, &
                                      astride, bstride,                 &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_plane_writev_double"
@@ -1304,9 +1314,10 @@ end subroutine esio_plane_writev_double
 
 subroutine esio_plane_writev_single (handle, name, plane, ncomponents, &
                                      astride, bstride,                 &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_plane_writev_float"
@@ -1318,9 +1329,10 @@ end subroutine esio_plane_writev_single
 
 subroutine esio_plane_writev_integer (handle, name, plane, ncomponents, &
                                       astride, bstride,                 &
-                                      ierr)
+                                      comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_plane_writev_int"
@@ -1419,8 +1431,9 @@ end subroutine esio_plane_readv_integer
 
 subroutine esio_field_write_double (handle, name, field,              &
                                     astride, bstride, cstride,        &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_write_double"
@@ -1432,8 +1445,9 @@ end subroutine esio_field_write_double
 
 subroutine esio_field_write_single (handle, name, field,              &
                                     astride, bstride, cstride,        &
-                                    ierr)
+                                    comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_write_float"
@@ -1445,8 +1459,9 @@ end subroutine esio_field_write_single
 
 subroutine esio_field_write_integer (handle, name, field,              &
                                      astride, bstride, cstride,        &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_write_int"
@@ -1541,9 +1556,10 @@ end subroutine esio_field_read_integer
 
 subroutine esio_field_writev_double (handle, name, field, ncomponents, &
                                      astride, bstride, cstride,        &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_double)
 #  define CBINDNAME "esio_field_writev_double"
@@ -1555,9 +1571,10 @@ end subroutine esio_field_writev_double
 
 subroutine esio_field_writev_single (handle, name, field, ncomponents, &
                                      astride, bstride, cstride,        &
-                                     ierr)
+                                     comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE real(c_float)
 #  define CBINDNAME "esio_field_writev_float"
@@ -1569,9 +1586,10 @@ end subroutine esio_field_writev_single
 
 subroutine esio_field_writev_integer (handle, name, field, ncomponents, &
                                       astride, bstride, cstride,        &
-                                      ierr)
+                                      comment, ierr)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #  define VECTORVALUED
+#  define HASCOMMENT
 #  define FINTENT intent(in)
 #  define CTYPE integer(c_int)
 #  define CBINDNAME "esio_field_writev_int"

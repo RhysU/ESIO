@@ -67,14 +67,14 @@ program line_int_f
 !   Write a scalar-valued line
     call esio_line_write_integer(h, "name_scalar", value_scalar,            &
                                  stride(1),                                 &
-                                 ierr)
+                                 "scalar-valued line", ierr)
     ASSERT(ierr == 0)
 
 !   Write a vector-valued line
     call esio_line_writev_integer(h, "name_vector", value_vector,           &
                                   ncomponents,                              &
                                   stride(1),                                &
-                                  ierr)
+                                  "vector-valued line", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
