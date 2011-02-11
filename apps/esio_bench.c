@@ -648,11 +648,14 @@ int main(int argc, char *argv[])
 
     // Determine which functions to invoke below based on d.typesize
     int (*p_esio_field_writev)(const esio_handle, const char *,
-                               const void *, int, int, int, int) = NULL;
+                               const void *, int, int, int, int,
+                               const char *) = NULL;
     int (*p_esio_plane_writev)(const esio_handle, const char *,
-                               const void *, int, int, int) = NULL;
+                               const void *, int, int, int,
+                               const char *) = NULL;
     int (*p_esio_line_writev)(const esio_handle, const char *,
-                              const void *, int, int) = NULL;
+                              const void *, int, int,
+                              const char *) = NULL;
     // TODO Understand "warning: assignment from incompatible pointer type"
     // which arise from the function pointer assignments that follow.
     switch (d.typesize)
@@ -690,7 +693,7 @@ int main(int argc, char *argv[])
             for (int j = 0; j < d.nfields; ++j) {
                 *n = 'f';
                 p_esio_field_writev(d.h, n,
-                        f.data + j * f.stride, 0, 0, 0, f.ncomponents);
+                        f.data + j * f.stride, 0, 0, 0, f.ncomponents, NULL);
                 n += namelen;
             }
             GRVY_TIMER_END("esio_field_write");
@@ -702,7 +705,7 @@ int main(int argc, char *argv[])
             for (int j = 0; j < d.nplanes; ++j) {
                 *n = 'p';
                 p_esio_plane_writev(d.h, n,
-                        p.data + j * p.stride, 0, 0, p.ncomponents);
+                        p.data + j * p.stride, 0, 0, p.ncomponents, NULL);
                 n += namelen;
             }
             GRVY_TIMER_END("esio_plane_write");
@@ -714,7 +717,7 @@ int main(int argc, char *argv[])
             for (int j = 0; j < d.nlines; ++j) {
                 *n = 'l';
                 p_esio_line_writev(d.h, n,
-                        l.data + j * l.stride, 0, l.ncomponents);
+                        l.data + j * l.stride, 0, l.ncomponents, NULL);
                 n += namelen;
             }
             GRVY_TIMER_END("esio_line_write");
@@ -1012,6 +1015,22 @@ static int field_initialize(struct details *d, struct field_details *f)
             f->cglobal, f->bglobal, f->aglobal, f->ncomponents,
             d->typesize);
 
+    // In verbose mode, dump out decomposition details
+    if (d->verbose) {
+        fflush(stdout);
+        fflush(stderr);
+        for (int i = 0; i < d->world_size; ++i) {
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+            if (i != d->world_rank) continue;
+            fprintf(stdout, "\tRank %d owns [%d,%d)x[%d,%d)x[%d,%d)\n",
+                    d->world_rank, f->cstart, f->cstart + f->clocal,
+                                   f->bstart, f->bstart + f->blocal,
+                                   f->astart, f->astart + f->alocal);
+            fflush(stdout);
+        }
+        ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+    }
+
     return ESIO_SUCCESS;
 }
 
@@ -1085,6 +1104,21 @@ static int plane_initialize(struct details *d, struct plane_details *p)
             " each with %d %zu-byte component(s)\n", d->nplanes,
             p->bglobal, p->aglobal, p->ncomponents, d->typesize);
 
+    // In verbose mode, dump out decomposition details
+    if (d->verbose) {
+        fflush(stdout);
+        fflush(stderr);
+        for (int i = 0; i < d->world_size; ++i) {
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+            if (i != d->world_rank) continue;
+            fprintf(stdout, "\tRank %d owns [%d,%d)x[%d,%d)\n",
+                    d->world_rank, p->bstart, p->bstart + p->blocal,
+                                   p->astart, p->astart + p->alocal);
+            fflush(stdout);
+        }
+        ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+    }
+
     return ESIO_SUCCESS;
 }
 
@@ -1154,6 +1188,20 @@ static int line_initialize(struct details *d, struct line_details  *l)
     fprintf(rankout, "Problem contains %d line(s) of size %d"
             " each with %d %zu-byte component(s)\n", d->nlines,
             l->aglobal, l->ncomponents, d->typesize);
+
+    // In verbose mode, dump out decomposition details
+    if (d->verbose) {
+        fflush(stdout);
+        fflush(stderr);
+        for (int i = 0; i < d->world_size; ++i) {
+            ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+            if (i != d->world_rank) continue;
+            fprintf(stdout, "\tRank %d owns [%d,%d)\n",
+                    d->world_rank, l->astart, l->astart + l->alocal);
+            fflush(stdout);
+        }
+        ESIO_MPICHKQ(MPI_Barrier(MPI_COMM_WORLD));
+    }
 
     return ESIO_SUCCESS;
 }
