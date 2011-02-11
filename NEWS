@@ -1,3 +1,14 @@
+What's new in ESIO 0.1.3
+------------------------
+
+Showstopper build fixes for Intel 10.1
+
+This release contains the following
+
+    * Bug #1382: Intel 10.1.21 showstopper on buildbot for ESIO 0.1.2
+    * Support #1383: Roll ESIO 0.1.3 release
+
+
 What's new in ESIO 0.1.2
 ------------------------
 
