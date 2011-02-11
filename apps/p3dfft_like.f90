@@ -80,8 +80,7 @@ program p3dfft_like
                                     nz, zjst, zjsz)
   stime = mpi_wtime()
   do i = 1, niter
-!   TODO Use generic, precision-agnostic call
-    call esio_field_write_double(handle, fieldname, u)
+    call esio_field_writev(handle, fieldname, u, nc) ! Precision-agnostic!!!
   end do
   etime = mpi_wtime()
 

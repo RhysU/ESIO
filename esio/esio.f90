@@ -39,7 +39,11 @@
 !!   <li>
 !!     The Fortran API uses <tt>integer</tt>, <tt>single</tt>, and
 !!     <tt>double</tt> to refer to the types the C API calls <tt>int</tt>,
-!!     <tt>float</tt> and <tt>double</tt>.
+!!     <tt>float</tt> and <tt>double</tt>.  Moreover, the Fortran API
+!!     provides generic interfaces for all read and write operations.
+!!     This allows you to, for example, invoke esio::esio_field_write()
+!!     and have it correctly determine which precision your field data
+!!     possesses.
 !!   </li>
 !!   <li>
 !!     The \c intent(in) and \c intent(out) semantics of each call
@@ -115,6 +119,106 @@ module esio
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
   private :: esio_error
+
+! Generic, precision-agnostic attribute interfaces atop the public API
+  interface esio_attribute_write
+    module procedure esio_attribute_write_double
+    module procedure esio_attribute_write_single
+    module procedure esio_attribute_write_integer
+  end interface
+
+  interface esio_attribute_read
+    module procedure esio_attribute_read_double
+    module procedure esio_attribute_read_single
+    module procedure esio_attribute_read_integer
+  end interface
+
+  interface esio_attribute_writev
+    module procedure esio_attribute_writev_double
+    module procedure esio_attribute_writev_single
+    module procedure esio_attribute_writev_integer
+  end interface
+
+  interface esio_attribute_readv
+    module procedure esio_attribute_readv_double
+    module procedure esio_attribute_readv_single
+    module procedure esio_attribute_readv_integer
+  end interface
+
+! Generic, precision-agnostic line interfaces atop the public API
+  interface esio_line_write
+    module procedure esio_line_write_double
+    module procedure esio_line_write_single
+    module procedure esio_line_write_integer
+  end interface
+
+  interface esio_line_read
+    module procedure esio_line_read_double
+    module procedure esio_line_read_single
+    module procedure esio_line_read_integer
+  end interface
+
+  interface esio_line_writev
+    module procedure esio_line_writev_double
+    module procedure esio_line_writev_single
+    module procedure esio_line_writev_integer
+  end interface
+
+  interface esio_line_readv
+    module procedure esio_line_readv_double
+    module procedure esio_line_readv_single
+    module procedure esio_line_readv_integer
+  end interface
+
+! Generic, precision-agnostic plane interfaces atop the public API
+  interface esio_plane_write
+    module procedure esio_plane_write_double
+    module procedure esio_plane_write_single
+    module procedure esio_plane_write_integer
+  end interface
+
+  interface esio_plane_read
+    module procedure esio_plane_read_double
+    module procedure esio_plane_read_single
+    module procedure esio_plane_read_integer
+  end interface
+
+  interface esio_plane_writev
+    module procedure esio_plane_writev_double
+    module procedure esio_plane_writev_single
+    module procedure esio_plane_writev_integer
+  end interface
+
+  interface esio_plane_readv
+    module procedure esio_plane_readv_double
+    module procedure esio_plane_readv_single
+    module procedure esio_plane_readv_integer
+  end interface
+
+! Generic, precision-agnostic field interfaces atop the public API
+  interface esio_field_write
+    module procedure esio_field_write_double
+    module procedure esio_field_write_single
+    module procedure esio_field_write_integer
+  end interface
+
+  interface esio_field_read
+    module procedure esio_field_read_double
+    module procedure esio_field_read_single
+    module procedure esio_field_read_integer
+  end interface
+
+  interface esio_field_writev
+    module procedure esio_field_writev_double
+    module procedure esio_field_writev_single
+    module procedure esio_field_writev_integer
+  end interface
+
+  interface esio_field_readv
+    module procedure esio_field_readv_double
+    module procedure esio_field_readv_single
+    module procedure esio_field_readv_integer
+  end interface
 
 contains
 

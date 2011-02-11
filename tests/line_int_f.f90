@@ -64,17 +64,28 @@ program line_int_f
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
-!   Write a scalar-valued line
+!   Write a scalar-valued line using an explicitly-typed interface
     call esio_line_write_integer(h, "name_scalar", value_scalar,            &
                                  stride(1),                                 &
                                  "scalar-valued line", ierr)
     ASSERT(ierr == 0)
 
-!   Write a vector-valued line
+!   Overwrite the scalar-valued line using a generic interface
+    call esio_line_write(h, "name_scalar", value_scalar,            &
+                         stride(1),                                 &
+                         "scalar-valued line", ierr)
+    ASSERT(ierr == 0)
+
+!   Write a vector-valued line using an explicitly-typed interface
     call esio_line_writev_integer(h, "name_vector", value_vector,           &
-                                  ncomponents,                              &
-                                  stride(1),                                &
+                                  ncomponents, stride(1),                   &
                                   "vector-valued line", ierr)
+    ASSERT(ierr == 0)
+
+!   Overwrite the vector-valued line using a generic interface
+    call esio_line_writev(h, "name_vector", value_vector,   &
+                          ncomponents, stride(1),           &
+                          "vector-valued line", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
@@ -98,6 +109,13 @@ program line_int_f
                                 ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
+    call esio_line_read(h, "name_scalar", buffer_scalar,          &
+                        stride(1),                                &
+                        ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
 
 !   Check the vector-valued line's size and data
     call esio_line_sizev(h, "name_vector", i, j, ierr)
@@ -110,6 +128,14 @@ program line_int_f
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
+    call esio_line_readv(h, "name_vector", buffer_vector,          &
+                         ncomponents,                              &
+                         stride(1),                                &
+                         ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
 
 !   Close the file
     call esio_file_close(h, ierr)

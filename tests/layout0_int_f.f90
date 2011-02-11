@@ -88,17 +88,30 @@ program layout0_int_f
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
-!   Write a scalar-valued field
+!   Write a scalar-valued field using an explicitly-typed interface
     call esio_field_write_integer(h, "name_scalar", value_scalar,           &
                                   stride(1), stride(2), stride(3),          &
                                   "scalar-valued field", ierr)
     ASSERT(ierr == 0)
 
-!   Write a vector-valued field
+!   Overwrite the scalar-valued field using a generic interface
+    call esio_field_write(h, "name_scalar", value_scalar,           &
+                          stride(1), stride(2), stride(3),          &
+                          "scalar-valued field", ierr)
+    ASSERT(ierr == 0)
+
+!   Write a vector-valued field using an explicitly-typed interface
     call esio_field_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
                                    stride(1), stride(2), stride(3),          &
                                    "vector-valued field", ierr)
+    ASSERT(ierr == 0)
+
+!   Overwrite the vector-valued field using a generic interface
+    call esio_field_writev(h, "name_vector", value_vector,           &
+                           ncomponents,                              &
+                           stride(1), stride(2), stride(3),          &
+                           "vector-valued field", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
@@ -126,6 +139,13 @@ program layout0_int_f
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
+    call esio_field_read(h, "name_scalar", buffer_scalar,          &
+                         stride(1), stride(2), stride(3),          &
+                         ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
 
 !   Check the vector-valued field's size and data
     call esio_field_sizev(h, "name_vector", i, j, k, l, ierr)
@@ -140,6 +160,14 @@ program layout0_int_f
                                   ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
+    call esio_field_readv(h, "name_vector", buffer_vector,          &
+                          ncomponents,                              &
+                          stride(1), stride(2), stride(3),          &
+                          ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
 
 !   Close the file
     call esio_file_close(h, ierr)

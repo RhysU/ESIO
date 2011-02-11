@@ -31,8 +31,10 @@
 
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
-  CTYPE,             FINTENT               :: field(*)
-#ifdef VECTORVALUED
+#ifndef VECTORVALUED
+  CTYPE,             FINTENT               :: field(1,1,*)
+#else
+  CTYPE,             FINTENT               :: field(1,1,1,*)
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride

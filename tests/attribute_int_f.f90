@@ -42,13 +42,23 @@ program attribute_int_f
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
-!   Write a scalar-valued attribute
+!   Write a scalar-valued attribute using an explicitly-typed method
     call esio_attribute_write_integer(  &
             h, "/", "name_scalar", value_scalar, ierr)
     ASSERT(ierr == 0)
 
-!   Write a vector-valued attribute
+!   Overwrite the scalar-valued attribute using a generic interface
+    call esio_attribute_write(  &
+            h, "/", "name_scalar", value_scalar, ierr)
+    ASSERT(ierr == 0)
+
+!   Write a vector-valued attribute using an explicitly-typed method
     call esio_attribute_writev_integer(  &
+            h, "/", "name_vector", value_vector, size(value_vector), ierr)
+    ASSERT(ierr == 0)
+
+!   Overwrite the vector-valued attribute using a generic interface
+    call esio_attribute_writev(  &
             h, "/", "name_vector", value_vector, size(value_vector), ierr)
     ASSERT(ierr == 0)
 
@@ -64,17 +74,30 @@ program attribute_int_f
     call esio_attribute_sizev(h, "/", "name_scalar", buffer(1), ierr)
     ASSERT(ierr == 0)
     ASSERT(buffer(1) == 1)
+    buffer(:) = 0
     call esio_attribute_read_integer(h, "/", "name_scalar", buffer(1), ierr)
     ASSERT(ierr == 0)
     ASSERT(buffer(1) == 123)
+    buffer(:) = 0
+    call esio_attribute_read(h, "/", "name_scalar", buffer(1), ierr)
+    ASSERT(ierr == 0)
+    ASSERT(buffer(1) == 123)
+    buffer(:) = 0
 
 !   Check the vector-valued attribute's size and data
     call esio_attribute_sizev(h, "/", "name_vector", buffer(1), ierr)
     ASSERT(buffer(1) == size(value_vector))
+    buffer(:) = 0
     call esio_attribute_readv_integer(  &
             h, "/", "name_vector", buffer, size(value_vector), ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer == value_vector))
+    buffer(:) = 0
+    call esio_attribute_readv(  &
+            h, "/", "name_vector", buffer, size(value_vector), ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer == value_vector))
+    buffer(:) = 0
 
 !   Close the file
     call esio_file_close(h, ierr)

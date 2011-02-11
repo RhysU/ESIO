@@ -31,8 +31,10 @@
 
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
-  CTYPE,             FINTENT               :: plane(*)
-#ifdef VECTORVALUED
+#ifndef VECTORVALUED
+  CTYPE,             FINTENT               :: plane(1,*)
+#else
+  CTYPE,             FINTENT               :: plane(1,1,*)
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride

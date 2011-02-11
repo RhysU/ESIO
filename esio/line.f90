@@ -31,8 +31,10 @@
 
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
+#ifndef VECTORVALUED
   CTYPE,             FINTENT               :: line(*)
-#ifdef VECTORVALUED
+#else
+  CTYPE,             FINTENT               :: line(1,*)
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride

@@ -67,17 +67,30 @@ program plane_int_f
     call esio_file_create(h, filename, .false., ierr)
     ASSERT(ierr == 0)
 
-!   Write a scalar-valued plane
+!   Write a scalar-valued plane using an explicitly-typed interface
     call esio_plane_write_integer(h, "name_scalar", value_scalar,            &
                                   stride(1), stride(2),                      &
                                   "scalar-valued plane", ierr)
     ASSERT(ierr == 0)
 
-!   Write a vector-valued plane
+!   Overwrite the scalar-valued plane using a generic interface
+    call esio_plane_write(h, "name_scalar", value_scalar,            &
+                          stride(1), stride(2),                      &
+                          "scalar-valued plane", ierr)
+    ASSERT(ierr == 0)
+
+!   Write a vector-valued plane using an explicitly-typed interface
     call esio_plane_writev_integer(h, "name_vector", value_vector,           &
                                    ncomponents,                              &
                                    stride(1), stride(2),                     &
                                    "vector-valued plane", ierr)
+    ASSERT(ierr == 0)
+
+!   Overwrite the vector-valued plane using a generic interface
+    call esio_plane_writev(h, "name_vector", value_vector,           &
+                           ncomponents,                              &
+                           stride(1), stride(2),                     &
+                           "vector-valued plane", ierr)
     ASSERT(ierr == 0)
 
 !   Close the file
@@ -103,6 +116,13 @@ program plane_int_f
                                  ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
+    call esio_plane_read(h, "name_scalar", buffer_scalar,          &
+                         stride(1), stride(2),                     &
+                         ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_scalar == value_scalar))
+    buffer_scalar = 0
 
 !   Check the vector-valued plane's size and data
     call esio_plane_sizev(h, "name_vector", i, j, k, ierr)
@@ -116,6 +136,14 @@ program plane_int_f
                                   ierr)
     ASSERT(ierr == 0)
     ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
+    call esio_plane_readv(h, "name_vector", buffer_vector,          &
+                          ncomponents,                              &
+                          stride(1), stride(2),                     &
+                          ierr)
+    ASSERT(ierr == 0)
+    ASSERT(all(buffer_vector == value_vector))
+    buffer_vector = 0
 
 !   Close the file
     call esio_file_close(h, ierr)
