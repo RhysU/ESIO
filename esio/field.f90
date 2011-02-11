@@ -46,6 +46,9 @@
   integer,           intent(out), optional :: ierr
 
   integer :: stat, tmp_astride, tmp_bstride, tmp_cstride
+#ifdef HASCOMMENT
+  character(len=1,kind=c_char), parameter :: null_char(1) = (/ c_null_char /)
+#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
@@ -106,7 +109,7 @@
 #ifdef VECTORVALUED
                       ,ncomponents                          &
 #endif
-                      ,c_null_char                          &
+                      ,null_char                            &
                      )
   end if
 #endif /* HASCOMMENT */
