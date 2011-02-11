@@ -1057,7 +1057,8 @@ esio_plane_writev(const esio_handle h,                                        \
                   int bstride, int astride,                                   \
                   int ncomponents,                                            \
                   const char *comment = 0)                                    \
-{ return esio_plane_writev_##TYPE(h,name,plane,bstride,astride,ncomponents); }
+{ return esio_plane_writev_##TYPE(h,name,plane,bstride,astride,ncomponents,   \
+                                  comment); }
 #endif
 
 #define ESIO_PLANE_READV_GEN(TYPE)                \
