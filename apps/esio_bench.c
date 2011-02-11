@@ -918,7 +918,7 @@ static int start(int nglobal, int nranks, int rank, int extralow)
 {
     int offset = 0;
     for (int i = 0; i < rank; ++i) {
-        offset += local(nglobal, nranks, rank, extralow);
+        offset += local(nglobal, nranks, i, extralow);
     }
     return offset;
 }
@@ -1017,6 +1017,7 @@ static int field_initialize(struct details *d, struct field_details *f)
 
     // In verbose mode, dump out decomposition details
     if (d->verbose) {
+        fflush(rankout);
         fflush(stdout);
         fflush(stderr);
         for (int i = 0; i < d->world_size; ++i) {
@@ -1106,6 +1107,7 @@ static int plane_initialize(struct details *d, struct plane_details *p)
 
     // In verbose mode, dump out decomposition details
     if (d->verbose) {
+        fflush(rankout);
         fflush(stdout);
         fflush(stderr);
         for (int i = 0; i < d->world_size; ++i) {
@@ -1191,6 +1193,7 @@ static int line_initialize(struct details *d, struct line_details  *l)
 
     // In verbose mode, dump out decomposition details
     if (d->verbose) {
+        fflush(rankout);
         fflush(stdout);
         fflush(stderr);
         for (int i = 0; i < d->world_size; ++i) {
