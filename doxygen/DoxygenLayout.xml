@@ -104,18 +104,18 @@
     <memberdecl>
       <classes visible="yes" title=""/>
       <namespaces visible="yes" title=""/>
-      <defines title=""/>
       <typedefs title=""/>
       <enums title=""/>
       <functions title=""/>
+      <defines title=""/>
       <variables title=""/>
       <membergroups visible="yes"/>
     </memberdecl>
     <memberdef>
-      <defines title=""/>
       <typedefs title=""/>
       <enums title=""/>
       <functions title=""/>
+      <defines title=""/>
       <variables title=""/>
     </memberdef>
     <authorsection/>
