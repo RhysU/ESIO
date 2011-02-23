@@ -75,6 +75,31 @@ esio_handle esio_handle_initialize_fortran(MPI_Fint fcomm) ESIO_API;
 /** \endcond */
 
 /**
+ * Retrieve the size of the MPI communicator over which the handle collectively
+ * operates.  This method may be invoked in a non-collective manner and has
+ * semantics identical to <tt>MPI_Comm_size</tt>.
+ *
+ * \param h    Handle to use.
+ * \param size On success, contains the MPI communicator size.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
+int esio_handle_comm_size(const esio_handle h, int *size) ESIO_API;
+
+/**
+ * Retrieve the rank of the local MPI process as seen by the MPI communicator
+ * over which the handle collectively operates.  This method may be invoked in
+ * a non-collective manner and has semantics identical to
+ * <tt>MPI_Comm_rank</tt>.
+ *
+ * \param h    Handle to use.
+ * \param rank On success, contains the MPI communicator rank.
+ *
+ * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
+ */
+int esio_handle_comm_rank(const esio_handle h, int *rank) ESIO_API;
+
+/**
  * Finalize a handle.
  * Finalizing a handle automatically closes any associated file.
  *

@@ -260,6 +260,60 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  subroutine esio_handle_comm_size (handle, size, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(out)           :: size
+    integer,           intent(out), optional :: ierr
+
+    integer :: stat, tmp_size
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, size)  bind (C, name="esio_handle_comm_size")
+        import
+        integer(c_int)                                    :: impl
+        type(esio_handle),            intent(in),   value :: handle
+        integer(c_int),               intent(inout)       :: size
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(handle, tmp_size)
+    size = tmp_size
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_handle_comm_size
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  subroutine esio_handle_comm_rank (handle, rank, ierr)
+
+    type(esio_handle), intent(in)            :: handle
+    integer,           intent(out)           :: rank
+    integer,           intent(out), optional :: ierr
+
+    integer :: stat, tmp_rank
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    interface
+      function impl (handle, rank)  bind (C, name="esio_handle_comm_rank")
+        import
+        integer(c_int)                                    :: impl
+        type(esio_handle),            intent(in),   value :: handle
+        integer(c_int),               intent(inout)       :: rank
+      end function impl
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
+
+    stat = impl(handle, tmp_rank)
+    rank = tmp_rank
+    if (present(ierr)) ierr = stat
+
+  end subroutine esio_handle_comm_rank
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine esio_handle_finalize (handle, ierr)
     type(esio_handle), intent(in)            :: handle
     integer,           intent(out), optional :: ierr

@@ -32,6 +32,7 @@ program basic_f
 
     implicit none
 
+    integer            :: size, rank
     logical            :: file_exists
     character(len=256) :: file_path, template, restart0, restart1
 
@@ -44,6 +45,14 @@ program basic_f
     integer            :: tmp_ag = 555, tmp_as, tmp_al
 
     call testframework_setup(__FILE__)
+
+!   Check that the handle correctly reports world size and world rank
+    call esio_handle_comm_size(h, size, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(size == world_size)
+    call esio_handle_comm_rank(h, rank, ierr)
+    ASSERT(ierr == 0)
+    ASSERT(rank == world_rank)
 
 !   Check that we can establish and retrieve line decomposition details
     call esio_line_established(h, tmp_ag, tmp_as, tmp_al, ierr)

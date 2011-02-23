@@ -124,6 +124,16 @@ FCT_BGN()
             // Initialize ESIO handle
             handle = esio_handle_initialize(MPI_COMM_WORLD);
             fct_req(handle);
+
+            // Check that the handle correctly reports world_size
+            int size;
+            fct_req(ESIO_SUCCESS == esio_handle_comm_size(handle, &size));
+            fct_chk_eq_int(world_size, size);
+
+            // Check that the handle correctly reports world_rank
+            int rank;
+            fct_req(ESIO_SUCCESS == esio_handle_comm_rank(handle, &rank));
+            fct_chk_eq_int(world_rank, rank);
         }
         FCT_SETUP_END();
 

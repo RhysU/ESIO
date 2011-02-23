@@ -378,6 +378,28 @@ esio_handle_initialize_fortran(MPI_Fint fcomm)
 }
 
 int
+esio_handle_comm_size(const esio_handle h, int *size)
+{
+    if (h == NULL)    ESIO_ERROR("h == NULL",    ESIO_EFAULT);
+    if (size == NULL) ESIO_ERROR("size == NULL", ESIO_EFAULT);
+
+    *size = h->comm_size;
+
+    return ESIO_SUCCESS;
+}
+
+int
+esio_handle_comm_rank(const esio_handle h, int *rank)
+{
+    if (h == NULL)    ESIO_ERROR("h == NULL",    ESIO_EFAULT);
+    if (rank == NULL) ESIO_ERROR("rank == NULL", ESIO_EFAULT);
+
+    *rank = h->comm_rank;
+
+    return ESIO_SUCCESS;
+}
+
+int
 esio_handle_finalize(esio_handle h)
 {
     if (h) {
