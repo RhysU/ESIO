@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <mpi.h>
 #include <hdf5.h>
@@ -255,11 +256,11 @@ FCT_BGN()
             // Free the line
             free(line);
 
+            line = calloc(aglobal, sizeof(REAL));
+            fct_req(line);
             // Reopen the file using normal HDF5 APIs on root processor
             // Examine the contents (contiguously) to ensure it matches
             if (world_rank == 0) {
-                line = calloc(aglobal, sizeof(REAL));
-                fct_req(line);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
                 fct_req(0 <= H5LTread_dataset(file_id, "line",
@@ -279,8 +280,29 @@ FCT_BGN()
                 fct_chk_eq_str("comment!", buf);
 
                 fct_req(0 <= H5Fclose(file_id));
-                free(line);
             }
+            // Load the line onto only the root processor using ESIO
+            // Tests collective operations that are NOPs on some ranks
+            {
+                REAL *buf = NULL;
+                fct_req(0 == esio_file_open(handle, filename, 0));
+                if (world_rank == 0) {
+                    buf = calloc(aglobal, sizeof(REAL));
+                    fct_req(buf);
+                    fct_req(0 == esio_line_establish(
+                                handle, aglobal, 0, aglobal));
+                } else {
+                    fct_req(0 == esio_line_establish(
+                                handle, aglobal, 0, 0));
+                }
+                fct_req(0 == AFFIX(esio_line_read)(handle, "line", buf, 0));
+                if (world_rank == 0) {
+                    fct_chk_eq_int(0, memcmp(line, buf, aglobal*sizeof(REAL)));
+                }
+                fct_req(0 == esio_file_close(handle));
+                if (buf) free(buf);
+            }
+            free(line);
 
             // Re-read the file in a distributed manner and verify contents
             // TODO Ensure non-referenced memory locations remain unmodified
