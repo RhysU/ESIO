@@ -1126,7 +1126,9 @@ int esio_field_write_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
+    if (field == NULL && h->f.clocal && h->f.blocal && h->f.alocal) {
+                          ESIO_ERROR("field == NULL",           ESIO_EFAULT);
+    }
     if (cstride < 0)      ESIO_ERROR("cstride < 0",            ESIO_EINVAL);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
@@ -1314,7 +1316,9 @@ int esio_field_read_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (field == NULL)    ESIO_ERROR("field == NULL",          ESIO_EFAULT);
+    if (field == NULL && h->f.clocal && h->f.blocal && h->f.alocal) {
+                          ESIO_ERROR("field == NULL",           ESIO_EFAULT);
+    }
     if (cstride < 0)      ESIO_ERROR("cstride < 0",            ESIO_EINVAL);
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
@@ -1494,7 +1498,7 @@ int esio_plane_write_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (plane == NULL && h->p.blocal > 0 && h->p.alocal > 0) {
+    if (plane == NULL && h->p.blocal && h->p.alocal) {
                           ESIO_ERROR("plane == NULL",           ESIO_EFAULT);
     }
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
@@ -1644,7 +1648,7 @@ int esio_plane_read_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (plane == NULL && h->p.blocal > 0 && h->p.alocal > 0) {
+    if (plane == NULL && h->p.blocal && h->p.alocal) {
                           ESIO_ERROR("plane == NULL",           ESIO_EFAULT);
     }
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
@@ -1809,7 +1813,7 @@ int esio_line_write_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (line == NULL && h->l.alocal > 0) {
+    if (line == NULL && h->l.alocal) {
                           ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     }
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
@@ -1948,7 +1952,7 @@ int esio_line_read_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (line == NULL && h->l.alocal > 0) {
+    if (line == NULL && h->l.alocal) {
                           ESIO_ERROR("line == NULL",           ESIO_EFAULT);
     }
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
