@@ -258,6 +258,8 @@ FCT_BGN()
 
             line = calloc(aglobal, sizeof(REAL));
             fct_req(line);
+            REAL *buf = calloc(aglobal, sizeof(REAL));
+            fct_req(buf);
             // Reopen the file using normal HDF5 APIs on root processor
             // Examine the contents (contiguously) to ensure it matches
             if (world_rank == 0) {
@@ -283,25 +285,25 @@ FCT_BGN()
             }
             // Load the line onto only the root processor using ESIO
             // Tests collective operations that are NOPs on some ranks
-            {
-                REAL *buf = NULL;
-                fct_req(0 == esio_file_open(handle, filename, 0));
-                if (world_rank == 0) {
-                    buf = calloc(aglobal, sizeof(REAL));
-                    fct_req(buf);
-                    fct_req(0 == esio_line_establish(
-                                handle, aglobal, 0, aglobal));
-                } else {
-                    fct_req(0 == esio_line_establish(
-                                handle, aglobal, 0, 0));
-                }
-                fct_req(0 == AFFIX(esio_line_read)(handle, "line", buf, 0));
-                if (world_rank == 0) {
-                    fct_chk_eq_int(0, memcmp(line, buf, aglobal*sizeof(REAL)));
-                }
-                fct_req(0 == esio_file_close(handle));
-                if (buf) free(buf);
+            fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_line_establish(handle,
+                        aglobal, 0, (world_rank == 0 ? aglobal : 0)));
+            fct_req(0 == AFFIX(esio_line_read)(handle, "line", buf, 0));
+            if (world_rank == 0) {
+                fct_req(0 == memcmp(line, buf, aglobal*sizeof(REAL)));
             }
+            fct_req(0 == esio_file_close(handle));
+            // Broadcast root's data to all processes then test that
+            // collective overlapping reads work as expected
+            fct_req(0 == MPI_Bcast(
+                        buf, aglobal, REAL_MPIT, 0, MPI_COMM_WORLD));
+            fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_line_establish(handle, aglobal, 0, aglobal));
+            free(line); line = calloc(aglobal, sizeof(REAL)); fct_req(line);
+            fct_req(0 == AFFIX(esio_line_read)(handle, "line", line, 0));
+            fct_req(0 == memcmp(line, buf, aglobal*sizeof(REAL)));
+            fct_req(0 == esio_file_close(handle));
+            free(buf);
             free(line);
 
             // Re-read the file in a distributed manner and verify contents

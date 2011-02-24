@@ -25,6 +25,7 @@
 
 #define REAL              int
 #define REAL_H5T          H5T_NATIVE_INT
+#define REAL_MPIT         MPI_INT
 #define AFFIX(name)       name ## _int
 
 #include "line_template.c"

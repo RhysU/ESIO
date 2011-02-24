@@ -25,6 +25,7 @@
 
 #define REAL              double
 #define REAL_H5T          H5T_NATIVE_DOUBLE
+#define REAL_MPIT         MPI_DOUBLE
 #define AFFIX(name)       name ## _double
 
 #include "line_template.c"

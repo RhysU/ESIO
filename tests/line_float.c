@@ -25,6 +25,7 @@
 
 #define REAL              float
 #define REAL_H5T          H5T_NATIVE_FLOAT
+#define REAL_MPIT         MPI_FLOAT
 #define AFFIX(name)       name ## _float
 
 #include "line_template.c"

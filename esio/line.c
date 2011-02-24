@@ -41,8 +41,7 @@ hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
     assert(memspace > 0);
     if (alocal == 0) {
         H5Sselect_none(memspace);
-    } else
-        if (astride != 1) {
+    } else if (astride != 1) {
         /* Strided memspace; additional hyperslab selection necessary */
         const hsize_t start  = 0;
         const hsize_t stride = astride;
@@ -61,8 +60,7 @@ hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
     const hsize_t count[1] = { alocal };
     if (alocal == 0) {
         H5Sselect_none(filespace);
-    } else
-        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+    } else if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                    start, NULL, count, NULL) < 0) {
         H5Sclose(memspace);
         H5Sclose(filespace);
