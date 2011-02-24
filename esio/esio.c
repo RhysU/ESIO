@@ -1494,7 +1494,9 @@ int esio_plane_write_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
+    if (plane == NULL && h->p.blocal > 0 && h->p.alocal > 0) {
+                          ESIO_ERROR("plane == NULL",           ESIO_EFAULT);
+    }
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     // (comment == NULL) is valid input
@@ -1642,7 +1644,9 @@ int esio_plane_read_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (plane == NULL)    ESIO_ERROR("plane == NULL",          ESIO_EFAULT);
+    if (plane == NULL && h->p.blocal > 0 && h->p.alocal > 0) {
+                          ESIO_ERROR("plane == NULL",           ESIO_EFAULT);
+    }
     if (bstride < 0)      ESIO_ERROR("bstride < 0",            ESIO_EINVAL);
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
@@ -1805,7 +1809,9 @@ int esio_line_write_internal(const esio_handle h,
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
-    if (line == NULL)     ESIO_ERROR("line == NULL",           ESIO_EFAULT);
+    if (line == NULL && h->l.alocal > 0) {
+                          ESIO_ERROR("line == NULL",           ESIO_EFAULT);
+    }
     if (astride < 0)      ESIO_ERROR("astride < 0",            ESIO_EINVAL);
     if (type_id < 0)      ESIO_ERROR("type_id < 0",            ESIO_EINVAL);
     if (h->l.aglobal == 0)
