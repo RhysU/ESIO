@@ -36,9 +36,13 @@ hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
 
     /* Establish (possibly strided) memspace details */
     const hsize_t nelems = alocal * astride;
-    const hid_t memspace = H5Screate_simple(1, &nelems, NULL);
+    const hsize_t lies   = 1;
+    const hid_t memspace = H5Screate_simple(1, alocal ? &nelems : &lies, NULL);
     assert(memspace > 0);
-    if (astride != 1) {
+    if (alocal == 0) {
+        H5Sselect_none(memspace);
+    } else
+        if (astride != 1) {
         /* Strided memspace; additional hyperslab selection necessary */
         const hsize_t start  = 0;
         const hsize_t stride = astride;
@@ -55,8 +59,11 @@ hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
     assert(filespace >= 0);
     const hsize_t start[1] = { astart };
     const hsize_t count[1] = { alocal };
-    if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                            start, NULL, count, NULL) < 0) {
+    if (alocal == 0) {
+        H5Sselect_none(filespace);
+    } else
+        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                   start, NULL, count, NULL) < 0) {
         H5Sclose(memspace);
         H5Sclose(filespace);
         ESIO_ERROR("Selecting file hyperslab failed", ESIO_EFAILED);

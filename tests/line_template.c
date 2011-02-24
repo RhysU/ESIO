@@ -309,6 +309,7 @@ FCT_BGN()
             line = calloc(nelem, sizeof(REAL));
             fct_req(line);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_line_establish(handle, aglobal, astart, alocal));
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_read)(
@@ -424,6 +425,7 @@ FCT_BGN()
             vline = calloc(nelem, sizeof(REAL));
             fct_req(vline);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_line_establish(handle, aglobal, astart, alocal));
             if (auxstride_a) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_line_readv)(
