@@ -368,12 +368,11 @@ FCT_BGN()
             // Free the field
             free(field);
 
+            field = calloc(cglobal * bglobal * aglobal, sizeof(REAL));
+            fct_req(field);
             // Reopen the file using normal HDF5 APIs on root processor
             // Examine the contents (contiguously) to ensure it matches
             if (world_rank == 0) {
-                field = calloc(cglobal * bglobal * aglobal,
-                               sizeof(REAL));
-                fct_req(field);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
                 fct_req(0 <= H5LTread_dataset(file_id, "field",
@@ -399,14 +398,44 @@ FCT_BGN()
 
 
                 fct_req(0 <= H5Fclose(file_id));
-                free(field);
             }
+            // Load the field onto only the root processor using ESIO
+            // Tests collective operations that are NOPs on some ranks
+            {
+                REAL *buf = NULL;
+                fct_req(0 == esio_file_open(handle, filename, 0));
+                if (world_rank == 0) {
+                    buf = calloc(cglobal*bglobal*aglobal, sizeof(REAL));
+                    fct_req(buf);
+                    fct_req(0 == esio_field_establish(handle,
+                                                      cglobal, 0, cglobal,
+                                                      bglobal, 0, bglobal,
+                                                      aglobal, 0, aglobal));
+                } else {
+                    fct_req(0 == esio_field_establish(handle,
+                                                      cglobal, 0, 0,
+                                                      bglobal, 0, 0,
+                                                      aglobal, 0, 0));
+                }
+                fct_req(0 == AFFIX(esio_field_read)(
+                            handle, "field", buf, 0, 0, 0));
+                if (world_rank == 0) {
+                    fct_chk_eq_int(0, memcmp(field, buf,
+                                cglobal*bglobal*aglobal*sizeof(REAL)));
+                }
+                fct_req(0 == esio_file_close(handle));
+                if (buf) free(buf);
+            }
+            free(field);
 
             // Re-read the file in a distributed manner and verify contents
             // TODO Ensure non-referenced memory locations remain unmodified
             field = calloc(nelem, sizeof(REAL));
             fct_req(field);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_field_establish(handle, cglobal, cstart, clocal,
+                                                      bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_read)(
@@ -558,6 +587,9 @@ FCT_BGN()
             vfield = calloc(nelem, sizeof(REAL));
             fct_req(vfield);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_field_establish(handle, cglobal, cstart, clocal,
+                                                      bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
             if (auxstride_a || auxstride_b || auxstride_c) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_field_readv)(
