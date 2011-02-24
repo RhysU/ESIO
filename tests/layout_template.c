@@ -401,7 +401,7 @@ FCT_BGN()
             }
             // Load the field onto only the root processor using ESIO
             // Tests collective operations that are NOPs on some ranks
-            {
+            if (LAYOUT_TAG == 0) { // FIXME: Add for all layouts #1422, #1229
                 REAL *buf = NULL;
                 fct_req(0 == esio_file_open(handle, filename, 0));
                 if (world_rank == 0) {

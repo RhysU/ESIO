@@ -28,6 +28,9 @@
 #error "One of METHODNAME, OPFUNC, or QUALIFIER not defined"
 #endif
 
+// TODO See bug #1229
+// TODO See bug #1422
+
 hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *field,
                  int cglobal, int cstart, int clocal, int cstride,
                  int bglobal, int bstart, int blocal, int bstride,
