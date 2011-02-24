@@ -321,11 +321,11 @@ FCT_BGN()
             // Free the plane
             free(plane);
 
+            plane = calloc(bglobal * aglobal, sizeof(REAL));
+            fct_req(plane);
             // Reopen the file using normal HDF5 APIs on root processor
             // Examine the contents (contiguously) to ensure it matches
             if (world_rank == 0) {
-                plane = calloc(bglobal * aglobal, sizeof(REAL));
-                fct_req(plane);
                 const hid_t file_id
                     = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
                 fct_req(0 <= H5LTread_dataset(file_id, "plane",
@@ -347,14 +347,41 @@ FCT_BGN()
                 fct_chk_eq_str("comment!", buf);
 
                 fct_req(0 <= H5Fclose(file_id));
-                free(plane);
             }
+            // Load the plane onto only the root processor using ESIO
+            // Tests collective operations that are NOPs on some ranks
+            {
+                REAL *buf = NULL;
+                fct_req(0 == esio_file_open(handle, filename, 0));
+                if (world_rank == 0) {
+                    buf = calloc(bglobal*aglobal, sizeof(REAL));
+                    fct_req(buf);
+                    fct_req(0 == esio_plane_establish(handle,
+                                                      bglobal, 0, bglobal,
+                                                      aglobal, 0, aglobal));
+                } else {
+                    fct_req(0 == esio_plane_establish(handle,
+                                                      bglobal, 0, 0,
+                                                      aglobal, 0, 0));
+                }
+                fct_req(0 == AFFIX(esio_plane_read)(
+                            handle, "plane", buf, 0, 0));
+                if (world_rank == 0) {
+                    fct_chk_eq_int(0,
+                            memcmp(plane, buf, bglobal*aglobal*sizeof(REAL)));
+                }
+                fct_req(0 == esio_file_close(handle));
+                if (buf) free(buf);
+            }
+            free(plane);
 
             // Re-read the file in a distributed manner and verify contents
             // TODO Ensure non-referenced memory locations remain unmodified
             plane = calloc(nelem, sizeof(REAL));
             fct_req(plane);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_plane_establish(handle, bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_read)(
@@ -488,6 +515,8 @@ FCT_BGN()
             vplane = calloc(nelem, sizeof(REAL));
             fct_req(vplane);
             fct_req(0 == esio_file_open(handle, filename, 0));
+            fct_req(0 == esio_plane_establish(handle, bglobal, bstart, blocal,
+                                                      aglobal, astart, alocal));
             if (auxstride_a || auxstride_b) {
                 // Noncontiguous; exercise non-default stride arguments
                 fct_req(0 == AFFIX(esio_plane_readv)(
