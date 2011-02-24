@@ -1,3 +1,15 @@
+What's new in ESIO 0.1.4
+------------------------
+
+Bugfixes for degenerate operations on some ranks
+
+This release contains the following
+
+    * Feature #1420: Add esio_handle_comm_{size,rank}()
+    * Support #1423: Roll ESIO 0.1.4 release
+    * Bug #1422: Zero sized dimension for non-unlimited dimension
+
+
 What's new in ESIO 0.1.3
 ------------------------
 
