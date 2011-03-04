@@ -222,7 +222,7 @@ int esio_file_close(esio_handle h) ESIO_API;
  *                         above for what constitutes a valid value.
  *                         It may contain a leading URI scheme (e.g. "ufs:").
  * \param retain_count     The maximum number of old restart files to retain.
- *                         Value must me strictly positive.
+ *                         Value must be strictly positive.
  *
  * \return Either ESIO_SUCCESS \c (0) or one of ::esio_status on failure.
  *         On failure the handle \c h will be in an undefined state and should
