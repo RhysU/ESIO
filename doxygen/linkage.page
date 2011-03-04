@@ -11,9 +11,11 @@ C/C++ compiler wrapper script, denoted here by <tt>\$(MPICC)</tt>, or you will
 additionally need to provide MPI-related flags within the sample commands
 below.
 
-Assuming you installed HDF5 under $HDF5HOME and also assuming at ESIO
+This tutorial assumes you installed HDF5 under $HDF5HOME and also that at ESIO
 configuration time you specified <tt>--prefix=$HOME</tt> to install ESIO under
-your home directory, compiling and linking an MPI application consisting of a
+your home directory (It may be necessary to include your home directory
+under in \code LD_LIBRARY_PATH \endcode). In this case, compiling and linking 
+an MPI application consisting of a
 single source file named <tt>app.c</tt> might look as follows:
 
 \code > $(MPICC) -I$HOME/include app.c -L$HOME/lib -lesio -L$HDF5HOME -lhdf5_hl -lhdf5 -lz -lm \endcode
