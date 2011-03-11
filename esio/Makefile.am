@@ -40,11 +40,11 @@ libesio_internal_la_SOURCES       += restart-rename.c restart-rename.h
 libesio_internal_la_SOURCES       += uri.c            uri.h
 libesio_internal_la_LDFLAGS        = $(LTLIBINTL)         # gnulib requirement
 libesio_internal_la_LIBADD         = ../gnulib/libgnu.la  # gnulib requirement
-EXTRA_libesio_internal_la_SOURCES  = layout0.c  # x-macro template
-EXTRA_libesio_internal_la_SOURCES += layout1.c  # x-macro template
-EXTRA_libesio_internal_la_SOURCES += layout2.c  # x-macro template
-EXTRA_libesio_internal_la_SOURCES += line.c     # x-macro template
-EXTRA_libesio_internal_la_SOURCES += plane.c    # x-macro template
+EXTRA_libesio_internal_la_SOURCES  = x-layout0.c          # x-macro template
+EXTRA_libesio_internal_la_SOURCES += x-layout1.c          # x-macro template
+EXTRA_libesio_internal_la_SOURCES += x-layout2.c          # x-macro template
+EXTRA_libesio_internal_la_SOURCES += x-line.c             # x-macro template
+EXTRA_libesio_internal_la_SOURCES += x-plane.c            # x-macro template
 
 # Public ESIO C library
 lib_LTLIBRARIES    += libesio.la
@@ -67,10 +67,10 @@ libesiof_la_LIBTOOLFLAGS   = --tag=FC
 libesiof_la_SOURCES        = esio_c_binding.f90 esio.f90
 module_DATA                = esio_c_binding.mod esio.mod
 libesiof_la_LIBADD         = libesio_internal.la
-EXTRA_libesiof_la_SOURCES  = attribute.f90   # x-macro template
-EXTRA_libesiof_la_SOURCES += field.f90       # x-macro template
-EXTRA_libesiof_la_SOURCES += line.f90        # x-macro template
-EXTRA_libesiof_la_SOURCES += plane.f90       # x-macro template
+EXTRA_libesiof_la_SOURCES  = x-attribute.f90              # x-macro template
+EXTRA_libesiof_la_SOURCES += x-field.f90                  # x-macro template
+EXTRA_libesiof_la_SOURCES += x-line.f90                   # x-macro template
+EXTRA_libesiof_la_SOURCES += x-plane.f90                  # x-macro template
 
 # Extra things to clean up
 CLEANFILES += *.mod *.gcno *.gcna

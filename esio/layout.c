@@ -40,7 +40,7 @@
 #define METHODNAME esio_plane_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
-#include "plane.c"
+#include "x-plane.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -48,7 +48,7 @@
 #define METHODNAME esio_plane_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
-#include "plane.c"
+#include "x-plane.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -56,7 +56,7 @@
 #define METHODNAME esio_line_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
-#include "line.c"
+#include "x-line.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -64,7 +64,7 @@
 #define METHODNAME esio_line_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
-#include "line.c"
+#include "x-line.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -91,7 +91,7 @@ herr_t esio_field_layout0_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout0_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
-#include "layout0.c"
+#include "x-layout0.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -99,7 +99,7 @@ herr_t esio_field_layout0_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout0_field_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
-#include "layout0.c"
+#include "x-layout0.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -126,7 +126,7 @@ herr_t esio_field_layout1_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout1_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
-#include "layout1.c"
+#include "x-layout1.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -134,7 +134,7 @@ herr_t esio_field_layout1_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout1_field_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
-#include "layout1.c"
+#include "x-layout1.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -161,7 +161,7 @@ herr_t esio_field_layout2_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout2_field_writer
 #define OPFUNC     H5Dwrite
 #define QUALIFIER  const
-#include "layout2.c"
+#include "x-layout2.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
@@ -169,7 +169,7 @@ herr_t esio_field_layout2_dataset_chunker(hid_t dcpl_id,
 #define METHODNAME esio_field_layout2_field_reader
 #define OPFUNC     H5Dread
 #define QUALIFIER  /* mutable */
-#include "layout2.c"
+#include "x-layout2.c"
 #undef METHODNAME
 #undef OPFUNC
 #undef QUALIFIER
