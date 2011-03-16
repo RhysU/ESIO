@@ -51,6 +51,7 @@ lib_LTLIBRARIES    += libesio.la
 libesio_la_SOURCES  =
 libesio_la_LDFLAGS  = -release $(PACKAGE_VERSION)
 libesio_la_LIBADD   = libesio_internal.la
+libesio_la_LIBADD  += $(HDF5_LDFLAGS)
 
 # Public ESIO C headers
 pkginclude_HEADERS  = error.h
@@ -67,6 +68,7 @@ libesiof_la_LIBTOOLFLAGS   = --tag=FC
 libesiof_la_SOURCES        = esio_c_binding.f90 esio.f90
 module_DATA                = esio_c_binding.mod esio.mod
 libesiof_la_LIBADD         = libesio_internal.la
+libesiof_la_LIBADD        += $(HDF5_FLIBS)
 EXTRA_libesiof_la_SOURCES  = x-attribute.f90              # x-macro template
 EXTRA_libesiof_la_SOURCES += x-field.f90                  # x-macro template
 EXTRA_libesiof_la_SOURCES += x-line.f90                   # x-macro template
