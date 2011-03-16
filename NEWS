@@ -1,3 +1,18 @@
+What's new in ESIO 0.1.5
+------------------------
+
+Build and installation fixes
+
+This release contains the following
+
+    * Feature #637: Look into autoreconf for Suzerain, Esio
+    * Feature #1505: Create static ESIO libraries
+    * Support #1506: Roll ESIO 0.1.5 release
+    * Bug #1458: Version information not set on libesiof
+    * Bug #1459: -lesiof not a superset of -lesio
+    * Bug #1503: libesio.la lacks HDF5 dependencies
+
+
 What's new in ESIO 0.1.4
 ------------------------
 
