@@ -66,7 +66,7 @@ lib_LTLIBRARIES           += libesiof.la
 libesiof_la_LDFLAGS        = -release $(PACKAGE_VERSION)
 libesiof_la_LIBTOOLFLAGS   = --tag=FC
 libesiof_la_SOURCES        = esio_c_binding.f90 esio.f90
-module_DATA                = esio_c_binding.mod esio.mod
+module_DATA                =                    esio.mod
 libesiof_la_LIBADD         = libesio_internal.la
 libesiof_la_LIBADD        += $(HDF5_FLIBS)
 EXTRA_libesiof_la_SOURCES  = x-attribute.f90              # x-macro template
