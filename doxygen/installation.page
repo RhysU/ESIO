@@ -62,6 +62,13 @@ where you should add any additional configure options at the end of
 the command.  One very useful option is the <code>--prefix=DIR</code>
 which sets your desired top-level installation directory for ESIO.
 
+By default, ESIO builds both a shared and static library (for example,
+<tt>libesio.so</tt> and <tt>libesio.a</tt>, respectively).  This will only
+succeed if your HDF5 installation was configured with
+<code>--enable-shared</code>.  To disable one or the other, use the
+<code>--disable-shared</code> or <code>--disable-static</code> option to
+configure.
+
 <h2> Library Build </h2>
 
 Once configured, issue a <tt>make</tt> to build the software. If successful,
@@ -69,6 +76,9 @@ this will build the ESIO library (static and dynamic versions), several
 examples, and some additional ESIO-related utilities.
 
 \code > make \endcode
+
+If you see error messages regarding <tt>-fPIC</tt>, see the above configuration
+hints regarding building shared versus static versions of ESIO.
 
 <h2> Build Verification (Optional) </h2>
 
