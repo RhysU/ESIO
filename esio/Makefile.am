@@ -62,13 +62,14 @@ pkginclude_HEADERS += esio-config.h
 BUILT_SOURCES      += esio-config.h # See AX_PREFIX_CONFIG_H
 
 # Public ESIO Fortran library and module files
+# ESIO Fortran uses only the HDF5 C API so HDF5_FLIBS does not appear below
 lib_LTLIBRARIES           += libesiof.la
 libesiof_la_LDFLAGS        = -release $(PACKAGE_VERSION)
 libesiof_la_LIBTOOLFLAGS   = --tag=FC
 libesiof_la_SOURCES        = esio_c_binding.f90 esio.f90
 module_DATA                =                    esio.mod
 libesiof_la_LIBADD         = libesio_internal.la
-libesiof_la_LIBADD        += $(HDF5_FLIBS)
+libesiof_la_LIBADD        += $(HDF5_LDFLAGS)
 EXTRA_libesiof_la_SOURCES  = x-attribute.f90              # x-macro template
 EXTRA_libesiof_la_SOURCES += x-field.f90                  # x-macro template
 EXTRA_libesiof_la_SOURCES += x-line.f90                   # x-macro template

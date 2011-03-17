@@ -14,8 +14,9 @@ hdf5_fflags=@HDF5_FFLAGS@
 hdf5_flibs=@HDF5_FLIBS@
 # Fortran compilation and linking information
 # Retrieve these using `pkg-config --variable=name @PACKAGE_NAME@-hdf5`
+# Note -l@PACKAGE_NAME@f uses the HDF5 C API so no -lhdf5_fortran appears below
 fflags=-I@libdir@
-flibs=-L@libdir@ -lesiof @HDF5_FLIBS@
+flibs=-L@libdir@ -l@PACKAGE_NAME@f @HDF5_LDFLAGS@
 
 Name: @PACKAGE_NAME@-hdf5
 Description: @PACKAGE_DESCRIPTION@
