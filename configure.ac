@@ -33,7 +33,7 @@ AC_CACHE_SAVE
 dnl ------------------------------------------------
 dnl Manipulate C settings and find MPI/HDF5
 dnl ------------------------------------------------
-AX_CHECK_ENABLE_DEBUG
+AX_CHECK_ENABLE_DEBUG([info])
 AC_PROG_CC
 gl_EARLY
 gl_INIT
