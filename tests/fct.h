@@ -58,7 +58,7 @@ with a standard logger. */
 #endif /* !FCT_DEFAULT_LOGGER */
 
 #define FCT_VERSION_MAJOR 1
-#define FCT_VERSION_MINOR 5
+#define FCT_VERSION_MINOR 6
 #define FCT_VERSION_MICRO 0
 
 #define _FCT_QUOTEME(x) #x
@@ -944,7 +944,7 @@ struct _fct_test_t
 /* Clears the failed tests ... partly for internal testing. */
 #define fct_test__clear_failed(test) \
     fct_nlist__clear(test->failed_chks, (fct_nlist_on_del_t)fctchk__del);\
-
+ 
 
 static void
 fct_test__del(fct_test_t *test)
@@ -1217,14 +1217,16 @@ setup mode. You must be already in setup mode for this to work! */
 static void
 fct_ts__setup_end(fct_ts_t *ts)
 {
-    if ( ts->mode != ts_mode_abort ) {
+    if ( ts->mode != ts_mode_abort )
+    {
         ts->mode = ts_mode_test;
     }
 }
 
 
 static fct_test_t *
-fct_ts__make_abort_test(fct_ts_t *ts) {
+fct_ts__make_abort_test(fct_ts_t *ts)
+{
     char setup_testname[FCT_MAX_LOG_LINE+1] = {'\0'};
     char const *suitename = fct_ts__name(ts);
     fct_snprintf(setup_testname, FCT_MAX_LOG_LINE, "setup_%s", suitename);
@@ -1233,7 +1235,8 @@ fct_ts__make_abort_test(fct_ts_t *ts) {
 
 /* Flags a pre-mature abort of a setup (like a failed fct_req). */
 static void
-fct_ts__setup_abort(fct_ts_t *ts) {
+fct_ts__setup_abort(fct_ts_t *ts)
+{
     FCT_ASSERT( ts != NULL );
     ts->mode = ts_mode_abort;
 }
@@ -1243,7 +1246,8 @@ into setup mode (for the next 'iteration'). */
 static void
 fct_ts__teardown_end(fct_ts_t *ts)
 {
-    if ( ts->mode == ts_mode_abort ) {
+    if ( ts->mode == ts_mode_abort )
+    {
         return; /* Because we are aborting . */
     }
     /* We have to decide if we should keep on testing by moving into tear down
@@ -1829,6 +1833,9 @@ typedef struct _fct_namespace_t
 
     /* Counts the number of tests in a test suite. */
     int test_num;
+
+    /* Set at the end of the test suites. */
+    size_t num_total_failed;
 } fct_namespace_t;
 
 
@@ -3254,28 +3261,59 @@ they are needed, but at runtime, only the cheap, first call is made. */
     }
 
 
+#define FCT_INIT(_ARGC_, _ARGV_)                                    \
+   fctkern_t  fctkern__;                                            \
+   size_t num_failed__ =0;                                          \
+   fctkern_t* fctkern_ptr__ = &fctkern__;                           \
+   FCT_REFERENCE_FUNCS();                                           \
+   if ( !fctkern__init(fctkern_ptr__, argc, (const char **)argv) ) {\
+        (void)fprintf(                                              \
+            stderr, "FATAL ERROR: Unable to initialize FCTX Kernel."\
+        );                                                          \
+        exit(EXIT_FAILURE);                                         \
+   }                                                                \
+
+
+#define FCT_FINAL()                                                \
+   fctkern_ptr__->ns.num_total_failed = fctkern__tst_cnt_failed(   \
+            (fctkern_ptr__)                                        \
+           );                                                      \
+   fctkern__log_end(fctkern_ptr__);                                \
+   fctkern__end(fctkern_ptr__);                                    \
+   fctkern__final(fctkern_ptr__);                                  \
+   FCT_ASSERT( !((int)num_failed__ < 0) && "or we got truncated!");\
+   if ( fctkern_ptr__->ns.num_total_failed ==                      \
+        fctkern_ptr__->num_expected_failures) {                    \
+       fctkern_ptr__->ns.num_total_failed = 0;                     \
+   }                                                               \
+   
+
+
+#define FCT_NUM_FAILED()       \
+    fctkern_ptr__->ns.num_total_failed \
+    
+
+
 /* Typically used internally only, this mentions to FCTX that you EXPECT
 to _NUM_FAILS_. If you the expected matches the actual, a 0 value is returned
 from the program. */
 #define FCT_EXPECTED_FAILURES(_NUM_FAILS_) \
     ((fctkern_ptr__->num_expected_failures = (_NUM_FAILS_)))
 
+
+#define FCT_BGN_FN(_FNNAME_)            \
+    int _FNNAME_(int argc, char* argv[])\
+    {                                   \
+        FCT_INIT(argc, argv)
+ 
+#define FCT_END_FN() FCT_END()
+
 /* This defines our start. The fctkern__ is a kernal object
 that lives throughout the lifetime of our program. The
 fctkern_ptr__ makes it easier to abstract out macros.  */
-#define FCT_BGN() \
-int main(int argc, char* argv[])\
-{\
-   fctkern_t  fctkern__;\
-   fctkern_t* fctkern_ptr__ = &fctkern__;\
-   FCT_REFERENCE_FUNCS();\
-   if ( !fctkern__init(fctkern_ptr__, argc, (const char **)argv) ) {\
-        (void)fprintf(\
-            stderr, "FATAL ERROR: Unable to initialize FCTX Kernel."\
-        );\
-        exit(EXIT_FAILURE);\
-   }\
- 
+#define FCT_BGN() FCT_BGN_FN(main)
+
+
 /* Silence Intel complaints about unspecified operand order in user's code */
 #ifndef __INTEL_COMPILER
 # define FCT_END_WARNINGFIX_BGN
@@ -3288,20 +3326,12 @@ int main(int argc, char* argv[])\
 /* Ends the test suite by returning the number failed. The "chk_cnt" call is
 made in order allow strict compilers to pass when it encounters unreferenced
 functions. */
-#define FCT_END()\
-   {\
-      FCT_END_WARNINGFIX_BGN\
-      size_t num_failed__ =0;\
-      num_failed__ = fctkern__tst_cnt_failed((fctkern_ptr__));\
-      fctkern__log_end(fctkern_ptr__);\
-      fctkern__end(fctkern_ptr__);\
-      fctkern__final(fctkern_ptr__);\
-      FCT_ASSERT( !((int)num_failed__ < 0) && "or we got truncated!");\
-      if ( num_failed__ == fctkern_ptr__->num_expected_failures) {\
-          return 0;\
-      }\
-      return (int)num_failed__;\
-      FCT_END_WARNINGFIX_END\
+#define FCT_END()             \
+   {                          \
+      FCT_END_WARNINGFIX_BGN  \
+      FCT_FINAL();            \
+      return FCT_NUM_FAILED();\
+      FCT_END_WARNINGFIX_END  \
    }\
 }
 
@@ -3406,7 +3436,7 @@ specification. */
     FCT_FIXTURE_SUITE_END();\
     fctkern_ptr__->ns.ts_is_skip_suite =0;\
     fctkern_ptr__->ns.ts_skip_cndtn =NULL;\
-
+ 
 #define FCT_SETUP_BGN()\
    if ( fct_ts__is_setup_mode(fctkern_ptr__->ns.ts_curr) ) {
 
@@ -3415,7 +3445,7 @@ specification. */
 
 #define FCT_TEARDOWN_BGN() \
    if ( fct_ts__is_teardown_mode(fctkern_ptr__->ns.ts_curr) ) {\
-
+ 
 #define FCT_TEARDOWN_END() \
    fct_ts__teardown_end(fctkern_ptr__->ns.ts_curr); \
    continue; \
@@ -3427,14 +3457,14 @@ do it by 'stubbing' out the setup/teardown logic. */
    FCT_FIXTURE_SUITE_BGN(Name) {\
    FCT_SETUP_BGN() {_fct_cmt("stubbed"); } FCT_SETUP_END()\
    FCT_TEARDOWN_BGN() {_fct_cmt("stubbed");} FCT_TEARDOWN_END()\
-
+ 
 #define FCT_SUITE_END() } FCT_FIXTURE_SUITE_END()
 
 #define FCT_SUITE_BGN_IF(_CONDITION_, _NAME_) \
     FCT_FIXTURE_SUITE_BGN_IF(_CONDITION_, (_NAME_)) {\
     FCT_SETUP_BGN() {_fct_cmt("stubbed"); } FCT_SETUP_END()\
     FCT_TEARDOWN_BGN() {_fct_cmt("stubbed");} FCT_TEARDOWN_END()\
-
+ 
 #define FCT_SUITE_END_IF() } FCT_FIXTURE_SUITE_END_IF()
 
 typedef enum
@@ -3448,7 +3478,7 @@ typedef enum
     fctkern_ptr__->ns.test_is_skip = !(_CONDITION_);\
     fctkern_ptr__->ns.test_skip_cndtn = #_CONDITION_;\
     FCT_TEST_BGN(_NAME_) {\
-
+ 
 #define FCT_TEST_END_IF() \
     } FCT_TEST_END();\
     fctkern_ptr__->ns.test_is_skip = 0;\
@@ -3512,7 +3542,7 @@ object (should be rare). */
                continue;\
             }\
          }\
-
+ 
 
 
 /*
@@ -3627,7 +3657,7 @@ if it fails. */
 
 /* When in test mode, construct a mock test object for fct_xchk to operate
 with. If we fail a setup up, then we go directly to a teardown mode. */
-#define fct_req(_CNDTN_) 				                                 \
+#define fct_req(_CNDTN_) 				                 \
     if ( fct_ts__is_test_mode(fctkern_ptr__->ns.ts_curr) ) {             \
        _fct_req((_CNDTN_));                                              \
     }                                                                    \
@@ -3812,7 +3842,24 @@ _fct_chk_full_str(char const *s)
         (V2)\
         )
 
-
+#define fct_chk_ex(EXCEPTION, CODE)   \
+   {                                  \
+      bool pass_chk_ex = false;       \
+      try {                           \
+          CODE;                       \
+          pass_chk_ex = false;        \
+      } catch ( EXCEPTION ) {         \
+          pass_chk_ex = true;         \
+      } catch ( ... ) {               \
+          pass_chk_ex = false;        \
+      }                               \
+      fct_xchk(                       \
+	pass_chk_ex,                  \
+        "%s exception not generated", \
+        #EXCEPTION                    \
+      );                              \
+   }                                  \
+ 
 /*
 ---------------------------------------------------------
 GUT CHECK MACROS
@@ -3895,7 +3942,7 @@ The basic idea is that there is one test per test suite.
 #define FCT_QTEST_BGN(NAME) \
 	FCT_SUITE_BGN(NAME) {\
 		FCT_TEST_BGN(NAME) {\
-
+ 
 #define FCT_QTEST_END() \
 		} FCT_TEST_END();\
 	} FCT_SUITE_END();
@@ -3904,7 +3951,7 @@ The basic idea is that there is one test per test suite.
 #define FCT_QTEST_BGN_IF(_CONDITION_, _NAME_) \
 	FCT_SUITE_BGN(_NAME_) {\
 		FCT_TEST_BGN_IF(_CONDITION_, _NAME_) {\
-
+ 
 #define FCT_QTEST_END_IF() \
 		} FCT_TEST_END_IF();\
 	} FCT_SUITE_END();
