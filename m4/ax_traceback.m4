@@ -11,7 +11,7 @@
 #
 # REQUIRES
 #
-#   AX_CHECK_COMPILER_FLAGS
+#   AX_CHECK_COMPILE_FLAG
 #
 # LAST MODIFICATION
 #
@@ -51,7 +51,6 @@
 
 AC_DEFUN([AX_TRACEBACK], [
 AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
-AC_REQUIRE([AX_CHECK_COMPILER_FLAGS])
 
 ax_traceback_[]_AC_LANG_ABBREV[]_flag=
 dnl Simulate a PUSH/POP on enabling AC_LANG_WERROR
@@ -59,7 +58,7 @@ ax_traceback_[]_AC_LANG_ABBREV[]_werror_save=$ac_[]_AC_LANG_ABBREV[]_werror_flag
 ac_[]_AC_LANG_ABBREV[]_werror_flag=yes
 for possibility in "-traceback"
 do
-  AX_CHECK_COMPILER_FLAGS([$possibility],[
+  AX_CHECK_COMPILE_FLAG([$possibility],[
     ax_traceback_[]_AC_LANG_ABBREV[]_flag=$possibility
     break
   ],[])

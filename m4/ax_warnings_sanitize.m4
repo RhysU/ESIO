@@ -7,9 +7,10 @@
 #   Some compiler vendors, in particular Intel, offer no -pedantic option and
 #   have -Wall complain about more than necessary.  Some compiler vendors also
 #   offer diagnostic information above and beyond -Wall.  This macro enables
-#   the nicer diagnostics and also disables some useless warnings via CFLAGS.
+#   the nicer diagnostics and also disables some useless warnings via CFLAGS
+#   and CXXFLAGS.
 #
-#   Requires macros: AX_COMPILER_VENDOR, AX_CHECK_COMPILER_FLAGS
+#   Requires macros: AX_COMPILER_VENDOR, AX_APPEND_COMPILE_FLAGS
 #
 # LAST MODIFICATION
 #
@@ -56,22 +57,53 @@ case $ax_cv_c_compiler_vendor in #(
   hp)    ;;#(
   ibm)   ;;#(
   intel) # Enable -Wcheck for more diagnostic information
-         AX_CHECK_COMPILER_FLAGS([-Wcheck], [CFLAGS="$CFLAGS -Wcheck"])
+         AX_APPEND_COMPILE_FLAGS([-Wcheck])
          # Enable diagnostics about questionable pointer arithmetic
-         AX_CHECK_COMPILER_FLAGS([-Wpointer-arith], [CFLAGS="$CFLAGS -Wpointer-arith"])
-         # Disable remark #981: operands are evaluated in unspecified order
-         AX_CHECK_COMPILER_FLAGS([-wd981], [CFLAGS="$CFLAGS -wd981"])
-         # Enable information about vectorization
-         AX_CHECK_COMPILER_FLAGS([-vec-report1], [CFLAGS="$CFLAGS -vec-report1"])
+         AX_APPEND_COMPILE_FLAGS([-Wpointer-arith])
+         # Disable remark #424: extra ";" ignored
+         AX_APPEND_COMPILE_FLAGS([-wd424])
          ;;#(
-  gnu)   AX_CHECK_COMPILER_FLAGS([-Wextra], [CFLAGS="$CFLAGS -Wextra"])
+  gnu)   AX_APPEND_COMPILE_FLAGS([-Wextra])
          ;;#(
   *)     # Problem may occur if AX_COMPILER_VENDOR not called prior to AX_WARNINGS_SANITIZE
          AC_MSG_WARN([AX_WARNINGS[]_SANITIZE: ax_cv_c_compiler_vendor = $ax_cv_c_compiler_vendor unknown])
          ;;
 esac
 # Disable warnings on unrecognized pragmas for any compiler
-AX_CHECK_COMPILER_FLAGS([-Wno-unknown-pragmas],
-                        [CFLAGS="$CFLAGS -Wno-unknown-pragmas"])
+AX_APPEND_COMPILE_FLAGS([-Wno-unknown-pragmas])
+AC_LANG_POP()
+AC_LANG_PUSH([C++])
+case $ax_cv_cxx_compiler_vendor in #(
+  dec)   ;;#(
+  sun)   ;;#(
+  hp)    ;;#(
+  ibm)   ;;#(
+  intel) # Enable -Wcheck for more diagnostic information
+         AX_APPEND_COMPILE_FLAGS([-Wcheck])
+         # Enable -Weffc++ for warnings related to C++ programming guidelines
+dnl      AX_APPEND_COMPILE_FLAGS([-Weffc++])
+dnl      # Enable diagnostics about questionable pointer arithmetic
+         AX_APPEND_COMPILE_FLAGS([-Wpointer-arith])
+         # Enable warnings if generated code is not C++ ABI compliant
+         AX_APPEND_COMPILE_FLAGS([-Wabi])
+         # Disable remark #383: value copied to temporary, reference to temporary used
+         AX_APPEND_COMPILE_FLAGS([-wd383])
+         # Disable remark #424: extra ";" ignored
+         AX_APPEND_COMPILE_FLAGS([-wd424])
+         # Disable remark #981: operands are evaluated in unspecified order
+         AX_APPEND_COMPILE_FLAGS([-wd981])
+dnl      # Disable warning #2012: Effective C++ Item 1 prefer const and inline to #define
+dnl      AX_APPEND_COMPILE_FLAGS([-wd2012])
+dnl      # Disable warning #2015: Effective C++ Item 4 prefer C++ style comments
+dnl      AX_APPEND_COMPILE_FLAGS([-wd2015])
+         ;;#(
+  gnu)   AX_APPEND_COMPILE_FLAGS([-Wextra])
+         ;;#(
+  *)     # Problem may occur if AX_COMPILER_VENDOR not called prior to AX_WARNINGS_SANITIZE
+         AC_MSG_WARN([AX_WARNINGS[]_SANITIZE: ax_cv_cxx_compiler_vendor = $ax_cv_cxx_compiler_vendor unknown])
+         ;;
+esac
+# Disable warnings on unrecognized pragmas for any compiler
+AX_APPEND_COMPILE_FLAGS([-Wno-unknown-pragmas])
 AC_LANG_POP()
 ])

@@ -18,7 +18,7 @@
 #
 # REQUIRES
 #
-#   AX_CHECK_COMPILER_FLAGS
+#   AX_CHECK_COMPILE_FLAG
 #
 # LAST MODIFICATION
 #
@@ -58,7 +58,6 @@
 
 AC_DEFUN([AX_VISIBILITY], [
 AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
-AC_REQUIRE([AX_CHECK_COMPILER_FLAGS])
 
 m4_define(ax_visibility_setting,[m4_tolower(m4_normalize(ifelse([$1],,[hidden],[$1])))])
 
@@ -68,7 +67,7 @@ ax_visibility_[]_AC_LANG_ABBREV[]_werror_save=$ac_[]_AC_LANG_ABBREV[]_werror_fla
 ac_[]_AC_LANG_ABBREV[]_werror_flag=yes
 for possibility in "-fvisibility=ax_visibility_setting"
 do
-  AX_CHECK_COMPILER_FLAGS([$possibility],[
+  AX_CHECK_COMPILE_FLAG([$possibility],[
     ax_visibility_[]_AC_LANG_ABBREV[]_flag=$possibility
     break
   ],[])

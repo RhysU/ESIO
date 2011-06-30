@@ -37,6 +37,7 @@ AX_CHECK_ENABLE_DEBUG([info])
 AC_PROG_CC
 gl_EARLY
 gl_INIT
+AX_APPEND_LINK_FLAGS([-Wl,--as-needed],[LDFLAGS])
 AC_LANG_PUSH([C])
 if test "x$ax_enable_debug" != "xno"; then
     AX_TRACEBACK()
