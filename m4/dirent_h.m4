@@ -1,5 +1,5 @@
-# dirent_h.m4 serial 13
-dnl Copyright (C) 2008-2010 Free Software Foundation, Inc.
+# dirent_h.m4 serial 14
+dnl Copyright (C) 2008-2011 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -19,13 +19,6 @@ AC_DEFUN([gl_DIRENT_H],
   dnl corresponding gnulib module is not in use.
   gl_WARN_ON_USE_PREPARE([[#include <dirent.h>
     ]], [alphasort dirfd fdopendir scandir])
-])
-
-dnl Unconditionally enables the replacement of <dirent.h>.
-AC_DEFUN([gl_REPLACE_DIRENT_H],
-[
-  dnl This is a no-op, because <dirent.h> is always overridden.
-  :
 ])
 
 AC_DEFUN([gl_DIRENT_MODULE_INDICATOR],

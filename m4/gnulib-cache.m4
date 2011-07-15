@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2010 Free Software Foundation, Inc.
+# Copyright (C) 2002-2011 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --libtool --macro-prefix=gl --no-vc-files argp binary-io canonicalize-lgpl chown full-write getopt-gnu open rename safe-read scandir strdup-posix strverscmp unistd
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --no-conditional-dependencies --libtool --macro-prefix=gl --no-vc-files argp binary-io canonicalize-lgpl chown full-write getopt-gnu open rename safe-read scandir strdup-posix strverscmp unistd
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -46,4 +46,5 @@ gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([gl])
 gl_PO_DOMAIN([])
+gl_WITNESS_C_DOMAIN([])
 gl_VC_FILES([false])

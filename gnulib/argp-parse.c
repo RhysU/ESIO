@@ -1,5 +1,5 @@
 /* Hierarchial argument parsing, layered over getopt
-   Copyright (C) 1995-2000, 2002-2004, 2009-2010 Free Software Foundation, Inc.
+   Copyright (C) 1995-2000, 2002-2004, 2009-2011 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Written by Miles Bader <miles@gnu.ai.mit.edu>.
 
@@ -254,7 +254,7 @@ struct parser
   struct group *groups;
   /* The end of the GROUPS array.  */
   struct group *egroup;
-  /* An vector containing storage for the CHILD_INPUTS field in all groups.  */
+  /* A vector containing storage for the CHILD_INPUTS field in all groups.  */
   void **child_inputs;
 
   /* True if we think using getopt is still useful; if false, then

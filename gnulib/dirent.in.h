@@ -1,5 +1,5 @@
 /* A GNU-like <dirent.h>.
-   Copyright (C) 2006-2010 Free Software Foundation, Inc.
+   Copyright (C) 2006-2011 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -14,7 +14,7 @@
    You should have received a copy of the GNU Lesser General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _GL_DIRENT_H
+#ifndef _@GUARD_PREFIX@_DIRENT_H
 
 #if __GNUC__ >= 3
 @PRAGMA_SYSTEM_HEADER@
@@ -24,8 +24,8 @@
 /* The include_next requires a split double-inclusion guard.  */
 #@INCLUDE_NEXT@ @NEXT_DIRENT_H@
 
-#ifndef _GL_DIRENT_H
-#define _GL_DIRENT_H
+#ifndef _@GUARD_PREFIX@_DIRENT_H
+#define _@GUARD_PREFIX@_DIRENT_H
 
 /* Get ino_t.  Needed on some systems, including glibc 2.8.  */
 #include <sys/types.h>
@@ -168,5 +168,5 @@ _GL_WARN_ON_USE (alphasort, "alphasort is unportable - "
 #endif
 
 
-#endif /* _GL_DIRENT_H */
-#endif /* _GL_DIRENT_H */
+#endif /* _@GUARD_PREFIX@_DIRENT_H */
+#endif /* _@GUARD_PREFIX@_DIRENT_H */
