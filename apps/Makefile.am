@@ -11,7 +11,6 @@ bin_PROGRAMS    = # Append below
 BUILT_DOCS      = # Append below
 BUILT_SOURCES   = # Append below
 CLEANFILES      = # Append below
-EXTRA_DIST      = # Append below
 
 # Use MPI compiler wrappers since HDF5 wrappers break autodependencies.
 CC=@MPICC@

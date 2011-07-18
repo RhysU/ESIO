@@ -1,23 +1,24 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CFLAGS       = # Append below
-AM_CPPFLAGS     = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
-AM_CPPFLAGS    += -I$(top_builddir)        -I$(top_srcdir)
-AM_FCFLAGS      = -I$(top_builddir)        -I$(top_srcdir)
-AM_FCFLAGS     += -I$(top_builddir)/esio
-AM_LDFLAGS      = # Append below
-check_PROGRAMS  = # Append below
-noinst_PROGRAMS = # Append below
-BUILT_SOURCES   = # Append below
-CLEANFILES      = # Append below
-noinst_HEADERS  = fct.h                  \
-                  testframework_assert.h \
-                  testutils.h
-EXTRA_DIST      = layout_template.c      \
-                  plane_template.c       \
-                  line_template.c        \
-                  attribute_template.c   \
-                  empty.h5
+AM_CFLAGS            = # Append below
+AM_CPPFLAGS         = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib
+AM_CPPFLAGS        += -I$(top_builddir)        -I$(top_srcdir)
+AM_FCFLAGS          = -I$(top_builddir)        -I$(top_srcdir)
+AM_FCFLAGS         += -I$(top_builddir)/esio
+AM_LDFLAGS          = # Append below
+check_PROGRAMS      = # Append below
+dist_check_SCRIPTS  = # Append below
+noinst_PROGRAMS     = # Append below
+BUILT_SOURCES       = # Append below
+CLEANFILES          = # Append below
+noinst_HEADERS      = fct.h                  \
+                      testframework_assert.h \
+                      testutils.h
+EXTRA_DIST          = layout_template.c      \
+                      plane_template.c       \
+                      line_template.c        \
+                      attribute_template.c   \
+                      empty.h5
 
 TESTS              = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
@@ -53,11 +54,11 @@ uri_tests_LDADD    = ../esio/libesio.la
 #############################################################################
 
 ## Basic C API sanity checks
-TESTS          += basic.sh     # Wrapper script
-EXTRA_DIST     += basic.sh     # Wrapper script
-check_PROGRAMS += basic
-basic_SOURCES   = basic.c testutils.c
-basic_LDADD     = ../esio/libesio.la
+TESTS              += basic.sh
+dist_check_SCRIPTS += basic.sh
+check_PROGRAMS     += basic
+basic_SOURCES       = basic.c testutils.c
+basic_LDADD         = ../esio/libesio.la
 
 ## Basic Fortran API sanity checks
 TESTS           += basic_f
@@ -70,8 +71,8 @@ basic_f_LDADD    = ../esio/libesiof.la
 ###########################################################################
 
 ## String tests...
-TESTS          += string.sh    # Wrapper script
-EXTRA_DIST     += string.sh    # Wrapper script
+TESTS              += string.sh
+dist_check_SCRIPTS += string.sh
 
 ## ...in C
 check_PROGRAMS += string
@@ -88,22 +89,22 @@ string_f_LDADD    = ../esio/libesiof.la
 ###########################################################################
 
 ## Attribute double precision tests in C
-TESTS                    += attribute_double.sh    # Wrapper script
-EXTRA_DIST               += attribute_double.sh    # Wrapper script
+TESTS                    += attribute_double.sh
+dist_check_SCRIPTS       += attribute_double.sh
 check_PROGRAMS           += attribute_double
 attribute_double_SOURCES  = attribute_double.c testutils.c
 attribute_double_LDADD    = ../esio/libesio.la
 
 ## Attribute single precision tests in C
-TESTS                   += attribute_float.sh     # Wrapper script
-EXTRA_DIST              += attribute_float.sh     # Wrapper script
+TESTS                   += attribute_float.sh
+dist_check_SCRIPTS      += attribute_float.sh
 check_PROGRAMS          += attribute_float
 attribute_float_SOURCES  = attribute_float.c testutils.c
 attribute_float_LDADD    = ../esio/libesio.la
 
 ## Attribute integer tests...
-TESTS                 += attribute_int.sh         # Wrapper script
-EXTRA_DIST            += attribute_int.sh         # Wrapper script
+TESTS                 += attribute_int.sh
+dist_check_SCRIPTS    += attribute_int.sh
 
 ## ...in C
 check_PROGRAMS        += attribute_int
@@ -120,22 +121,22 @@ attribute_int_f_LDADD    = ../esio/libesiof.la
 ###########################################################################
 
 ## Line double precision tests in C
-TESTS               += line_double.sh    # Wrapper script
-EXTRA_DIST          += line_double.sh    # Wrapper script
+TESTS               += line_double.sh
+dist_check_SCRIPTS  += line_double.sh
 check_PROGRAMS      += line_double
 line_double_SOURCES  = line_double.c testutils.c
 line_double_LDADD    = ../esio/libesio.la
 
 ## Line single precision tests in C
-TESTS               += line_float.sh     # Wrapper script
-EXTRA_DIST          += line_float.sh     # Wrapper script
+TESTS               += line_float.sh
+dist_check_SCRIPTS  += line_float.sh
 check_PROGRAMS      += line_float
 line_float_SOURCES   = line_float.c testutils.c
 line_float_LDADD     = ../esio/libesio.la
 
 ## Line integer tests...
-TESTS             += line_int.sh         # Wrapper script
-EXTRA_DIST        += line_int.sh         # Wrapper script
+TESTS              += line_int.sh
+dist_check_SCRIPTS += line_int.sh
 
 ## ...in C
 check_PROGRAMS    += line_int
@@ -152,22 +153,22 @@ line_int_f_LDADD    = ../esio/libesiof.la
 #############################################################################
 
 ## Plane double precision tests in C
-TESTS                += plane_double.sh    # Wrapper script
-EXTRA_DIST           += plane_double.sh    # Wrapper script
+TESTS                += plane_double.sh
+dist_check_SCRIPTS   += plane_double.sh
 check_PROGRAMS       += plane_double
 plane_double_SOURCES  = plane_double.c testutils.c
 plane_double_LDADD    = ../esio/libesio.la
 
 ## Plane single precision tests in C
-TESTS                += plane_float.sh     # Wrapper script
-EXTRA_DIST           += plane_float.sh     # Wrapper script
+TESTS                += plane_float.sh
+dist_check_SCRIPTS   += plane_float.sh
 check_PROGRAMS       += plane_float
 plane_float_SOURCES   = plane_float.c testutils.c
 plane_float_LDADD     = ../esio/libesio.la
 
 ## Plane integer tests...
-TESTS              += plane_int.sh         # Wrapper script
-EXTRA_DIST         += plane_int.sh         # Wrapper script
+TESTS              += plane_int.sh
+dist_check_SCRIPTS += plane_int.sh
 
 ## ...in C
 check_PROGRAMS     += plane_int
@@ -184,22 +185,22 @@ plane_int_f_LDADD    = ../esio/libesiof.la
 #############################################################################
 
 ## Layout 0 double precision tests in C
-TESTS                  += layout0_double.sh    # Wrapper script
-EXTRA_DIST             += layout0_double.sh    # Wrapper script
+TESTS                  += layout0_double.sh
+dist_check_SCRIPTS     += layout0_double.sh
 check_PROGRAMS         += layout0_double
 layout0_double_SOURCES  = layout0_double.c testutils.c
 layout0_double_LDADD    = ../esio/libesio.la
 
 ## Layout 0 single precision tests in C
-TESTS                  += layout0_float.sh     # Wrapper script
-EXTRA_DIST             += layout0_float.sh     # Wrapper script
+TESTS                  += layout0_float.sh
+dist_check_SCRIPTS     += layout0_float.sh
 check_PROGRAMS         += layout0_float
 layout0_float_SOURCES   = layout0_float.c testutils.c
 layout0_float_LDADD     = ../esio/libesio.la
 
 ## Layout 0 integer tests...
-TESTS                += layout0_int.sh         # Wrapper script
-EXTRA_DIST           += layout0_int.sh         # Wrapper script
+TESTS                += layout0_int.sh
+dist_check_SCRIPTS   += layout0_int.sh
 
 ## ...in C
 check_PROGRAMS       += layout0_int
@@ -216,22 +217,22 @@ layout0_int_f_LDADD    = ../esio/libesiof.la
 #############################################################################
 
 ## Layout 1 double precision tests in C
-TESTS                  += layout1_double.sh    # Wrapper script
-EXTRA_DIST             += layout1_double.sh    # Wrapper script
+TESTS                  += layout1_double.sh
+dist_check_SCRIPTS     += layout1_double.sh
 check_PROGRAMS         += layout1_double
 layout1_double_SOURCES  = layout1_double.c testutils.c
 layout1_double_LDADD    = ../esio/libesio.la
 
 ## Layout 1 single precision tests in C
-TESTS                  += layout1_float.sh     # Wrapper script
-EXTRA_DIST             += layout1_float.sh     # Wrapper script
+TESTS                  += layout1_float.sh
+dist_check_SCRIPTS     += layout1_float.sh
 check_PROGRAMS         += layout1_float
 layout1_float_SOURCES   = layout1_float.c testutils.c
 layout1_float_LDADD     = ../esio/libesio.la
 
 ## Layout 1 integer tests in C
-TESTS                += layout1_int.sh         # Wrapper script
-EXTRA_DIST           += layout1_int.sh         # Wrapper script
+TESTS                += layout1_int.sh
+dist_check_SCRIPTS   += layout1_int.sh
 check_PROGRAMS       += layout1_int
 layout1_int_SOURCES   = layout1_int.c testutils.c
 layout1_int_LDADD     = ../esio/libesio.la
@@ -241,22 +242,22 @@ layout1_int_LDADD     = ../esio/libesio.la
 #############################################################################
 
 ## Layout 2 double precision tests in C
-TESTS                  += layout2_double.sh    # Wrapper script
-EXTRA_DIST             += layout2_double.sh    # Wrapper script
+TESTS                  += layout2_double.sh
+dist_check_SCRIPTS     += layout2_double.sh
 check_PROGRAMS         += layout2_double
 layout2_double_SOURCES  = layout2_double.c testutils.c
 layout2_double_LDADD    = ../esio/libesio.la
 
 ## Layout 2 single precision tests in C
-TESTS                  += layout2_float.sh     # Wrapper script
-EXTRA_DIST             += layout2_float.sh     # Wrapper script
+TESTS                  += layout2_float.sh
+dist_check_SCRIPTS     += layout2_float.sh
 check_PROGRAMS         += layout2_float
 layout2_float_SOURCES   = layout2_float.c testutils.c
 layout2_float_LDADD     = ../esio/libesio.la
 
 ## Layout 2 integer tests in C
-TESTS                += layout2_int.sh         # Wrapper script
-EXTRA_DIST           += layout2_int.sh         # Wrapper script
+TESTS                += layout2_int.sh
+dist_check_SCRIPTS   += layout2_int.sh
 check_PROGRAMS       += layout2_int
 layout2_int_SOURCES   = layout2_int.c testutils.c
 layout2_int_LDADD     = ../esio/libesio.la
@@ -266,8 +267,8 @@ layout2_int_LDADD     = ../esio/libesio.la
 #############################################################################
 
 ## Externally observable restart renaming tets
-TESTS      += esio_rename.sh
-EXTRA_DIST += esio_rename.sh
+TESTS              += esio_rename.sh
+dist_check_SCRIPTS += esio_rename.sh
 
 #############################################################################
 ### MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS MISCELLANEOUS ###

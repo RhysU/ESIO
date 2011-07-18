@@ -8,7 +8,6 @@ AM_LDFLAGS         = # Append below
 BUILT_SOURCES      = # Append below
 check_PROGRAMS     = # Append below
 CLEANFILES         = # Append below
-EXTRA_DIST         = # Append below
 include_HEADERS    = # Append below
 lib_LTLIBRARIES    = # Append below
 noinst_HEADERS     = # Append below
