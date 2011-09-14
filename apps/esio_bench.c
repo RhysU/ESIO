@@ -756,7 +756,9 @@ int main(int argc, char *argv[])
     }
 
     // TODO Get timing information back from multiple ranks
-    if (d.world_rank == 0) GRVY_TIMER_SUMMARIZE();
+    if (d.world_rank == 0) {
+        GRVY_TIMER_SUMMARIZE();
+    }
 
     // Finalize the field, plane, and line problems
     if (d.nfields) field_finalize(&d, &f);
