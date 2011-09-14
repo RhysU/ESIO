@@ -113,6 +113,10 @@ int esio_field_metadata_write(hid_t loc_id, const char *name,
                               int cglobal, int bglobal, int aglobal,
                               hid_t type_id)
 {
+    // layout0 is the default and requires writing no auxiliary metadata.
+    // Requires companion logic in esio_field_metadata_read(...) below.
+    if (layout_index == 0) return ESIO_SUCCESS;
+
     // Meant to be opaque but the cool kids will figure it out. :P
     const int ncomponents = esio_type_ncomponents(type_id);
     const int metadata[ESIO_FIELD_METADATA_SIZE] = {
@@ -136,20 +140,42 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
                              int *ncomponents)
 {
     // This routine should not (generally) invoke any ESIO error handling
-    // unless Very Bad Things (TM) happen.  It is sometimes used to query for
-    // the existence of a field.
+    // unless Bad Things (TM) happen.  It is sometimes used to query for the
+    // existence of a field.
 
-    // Local scratch space into which we read the metadata
+    // Local scratch space into which we read a field's metadata.
     // Employ a sentinel to balk if/when we accidentally blow out the buffer
     int metadata[ESIO_FIELD_METADATA_SIZE + 1];
     const int sentinel = INT_MIN + 999983;
     metadata[ESIO_FIELD_METADATA_SIZE] = sentinel;
 
-    // Read the metadata into the buffer
-    DISABLE_HDF5_ERROR_HANDLER
+    // Disable the error handler once and only once and perform all queries.
+    // Dumb but required due to how disable/enable macros are implemented.
+    DISABLE_HDF5_ERROR_HANDLER(one)
+    const htri_t metadata_exists = H5Aexists_by_name(
+            loc_id, name, "esio_field_metadata", H5P_DEFAULT);
+    ENABLE_HDF5_ERROR_HANDLER(one)
+
+    // If metadata did not exist use layout0 and employ esio_hdf5metadata_read.
+    if (metadata_exists == 0) {
+        assert(ESIO_FIELD_METADATA_SIZE >= 4);
+        if (esio_hdf5metadata_read(loc_id, name, 3, metadata, metadata + 3)) {
+            ESIO_ERROR("ESIO unable to read field (?) lacking esio_field_metadata",
+                       ESIO_EFAILED); // Moderately Bad (TM)
+        }
+        if (layout_index) *layout_index = 0;
+        if (cglobal)      *cglobal      = metadata[0];
+        if (bglobal)      *bglobal      = metadata[1];
+        if (aglobal)      *aglobal      = metadata[2];
+        if (ncomponents)  *ncomponents  = metadata[3];
+        return ESIO_SUCCESS;
+    }
+
+    // Metadata existed so read it into local scratch space
+    DISABLE_HDF5_ERROR_HANDLER(two)
     const herr_t err = H5LTget_attribute_int(
             loc_id, name, "esio_field_metadata", metadata);
-    ENABLE_HDF5_ERROR_HANDLER
+    ENABLE_HDF5_ERROR_HANDLER(two)
 
     // Check that our sentinel survived the read process (Very Bad (TM))
     if (metadata[ESIO_FIELD_METADATA_SIZE] != sentinel) {
@@ -187,9 +213,9 @@ int esio_hdf5metadata_read(hid_t loc_id,
     // Extract metadata using HDF5's introspection utilities
 
     // Open dataset with "soft" failure: ESIO_ERROR not invoked
-    DISABLE_HDF5_ERROR_HANDLER
+    DISABLE_HDF5_ERROR_HANDLER(one)
     const hid_t dset_id = H5Dopen1(loc_id, name);
-    ENABLE_HDF5_ERROR_HANDLER
+    ENABLE_HDF5_ERROR_HANDLER(one)
     if (dset_id < 0) {
         return ESIO_EINVAL;
     }

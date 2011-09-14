@@ -2105,14 +2105,14 @@ int esio_attribute_sizev(const esio_handle h,
     hsize_t dims[H5S_MAX_RANK]; // Oversized to protect smashing the stack
     H5T_class_t type_class;
     size_t type_size;
-    DISABLE_HDF5_ERROR_HANDLER
+    DISABLE_HDF5_ERROR_HANDLER(one)
     const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id,
                                                          location,
                                                          name,
                                                          &rank, dims,
                                                          &type_class,
                                                          &type_size);
-    ENABLE_HDF5_ERROR_HANDLER
+    ENABLE_HDF5_ERROR_HANDLER(one)
     if (err  <  0) {
         ESIO_ERROR("No such attribute found at that location", ESIO_EINVAL);
     }
@@ -2175,11 +2175,11 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     hsize_t dims[H5S_MAX_RANK]; /* Oversized protects the stack */            \
     H5T_class_t type_class;                                                   \
     size_t type_size;                                                         \
-    DISABLE_HDF5_ERROR_HANDLER                                                \
+    DISABLE_HDF5_ERROR_HANDLER(one)                                           \
     const herr_t err1 = esio_H5LTget_attribute_ndims_info(                    \
             h->file_id, location, name, &rank, dims,                          \
             &type_class, &type_size);                                         \
-    ENABLE_HDF5_ERROR_HANDLER                                                 \
+    ENABLE_HDF5_ERROR_HANDLER(one)                                            \
     if (err1 < 0) {                                                           \
         ESIO_ERROR("unable to interrogate requested attribute at location",   \
                 ESIO_EINVAL);                                                 \
@@ -2275,13 +2275,13 @@ char* esio_string_get(const esio_handle h,
         ESIO_ERROR_NULL("name == NULL",           ESIO_EFAULT);
 
     // Silence HDF5 errors while querying the attribute
-    DISABLE_HDF5_ERROR_HANDLER
+    DISABLE_HDF5_ERROR_HANDLER(one)
 
     // Attempt to open the requested attribute
     const hid_t aid = H5Aopen_by_name(
             h->file_id, location, name, H5P_DEFAULT, H5P_DEFAULT);
     if (aid < 0) {
-        ENABLE_HDF5_ERROR_HANDLER
+        ENABLE_HDF5_ERROR_HANDLER(one)
         ESIO_ERROR_NULL("unable to interrogate requested attribute at location",
                         ESIO_EINVAL);
     }
@@ -2289,21 +2289,21 @@ char* esio_string_get(const esio_handle h,
     // Open type associated with the attribute
     const hid_t tid = H5Aget_type(aid);
     if (tid < 0) {
-        ENABLE_HDF5_ERROR_HANDLER
+        ENABLE_HDF5_ERROR_HANDLER(one)
         H5Aclose(aid);
         ESIO_ERROR_NULL("unable to interrogate attribute type", ESIO_EINVAL);
     }
 
     // Check that we're dealing with a string
     if (H5T_STRING != H5Tget_class(tid)) {
-        ENABLE_HDF5_ERROR_HANDLER
+        ENABLE_HDF5_ERROR_HANDLER(one)
         H5Tclose(tid);
         H5Aclose(aid);
         ESIO_ERROR_NULL("requested attribute is not a string", ESIO_EINVAL);
     }
 
     // Below here HDF5 calls should be succeeding
-    ENABLE_HDF5_ERROR_HANDLER
+    ENABLE_HDF5_ERROR_HANDLER(one)
 
     // Retrieve the string length
     const size_t size = H5Tget_size(tid);

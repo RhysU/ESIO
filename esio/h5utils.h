@@ -35,15 +35,17 @@ extern "C" {
 #endif
 
 // Macro to save and disable current HDF5 error handler
-#define DISABLE_HDF5_ERROR_HANDLER                               \
-    H5E_auto2_t hdf5_handler;                                    \
-    void *hdf5_client_data;                                      \
-    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler, &hdf5_client_data); \
+// "id" is present to allow multiple disable/enable calls in one scope.
+#define DISABLE_HDF5_ERROR_HANDLER(id)                                   \
+    H5E_auto2_t hdf5_handler##id;                                        \
+    void *hdf5_client_data##id;                                          \
+    H5Eget_auto2(H5E_DEFAULT, &hdf5_handler##id, &hdf5_client_data##id); \
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
 // Macro to restore previously saved HDF5 error handler
-#define ENABLE_HDF5_ERROR_HANDLER                               \
-    H5Eset_auto2(H5E_DEFAULT, hdf5_handler, hdf5_client_data);
+// "id" is present to allow multiple disable/enable calls in one scope.
+#define ENABLE_HDF5_ERROR_HANDLER(id)                                 \
+    H5Eset_auto2(H5E_DEFAULT, hdf5_handler##id, hdf5_client_data##id);
 
 herr_t
 esio_H5LTget_attribute_ndims_info(hid_t loc_id,
