@@ -225,6 +225,11 @@ FCT_BGN()
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
 #endif
+
+            // Check that non-existent attribute yields quiet ESIO_NOTFOUND
+            fct_chk(ESIO_NOTFOUND == esio_attribute_sizev(
+                        state, "/", "nonexistent", NULL));
+
             fct_req(0 == esio_file_close(state));
         }
         FCT_TEST_END();
