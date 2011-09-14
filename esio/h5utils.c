@@ -108,3 +108,32 @@ bail:
     H5Oclose(obj_id);
     return e ? e : -1;
 }
+
+struct qw_data {
+    hid_t errnum;
+    int   maj_pos;
+    int   min_pos;
+};
+
+static herr_t
+query_walker(unsigned n, H5E_error2_t *err_desc, void *client_data)
+{
+    struct qw_data * const qw = (struct qw_data*) client_data;
+    if (err_desc->maj_num == qw->errnum) qw->maj_pos = n;
+    if (err_desc->min_num == qw->errnum) qw->min_pos = n;
+    return 0;
+}
+
+htri_t
+esio_H5Equery_stack(hid_t errnum)
+{
+    herr_t e = 0;
+
+    /* Walk stack looking for errnum */
+    struct qw_data qw = {errnum, -1, -1};
+    if ((e = H5Ewalk2(H5E_DEFAULT, H5E_WALK_UPWARD, &query_walker, &qw)) < 0)
+        return e;
+
+    /* Return true iff we found the specified error code */
+    return (qw.maj_pos == -1 && qw.min_pos == -1) ? 0 : 1;
+}

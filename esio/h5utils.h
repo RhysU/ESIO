@@ -56,6 +56,10 @@ esio_H5LTget_attribute_ndims_info(hid_t loc_id,
                                   H5T_class_t *type_class,
                                   size_t *type_size);
 
+// Walk the current error stack to see if errnum appears anywhere within it
+htri_t
+esio_H5Equery_stack(hid_t errnum);
+
 #ifdef __cplusplus
 }
 #endif
