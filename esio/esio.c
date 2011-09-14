@@ -1018,7 +1018,7 @@ int esio_field_size(const esio_handle h,
     int ncomponents;
     const int status
         = esio_field_sizev(h, name, cglobal, bglobal, aglobal, &ncomponents);
-    if (ncomponents != 1) {
+    if (status == ESIO_SUCCESS && ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_field_sizev",
                    ESIO_EINVAL);
     }
@@ -1053,7 +1053,7 @@ int esio_plane_size(const esio_handle h,
     int ncomponents;
     const int status
         = esio_plane_sizev(h, name, bglobal, aglobal, &ncomponents);
-    if (ncomponents != 1) {
+    if (status == ESIO_SUCCESS && ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_plane_sizev",
                    ESIO_EINVAL);
     }
@@ -1087,7 +1087,7 @@ int esio_line_size(const esio_handle h,
 {
     int ncomponents;
     const int status = esio_line_sizev(h, name, aglobal, &ncomponents);
-    if (ncomponents != 1) {
+    if (status == ESIO_SUCCESS && ncomponents != 1) {
         ESIO_ERROR("Must retrieve location size using esio_line_sizev",
                    ESIO_EINVAL);
     }
