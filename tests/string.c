@@ -177,6 +177,9 @@ FCT_BGN()
                 free(retrieved2);
             }
 
+            // Attempt to retrieve a nonexistent third and ensure NULL result
+            fct_chk(0 == esio_string_get(state, "/", "nonexistent"));
+
             // Close the file
             fct_req(0 == esio_file_close(state));
 

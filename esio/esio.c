@@ -2220,7 +2220,7 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     const herr_t err2 = H5LTget_attribute_##TYPE(                             \
             h->file_id, location, name, value);                               \
     if (err2 < 0) {                                                           \
-        ESIO_ERROR("unable to retrieve requested attribute at location",      \
+        ESIO_ERROR("unable to retrieve attribute at location",                \
                 ESIO_EFAILED);                                                \
     }                                                                         \
                                                                               \
@@ -2305,12 +2305,14 @@ char* esio_string_get(const esio_handle h,
     // Attempt to open the requested attribute
     const hid_t aid = H5Aopen_by_name(
             h->file_id, location, name, H5P_DEFAULT, H5P_DEFAULT);
-    if (aid == H5E_NOTFOUND) {
-        return NULL;  // ESIO_ERROR not called to allow existence query
-    } else if (aid < 0) {
+    if (aid < 0) {
         ENABLE_HDF5_ERROR_HANDLER(one)
-        ESIO_ERROR_NULL("unable to interrogate requested attribute at location",
-                        ESIO_EINVAL);
+        if (0 == H5Aexists_by_name(h->file_id, location, name, H5P_DEFAULT)) {
+            return NULL;
+        } else {
+            ESIO_ERROR_NULL("unable to interrogate attribute at location",
+                            ESIO_EINVAL);
+        }
     }
 
     // Open type associated with the attribute
@@ -2326,7 +2328,7 @@ char* esio_string_get(const esio_handle h,
         ENABLE_HDF5_ERROR_HANDLER(one)
         H5Tclose(tid);
         H5Aclose(aid);
-        ESIO_ERROR_NULL("requested attribute is not a string", ESIO_EINVAL);
+        ESIO_ERROR_NULL("attribute is not a string", ESIO_EINVAL);
     }
 
     // Below here HDF5 calls should be succeeding
@@ -2337,7 +2339,7 @@ char* esio_string_get(const esio_handle h,
     if (size == 0) {
         H5Tclose(tid);
         H5Aclose(aid);
-        ESIO_ERROR_NULL("unable to obtain requested string length",
+        ESIO_ERROR_NULL("unable to obtain string length",
                 ESIO_EINVAL);
     }
 
@@ -2354,7 +2356,7 @@ char* esio_string_get(const esio_handle h,
     if (err < 0) {
         H5Tclose(tid);
         H5Aclose(aid);
-        ESIO_ERROR_NULL("unable to retrieve requested string", ESIO_EFAILED);
+        ESIO_ERROR_NULL("unable to retrieve string", ESIO_EFAILED);
     }
 
     // Close the attribute type and the attribute
