@@ -362,6 +362,10 @@ FCT_BGN()
                 fct_chk_eq_int(aglobal, tmp_aglobal);
             }
 
+            // Ensure a nonexistent field returns ESIO_NOTFOUND
+            fct_chk(ESIO_NOTFOUND == esio_field_size(
+                        handle, "nonexistent", NULL, NULL, NULL));
+
             // Close the file
             fct_req(0 == esio_file_close(handle));
 
@@ -532,6 +536,10 @@ FCT_BGN()
                 fct_chk_eq_int(aglobal,     tmp_aglobal);
                 fct_chk_eq_int(ncomponents, tmp_ncomponents);
             }
+
+            // Ensure a nonexistent field returns ESIO_NOTFOUND
+            fct_chk(ESIO_NOTFOUND == esio_field_sizev(
+                        handle, "nonexistent", NULL, NULL, NULL, NULL));
 
             // Close the file
             fct_req(0 == esio_file_close(handle));

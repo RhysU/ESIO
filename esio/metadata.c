@@ -156,8 +156,11 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
             loc_id, name, "esio_field_metadata", H5P_DEFAULT);
     ENABLE_HDF5_ERROR_HANDLER(one)
 
-    // If metadata did not exist use layout0 and employ esio_hdf5metadata_read.
-    if (metadata_exists == 0) {
+    // If metadata retrieval fails return ESIO_NOTFOUND as field doesn't exist.
+    // If metadata not found use layout0 and employ esio_hdf5metadata_read.
+    if (metadata_exists < 0) {
+        return ESIO_NOTFOUND;
+    } else if (metadata_exists == 0) {
         assert(ESIO_FIELD_METADATA_SIZE >= 4);
         if (esio_hdf5metadata_read(loc_id, name, 3, metadata, metadata + 3)) {
             ESIO_ERROR("ESIO unable to read field (?) lacking esio_field_metadata",
