@@ -59,7 +59,8 @@ enum esio_status {
     ESIO_EINVAL   =  4, /**< Invalid argument supplied by user */
     ESIO_EFAILED  =  5, /**< Generic failure */
     ESIO_ESANITY  =  7, /**< Sanity check failed - shouldn't happen */
-    ESIO_ENOMEM   =  8  /**< Memory allocation failed */
+    ESIO_ENOMEM   =  8, /**< Memory allocation failed */
+    ESIO_NOTFOUND =  9  /**< Object not found */
 };
 
 /**

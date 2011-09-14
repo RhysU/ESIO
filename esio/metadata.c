@@ -212,11 +212,13 @@ int esio_hdf5metadata_read(hid_t loc_id,
 {
     // Extract metadata using HDF5's introspection utilities
 
-    // Open dataset with "soft" failure: ESIO_ERROR not invoked
+    // Open dataset and invoke ESIO_ERROR for non-H5E_NOTFOUND errors.
     DISABLE_HDF5_ERROR_HANDLER(one)
     const hid_t dset_id = H5Dopen1(loc_id, name);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (dset_id < 0) {
+    if (dset_id == H5E_NOTFOUND) {
+        return ESIO_NOTFOUND;
+    } else if (dset_id < 0) {
         return ESIO_EINVAL;
     }
 

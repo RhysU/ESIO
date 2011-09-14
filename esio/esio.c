@@ -1037,11 +1037,13 @@ int esio_field_sizev(const esio_handle h,
 
     const int status = esio_field_metadata_read(
             h->file_id, name, NULL, cglobal, bglobal, aglobal, ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read field metadata", status);
+    switch (status) {
+        case ESIO_SUCCESS:
+        case ESIO_NOTFOUND:  // ESIO_ERROR not called to allow existence query
+            return status;
+        default:
+            ESIO_ERROR("Unable to retrieve field metadata", status);
     }
-
-    return ESIO_SUCCESS;
 }
 
 int esio_plane_size(const esio_handle h,
@@ -1070,11 +1072,13 @@ int esio_plane_sizev(const esio_handle h,
 
     const int status = esio_plane_metadata_read(
             h->file_id, name, bglobal, aglobal, ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read plane metadata", status);
+    switch (status) {
+        case ESIO_SUCCESS:
+        case ESIO_NOTFOUND:  // ESIO_ERROR not called to allow existence query
+            return status;
+        default:
+            ESIO_ERROR("Unable to retrieve plane metadata", status);
     }
-
-    return ESIO_SUCCESS;
 }
 
 int esio_line_size(const esio_handle h,
@@ -1102,11 +1106,13 @@ int esio_line_sizev(const esio_handle h,
 
     const int status = esio_line_metadata_read(
             h->file_id, name, aglobal, ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read line metadata", ESIO_EFAILED);
+    switch (status) {
+        case ESIO_SUCCESS:
+        case ESIO_NOTFOUND:  // ESIO_ERROR not called to allow existence query
+            return status;
+        default:
+            ESIO_ERROR("Unable to retrieve line metadata", status);
     }
-
-    return ESIO_SUCCESS;
 }
 
 // *******************************************************************
@@ -1342,8 +1348,13 @@ int esio_field_read_internal(const esio_handle h,
                                                 &field_bglobal,
                                                 &field_aglobal,
                                                 &field_ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read field's ESIO metadata", status);
+    switch (status) {
+        case ESIO_SUCCESS:
+            break;
+        case ESIO_NOTFOUND:
+            ESIO_ERROR("Field not found in file", status);
+        default:
+            ESIO_ERROR("Unable to read field's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information
@@ -1669,8 +1680,13 @@ int esio_plane_read_internal(const esio_handle h,
                                                 &plane_bglobal,
                                                 &plane_aglobal,
                                                 &plane_ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read plane's ESIO metadata", status);
+    switch (status) {
+        case ESIO_SUCCESS:
+            break;
+        case ESIO_NOTFOUND:
+            ESIO_ERROR("Plane not found in file", status);
+        default:
+            ESIO_ERROR("Unable to read plane's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information
@@ -1970,8 +1986,13 @@ int esio_line_read_internal(const esio_handle h,
     const int status = esio_line_metadata_read(h->file_id, name,
                                                &line_aglobal,
                                                &line_ncomponents);
-    if (status != ESIO_SUCCESS) {
-        ESIO_ERROR("Unable to read line's ESIO metadata", status);
+    switch (status) {
+        case ESIO_SUCCESS:
+            break;
+        case ESIO_NOTFOUND:
+            ESIO_ERROR("Line not found in file", status);
+        default:
+            ESIO_ERROR("Unable to read line's ESIO metadata", status);
     }
 
     // Ensure caller gave correct size information
@@ -2113,11 +2134,13 @@ int esio_attribute_sizev(const esio_handle h,
                                                          &type_class,
                                                          &type_size);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (err  <  0) {
-        ESIO_ERROR("No such attribute found at that location", ESIO_EINVAL);
+    if (err == H5E_NOTFOUND) {
+        return ESIO_NOTFOUND;  // ESIO_ERROR not called to allow existence query
+    } else if (err < 0) {
+        ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
     }
     if (rank != 1) {
-        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EINVAL);
+        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
     }
 
     // Ensure we won't overflow the return value type
@@ -2180,9 +2203,11 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
             h->file_id, location, name, &rank, dims,                          \
             &type_class, &type_size);                                         \
     ENABLE_HDF5_ERROR_HANDLER(one)                                            \
-    if (err1 < 0) {                                                           \
-        ESIO_ERROR("unable to interrogate requested attribute at location",   \
-                ESIO_EINVAL);                                                 \
+    if (err1 == H5E_NOTFOUND) {                                               \
+        ESIO_ERROR("Attribute not found at location", ESIO_EINVAL);           \
+    } else if (err1 < 0) {                                                    \
+        ESIO_ERROR("unable to interrogate attribute at location",             \
+                    ESIO_EINVAL);                                             \
     }                                                                         \
                                                                               \
     /* Ensure the user is getting what he/she requested */                    \
@@ -2280,7 +2305,9 @@ char* esio_string_get(const esio_handle h,
     // Attempt to open the requested attribute
     const hid_t aid = H5Aopen_by_name(
             h->file_id, location, name, H5P_DEFAULT, H5P_DEFAULT);
-    if (aid < 0) {
+    if (aid == H5E_NOTFOUND) {
+        return NULL;  // ESIO_ERROR not called to allow existence query
+    } else if (aid < 0) {
         ENABLE_HDF5_ERROR_HANDLER(one)
         ESIO_ERROR_NULL("unable to interrogate requested attribute at location",
                         ESIO_EINVAL);
