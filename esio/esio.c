@@ -1161,7 +1161,7 @@ int esio_field_write_internal(const esio_handle h,
                                                &field_ncomponents);
 
     if (mstat != ESIO_SUCCESS) {
-        // Field did not exist
+        // Presume field did not exist
 
         // Determine the chunking parameters to use for dataset creation
         // if they've not already been computed.  Note values are cached!
@@ -1534,7 +1534,7 @@ int esio_plane_write_internal(const esio_handle h,
 
     hid_t dset_id;
     if (mstat != ESIO_SUCCESS) {
-        // Plane did not exist
+        // Presume plane did not exist
 
         // Determine the chunking parameters to use for dataset creation
         // if they've not already been computed.  Note values are cached!
@@ -1848,8 +1848,8 @@ int esio_line_write_internal(const esio_handle h,
                                               &line_ncomponents);
 
     hid_t dset_id;
-    if (mstat == ESIO_EINVAL) {
-        // Line did not exist
+    if (mstat != ESIO_SUCCESS) {
+        // Presume line did not already exist
 
         // Determine the chunking parameters to use for dataset creation
         // if they've not already been computed.  Note values are cached!
@@ -1887,7 +1887,7 @@ int esio_line_write_internal(const esio_handle h,
         // Close creation property list
         H5Pclose(dcpl_id);
 
-    } else if (mstat == ESIO_SUCCESS) {
+    } else {
         // Line already existed
 
         // Ensure caller gave correct size information
@@ -1919,8 +1919,6 @@ int esio_line_write_internal(const esio_handle h,
                        ESIO_EINVAL);
         }
         H5Tclose(line_type_id);
-    } else {
-        ESIO_ERROR("Unrecoverable error attempting to write line", mstat);
     }
 
     // Obtain appropriate dataset transfer properties

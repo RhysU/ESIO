@@ -216,10 +216,10 @@ int esio_hdf5metadata_read(hid_t loc_id,
     DISABLE_HDF5_ERROR_HANDLER(one)
     const hid_t dset_id = H5Dopen1(loc_id, name);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (dset_id == H5E_NOTFOUND) {
-        return ESIO_NOTFOUND;
-    } else if (dset_id < 0) {
-        return ESIO_EINVAL;
+    if (dset_id < 0) {
+        // Suspect this simplistic logic if errors cannot be disambiguated
+        return (esio_H5Equery_stack(H5E_NOTFOUND) > 0) ? ESIO_NOTFOUND
+                                                       : ESIO_EINVAL;
     }
 
     // Obtain type information
