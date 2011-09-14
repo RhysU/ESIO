@@ -168,7 +168,7 @@ FCT_BGN()
                 free(retrieved1);
             }
 
-            // Retrieve the first and ensure it comes back cleanly
+            // Retrieve the second and ensure it comes back cleanly
             {
                 char *retrieved2 = esio_string_get(state, "/", "msg2");
                 fct_req(retrieved2);
