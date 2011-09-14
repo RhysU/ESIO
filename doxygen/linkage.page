@@ -46,16 +46,21 @@ the installation's \c lib directory must be added to both your Fortran
 compiler's include and library search paths.  In particular, if you do not
 provide \c lib within the search path you will see error messages stating that
 <tt>esio.mod</tt> is missing.  You will need to supply flags to link against
-ESIO <i>and</i> HDF5's basic and high-level Fortran libraries.  Note that you
-will either need to use your MPI implementation's Fortran compiler wrapper
-script, denoted here by <tt>\$(MPIFC)</tt>, or you will additionally need to
-provide MPI-related flags within the sample commands below.
+ESIO's Fortran library (<tt>esiof</tt>) <i>and</i> HDF5's basic and high-level
+C libraries (<tt>hdf5</tt> and <tt>hdf5_hl</tt>).  The HDF5 Fortran libraries
+(<tt>hdf5_fortran</tt> and <tt>hdf5hl_fortran</tt>) are <tt>not</tt> required.
+You do not need to have built HDF5 with Fortran support enabled.
+
+Note that you will either need to use your MPI implementation's Fortran
+compiler wrapper script, denoted here by <tt>\$(MPIFC)</tt>, or you will
+additionally need to provide MPI-related flags within the sample commands
+below.
 
 Assuming the same installation detailed in the C/C++ examples just above, you
 would compile and link a Fortran MPI application consisting of a single source
 file named <tt>app.f90</tt> as follows:
 
-\code > $(MPIFC) -I$HOME/lib app.f90 -L$HOME/lib -lesiof -L$HDF5HOME -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lz -lm \endcode
+\code > $(MPIFC) -I$HOME/lib app.f90 -L$HOME/lib -lesiof -L$HDF5HOME -lhdf5_hl -lhdf5 -lz -lm \endcode
 
 Using pkg-config simplifies the process considerably:
 
