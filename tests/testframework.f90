@@ -57,6 +57,7 @@ contains
 
     character(len=*), intent(in)           :: testsource
     integer,          intent(in), optional :: dimensionality
+    logical, allocatable, dimension(:)     :: periods  ! OpenMPI workaround
 
 !   Determine process topology dimensionality and allocate storage
     if (present(dimensionality)) then
@@ -119,8 +120,11 @@ contains
                             world_size, " ranks"
         end if
         if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
-        call MPI_Cart_create (MPI_COMM_WORLD, ndims, dims, .false., .true., &
+        allocate ( periods(ndims) )
+        periods(:) = .false.
+        call MPI_Cart_create (MPI_COMM_WORLD, ndims, dims, periods, .true., &
                               cart_comm, ierr)
+        deallocate ( periods )
         if (ierr /= MPI_SUCCESS) call MPI_Abort (MPI_COMM_WORLD, 1, ierr)
     else
         call MPI_Comm_dup (MPI_COMM_WORLD, cart_comm, ierr)
