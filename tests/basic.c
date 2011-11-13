@@ -188,7 +188,7 @@ FCT_BGN()
             fct_req(NULL == esio_file_path(handle));
 
             // Create without overwrite should fail
-            H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+            H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
             esio_set_error_handler_off();
             fct_req(0 != esio_file_create(handle, filename, 0 /* no o/w */));
             esio_set_error_handler(esio_handler);
@@ -242,7 +242,7 @@ FCT_BGN()
             fct_req(0 == esio_file_close(handle));
 
             // Create without overwrite should fail
-            H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+            H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
             esio_set_error_handler_off();
             fct_req(0 != esio_file_clone(handle, srcfile, filename, 0));
             esio_set_error_handler(esio_handler);
