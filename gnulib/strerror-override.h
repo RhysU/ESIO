@@ -29,8 +29,8 @@
 /* If ERRNUM maps to an errno value defined by gnulib, return a string
    describing the error.  Otherwise return NULL.  */
 # if REPLACE_STRERROR_0 \
-     || GNULIB_defined_ETXTBSY \
      || GNULIB_defined_ESOCK \
+     || GNULIB_defined_EWINSOCK \
      || GNULIB_defined_ENOMSG \
      || GNULIB_defined_EIDRM \
      || GNULIB_defined_ENOLINK \
@@ -39,6 +39,8 @@
      || GNULIB_defined_EBADMSG \
      || GNULIB_defined_EOVERFLOW \
      || GNULIB_defined_ENOTSUP \
+     || GNULIB_defined_ENETRESET \
+     || GNULIB_defined_ECONNABORTED \
      || GNULIB_defined_ESTALE \
      || GNULIB_defined_EDQUOT \
      || GNULIB_defined_ECANCELED
