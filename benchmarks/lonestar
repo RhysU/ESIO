@@ -1,0 +1,32 @@
+#!/bin/bash
+######################################################
+# batch job script to start a PSDNS run on Lonestar
+# created by Nicholas Malaya
+######################################################
+# ICES TURBULENCE Project number : TG-MCA99S022
+#$ -A TurbulenceDNS
+#$ -V                         # Load all enviroment variables
+#$ -pe 12way 12               # Tpn = tasks per node, NoNx16 is the number of cores
+#$ -cwd                       # place output in current directory
+#$ -N ESIO-benchmark          # Job Name
+#$ -S /bin/bash               # Specify shell path
+#$ -j y                       # Merge standard out, standard error to one file
+#$ -l h_rt=0:10:00            # Max Run Time
+#$ -q development             # Queue Type (qconf -sql) development/normal/huge
+#$ -M nick@ices.utexas.edu    # email notification address
+#$ -m be                      # email at beginning and the end of job
+
+export DEBUG_CACHE_BINARY=1      # cache binary -- lessens system load
+cd ../apps                       # move dir
+cache_binary $PWD   ./esio_bench # cache binary
+ibrun tacc_affinity ./esio_bench -r 10 --nfields=1 -f 128M --field-ncomponents=1 -d foo.h5
+
+#################################################
+# Commands / Notes
+#
+# qstat -u npm7 :: display all jobs
+# where npm7 is the user name
+#
+# or use showq
+#
+#################################################
