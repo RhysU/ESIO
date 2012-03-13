@@ -1,0 +1,101 @@
+TACC: Setting memory limits for job 499114 to unlimited KB
+TACC: Dumping job script:
+--------------------------------------------------------------------------------
+#!/bin/bash
+######################################################
+# batch job script to start a PSDNS run on Lonestar
+# created by Nicholas Malaya
+######################################################
+# ICES TURBULENCE Project number : TG-MCA99S022
+#$ -A TurbulenceDNS
+#$ -V                         # Load all enviroment variables
+#$ -pe 12way 12               # Tpn = tasks per node, NoNx16 is the number of cores
+#$ -cwd                       # place output in current directory
+#$ -N ESIO-benchmark          # Job Name
+#$ -S /bin/bash               # Specify shell path
+#$ -j y                       # Merge standard out, standard error to one file
+#$ -l h_rt=0:10:00            # Max Run Time
+#$ -q development             # Queue Type (qconf -sql) development/normal/huge
+#$ -M nick@ices.utexas.edu    # email notification address
+#$ -m be                      # email at beginning and the end of job
+
+export DEBUG_CACHE_BINARY=1      # cache binary -- lessens system load
+cd ../apps                       # move dir
+cache_binary $PWD   ./esio_bench # cache binary
+ibrun tacc_affinity ./esio_bench -r 10 --nfields=1 -f 128M --field-ncomponents=1 -d foo.h5
+
+#################################################
+# Commands / Notes
+#
+# qstat -u npm7 :: display all jobs
+# where npm7 is the user name
+#
+# or use showq
+#
+#################################################--------------------------------------------------------------------------------
+TACC: Done.
+Caching hosts in /home1/00000/npm7/.sge/prolog_hostfile.499114.jo13553
+Examining ./esio_bench:
+--> Dynamic libraries found
+  --> Caching /usr/lib64/libz.so.1...
+  --> Caching /opt/apps/intel11_1/mvapich2/1.6/lib/libmpich.so.1.2...
+  --> Caching /lib64/libpthread.so.0...
+  --> Caching /lib64/libc.so.6...
+  --> Caching /opt/apps/limic2/0.5.4//lib/liblimic2.so.0...
+  --> Caching /opt/ofed/lib64/librdmacm.so.1...
+  --> Caching /opt/ofed/lib64/libibverbs.so.1...
+  --> Caching /opt/ofed/lib64/libibumad.so.3...
+  --> Caching /lib64/libdl.so.2...
+  --> Caching /lib64/librt.so.1...
+  --> Caching /opt/apps/intel/11.1/lib/intel64/libimf.so...
+  --> Caching /opt/apps/intel/11.1/lib/intel64/libsvml.so...
+  --> Caching /lib64/libm.so.6...
+  --> Caching /lib64/libgcc_s.so.1...
+  --> Caching /opt/apps/intel/11.1/lib/intel64/libintlc.so.5...
+--> Caching .ssh directory
+  --> Caching authorized_keys...
+  --> Caching id_rsa...
+  --> Caching id_rsa.pub...
+  --> Caching known_hosts...
+--> Caching environment files
+  --> Caching .cshrc...
+  --> Caching .login...
+  --> Caching .profile...
+  --> Caching .profile_user...
+  --> Caching /opt/apps/intel11_1/mvapich2/1.6/bin/mpispawn...
+--> Caching ./esio_bench...
+ 
+cache_binary complete
+ 
+TACC: Starting up job 499114
+TACC: Setting up parallel environment for MVAPICH ssh-based mpirun.
+TACC: Setup complete. Running job script.
+TACC: starting parallel tasks...
+esio_bench 0.1.7 invoked as
+	 ./esio_bench -r 10 --nfields=1 -f 128M --field-ncomponents=1 -d foo.h5
+Initializing field problem...
+	Field spread across (3 x 2 x 2)-rank MPI topology
+	Per-rank 128.00 MB memory requested => 587 x 587 x 587 problem
+	Minimum per-rank field memory is 127.720 MB
+	Maximum per-rank field memory is 129.253 MB
+	Establishing field problem within ESIO using layout 0
+Problem contains 1 field(s) of size 587 x 587 x 587 each with 1 8-byte component(s)
+Global overall problem size is 1.507 GB
+Allocating and filling required memory buffers
+Beginning benchmark...
+	Iteration 0
+	Iteration 1
+	Iteration 2
+	Iteration 3
+	Iteration 4
+	Iteration 5
+	Iteration 6
+	Iteration 7
+	Iteration 8
+	Iteration 9
+Ending benchmark...
+Mean global transfer rate across 10 iteration(s) was 408.3525 MB/s
+TACC: Shutting down parallel environment.
+TACC: Shutdown complete. Exiting.
+TACC: Cleaning up after job: 499114
+TACC: Done.
