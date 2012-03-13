@@ -6,7 +6,7 @@
 # ICES TURBULENCE Project number : TG-MCA99S022
 #$ -A TurbulenceDNS
 #$ -V                         # Load all enviroment variables
-#$ -pe 12way 12               # Tpn = tasks per node, NoNx16 is the number of cores
+#$ -pe 12way 144              # Tpn = tasks per node, NoNx12 is the number of cores
 #$ -cwd                       # place output in current directory
 #$ -N ESIO-benchmark          # Job Name
 #$ -S /bin/bash               # Specify shell path
