@@ -6,13 +6,13 @@
 # ICES TURBULENCE Project number : TG-MCA99S022
 #$ -A TurbulenceDNS
 #$ -V                         # Load all enviroment variables
-#$ -pe 12way 144              # Tpn = tasks per node, NoNx12 is the number of cores
+#$ -pe 12way 504              # Tpn = tasks per node, NoNx12 is the number of cores
 #$ -cwd                       # place output in current directory
 #$ -N ESIO-benchmark          # Job Name
 #$ -S /bin/bash               # Specify shell path
 #$ -j y                       # Merge standard out, standard error to one file
-#$ -l h_rt=0:10:00            # Max Run Time
-#$ -q development             # Queue Type (qconf -sql) development/normal/huge
+#$ -l h_rt=0:20:00            # Max Run Time
+#$ -q normal                  # Queue Type (qconf -sql) development/normal/huge
 #$ -M nick@ices.utexas.edu    # email notification address
 #$ -m be                      # email at beginning and the end of job
 
