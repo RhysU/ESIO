@@ -19,7 +19,7 @@
 export DEBUG_CACHE_BINARY=1      # cache binary -- lessens system load
 cd ../apps                       # move dir
 cache_binary $PWD   ./esio_bench # cache binary
-ibrun tacc_affinity ./esio_bench -r 10 --nfields=1 -f 128M --field-ncomponents=1 -d foo.h5
+ibrun tacc_affinity ./esio_bench -r 10 --nfields=1 -f 64M --field-ncomponents=1 -d foo.h5
 
 #################################################
 # Commands / Notes
