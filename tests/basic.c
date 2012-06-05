@@ -91,7 +91,7 @@ FCT_BGN()
     const char * const output_dir = getenv("ESIO_TEST_OUTPUT_DIR");
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     char * filename = NULL;
-    esio_handle handle;
+    esio_handle handle = NULL;
 
     FCT_FIXTURE_SUITE_BGN(esio_file)
     {

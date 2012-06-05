@@ -142,7 +142,7 @@ FCT_BGN()
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
     char * filename = NULL;
-    esio_handle handle;
+    esio_handle handle = NULL;
 
     FCT_FIXTURE_SUITE_BGN(line_suite)
     {

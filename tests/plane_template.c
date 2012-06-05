@@ -138,8 +138,8 @@ FCT_BGN()
     }
 
     // Retrieve and process parallel distribution options
-    int bglobal, bstart, blocal;
-    int aglobal, astart, alocal;
+    int bglobal = -1, bstart = -1, blocal = -1;
+    int aglobal = -1, astart = -1, alocal = -1;
     const char *distribute = fctcl_val2("--distribute", "a");
     if (fctstr_ieq(distribute,"b")) {
         // Data uniformly partitioned in the medium index
@@ -191,7 +191,7 @@ FCT_BGN()
     char * filetemplate = create_testfiletemplate(output_dir, __FILE__);
     (void) input_dir;  // Possibly unused
     char * filename = NULL;
-    esio_handle handle;
+    esio_handle handle = NULL;
 
     FCT_FIXTURE_SUITE_BGN(plane_suite)
     {
