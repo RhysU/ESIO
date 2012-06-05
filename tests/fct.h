@@ -59,7 +59,7 @@ with a standard logger. */
 
 #define FCT_VERSION_MAJOR 1
 #define FCT_VERSION_MINOR 6
-#define FCT_VERSION_MICRO 0
+#define FCT_VERSION_MICRO 1
 
 #define _FCT_QUOTEME(x) #x
 #define FCT_QUOTEME(x) _FCT_QUOTEME(x)
@@ -3261,17 +3261,16 @@ they are needed, but at runtime, only the cheap, first call is made. */
     }
 
 
-#define FCT_INIT(_ARGC_, _ARGV_)                                    \
-   fctkern_t  fctkern__;                                            \
-   size_t num_failed__ =0;                                          \
-   fctkern_t* fctkern_ptr__ = &fctkern__;                           \
-   FCT_REFERENCE_FUNCS();                                           \
-   if ( !fctkern__init(fctkern_ptr__, argc, (const char **)argv) ) {\
-        (void)fprintf(                                              \
-            stderr, "FATAL ERROR: Unable to initialize FCTX Kernel."\
-        );                                                          \
-        exit(EXIT_FAILURE);                                         \
-   }                                                                \
+#define FCT_INIT(_ARGC_, _ARGV_)                                            \
+   fctkern_t  fctkern__;                                                    \
+   fctkern_t* fctkern_ptr__ = &fctkern__;                                   \
+   FCT_REFERENCE_FUNCS();                                                   \
+   if ( !fctkern__init(fctkern_ptr__, (_ARGC_), (const char **)(_ARGV_)) ) {\
+        (void)fprintf(                                                      \
+            stderr, "FATAL ERROR: Unable to initialize FCTX Kernel."        \
+        );                                                                  \
+        exit(EXIT_FAILURE);                                                 \
+   }                                                                        \
 
 
 #define FCT_FINAL()                                                \
@@ -3281,7 +3280,8 @@ they are needed, but at runtime, only the cheap, first call is made. */
    fctkern__log_end(fctkern_ptr__);                                \
    fctkern__end(fctkern_ptr__);                                    \
    fctkern__final(fctkern_ptr__);                                  \
-   FCT_ASSERT( !((int)num_failed__ < 0) && "or we got truncated!");\
+   FCT_ASSERT( !((int)fctkern_ptr__->ns.num_total_failed < 0)      \
+               && "or we got truncated!");                         \
    if ( fctkern_ptr__->ns.num_total_failed ==                      \
         fctkern_ptr__->num_expected_failures) {                    \
        fctkern_ptr__->ns.num_total_failed = 0;                     \
@@ -3326,12 +3326,12 @@ fctkern_ptr__ makes it easier to abstract out macros.  */
 /* Ends the test suite by returning the number failed. The "chk_cnt" call is
 made in order allow strict compilers to pass when it encounters unreferenced
 functions. */
-#define FCT_END()             \
-   {                          \
-      FCT_END_WARNINGFIX_BGN  \
-      FCT_FINAL();            \
-      return FCT_NUM_FAILED();\
-      FCT_END_WARNINGFIX_END  \
+#define FCT_END()                   \
+   {                                \
+      FCT_END_WARNINGFIX_BGN        \
+      FCT_FINAL();                  \
+      return (int) FCT_NUM_FAILED();\
+      FCT_END_WARNINGFIX_END        \
    }\
 }
 
