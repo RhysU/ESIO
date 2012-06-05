@@ -28,10 +28,11 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <mpi.h>
@@ -572,7 +573,10 @@ esio_file_open(esio_handle h, const char *file, int readwrite)
     // Canonical chosen so that changes in working directory are irrelevant
     h->file_path = canonicalize_file_name(file + scheme_prefix_len(file));
     if (h->file_path == NULL) {
-        ESIO_ERROR("failed to allocate space for file_path", ESIO_ENOMEM);
+        char msg[384];
+        snprintf(msg, sizeof(msg), "failed to canonicalize path '%s': %s",
+                file, strerror(errno));
+        ESIO_ERROR(msg, ESIO_ENOMEM);
     }
 
     // File creation successful: update handle
