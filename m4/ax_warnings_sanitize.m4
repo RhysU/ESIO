@@ -62,6 +62,8 @@ case $ax_cv_c_compiler_vendor in #(
          AX_APPEND_COMPILE_FLAGS([-Wpointer-arith])
          # Disable remark #424: extra ";" ignored
          AX_APPEND_COMPILE_FLAGS([-wd424])
+         # Disable remark #981: operands are evaluated in unspecified order
+         AX_APPEND_COMPILE_FLAGS([-wd981])
          ;;#(
   gnu)   AX_APPEND_COMPILE_FLAGS([-Wextra])
          ;;#(
