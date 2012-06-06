@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2011 Free Software Foundation, Inc.
+# Copyright (C) 2002-2012 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -150,6 +150,7 @@ gl_ARGP
 m4_ifdef([AM_XGETTEXT_OPTION],
   [AM_][XGETTEXT_OPTION([--flag=argp_error:2:c-format])
    AM_][XGETTEXT_OPTION([--flag=argp_failure:4:c-format])])
+AC_REQUIRE([AC_C_INLINE])
 gl_CANONICALIZE_LGPL
 if test $HAVE_CANONICALIZE_FILE_NAME = 0 || test $REPLACE_CANONICALIZE_FILE_NAME = 1; then
   AC_LIBOBJ([canonicalize-lgpl])
@@ -194,16 +195,23 @@ if test $REPLACE_GETOPT = 1; then
   AC_LIBOBJ([getopt])
   AC_LIBOBJ([getopt1])
   gl_PREREQ_GETOPT
+  dnl Arrange for unistd.h to include getopt.h.
+  GNULIB_GL_UNISTD_H_GETOPT=1
 fi
+AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
 gl_MODULE_INDICATOR_FOR_TESTS([getopt-gnu])
 gl_FUNC_GETOPT_POSIX
 if test $REPLACE_GETOPT = 1; then
   AC_LIBOBJ([getopt])
   AC_LIBOBJ([getopt1])
   gl_PREREQ_GETOPT
+  dnl Arrange for unistd.h to include getopt.h.
+  GNULIB_GL_UNISTD_H_GETOPT=1
 fi
+AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
 AC_SUBST([LIBINTL])
 AC_SUBST([LTLIBINTL])
+AC_REQUIRE([gl_LARGEFILE])
 gl_FUNC_LSTAT
 if test $REPLACE_LSTAT = 1; then
   AC_LIBOBJ([lstat])
@@ -679,6 +687,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/msvc-nothrow.m4
   m4/multiarch.m4
   m4/nocrash.m4
+  m4/off_t.m4
   m4/open.m4
   m4/opendir.m4
   m4/pathmax.m4
