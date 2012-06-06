@@ -465,6 +465,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
                         "plane-dims values %dx%d must be nonnegative",
                         d->p->dims[0], d->p->dims[1]);
             }
+            d->nplanes = max(d->nplanes, 1); // Set nplanes >= 1
             break;
 
 
@@ -480,6 +481,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
                         "line-dims value '%d' must be nonnegative",
                         d->l->dims[0]);
             }
+            d->nlines = max(d->nlines, 1); // Set nlines >= 1
             break;
 
         case FIELD_GLOBAL:
