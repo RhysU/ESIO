@@ -571,13 +571,73 @@ esio_file_open(esio_handle h, const char *file, int readwrite)
 
     // Duplicate the (prefix-less) canonical file name for later use
     // Canonical chosen so that changes in working directory are irrelevant
-    h->file_path = canonicalize_file_name(file + scheme_prefix_len(file));
-    if (h->file_path == NULL) {
-        char msg[384];
-        snprintf(msg, sizeof(msg), "failed to canonicalize path '%s': %s",
-                file, strerror(errno));
-        ESIO_ERROR(msg, ESIO_ENOMEM);
+    //
+    // canonicalize_file_name (aka. realpath) call just below has three issues:
+    //   1) A race occurs for file creation versus the canonicalize call
+    //   2) Every rank calling canonicalize_file_name hits the file system
+    //   3) Memory usage of the returned string isn't promised to be low
+    //
+    // The messy logic below here is to rectify all three concerns.
+    // It is ugly as sin and chatty but pre-allocating everything in advance is
+    // and calling realpath(3) is buggy as described in realpath(3)'s man page.
+
+    // Collectively best-effort flush to the operating system
+    H5Fflush(file_id, H5F_SCOPE_LOCAL);
+
+    // Last rank canonicalizes the file path, strdups it, and measures length
+    // Error information saved but not reported until later.
+    const int worker = h->comm_size - 1; // Last rank does work
+    int  buf[3] = { /*length*/ -1, /*status*/ ESIO_SUCCESS, /*line*/ -1 };
+    char msg[384];
+    if (h->comm_rank == worker) {
+        static const char msgpat[] = "failed to canonicalize path '%s': %s";
+        const char * s = canonicalize_file_name(file + scheme_prefix_len(file));
+        if (s == NULL) {
+            snprintf(msg, sizeof(msg), msgpat, file, strerror(errno));
+            buf[1] = ESIO_EFAILED;
+            buf[2] = __LINE__;
+        } else if ((h->file_path = strdup(s)) == NULL) {
+            snprintf(msg, sizeof(msg), msgpat, file, strerror(ENOMEM));
+            buf[1] = ESIO_ENOMEM;
+            buf[2] = __LINE__;
+        } else if ((buf[0] = (int) strlen(s)) < 1) {
+            snprintf(msg, sizeof(msg), msgpat, file, strerror(EINVAL));
+            buf[1] = ESIO_ESANITY;
+            buf[2] = __LINE__;
+        }
+        free((void *) s);
     }
+
+    // Broadcast details from rank zero to everyone and return if necessary
+    ESIO_MPICHKQ(MPI_Bcast(buf, sizeof(buf)/sizeof(buf[0]), MPI_INT,
+                           worker, h->comm));
+    if (buf[1] != ESIO_SUCCESS) {
+        if (h->comm_rank == worker) {
+            esio_error(msg, __FILE__, buf[2], buf[1]);
+            free(h->file_path);
+        }
+        return buf[1];
+    }
+
+    // Non-zero ranks allocate space to receive canonical path
+    if (h->comm_rank < worker) h->file_path = malloc(buf[0] + 1);
+    if (h->file_path == NULL)  buf[1] = ESIO_ENOMEM;
+
+    // Did everybody grab memory?  Otherwise subsequent broadcast crashes...
+    ESIO_MPICHKQ(MPI_Allreduce(MPI_IN_PLACE, buf, sizeof(buf)/sizeof(buf[0]),
+                               MPI_INT, MPI_MAX, h->comm));
+    if (buf[1] != ESIO_SUCCESS) {
+        if (h->file_path == NULL) {
+            ESIO_ERROR_REPORT("failed to allocate space for canonical path",
+                              ESIO_ENOMEM);
+        }
+        free(h->file_path);
+        return buf[1];
+    }
+
+    // Broadcast canonical path from rank zero to other ranks
+    ESIO_MPICHKQ(MPI_Bcast(h->file_path, buf[0] + 1, MPI_CHAR,
+                           worker, h->comm));
 
     // File creation successful: update handle
     h->file_id = file_id;
@@ -609,10 +669,9 @@ int esio_file_clone(esio_handle h,
     const int worker = h->comm_size - 1; // Last rank does work
     int status;
     if (h->comm_rank == worker) {
-       status = file_copy(srcfile + scheme_prefix_len(srcfile),
-                          dstfile + scheme_prefix_len(srcfile),
-                          overwrite,
-                          1 /*blockuntilsync*/);
+        int prefix_len = scheme_prefix_len(srcfile);
+        status = file_copy(srcfile + prefix_len, dstfile + prefix_len,
+                           overwrite, 1 /*blockuntilsync*/);
     }
     ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
 
