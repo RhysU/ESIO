@@ -44,6 +44,15 @@ program basic_f
     integer            :: tmp_bg = 555, tmp_bs, tmp_bl
     integer            :: tmp_ag = 555, tmp_as, tmp_al
 
+!   Assert status codes are publicly exposed in the API
+    ASSERT(ESIO_SUCCESS  ==  0)
+    ASSERT(ESIO_EFAULT   ==  3)
+    ASSERT(ESIO_EINVAL   ==  4)
+    ASSERT(ESIO_EFAILED  ==  5)
+    ASSERT(ESIO_ESANITY  ==  7)
+    ASSERT(ESIO_ENOMEM   ==  8)
+    ASSERT(ESIO_NOTFOUND ==  9)
+
     call testframework_setup(__FILE__)
 
 !   Check that the handle correctly reports world size and world rank

@@ -116,6 +116,24 @@ module esio
 ! ... with the exception of our opaque handle object type.
   public :: esio_handle
 
+!>Status codes matching the \c esio_status C \c enum
+  enum, bind(C) ! TODO Appending ":: esio_status" would be nice...
+    enumerator :: ESIO_SUCCESS  =  0 !< Success
+    enumerator :: ESIO_EFAULT   =  3 !< Invalid pointer
+    enumerator :: ESIO_EINVAL   =  4 !< Invalid argument supplied by user
+    enumerator :: ESIO_EFAILED  =  5 !< Generic failure
+    enumerator :: ESIO_ESANITY  =  7 !< Sanity check failed - shouldn't happen
+    enumerator :: ESIO_ENOMEM   =  8 !< Memory allocation failed
+    enumerator :: ESIO_NOTFOUND =  9 !< Object not found
+  end enum
+  public :: ESIO_SUCCESS
+  public :: ESIO_EFAULT
+  public :: ESIO_EINVAL
+  public :: ESIO_EFAILED
+  public :: ESIO_ESANITY
+  public :: ESIO_ENOMEM
+  public :: ESIO_NOTFOUND
+
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
   private :: esio_error
@@ -250,9 +268,9 @@ contains
     handle = handle_impl(comm)
     if (present(ierr)) then
       if (c_associated(handle)) then
-        ierr = 0  ! 0 == ESIO_SUCCESS
+        ierr = ESIO_SUCCESS
       else
-        ierr = 5  ! 5 == ESIO_EFAILED
+        ierr = ESIO_EFAILED
       end if
     end if
 
@@ -465,7 +483,7 @@ contains
         ierr = 5  ! 5 == ESIO_EFAILED
       else
         call esio_error('esio_file_path failed but ierr was not supplied', &
-                        __FILE__, __LINE__, 5)
+                        __FILE__, __LINE__, ESIO_EFAILED)
         call abort
       endif
     end if
@@ -619,13 +637,13 @@ contains
                         esio_f_c_string(location), &
                         esio_f_c_string(name))
     if (esio_c_f_stringcopy(tmp_p, value)) then
-      if (present(ierr)) ierr = 0  ! 0 == ESIO_SUCCESS
+      if (present(ierr)) ierr = ESIO_SUCCESS
     else
       if (present(ierr)) then
-        ierr = 5  ! 5 == ESIO_EFAILED
+        ierr = ESIO_EFAILED
       else
         call esio_error('esio_string_get failed but ierr was not supplied', &
-                        __FILE__, __LINE__, 5)
+                        __FILE__, __LINE__, ESIO_EFAILED)
         call abort
       endif
     end if
@@ -1767,7 +1785,7 @@ end subroutine esio_field_readv_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     count = impl()
-    if (present(ierr)) ierr = 0
+    if (present(ierr)) ierr = ESIO_SUCCESS
 
   end subroutine esio_field_layout_count
 
@@ -1790,7 +1808,7 @@ end subroutine esio_field_readv_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     layout_index = impl(handle)
-    if (present(ierr)) ierr = 0
+    if (present(ierr)) ierr = ESIO_SUCCESS
 
   end subroutine esio_field_layout_get
 
