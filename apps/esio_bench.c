@@ -449,6 +449,7 @@ parse_opt(int key, char *arg, struct argp_state *state)
                         "field-dims values %dx%dx%d must be nonnegative",
                         d->f->dims[0], d->f->dims[1], d->f->dims[2]);
             }
+            d->nfields = max(d->nfields, 1); // Set nfields >= 1
             break;
 
 
