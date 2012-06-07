@@ -126,13 +126,6 @@ module esio
     enumerator :: ESIO_ENOMEM   =  8 !< Memory allocation failed
     enumerator :: ESIO_NOTFOUND =  9 !< Object not found
   end enum
-  public :: ESIO_SUCCESS
-  public :: ESIO_EFAULT
-  public :: ESIO_EINVAL
-  public :: ESIO_EFAILED
-  public :: ESIO_ESANITY
-  public :: ESIO_ENOMEM
-  public :: ESIO_NOTFOUND
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
