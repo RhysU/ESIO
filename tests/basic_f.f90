@@ -45,6 +45,7 @@ program basic_f
     integer            :: tmp_ag = 555, tmp_as, tmp_al
 
 !   Assert status codes are publicly exposed in the API
+!   Refer to feature #2184 and bug #2410 for why ifdefs appear.
 #ifndef __INTEL_COMPILER
 #if defined(__GNUC__) && (__GNUC__ > 4 || __GNUC_MINOR__ > 5)
     ASSERT(ESIO_SUCCESS  ==  0)
