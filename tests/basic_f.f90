@@ -45,6 +45,8 @@ program basic_f
     integer            :: tmp_ag = 555, tmp_as, tmp_al
 
 !   Assert status codes are publicly exposed in the API
+#ifndef __INTEL_COMPILER
+#if defined(__GNUC__) && (__GNUC__ > 4 || __GNUC_MINOR__ > 5)
     ASSERT(ESIO_SUCCESS  ==  0)
     ASSERT(ESIO_EFAULT   ==  3)
     ASSERT(ESIO_EINVAL   ==  4)
@@ -52,6 +54,8 @@ program basic_f
     ASSERT(ESIO_ESANITY  ==  7)
     ASSERT(ESIO_ENOMEM   ==  8)
     ASSERT(ESIO_NOTFOUND ==  9)
+#endif
+#endif
 
     call testframework_setup(__FILE__)
 
