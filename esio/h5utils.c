@@ -116,7 +116,7 @@ struct qw_data {
 };
 
 static herr_t
-query_walker(unsigned n, H5E_error2_t *err_desc, void *client_data)
+query_walker(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 {
     struct qw_data * const qw = (struct qw_data*) client_data;
     if (err_desc->maj_num == qw->errnum) qw->maj_pos = n;
