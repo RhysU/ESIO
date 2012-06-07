@@ -26,6 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "metadata.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -35,7 +36,6 @@
 #include "error.h"
 #include "esio.h"
 #include "h5utils.h"
-#include "metadata.h"
 #include "version.h"
 
 // TODO Have esio_XXX_metadata_read detect different sorts of errors

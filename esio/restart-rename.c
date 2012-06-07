@@ -26,6 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "restart-rename.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -43,7 +44,6 @@
 #include <unistd.h>
 
 #include "error.h"
-#include "restart-rename.h"
 
 static inline int max(int a, int b)
 {

@@ -26,12 +26,12 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "layout.h"
 
 #include <assert.h>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include "error.h"
-#include "layout.h"
 
 // *******************************************************************
 // PLANE LINE POINT PLANE LINE POINT PLANE LINE POINT PLANE LINE POINT

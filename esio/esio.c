@@ -26,6 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "esio.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -39,7 +40,6 @@
 
 #include "chunksize.h"
 #include "error.h"
-#include "esio.h"
 #include "file-copy.h"
 #include "h5utils.h"
 #include "layout.h"

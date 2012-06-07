@@ -26,11 +26,11 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "chunksize.h"
 
 #include <mpi.h>
 
 #include "error.h"
-#include "chunksize.h"
 
 int
 chunksize_line(MPI_Comm comm,

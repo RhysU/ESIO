@@ -26,8 +26,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <hdf5.h>
 #include "h5utils.h"
 
 herr_t

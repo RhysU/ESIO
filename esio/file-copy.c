@@ -26,6 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "file-copy.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -39,7 +40,6 @@
 
 /* ESIO's error handling */
 #include "error.h"
-#include "file-copy.h"
 
 int
 file_copy(const char *src_filename,

@@ -26,6 +26,8 @@
 #ifndef __ESIO_H5UTILS_H
 #define __ESIO_H5UTILS_H
 
+#include <hdf5.h>
+
 //****************************************************************
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
 //****************************************************************

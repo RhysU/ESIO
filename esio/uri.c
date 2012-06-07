@@ -26,10 +26,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "uri.h"
 
 #include <ctype.h>
-
-#include "uri.h"
 
 int scheme_prefix_len(const char *s)
 {
