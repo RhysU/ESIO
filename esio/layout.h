@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_LAYOUT_H
-#define __ESIO_LAYOUT_H
+#ifndef ESIO_LAYOUT_H
+#define ESIO_LAYOUT_H
 
 #include <hdf5.h>
 
@@ -108,4 +108,4 @@ int esio_line_reader(
 }
 #endif
 
-#endif /* __ESIO_LAYOUT_H */
+#endif /* ESIO_LAYOUT_H */

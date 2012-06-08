@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_URI_H
-#define __ESIO_URI_H
+#ifndef ESIO_URI_H
+#define ESIO_URI_H
 
 //****************************************************************
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
@@ -59,4 +59,4 @@ int scheme_prefix_len(const char *s);
 } /* extern "C" */
 #endif
 
-#endif /* __ESIO_URI_H */
+#endif /* ESIO_URI_H */

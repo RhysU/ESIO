@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_VISIBILITY_H__
-#define __ESIO_VISIBILITY_H__
+#ifndef ESIO_VISIBILITY_H__
+#define ESIO_VISIBILITY_H__
 
 /** \cond INTERNAL */
 
@@ -54,4 +54,4 @@
 
 /** \endcond */
 
-#endif /* __ESIO_VISIBILITY_H__ */
+#endif /* ESIO_VISIBILITY_H__ */

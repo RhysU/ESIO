@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_H5UTILS_H
-#define __ESIO_H5UTILS_H
+#ifndef ESIO_H5UTILS_H
+#define ESIO_H5UTILS_H
 
 #include <hdf5.h>
 
@@ -66,4 +66,4 @@ esio_H5Equery_stack(hid_t errnum);
 }
 #endif
 
-#endif /* __ESIO_H5UTILS_H */
+#endif /* ESIO_H5UTILS_H */

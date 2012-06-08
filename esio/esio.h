@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_ESIO_H
-#define __ESIO_ESIO_H
+#ifndef ESIO_ESIO_H
+#define ESIO_ESIO_H
 
 #include <mpi.h>
 #include <esio/visibility.h>
@@ -1795,4 +1795,4 @@ int esio_field_layout_set(esio_handle h, int layout_index) ESIO_API;
 } /* extern "C" */
 #endif
 
-#endif /* __ESIO_ESIO_H */
+#endif /* ESIO_ESIO_H */

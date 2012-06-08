@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_FILE_COPY_H
-#define __ESIO_FILE_COPY_H
+#ifndef ESIO_FILE_COPY_H
+#define ESIO_FILE_COPY_H
 
 //****************************************************************
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
@@ -56,4 +56,4 @@ int file_copy(const char *src_filename,
 }
 #endif
 
-#endif /* __ESIO_FILE_COPY_H */
+#endif /* ESIO_FILE_COPY_H */

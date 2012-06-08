@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_CHUNKSIZE_H
-#define __ESIO_CHUNKSIZE_H
+#ifndef ESIO_CHUNKSIZE_H
+#define ESIO_CHUNKSIZE_H
 
 //****************************************************************
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
@@ -116,4 +116,4 @@ chunksize_field(MPI_Comm comm,
 } /* extern "C" */
 #endif
 
-#endif /* __ESIO_CHUNKSIZE_H */
+#endif /* ESIO_CHUNKSIZE_H */

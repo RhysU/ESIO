@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_RESTART_RENAME_H
-#define __ESIO_RESTART_RENAME_H
+#ifndef ESIO_RESTART_RENAME_H
+#define ESIO_RESTART_RENAME_H
 
 //****************************************************************
 // INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL
@@ -107,4 +107,4 @@ int restart_rename(const char *src_filepath,
 } /* extern "C" */
 #endif
 
-#endif /* __ESIO_RESTART_RENAME_H */
+#endif /* ESIO_RESTART_RENAME_H */

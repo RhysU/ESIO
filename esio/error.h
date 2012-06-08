@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_ERROR_H__
-#define __ESIO_ERROR_H__
+#ifndef ESIO_ERROR_H
+#define ESIO_ERROR_H
 
 #include <stdio.h>
 #include <esio/visibility.h>
@@ -340,4 +340,4 @@ esio_set_stream(FILE * new_stream) ESIO_API;
 } /* extern "C" */
 #endif
 
-#endif /* __ESIO_ERROR_H__ */
+#endif /* ESIO_ERROR_H */

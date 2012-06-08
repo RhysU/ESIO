@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_METADATA_H
-#define __ESIO_METADATA_H
+#ifndef ESIO_METADATA_H
+#define ESIO_METADATA_H
 
 #include <hdf5.h>
 
@@ -70,4 +70,4 @@ int esio_line_metadata_read(hid_t loc_id, const char *name,
 }
 #endif
 
-#endif /* __ESIO_METADATA_H */
+#endif /* ESIO_METADATA_H */

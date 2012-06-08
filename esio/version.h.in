@@ -23,8 +23,8 @@
 //-----------------------------------------------------------------------el-
 // $Id$
 
-#ifndef __ESIO_VERSION_H__
-#define __ESIO_VERSION_H__
+#ifndef ESIO_VERSION_H
+#define ESIO_VERSION_H
 
 /** @file
  * Provides ESIO version information.
@@ -47,4 +47,4 @@
                       + ESIO_MINOR_VERSION *    100  \
                       + ESIO_POINT_VERSION *      1)
 
-#endif /* __ESIO_VERSION_H__ */
+#endif /* ESIO_VERSION_H */
