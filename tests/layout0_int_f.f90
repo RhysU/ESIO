@@ -114,6 +114,16 @@ program layout0_int_f
                            "vector-valued field", ierr)
     ASSERT(ierr == 0)
 
+!   If contiguous, repeat the above using a named comment, no stride, no ierr
+    if (stride(1) == 0 .and. stride(2) == 0 .and. stride(3) == 0) then
+        call esio_field_writev_integer(h, "name_vector", value_vector, &
+                                       ncomponents,                    &
+                                       comment="vector-valued field")
+        call esio_field_writev        (h, "name_vector", value_vector, &
+                                       ncomponents,                    &
+                                       comment="vector-valued field")
+    end if
+
 !   Close the file
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)

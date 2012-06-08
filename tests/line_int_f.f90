@@ -76,6 +76,14 @@ program line_int_f
                          "scalar-valued line", ierr)
     ASSERT(ierr == 0)
 
+!   If contiguous, repeat the above using a named comment, no stride, no ierr
+    if (stride(1) == 0) then
+        call esio_line_write_integer(h, "name_scalar", value_scalar,        &
+                                     comment="scalar-valued line")
+        call esio_line_write        (h, "name_scalar", value_scalar,        &
+                                     comment="scalar-valued line")
+    end if
+
 !   Write a vector-valued line using an explicitly-typed interface
     call esio_line_writev_integer(h, "name_vector", value_vector,           &
                                   ncomponents, stride(1),                   &

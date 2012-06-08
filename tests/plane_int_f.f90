@@ -93,6 +93,16 @@ program plane_int_f
                            "vector-valued plane", ierr)
     ASSERT(ierr == 0)
 
+!   If contiguous, repeat the above using a named comment, no stride, no ierr
+    if (stride(1) == 0 .and. stride(2) == 0) then
+        call esio_plane_writev_integer(h, "name_vector", value_vector,     &
+                                       ncomponents,                        &
+                                       comment="vector-valued plane")
+        call esio_plane_writev        (h, "name_vector", value_vector,     &
+                                       ncomponents,                        &
+                                       comment="vector-valued plane")
+    end if
+
 !   Close the file
     call esio_file_close(h, ierr)
     ASSERT(ierr == 0)
