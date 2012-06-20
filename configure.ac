@@ -11,6 +11,8 @@ AC_SUBST([PACKAGE_URL])
 dnl ------------------------------------------------
 dnl Initialization macros
 dnl ------------------------------------------------
+AC_CONFIG_COMMANDS_PRE([m4_ifdef([AH_HEADER],
+    [AC_SUBST([CONFIG_INCLUDE], m4_defn([AH_HEADER]))])])
 AC_CONFIG_SRCDIR([esio/esio.h])
 AM_CONFIG_HEADER(esio/config.h)
 AC_CONFIG_AUX_DIR([build-aux])

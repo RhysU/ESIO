@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --no-conditional-dependencies --libtool --macro-prefix=gl --no-vc-files argp binary-io canonicalize-lgpl chown full-write getopt-gnu open rename safe-read scandir strdup-posix strverscmp unistd
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --no-conditional-dependencies --libtool --macro-prefix=gl --no-vc-files argp binary-io canonicalize-lgpl chown full-write getopt-gnu maintainer-makefile open rename safe-read scandir strdup-posix strverscmp unistd
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -38,6 +38,7 @@ gl_MODULES([
   chown
   full-write
   getopt-gnu
+  maintainer-makefile
   open
   rename
   safe-read
