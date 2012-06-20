@@ -236,7 +236,7 @@ FCT_BGN()
             if (world_rank == 0) {
                 if (!preserve) unlink(filename);
             }
-            if (filename) free(filename);
+            free(filename);
         }
         FCT_TEARDOWN_END();
 
@@ -375,7 +375,7 @@ FCT_BGN()
                             memcmp(plane, buf, bglobal*aglobal*sizeof(REAL)));
                 }
                 fct_req(0 == esio_file_close(handle));
-                if (buf) free(buf);
+                free(buf);
             }
             free(plane);
 
@@ -555,6 +555,6 @@ FCT_BGN()
     }
     FCT_FIXTURE_SUITE_END();
 
-    if (filetemplate) free(filetemplate);
+    free(filetemplate);
 }
 FCT_END()

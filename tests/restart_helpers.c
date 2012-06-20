@@ -57,7 +57,7 @@ FCT_BGN()
 
         FCT_TEARDOWN_BGN()
         {
-            if (ptr) free(ptr);
+            free(ptr);
         }
         FCT_TEARDOWN_END();
 

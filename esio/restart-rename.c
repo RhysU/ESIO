@@ -250,8 +250,8 @@ int restart_rename(const char *src_filepath,
                                  tmpl_dirname, namelist[n]->d_name)) {
             snprintf(errmsg, sizeof(errmsg), "Unable to form srcbuf for '%s'",
                      namelist[n]->d_name);
-            if (srcbuf) free(srcbuf);
-            if (dstbuf) free(dstbuf);
+            free(srcbuf);
+            free(dstbuf);
             do { free(namelist[n]); } while (n--);
             free(namelist);
             free(buffer);
@@ -263,8 +263,8 @@ int restart_rename(const char *src_filepath,
                                  tmpl_dirname, prefix, ndigits, next, suffix)) {
             snprintf(errmsg, sizeof(errmsg), "Unable to form dstbuf for '%s'",
                      namelist[n]->d_name);
-            if (srcbuf) free(srcbuf);
-            if (dstbuf) free(dstbuf);
+            free(srcbuf);
+            free(dstbuf);
             do { free(namelist[n]); } while (n--);
             free(namelist);
             free(buffer);
@@ -275,8 +275,8 @@ int restart_rename(const char *src_filepath,
         if (rename(srcbuf, dstbuf)) {
             snprintf(errmsg, sizeof(errmsg),
                      "Error renaming '%s' to '%s'", srcbuf, dstbuf);
-            if (srcbuf) free(srcbuf);
-            if (dstbuf) free(dstbuf);
+            free(srcbuf);
+            free(dstbuf);
             do { free(namelist[n]); } while (n--);
             free(namelist);
             free(buffer);
@@ -287,14 +287,14 @@ int restart_rename(const char *src_filepath,
         free(namelist[n]);
     }
     free(namelist);
-    if (srcbuf) free(srcbuf);
+    free(srcbuf);
 
     // Build the destination for the src_filepath rename
     if (0 > snprintf_realloc(&dstbuf, &dstlen, "%s/%s%0*d%s",
                              tmpl_dirname, prefix, ndigits, 0, suffix)) {
         snprintf(errmsg, sizeof(errmsg), "Unable to form dstbuf for '%s'",
                  src_filepath);
-        if (dstbuf) free(dstbuf);
+        free(dstbuf);
         free(buffer);
         ESIO_ERROR(errmsg, ESIO_ENOMEM);
     }
@@ -303,7 +303,7 @@ int restart_rename(const char *src_filepath,
     if (rename(src_filepath, dstbuf)) {
         snprintf(errmsg, sizeof(errmsg),
                  "Error renaming '%s' to '%s'", src_filepath, dstbuf);
-        if (dstbuf) free(dstbuf);
+        free(dstbuf);
         free(buffer);
         ESIO_ERROR(errmsg, ESIO_EFAILED);
     }
