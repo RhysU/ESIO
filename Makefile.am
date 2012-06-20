@@ -58,9 +58,6 @@ MAINTAINERCLEANFILES =     \
     src/Makefile.in        \
     src/stamp.h.in
 
-# Run toplevel makefile serially; submakes may still be parallel
-.NOTPARALLEL:
-
 # Additional tasks run with the 'all' target
 all-local:  libtool
 
