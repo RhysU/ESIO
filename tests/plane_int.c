@@ -1,10 +1,10 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// esio 0.1.7: ExaScale IO library for turbulence simulation restart files
+// esio 0.2.0: ExaScale IO library for turbulence simulation restart files
 // http://pecos.ices.utexas.edu/
 //
-// Copyright (C) 2010, 2011 The PECOS Development Team
+// Copyright (C) 2010, 2011, 2012 The PECOS Development Team
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the Version 2.1 GNU Lesser General
