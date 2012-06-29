@@ -1,3 +1,28 @@
+What's new in ESIO 0.1.7
+------------------------
+
+ESIO now provides constants like ESIO_SUCCESS and ESIO_NOTFOUND through the
+Fortran API (#2184).  Please note these constants are not available on gfortran
+before version 4.6 because of compiler issues.
+
+When using calls like esio_line_sizev from Fortran, ESIO now preserves size
+information when ESIO_NOTFOUND is returned (#2419).
+
+This release contains the following
+
+    * Feature #1804: Fortran API: Allow providing comments without requiring stride information
+    * Feature #2005: Use H5E_BEGIN_TRY/H5E_END_TRY within codebase
+    * Feature #2007: Add error constants to Fortran module
+    * Feature #2184: Add esio_status on Fortran side
+    * Feature #2407: Silence check program warnings
+    * Feature #2408: Upgrade FCTX to silence test warnings
+    * Feature #2409: Roll ESIO 0.1.7 release
+    * Feature #2419: Make _size and _sizev preserve arguments on ESIO_NOT_FOUND
+    * Support #2075: Move includes to top of implementation files
+    * Bug #2012: "esio_bench -F 32x32x32 foo.h5" borked
+    * Bug #2406: Race condition in esio_file_open
+
+
 What's new in ESIO 0.1.6
 ------------------------
 
