@@ -795,7 +795,7 @@ end subroutine esio_attribute_readv_integer
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: location
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: ncomponents
+    integer,           intent(inout)         :: ncomponents
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -819,7 +819,9 @@ end subroutine esio_attribute_readv_integer
                 esio_f_c_string(location), &
                 esio_f_c_string(name),     &
                 tmp_ncomponents)
-    ncomponents = tmp_ncomponents
+    if (stat == ESIO_SUCCESS) then
+      ncomponents = tmp_ncomponents
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_attribute_sizev
@@ -944,7 +946,7 @@ end subroutine esio_attribute_readv_integer
   subroutine esio_line_established (handle, aglobal, astart, alocal, ierr)
 
     type(esio_handle), intent(in)            :: handle
-    integer,           intent(out)           :: aglobal, astart, alocal
+    integer,           intent(inout)         :: aglobal, astart, alocal
     integer,           intent(out), optional :: ierr
 
     integer        :: stat
@@ -966,9 +968,11 @@ end subroutine esio_attribute_readv_integer
 
 !   Note conversion from zero- to one-based starting offsets
     stat = impl(handle, tmp_aglobal, tmp_astart, tmp_alocal)
-    aglobal = tmp_aglobal
-    astart  = tmp_astart + 1
-    alocal  = tmp_alocal
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_aglobal
+      astart  = tmp_astart + 1
+      alocal  = tmp_alocal
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_line_established
@@ -979,8 +983,8 @@ end subroutine esio_attribute_readv_integer
                                              bglobal, bstart, blocal, ierr)
 
     type(esio_handle), intent(in)            :: handle
-    integer,           intent(out)           :: aglobal, astart, alocal
-    integer,           intent(out)           :: bglobal, bstart, blocal
+    integer,           intent(inout)         :: aglobal, astart, alocal
+    integer,           intent(inout)         :: bglobal, bstart, blocal
     integer,           intent(out), optional :: ierr
 
     integer        :: stat
@@ -1009,12 +1013,14 @@ end subroutine esio_attribute_readv_integer
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(handle, tmp_bglobal, tmp_bstart, tmp_blocal,  &
                         tmp_aglobal, tmp_astart, tmp_alocal)
-    bglobal = tmp_bglobal
-    bstart  = tmp_bstart + 1
-    blocal  = tmp_blocal
-    aglobal = tmp_aglobal
-    astart  = tmp_astart + 1
-    alocal  = tmp_alocal
+    if (stat == ESIO_SUCCESS) then
+      bglobal = tmp_bglobal
+      bstart  = tmp_bstart + 1
+      blocal  = tmp_blocal
+      aglobal = tmp_aglobal
+      astart  = tmp_astart + 1
+      alocal  = tmp_alocal
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_plane_established
@@ -1026,9 +1032,9 @@ end subroutine esio_attribute_readv_integer
                                              cglobal, cstart, clocal, ierr)
 
     type(esio_handle), intent(in)            :: handle
-    integer,           intent(out)           :: aglobal, astart, alocal
-    integer,           intent(out)           :: bglobal, bstart, blocal
-    integer,           intent(out)           :: cglobal, cstart, clocal
+    integer,           intent(inout)         :: aglobal, astart, alocal
+    integer,           intent(inout)         :: bglobal, bstart, blocal
+    integer,           intent(inout)         :: cglobal, cstart, clocal
     integer,           intent(out), optional :: ierr
 
     integer        :: stat
@@ -1063,15 +1069,17 @@ end subroutine esio_attribute_readv_integer
     stat = impl(handle, tmp_cglobal, tmp_cstart, tmp_clocal,  &
                         tmp_bglobal, tmp_bstart, tmp_blocal,  &
                         tmp_aglobal, tmp_astart, tmp_alocal)
-    cglobal = tmp_cglobal
-    cstart  = tmp_cstart + 1
-    clocal  = tmp_clocal
-    bglobal = tmp_bglobal
-    bstart  = tmp_bstart + 1
-    blocal  = tmp_blocal
-    aglobal = tmp_aglobal
-    astart  = tmp_astart + 1
-    alocal  = tmp_alocal
+    if (stat == ESIO_SUCCESS) then
+      cglobal = tmp_cglobal
+      cstart  = tmp_cstart + 1
+      clocal  = tmp_clocal
+      bglobal = tmp_bglobal
+      bstart  = tmp_bstart + 1
+      blocal  = tmp_blocal
+      aglobal = tmp_aglobal
+      astart  = tmp_astart + 1
+      alocal  = tmp_alocal
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_field_established
@@ -1157,7 +1165,7 @@ end subroutine esio_line_read_integer
 
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: aglobal
+    integer,           intent(inout)         :: aglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1176,7 +1184,9 @@ end subroutine esio_line_read_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(handle, esio_f_c_string(name), tmp_a)
-    aglobal = tmp_a
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_line_size
@@ -1268,8 +1278,8 @@ end subroutine esio_line_readv_integer
 
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: ncomponents
-    integer,           intent(out)           :: aglobal
+    integer,           intent(inout)         :: ncomponents
+    integer,           intent(inout)         :: aglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1290,8 +1300,10 @@ end subroutine esio_line_readv_integer
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
     stat = impl(handle, esio_f_c_string(name), tmp_a, tmp_ncomponents)
-    aglobal = tmp_a
-    ncomponents = tmp_ncomponents
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+      ncomponents = tmp_ncomponents
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_line_sizev
@@ -1377,8 +1389,8 @@ end subroutine esio_plane_read_integer
 
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: aglobal
-    integer,           intent(out)           :: bglobal
+    integer,           intent(inout)         :: aglobal
+    integer,           intent(inout)         :: bglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1400,8 +1412,10 @@ end subroutine esio_plane_read_integer
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(handle, esio_f_c_string(name), tmp_b, tmp_a)
-    aglobal = tmp_a
-    bglobal = tmp_b
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+      bglobal = tmp_b
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_plane_size
@@ -1494,9 +1508,9 @@ end subroutine esio_plane_readv_integer
 
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: ncomponents
-    integer,           intent(out)           :: aglobal
-    integer,           intent(out)           :: bglobal
+    integer,           intent(inout)         :: ncomponents
+    integer,           intent(inout)         :: aglobal
+    integer,           intent(inout)         :: bglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1519,9 +1533,11 @@ end subroutine esio_plane_readv_integer
 
 !   Note reordering Fortran's (a, b) to C's (b, a)
     stat = impl(handle, esio_f_c_string(name), tmp_b, tmp_a, tmp_ncomponents)
-    aglobal = tmp_a
-    bglobal = tmp_b
-    ncomponents = tmp_ncomponents
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+      bglobal = tmp_b
+      ncomponents = tmp_ncomponents
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_plane_sizev
@@ -1607,9 +1623,9 @@ end subroutine esio_field_read_integer
 
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
-    integer,           intent(out)           :: aglobal
-    integer,           intent(out)           :: bglobal
-    integer,           intent(out)           :: cglobal
+    integer,           intent(inout)         :: aglobal
+    integer,           intent(inout)         :: bglobal
+    integer,           intent(inout)         :: cglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1632,9 +1648,11 @@ end subroutine esio_field_read_integer
 
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
     stat = impl(handle, esio_f_c_string(name), tmp_c, tmp_b, tmp_a)
-    aglobal = tmp_a
-    bglobal = tmp_b
-    cglobal = tmp_c
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+      bglobal = tmp_b
+      cglobal = tmp_c
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_field_size
@@ -1728,9 +1746,9 @@ end subroutine esio_field_readv_integer
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: name
     integer,           intent(out)           :: ncomponents
-    integer,           intent(out)           :: aglobal
-    integer,           intent(out)           :: bglobal
-    integer,           intent(out)           :: cglobal
+    integer,           intent(inout)         :: aglobal
+    integer,           intent(inout)         :: bglobal
+    integer,           intent(inout)         :: cglobal
     integer,           intent(out), optional :: ierr
     integer                                  :: stat
 
@@ -1755,10 +1773,12 @@ end subroutine esio_field_readv_integer
 !   Note reordering Fortran's (a, b, c) to C's (c, b, a)
     stat = impl(handle, esio_f_c_string(name),  &
                 tmp_c, tmp_b, tmp_a, tmp_ncomponents)
-    aglobal = tmp_a
-    bglobal = tmp_b
-    cglobal = tmp_c
-    ncomponents = tmp_ncomponents
+    if (stat == ESIO_SUCCESS) then
+      aglobal = tmp_a
+      bglobal = tmp_b
+      cglobal = tmp_c
+      ncomponents = tmp_ncomponents
+    end if
     if (present(ierr)) ierr = stat
 
   end subroutine esio_field_sizev

@@ -141,7 +141,8 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
 {
     // This routine should not (generally) invoke any ESIO error handling
     // unless Bad Things (TM) happen.  It is sometimes used to query for the
-    // existence of a field.
+    // existence of a field.  On error, none of cglobal, bglobal, aglobal,
+    // or ncomponents should be modified.
 
     // Local scratch space into which we read a field's metadata.
     // Employ a sentinel to balk if/when we accidentally blow out the buffer

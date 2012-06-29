@@ -568,8 +568,9 @@ ESIO_ATTRIBUTE_READV_GEN_CXX(int)
 /**
  * Query the number of components in a numeric attribute.
  * Scalar-valued attributes have <code>*ncomponents == 1</code>.
- * Querying a non-existent location or name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent location or name will return ESIO_NOTFOUND, will not
+ * modify \c ncomponents, and will not trigger ESIO's standard error handling
+ * mechanisms.
  *
  * \param h Handle to use.
  * \param location Null-terminated attribute location.
@@ -882,8 +883,8 @@ ESIO_LINE_READ_GEN_CXX(int)
 
 /**
  * Query the global number of scalars within a line.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * aglobal, and will not trigger ESIO's standard error handling mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated attribute name.
@@ -1002,8 +1003,9 @@ ESIO_LINE_READV_GEN_CXX(int)
 /**
  * Query the global number of vectors and components within a line.
  * Scalar-valued lines have <code>*ncomponents == 1</code>.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * aglobal or \c ncomponents, and will not trigger ESIO's standard error
+ * handling mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated line name.
@@ -1221,8 +1223,9 @@ ESIO_PLANE_READ_GEN_CXX(int)
 
 /**
  * Query the global number of scalars within a plane.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * bglobal or \c aglobal, and will not trigger ESIO's standard error handling
+ * mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -1351,8 +1354,9 @@ ESIO_PLANE_READV_GEN_CXX(int)
 /**
  * Query the global number of vectors and components within a plane.
  * Scalar-valued planes have <code>*ncomponents == 1</code>.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * bglobal, \c aglobal, or \c ncomponents, and will not trigger ESIO's standard
+ * error handling mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated plane name.
@@ -1579,8 +1583,9 @@ ESIO_FIELD_READ_GEN_CXX(int)
 
 /**
  * Query the global number of scalars within a field.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * cglobal, \c bglobal, or \c aglobal, and will not trigger ESIO's standard
+ * error handling mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated field name.
@@ -1716,8 +1721,9 @@ ESIO_FIELD_READV_GEN_CXX(int)
 /**
  * Query the global number of vectors and components within a field.
  * Scalar-valued fields have <code>*ncomponents == 1</code>.
- * Querying a non-existent name will return ESIO_NOTFOUND
- * and will not trigger ESIO's standard error handling mechanisms.
+ * Querying a non-existent name will return ESIO_NOTFOUND, will not modify \c
+ * cglobal, \c bglocal, \c aglobal, or \c ncomponents, and will not trigger
+ * ESIO's standard error handling mechanisms.
  *
  * \param h Handle to use.
  * \param name Null-terminated field name.
