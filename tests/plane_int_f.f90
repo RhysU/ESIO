@@ -116,11 +116,20 @@ program plane_int_f
     ASSERT(ierr == 0)
     ASSERT(j == global(1))
     ASSERT(k == global(2))
+    call esio_plane_size(h, "DOESNOTEXIST", j, k, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
+    ASSERT(k == global(2))  ! Preserved per feature #2419?
     call esio_plane_sizev(h, "name_scalar", i, j, k, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == 1)
     ASSERT(j == global(1))
     ASSERT(k == global(2))
+    call esio_plane_sizev(h, "DOESNOTEXIST", i, j, k, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(i == 1)          ! Preserved per feature #2419?
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
+    ASSERT(k == global(2))  ! Preserved per feature #2419?
     call esio_plane_read_integer(h, "name_scalar", buffer_scalar,          &
                                  stride(1), stride(2),                     &
                                  ierr)

@@ -86,7 +86,11 @@ program attribute_int_f
 
 !   Check the vector-valued attribute's size and data
     call esio_attribute_sizev(h, "/", "name_vector", buffer(1), ierr)
+    ASSERT(ierr /= 0)
     ASSERT(buffer(1) == size(value_vector))
+    call esio_attribute_sizev(h, "/", "DOESNOTEXIST", buffer(1), ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(buffer(1) == size(value_vector))  ! Preserved per feature #2419?
     buffer(:) = 0
     call esio_attribute_readv_integer(  &
             h, "/", "name_vector", buffer, size(value_vector), ierr)

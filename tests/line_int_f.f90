@@ -108,10 +108,17 @@ program line_int_f
     call esio_line_size(h, "name_scalar", j, ierr)
     ASSERT(ierr == 0)
     ASSERT(j == global(1))
+    call esio_line_size(h, "DOESNOTEXIST", j, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
     call esio_line_sizev(h, "name_scalar", i, j, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == 1)
     ASSERT(j == global(1))
+    call esio_line_sizev(h, "DOESNOTEXIST", i, j, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(i == 1)          ! Preserved per feature #2419?
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
     call esio_line_read_integer(h, "name_scalar", buffer_scalar,          &
                                 stride(1),                                &
                                 ierr)

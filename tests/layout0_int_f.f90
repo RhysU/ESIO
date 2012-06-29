@@ -138,12 +138,23 @@ program layout0_int_f
     ASSERT(j == global(1))
     ASSERT(k == global(2))
     ASSERT(l == global(3))
+    call esio_field_size(h, "DOESNOTEXIST", j, k, l, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
+    ASSERT(k == global(2))  ! Preserved per feature #2419?
+    ASSERT(l == global(3))  ! Preserved per feature #2419?
     call esio_field_sizev(h, "name_scalar", i, j, k, l, ierr)
     ASSERT(ierr == 0)
     ASSERT(i == 1)
     ASSERT(j == global(1))
     ASSERT(k == global(2))
     ASSERT(l == global(3))
+    call esio_field_sizev(h, "DOESNOTEXIST", i, j, k, l, ierr)
+    ASSERT(ierr /= 0)
+    ASSERT(i == 1)          ! Preserved per feature #2419?
+    ASSERT(j == global(1))  ! Preserved per feature #2419?
+    ASSERT(k == global(2))  ! Preserved per feature #2419?
+    ASSERT(l == global(3))  ! Preserved per feature #2419?
     call esio_field_read_integer(h, "name_scalar", buffer_scalar,          &
                                  stride(1), stride(2), stride(3),          &
                                  ierr)
