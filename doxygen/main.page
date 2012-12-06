@@ -13,7 +13,7 @@ input and output of structured data sets using parallel <a
 href="http://www.hdfgroup.org/HDF5/">HDF5</a>.  ESIO is designed to
 support reading and writing turbulence simulation restart files but it
 may be useful in other contexts.  The library is written in C99 and may
-be used by C89+ or C++ applications.  A Fortran API built atop the F2003
+be used by C89 or C++ applications.  A Fortran API built atop the F2003
 standard ISO_C_BINDING is also available.
 
 The ESIO library provides:
