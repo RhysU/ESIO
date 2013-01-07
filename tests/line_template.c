@@ -280,11 +280,11 @@ FCT_BGN()
                     fct_chk_eq_dbl(value, expected);
                 }
 
-                char buf[64];
-                const int bufsize = sizeof(buf)/sizeof(buf[0]);
-                fct_chk(0 < H5Oget_comment_by_name(file_id, "line", buf,
+                char msg[64];
+                const int bufsize = sizeof(msg)/sizeof(msg[0]);
+                fct_chk(0 < H5Oget_comment_by_name(file_id, "line", msg,
                                                    bufsize, H5P_DEFAULT));
-                fct_chk_eq_str("comment!", buf);
+                fct_chk_eq_str("comment!", msg);
 
                 fct_req(0 <= H5Fclose(file_id));
             }
