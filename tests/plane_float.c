@@ -1,24 +1,25 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// esio 0.2.0: ExaScale IO library for turbulence simulation restart files
-// http://pecos.ices.utexas.edu/
+// ESIO 0.1.8: ExaScale IO library for turbulence simulation restart files
+// http://red.ices.utexas.edu/projects/esio/
 //
-// Copyright (C) 2010, 2011, 2012 The PECOS Development Team
+// Copyright (C) 2010, 2011, 2012, 2013 The PECOS Development Team
 //
-// This library is free software; you can redistribute it and/or
-// modify it under the terms of the Version 2.1 GNU Lesser General
-// Public License as published by the Free Software Foundation.
+// This file is part of ESIO.
 //
-// This library is distributed in the hope that it will be useful,
+// ESIO is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation, either version 2.1 of the License, or
+// (at your option) any later version.
+//
+// ESIO is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-// Lesser General Public License for more details.
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public
-// License along with this library; if not, write to the Free Software
-// Foundation, Inc. 51 Franklin Street, Fifth Floor,
-// Boston, MA  02110-1301  USA
+// You should have received a copy of the GNU Lesser General Public License
+// along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
 // $Id$
