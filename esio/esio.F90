@@ -665,7 +665,7 @@ subroutine esio_attribute_write_double (handle, location, name, value, ierr)
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_attribute_write_double"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -674,7 +674,7 @@ subroutine esio_attribute_write_single (handle, location, name, value, ierr)
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_attribute_write_float"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -683,7 +683,7 @@ subroutine esio_attribute_write_integer (handle, location, name, value, ierr)
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_attribute_write_int"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -692,7 +692,7 @@ subroutine esio_attribute_read_double (handle, location, name, value, ierr)
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_attribute_read_double"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -701,7 +701,7 @@ subroutine esio_attribute_read_single (handle, location, name, value, ierr)
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_attribute_read_float"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -710,7 +710,7 @@ subroutine esio_attribute_read_integer (handle, location, name, value, ierr)
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_attribute_read_int"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -731,7 +731,7 @@ subroutine esio_attribute_writev_double (handle, location, name, value, &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_attribute_writev_double"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -742,7 +742,7 @@ subroutine esio_attribute_writev_single (handle, location, name, value, &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_attribute_writev_float"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -753,7 +753,7 @@ subroutine esio_attribute_writev_integer (handle, location, name, value, &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_attribute_writev_int"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -764,7 +764,7 @@ subroutine esio_attribute_readv_double (handle, location, name, value, &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_attribute_readv_double"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -775,7 +775,7 @@ subroutine esio_attribute_readv_single (handle, location, name, value, &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_attribute_readv_float"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -786,7 +786,7 @@ subroutine esio_attribute_readv_integer (handle, location, name, value, &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_attribute_readv_int"
-#include "x-attribute.f90"
+#include "x-attribute.F90"
 end subroutine esio_attribute_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1100,7 +1100,7 @@ subroutine esio_line_write_double (handle, name, line,               &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_line_write_double"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1112,7 +1112,7 @@ subroutine esio_line_write_single (handle, name, line,               &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_line_write_float"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1124,7 +1124,7 @@ subroutine esio_line_write_integer (handle, name, line,               &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_line_write_int"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1135,7 +1135,7 @@ subroutine esio_line_read_double (handle, name, line,               &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_line_read_double"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1146,7 +1146,7 @@ subroutine esio_line_read_single (handle, name, line,               &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_line_read_float"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1157,7 +1157,7 @@ subroutine esio_line_read_integer (handle, name, line,               &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_line_read_int"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1208,7 +1208,7 @@ subroutine esio_line_writev_double (handle, name, line, ncomponents,  &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_line_writev_double"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1221,7 +1221,7 @@ subroutine esio_line_writev_single (handle, name, line, ncomponents,  &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_line_writev_float"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1234,7 +1234,7 @@ subroutine esio_line_writev_integer (handle, name, line, ncomponents,  &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_line_writev_int"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1246,7 +1246,7 @@ subroutine esio_line_readv_double (handle, name, line, ncomponents,  &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_line_readv_double"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1258,7 +1258,7 @@ subroutine esio_line_readv_single (handle, name, line, ncomponents,  &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_line_readv_float"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1270,7 +1270,7 @@ subroutine esio_line_readv_integer (handle, name, line, ncomponents,  &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_line_readv_int"
-#include "x-line.f90"
+#include "x-line.F90"
 end subroutine esio_line_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1324,7 +1324,7 @@ subroutine esio_plane_write_double (handle, name, plane,              &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_plane_write_double"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1336,7 +1336,7 @@ subroutine esio_plane_write_single (handle, name, plane,              &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_plane_write_float"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1348,7 +1348,7 @@ subroutine esio_plane_write_integer (handle, name, plane,              &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_plane_write_int"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1359,7 +1359,7 @@ subroutine esio_plane_read_double (handle, name, plane,              &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_plane_read_double"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1370,7 +1370,7 @@ subroutine esio_plane_read_single (handle, name, plane,              &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_plane_read_float"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1381,7 +1381,7 @@ subroutine esio_plane_read_integer (handle, name, plane,              &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_plane_read_int"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1437,7 +1437,7 @@ subroutine esio_plane_writev_double (handle, name, plane, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_plane_writev_double"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1450,7 +1450,7 @@ subroutine esio_plane_writev_single (handle, name, plane, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_plane_writev_float"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1463,7 +1463,7 @@ subroutine esio_plane_writev_integer (handle, name, plane, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_plane_writev_int"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1475,7 +1475,7 @@ subroutine esio_plane_readv_double (handle, name, plane, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_plane_readv_double"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1487,7 +1487,7 @@ subroutine esio_plane_readv_single (handle, name, plane, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_plane_readv_float"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1499,7 +1499,7 @@ subroutine esio_plane_readv_integer (handle, name, plane, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_plane_readv_int"
-#include "x-plane.f90"
+#include "x-plane.F90"
 end subroutine esio_plane_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1558,7 +1558,7 @@ subroutine esio_field_write_double (handle, name, field,              &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_field_write_double"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_write_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1570,7 +1570,7 @@ subroutine esio_field_write_single (handle, name, field,              &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_field_write_float"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_write_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1582,7 +1582,7 @@ subroutine esio_field_write_integer (handle, name, field,              &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_field_write_int"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_write_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1593,7 +1593,7 @@ subroutine esio_field_read_double (handle, name, field,              &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_field_read_double"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_read_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1604,7 +1604,7 @@ subroutine esio_field_read_single (handle, name, field,              &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_field_read_float"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_read_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1615,7 +1615,7 @@ subroutine esio_field_read_integer (handle, name, field,              &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_field_read_int"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_read_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1674,7 +1674,7 @@ subroutine esio_field_writev_double (handle, name, field, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_field_writev_double"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_writev_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1687,7 +1687,7 @@ subroutine esio_field_writev_single (handle, name, field, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_field_writev_float"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_writev_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1700,7 +1700,7 @@ subroutine esio_field_writev_integer (handle, name, field, ncomponents, &
 #define FINTENT intent(in)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_field_writev_int"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_writev_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1712,7 +1712,7 @@ subroutine esio_field_readv_double (handle, name, field, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE real(c_double)
 #define CBINDNAME "esio_field_readv_double"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_readv_double
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1724,7 +1724,7 @@ subroutine esio_field_readv_single (handle, name, field, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE real(c_float)
 #define CBINDNAME "esio_field_readv_float"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_readv_single
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1736,7 +1736,7 @@ subroutine esio_field_readv_integer (handle, name, field, ncomponents, &
 #define FINTENT intent(out)
 #define CTYPE integer(c_int)
 #define CBINDNAME "esio_field_readv_int"
-#include "x-field.f90"
+#include "x-field.F90"
 end subroutine esio_field_readv_integer
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

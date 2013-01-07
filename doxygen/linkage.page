@@ -58,20 +58,20 @@ below.
 
 Assuming the same installation detailed in the C/C++ examples just above, you
 would compile and link a Fortran MPI application consisting of a single source
-file named <tt>app.f90</tt> as follows:
+file named <tt>app.F90</tt> as follows:
 
-\code > $(MPIFC) -I$HOME/lib app.f90 -L$HOME/lib -lesiof -L$HDF5HOME -lhdf5_hl -lhdf5 -lz -lm \endcode
+\code > $(MPIFC) -I$HOME/lib app.F90 -L$HOME/lib -lesiof -L$HDF5HOME -lhdf5_hl -lhdf5 -lz -lm \endcode
 
 Using pkg-config simplifies the process considerably:
 
-\code > $(MPIFC) `pkg-config --variable=fflags esio-hdf5` app.f90 `pkg-config --variable=flibs esio-hdf5` \endcode
+\code > $(MPIFC) `pkg-config --variable=fflags esio-hdf5` app.F90 `pkg-config --variable=flibs esio-hdf5` \endcode
 
 Again, if you are using HDF5's parallel compiler wrapper script <tt>h5pfc</tt>
 the above two examples become simpler:
 
-\code > h5pfc -I$HOME/lib app.f90 -L$HOME/lib -lesiof \endcode
+\code > h5pfc -I$HOME/lib app.F90 -L$HOME/lib -lesiof \endcode
 
-\code > h5pfc `pkg-config --variable=fflags esio` app.f90 `pkg-config --variable=flibs esio` \endcode
+\code > h5pfc `pkg-config --variable=fflags esio` app.F90 `pkg-config --variable=flibs esio` \endcode
 
 <b>Important Note:</b> F90 module file formats are not consistent across
 multiple compilers. Therefore, a Fortran application and the ESIO F90 interface

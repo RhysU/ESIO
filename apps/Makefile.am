@@ -36,10 +36,10 @@ esio_rename_LDADD    = ../gnulib/libgnu.la $(LTLIBINTL) -lm
 # PSDNS iokernel test program based on P3DFFT v2.3 loading patterns
 # See http://code.google.com/p/p3dfft/ for more details on P3DFFT
 noinst_PROGRAMS          += p3dfft_like
-p3dfft_like_SOURCES       = p3dfft_like_header.f90 p3dfft_like.f90
+p3dfft_like_SOURCES       = p3dfft_like_header.F90 p3dfft_like.F90
 p3dfft_like_LDADD         = ../esio/libesiof.la $(GRVY_LIBS)
 p3dfft_like_LIBTOOLFLAGS  = --tag=FC
-p3dfft_like.f90: p3dfft_like_header.o    # Explicit module dependence
+p3dfft_like.F90: p3dfft_like_header.o    # Explicit module dependence
 
 # Additional files to clean
 CLEANFILES += *.mod *.gcno *.gcda

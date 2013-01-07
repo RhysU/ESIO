@@ -43,8 +43,7 @@ DISTCLEANFILES =           \
     aminclude.am           \
     _configs.sed           \
     esio/esio-config.h     \
-    *__genmod.f90          \
-    *__genmod.mod
+    *__genmod.*
 MAINTAINERCLEANFILES =     \
     aclocal.m4             \
     autom4te.cache/*       \

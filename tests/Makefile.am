@@ -63,7 +63,7 @@ basic_LDADD         = ../esio/libesio.la
 ## Basic Fortran API sanity checks
 TESTS           += basic_f
 check_PROGRAMS  += basic_f
-basic_f_SOURCES  = basic_f.f90 testutils.c testframework.f90
+basic_f_SOURCES  = basic_f.F90 testutils.c testframework.F90
 basic_f_LDADD    = ../esio/libesiof.la
 
 ###########################################################################
@@ -81,7 +81,7 @@ string_LDADD    = ../esio/libesio.la
 
 ## ...in Fortran
 check_PROGRAMS   += string_f
-string_f_SOURCES  = string_f.f90 testutils.c testframework.f90
+string_f_SOURCES  = string_f.F90 testutils.c testframework.F90
 string_f_LDADD    = ../esio/libesiof.la
 
 ###########################################################################
@@ -113,7 +113,7 @@ attribute_int_LDADD    = ../esio/libesio.la
 
 ## ...in Fortran
 check_PROGRAMS          += attribute_int_f
-attribute_int_f_SOURCES  = attribute_int_f.f90 testutils.c testframework.f90
+attribute_int_f_SOURCES  = attribute_int_f.F90 testutils.c testframework.F90
 attribute_int_f_LDADD    = ../esio/libesiof.la
 
 ###########################################################################
@@ -145,7 +145,7 @@ line_int_LDADD     = ../esio/libesio.la
 
 ## ...in Fortran
 check_PROGRAMS     += line_int_f
-line_int_f_SOURCES  = line_int_f.f90 testutils.c testframework.f90
+line_int_f_SOURCES  = line_int_f.F90 testutils.c testframework.F90
 line_int_f_LDADD    = ../esio/libesiof.la
 
 #############################################################################
@@ -177,7 +177,7 @@ plane_int_LDADD     = ../esio/libesio.la
 
 ## ...in Fortran
 check_PROGRAMS      += plane_int_f
-plane_int_f_SOURCES  = plane_int_f.f90 testutils.c testframework.f90
+plane_int_f_SOURCES  = plane_int_f.F90 testutils.c testframework.F90
 plane_int_f_LDADD    = ../esio/libesiof.la
 
 #############################################################################
@@ -209,7 +209,7 @@ layout0_int_LDADD     = ../esio/libesio.la
 
 ## ...in Fortran
 check_PROGRAMS        += layout0_int_f
-layout0_int_f_SOURCES  = layout0_int_f.f90 testutils.c testframework.f90
+layout0_int_f_SOURCES  = layout0_int_f.F90 testutils.c testframework.F90
 layout0_int_f_LDADD    = ../esio/libesiof.la
 
 #############################################################################

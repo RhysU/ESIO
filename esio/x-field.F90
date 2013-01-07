@@ -24,7 +24,7 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
-! Designed to be #included from esio.f90 within a subroutine declaration
+! Designed to be #included from esio.F90 within a subroutine declaration
 
 #if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
@@ -33,27 +33,28 @@
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
 #ifndef VECTORVALUED
-  CTYPE,             FINTENT               :: plane(1,*)
+  CTYPE,             FINTENT               :: field(1,1,*)
 #else
-  CTYPE,             FINTENT               :: plane(1,1,*)
+  CTYPE,             FINTENT               :: field(1,1,1,*)
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride
   integer,           intent(in),  optional :: bstride
+  integer,           intent(in),  optional :: cstride
 #ifdef HASCOMMENT
   character(len=*),  intent(in),  optional :: comment
 #endif
   integer,           intent(out), optional :: ierr
 
-  integer :: stat, tmp_astride, tmp_bstride
+  integer :: stat, tmp_astride, tmp_bstride, tmp_cstride
 #ifdef HASCOMMENT
   character(len=1,kind=c_char), parameter :: null_char(1) = (/ c_null_char /)
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function plane_impl (handle, name, plane,        &
-                         bstride, astride            &
+    function field_impl (handle, name, field,        &
+                         cstride, bstride, astride   &
 #ifdef VECTORVALUED
                          ,ncomponents                &
 #endif
@@ -62,10 +63,11 @@
 #endif
                         ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: plane_impl
+      integer(c_int)                                  :: field_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
-      CTYPE,                        FINTENT           :: plane(*)
+      CTYPE,                        FINTENT           :: field(*)
+      integer(c_int),               intent(in), value :: cstride
       integer(c_int),               intent(in), value :: bstride
       integer(c_int),               intent(in), value :: astride
 #ifdef VECTORVALUED
@@ -74,7 +76,7 @@
 #ifdef HASCOMMENT
       character(len=1,kind=c_char), intent(in)        :: comment(*)
 #endif
-    end function plane_impl
+    end function field_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -82,32 +84,34 @@
   if (present(astride)) tmp_astride = astride
   tmp_bstride = 0
   if (present(bstride)) tmp_bstride = bstride
+  tmp_cstride = 0
+  if (present(cstride)) tmp_cstride = cstride
 
-! Note reordering Fortran's (a, b) to C's (b, a)
+! Note reordering Fortran's (a, b, c) to C's (c, b, a)
 #ifndef HASCOMMENT
-  stat = plane_impl(handle, esio_f_c_string(name), plane, &
-                    tmp_bstride, tmp_astride              &
+  stat = field_impl(handle, esio_f_c_string(name), field, &
+                    tmp_cstride, tmp_bstride, tmp_astride &
 #ifdef VECTORVALUED
                     ,ncomponents                          &
 #endif
                    )
 #else /* HASCOMMENT */
   if (present(comment)) then
-    stat = plane_impl(handle, esio_f_c_string(name), plane, &
-                      tmp_bstride, tmp_astride              &
+    stat = field_impl(handle, esio_f_c_string(name), field, &
+                      tmp_cstride, tmp_bstride, tmp_astride &
 #ifdef VECTORVALUED
                       ,ncomponents                          &
 #endif
-                     ,esio_f_c_string(comment)              &
-                    )
+                      ,esio_f_c_string(comment)             &
+                     )
   else
-    stat = plane_impl(handle, esio_f_c_string(name), plane, &
-                      tmp_bstride, tmp_astride              &
+    stat = field_impl(handle, esio_f_c_string(name), field, &
+                      tmp_cstride, tmp_bstride, tmp_astride &
 #ifdef VECTORVALUED
                       ,ncomponents                          &
 #endif
-                     ,null_char                             &
-                    )
+                      ,null_char                            &
+                     )
   end if
 #endif /* HASCOMMENT */
 

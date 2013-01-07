@@ -37,8 +37,8 @@ ESIO's C API is documented within the esio.h reference material.
 
 A complete, Fortran-based MPI program using ESIO to perform the same
 task would look like:
-\includelineno concepts2.f90
-ESIO's Fortran API is documented, relative to the C API, within the esio.f90
+\includelineno concepts2.F90
+ESIO's Fortran API is documented, relative to the C API, within the esio.F90
 reference material.
 
 Note that the C sample used the zero-indexed expression <tt>2*world_rank</tt>

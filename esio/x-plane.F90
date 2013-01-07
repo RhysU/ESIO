@@ -24,7 +24,7 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
-! Designed to be #included from esio.f90 within a subroutine declaration
+! Designed to be #included from esio.F90 within a subroutine declaration
 
 #if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
@@ -33,38 +33,40 @@
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
 #ifndef VECTORVALUED
-  CTYPE,             FINTENT               :: line(*)
+  CTYPE,             FINTENT               :: plane(1,*)
 #else
-  CTYPE,             FINTENT               :: line(1,*)
+  CTYPE,             FINTENT               :: plane(1,1,*)
   integer,           intent(in)            :: ncomponents
 #endif
   integer,           intent(in),  optional :: astride
+  integer,           intent(in),  optional :: bstride
 #ifdef HASCOMMENT
   character(len=*),  intent(in),  optional :: comment
 #endif
   integer,           intent(out), optional :: ierr
 
-  integer :: stat, tmp_astride
+  integer :: stat, tmp_astride, tmp_bstride
 #ifdef HASCOMMENT
   character(len=1,kind=c_char), parameter :: null_char(1) = (/ c_null_char /)
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function line_impl (handle, name, line,          &
-                        astride                      &
+    function plane_impl (handle, name, plane,        &
+                         bstride, astride            &
 #ifdef VECTORVALUED
-                        ,ncomponents                 &
+                         ,ncomponents                &
 #endif
 #ifdef HASCOMMENT
                         ,comment                     &
 #endif
-                       ) bind (C, name=CBINDNAME)
+                        ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: line_impl
+      integer(c_int)                                  :: plane_impl
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
-      CTYPE,                        FINTENT           :: line(*)
+      CTYPE,                        FINTENT           :: plane(*)
+      integer(c_int),               intent(in), value :: bstride
       integer(c_int),               intent(in), value :: astride
 #ifdef VECTORVALUED
       integer(c_int),               intent(in), value :: ncomponents
@@ -72,36 +74,39 @@
 #ifdef HASCOMMENT
       character(len=1,kind=c_char), intent(in)        :: comment(*)
 #endif
-    end function line_impl
+    end function plane_impl
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   tmp_astride = 0
   if (present(astride)) tmp_astride = astride
+  tmp_bstride = 0
+  if (present(bstride)) tmp_bstride = bstride
 
+! Note reordering Fortran's (a, b) to C's (b, a)
 #ifndef HASCOMMENT
-  stat = line_impl(handle, esio_f_c_string(name), line,  &
-                   tmp_astride                           &
+  stat = plane_impl(handle, esio_f_c_string(name), plane, &
+                    tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
-                   ,ncomponents                          &
+                    ,ncomponents                          &
 #endif
-                  )
-#else  /* HASCOMMENT */
+                   )
+#else /* HASCOMMENT */
   if (present(comment)) then
-    stat = line_impl(handle, esio_f_c_string(name), line,  &
-                     tmp_astride                           &
+    stat = plane_impl(handle, esio_f_c_string(name), plane, &
+                      tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
-                     ,ncomponents                          &
+                      ,ncomponents                          &
 #endif
-                     ,esio_f_c_string(comment)             &
+                     ,esio_f_c_string(comment)              &
                     )
   else
-    stat = line_impl(handle, esio_f_c_string(name), line,  &
-                     tmp_astride                           &
+    stat = plane_impl(handle, esio_f_c_string(name), plane, &
+                      tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
-                     ,ncomponents                          &
+                      ,ncomponents                          &
 #endif
-                     ,null_char                            &
+                     ,null_char                             &
                     )
   end if
 #endif /* HASCOMMENT */

@@ -24,7 +24,7 @@
 !!-----------------------------------------------------------------------el-
 !! $Id$
 
-! Designed to be #included from esio.f90 within a subroutine declaration
+! Designed to be #included from esio.F90 within a subroutine declaration
 
 #if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
