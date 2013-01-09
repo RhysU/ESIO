@@ -1,13 +1,14 @@
 /*! \page License
 
-This library is free software; you can redistribute it and/or
+ESIO is free software; you can redistribute it and/or
 modify it under the terms of the Version 2.1 GNU Lesser General
-Public License as published by the Free Software Foundation.
+Public License as published by the Free Software Foundation, or
+(at your option) any later version.
 
-This library is distributed in the hope that it will be useful, but
+ESIO is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 <a href="http://www.gnu.org/licenses/lgpl-2.1.txt">GNU Lesser General
-Public License </a> for more details.
+Public License</a> for more details.
 
 */
