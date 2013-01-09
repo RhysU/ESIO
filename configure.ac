@@ -20,7 +20,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AX_PREFIX_CONFIG_H([esio/esio-config.h])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE(1.11 no-define tar-ustar color-tests -Wall foreign)
-AC_PREREQ([2.61])
+AC_PREREQ([2.64])
 AX_AM_MACROS
 AX_ADD_AM_CTAGSFLAGS
 AX_AM_JOBSERVER([no])
