@@ -73,7 +73,7 @@ dnl When Autoconf 2.69 is more common, AC_FC_PP_SRCEXT([F90]) should be used.
 AC_FC_SRCEXT([F90])
 AC_FC_FREEFORM()
 ax_save_FCFLAGS=$FCFLAGS
-AC_LANG_WERROR
+dnl AC_LANG_WERROR # IBM XL Fortran emits success strings on stderr and breaks us!
 AC_MSG_CHECKING([for flags required to enable Fortran preprocessing])
 for fppflag in '' -fpp -cpp '-x f95-cpp-input' none
 do
