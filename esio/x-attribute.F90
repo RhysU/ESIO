@@ -30,6 +30,11 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
+! Permit specifying interface names to workaround, e.g. XLF, bugs.
+#ifndef ATTRIBUTE_IMPL
+#define ATTRIBUTE_IMPL attribute_impl
+#endif
+
   type(esio_handle), intent(in) :: handle
   character(len=*),  intent(in) :: location
   character(len=*),  intent(in) :: name
@@ -44,13 +49,13 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function attribute_impl (handle, location, name, value    &
+    function ATTRIBUTE_IMPL (handle, location, name, value    &
 #ifdef VECTORVALUED
                              ,ncomponents                     &
 #endif
                             ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: attribute_impl
+      integer(c_int)                                  :: ATTRIBUTE_IMPL
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: location(*)
       character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -60,11 +65,11 @@
       CTYPE,                        FINTENT           :: value(*)
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function attribute_impl
+    end function ATTRIBUTE_IMPL
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = attribute_impl(handle,                               &
+  stat = ATTRIBUTE_IMPL(handle,                               &
                         esio_f_c_string(location),            &
                         esio_f_c_string(name),                &
                         value  &
@@ -80,3 +85,4 @@
 #ifdef VECTORVALUED
 #undef VECTORVALUED
 #endif
+#undef ATTRIBUTE_IMPL

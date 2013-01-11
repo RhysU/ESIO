@@ -30,6 +30,11 @@
 #error "One of FINTENT, CTYPE, or CBINDNAME not defined"
 #endif
 
+! Permit specifying interface names to workaround, e.g. XLF, bugs.
+#ifndef PLANE_IMPL
+#define PLANE_IMPL plane_impl
+#endif
+
   type(esio_handle), intent(in)            :: handle
   character(len=*),  intent(in)            :: name
 #ifndef VECTORVALUED
@@ -52,7 +57,7 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function plane_impl (handle, name, plane,        &
+    function PLANE_IMPL (handle, name, plane,        &
                          bstride, astride            &
 #ifdef VECTORVALUED
                          ,ncomponents                &
@@ -62,7 +67,7 @@
 #endif
                         ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: plane_impl
+      integer(c_int)                                  :: PLANE_IMPL
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: plane(*)
@@ -74,7 +79,7 @@
 #ifdef HASCOMMENT
       character(len=1,kind=c_char), intent(in)        :: comment(*)
 #endif
-    end function plane_impl
+    end function PLANE_IMPL
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -85,7 +90,7 @@
 
 ! Note reordering Fortran's (a, b) to C's (b, a)
 #ifndef HASCOMMENT
-  stat = plane_impl(handle, esio_f_c_string(name), plane, &
+  stat = PLANE_IMPL(handle, esio_f_c_string(name), plane, &
                     tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
                     ,ncomponents                          &
@@ -93,7 +98,7 @@
                    )
 #else /* HASCOMMENT */
   if (present(comment)) then
-    stat = plane_impl(handle, esio_f_c_string(name), plane, &
+    stat = PLANE_IMPL(handle, esio_f_c_string(name), plane, &
                       tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
                       ,ncomponents                          &
@@ -101,7 +106,7 @@
                      ,esio_f_c_string(comment)              &
                     )
   else
-    stat = plane_impl(handle, esio_f_c_string(name), plane, &
+    stat = PLANE_IMPL(handle, esio_f_c_string(name), plane, &
                       tmp_bstride, tmp_astride              &
 #ifdef VECTORVALUED
                       ,ncomponents                          &
@@ -122,3 +127,4 @@
 #ifdef VECTORVALUED
 #undef VECTORVALUED
 #endif
+#undef PLANE_IMPL
