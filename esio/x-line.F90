@@ -26,13 +26,8 @@
 
 ! Designed to be #included from esio.F90 within a subroutine declaration
 
-#if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
-#error "One of FINTENT, CTYPE, or CBINDNAME not defined"
-#endif
-
-! Permit specifying interface names to workaround, e.g. XLF, bugs.
-#ifndef LINE_IMPL
-#define LINE_IMPL line_impl
+#if !(defined(FINTENT) && defined(CTYPE) && defined(CBINDNAME) && defined(IMPL))
+#error "One of FINTENT, CTYPE, CBINDNAME, or IMPL not defined"
 #endif
 
   type(esio_handle), intent(in)            :: handle
@@ -56,17 +51,17 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function LINE_IMPL (handle, name, line,          &
-                        astride                      &
+    function IMPL (handle, name, line,          &
+                   astride                      &
 #ifdef VECTORVALUED
-                        ,ncomponents                 &
+                   ,ncomponents                 &
 #endif
 #ifdef HASCOMMENT
-                        ,comment                     &
+                   ,comment                     &
 #endif
-                       ) bind (C, name=CBINDNAME)
+                  ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: LINE_IMPL
+      integer(c_int)                                  :: IMPL
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: name(*)
       CTYPE,                        FINTENT           :: line(*)
@@ -77,7 +72,7 @@
 #ifdef HASCOMMENT
       character(len=1,kind=c_char), intent(in)        :: comment(*)
 #endif
-    end function LINE_IMPL
+    end function IMPL
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -85,29 +80,29 @@
   if (present(astride)) tmp_astride = astride
 
 #ifndef HASCOMMENT
-  stat = LINE_IMPL(handle, esio_f_c_string(name), line,  &
-                   tmp_astride                           &
+  stat = IMPL(handle, esio_f_c_string(name), line,  &
+              tmp_astride                           &
 #ifdef VECTORVALUED
-                   ,ncomponents                          &
+              ,ncomponents                          &
 #endif
-                  )
+             )
 #else  /* HASCOMMENT */
   if (present(comment)) then
-    stat = LINE_IMPL(handle, esio_f_c_string(name), line,  &
-                     tmp_astride                           &
+    stat = IMPL(handle, esio_f_c_string(name), line,  &
+                tmp_astride                           &
 #ifdef VECTORVALUED
-                     ,ncomponents                          &
+                ,ncomponents                          &
 #endif
-                     ,esio_f_c_string(comment)             &
-                    )
+                ,esio_f_c_string(comment)             &
+               )
   else
-    stat = LINE_IMPL(handle, esio_f_c_string(name), line,  &
-                     tmp_astride                           &
+    stat = IMPL(handle, esio_f_c_string(name), line,  &
+                tmp_astride                           &
 #ifdef VECTORVALUED
-                     ,ncomponents                          &
+                ,ncomponents                          &
 #endif
-                     ,null_char                            &
-                    )
+                ,null_char                            &
+               )
   end if
 #endif /* HASCOMMENT */
 
@@ -116,10 +111,10 @@
 #undef FINTENT
 #undef CTYPE
 #undef CBINDNAME
+#undef IMPL
 #ifdef HASCOMMENT
 #undef HASCOMMENT
 #endif
 #ifdef VECTORVALUED
 #undef VECTORVALUED
 #endif
-#undef LINE_IMPL

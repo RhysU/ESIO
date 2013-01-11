@@ -26,13 +26,8 @@
 
 ! Designed to be #included from esio.F90 within a subroutine declaration
 
-#if !defined(FINTENT) || !defined(CTYPE) || !defined(CBINDNAME)
-#error "One of FINTENT, CTYPE, or CBINDNAME not defined"
-#endif
-
-! Permit specifying interface names to workaround, e.g. XLF, bugs.
-#ifndef ATTRIBUTE_IMPL
-#define ATTRIBUTE_IMPL attribute_impl
+#if !(defined(FINTENT) && defined(CTYPE) && defined(CBINDNAME) && defined(IMPL))
+#error "One of FINTENT, CTYPE, CBINDNAME, or IMPL not defined"
 #endif
 
   type(esio_handle), intent(in) :: handle
@@ -49,13 +44,13 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   interface
-    function ATTRIBUTE_IMPL (handle, location, name, value    &
+    function IMPL (handle, location, name, value    &
 #ifdef VECTORVALUED
-                             ,ncomponents                     &
+                   ,ncomponents                     &
 #endif
-                            ) bind (C, name=CBINDNAME)
+                  ) bind (C, name=CBINDNAME)
       import
-      integer(c_int)                                  :: ATTRIBUTE_IMPL
+      integer(c_int)                                  :: IMPL
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: location(*)
       character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -65,24 +60,24 @@
       CTYPE,                        FINTENT           :: value(*)
       integer(c_int),               intent(in), value :: ncomponents
 #endif
-    end function ATTRIBUTE_IMPL
+    end function IMPL
   end interface
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
-  stat = ATTRIBUTE_IMPL(handle,                               &
-                        esio_f_c_string(location),            &
-                        esio_f_c_string(name),                &
-                        value  &
+  stat = IMPL(handle,                               &
+              esio_f_c_string(location),            &
+              esio_f_c_string(name),                &
+              value  &
 #ifdef VECTORVALUED
-                        ,ncomponents                          &
+              ,ncomponents                          &
 #endif
-                       )
+              )
   if (present(ierr)) ierr = stat
 
 #undef FINTENT
 #undef CTYPE
 #undef CBINDNAME
+#undef IMPL
 #ifdef VECTORVALUED
 #undef VECTORVALUED
 #endif
-#undef ATTRIBUTE_IMPL
