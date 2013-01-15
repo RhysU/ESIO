@@ -18,10 +18,8 @@ moduledir          = @libdir@
 CC=@MPICC@
 FC=@MPIFC@
 
-# Make public C APIs visible in resulting libraries-- see visibility.h
-AM_CPPFLAGS += -DESIO_SHARED_EXPORTS
-
 # Internal ESIO C library consumed by both the public C and Fortran libraries
+# Only APIs marked as public are visible in the result-- see visibility.h
 # HDF5 C APIs visible during compilation, notice HDF5 Fortran APIs not used
 noinst_LTLIBRARIES                += libesio_internal.la
 libesio_internal_la_SOURCES        = chunksize.c      chunksize.h
@@ -35,6 +33,7 @@ libesio_internal_la_SOURCES       += restart-rename.c restart-rename.h
 libesio_internal_la_SOURCES       += uri.c            uri.h
 libesio_internal_la_CFLAGS         = $(AM_CFLAGS)   $(HDF5_CFLAGS)
 libesio_internal_la_CPPFLAGS       = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
+libesio_internal_la_CPPFLAGS      += -Wc,-DESIO_SHARED_EXPORTS
 libesio_internal_la_LDFLAGS        = $(LTLIBINTL)         # gnulib requirement
 libesio_internal_la_LIBADD         = ../gnulib/libgnu.la  # gnulib requirement
 EXTRA_libesio_internal_la_SOURCES  = x-layout0.c          # x-macro template
@@ -59,7 +58,7 @@ pkginclude_HEADERS += esio-config.h
 BUILT_SOURCES      += esio-config.h # See AX_PREFIX_CONFIG_H
 
 # Public ESIO Fortran library and module files
-# ESIO Fortran uses only the ESIO C API so no HDF5 Fortran artifacts appear
+# ESIO Fortran uses only the public C API so no HDF5 Fortran artifacts appear
 lib_LTLIBRARIES           += libesiof.la
 libesiof_la_LDFLAGS        = -release $(PACKAGE_VERSION)
 libesiof_la_LIBTOOLFLAGS   = --tag=FC
