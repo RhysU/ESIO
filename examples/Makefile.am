@@ -21,10 +21,9 @@ CLEANFILES      = # Append below
 CC=@MPICC@
 FC=@MPIFC@
 
-## Pick up HDF5 library includes
+## Pick up C-only HDF5 library includes
 AM_CFLAGS   += $(HDF5_CFLAGS)
 AM_CPPFLAGS += $(HDF5_CPPFLAGS)
-AM_FCFLAGS  += $(HDF5_FFLAGS)
 
 # Sample progams
 noinst_PROGRAMS        += concepts1
