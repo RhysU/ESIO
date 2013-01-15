@@ -33,10 +33,10 @@ The library's manual is divided into the following subsections:
   <li> \subpage installation </li>
   <li> \subpage linkage</li>
   <li> \subpage concepts</li>
+  <li> \subpage restarts</li>
   <li> \ref esio.h "C/C++ API"</li>
   <li> \ref error.h "C/C++ error handling API"</li>
   <li> \ref esio.F90 "Fortran API"</li>
-  <li> \subpage restarts</li>
   <li> \subpage benchmark</li>
   <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot test coverage</a> </li>
 </ul>

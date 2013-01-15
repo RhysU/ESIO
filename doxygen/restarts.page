@@ -1,4 +1,4 @@
-/*! \page restarts Restart files
+/*! \page restarts Writing restart files
 
 ESIO provides several methods that greatly simplify writing a sequence of
 metadata-rich restart files.  Each restart file might contain a simulation
@@ -8,6 +8,7 @@ data was generated and to allow data post-processing.
 A complete, C-based MPI program using ESIO to write a (trivial) sequence
 of restart files might look like:
 \includelineno restart1.c
+Analogous method calls exist in the ESIO Fortran API.
 
 This sample prepares a copy of loop-invariant data in the file "template.h5".
 Often this would include the program version, scenario parameters, and grid
