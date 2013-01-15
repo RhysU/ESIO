@@ -134,12 +134,12 @@ contains
 
     inquire(file='dims',exist=iex)
     if (iex) then
-      if (procnumber.eq.0) write(6,*), 'Reading grid from file dims'
+      if (procnumber.eq.0) write(6,*) 'Reading grid from file dims'
       open (999,file='dims')
       read (999,*) dims(1), dims(2)
       close (999)
     else
-      if (procnumber.eq.0) write(6,*), 'Creating grid with mpi_dims_create'
+      if (procnumber.eq.0) write(6,*) 'Creating grid with mpi_dims_create'
     endif
 
     iproc = dims(1)
@@ -147,8 +147,8 @@ contains
 
     if (iproc*jproc.ne.total) then
       if (procnumber.eq.0) then
-        write (6,*)  'ABORT: invalid choice of iproc x jproc!'
-        write (6,*)  'Correct choices in the dims file'
+        write (6,*) 'ABORT: invalid choice of iproc x jproc!'
+        write (6,*) 'Correct choices in the dims file'
         write (6,*) 'iproc,jproc,total=',iproc,jproc,total
         call MPI_ABORT(mpi_comm_world,1,ierr)
       end if
