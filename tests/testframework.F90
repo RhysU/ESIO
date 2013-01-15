@@ -217,21 +217,27 @@ contains
     character(len=*), intent(inout) :: filetemplate
     type(c_ptr)                     :: tmp_p
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#define IMPL create_testfiletemplate_c
+
     interface
-      function impl (dir, filename) bind (C, name="create_testfiletemplate")
+      function IMPL (dir, filename) bind (C, name="create_testfiletemplate")
         import
-        type(c_ptr)                              :: impl
+        type(c_ptr)                              :: IMPL
         character(len=1,kind=c_char), intent(in) :: dir(*)
         character(len=1,kind=c_char), intent(in) :: filename(*)
-      end function impl
+      end function IMPL
     end interface
 
     success = .false.
-    tmp_p = impl(esio_f_c_string(dir), esio_f_c_string(filename))
+    tmp_p = IMPL(esio_f_c_string(dir), esio_f_c_string(filename))
     if (esio_c_f_stringcopy(tmp_p, filetemplate)) then
       success = .true.
     end if
     call esio_c_free(tmp_p)
+
+#undef IMPL
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   end function create_testfiletemplate
 
@@ -246,20 +252,26 @@ contains
     character(len=*), intent(inout) :: filename
     type(c_ptr)                     :: tmp_p
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#define IMPL create_testfilename_c
+
     interface
-      function impl (filetemplate) bind (C, name="create_testfilename")
+      function IMPL (filetemplate) bind (C, name="create_testfilename")
         import
-        type(c_ptr)                              :: impl
+        type(c_ptr)                              :: IMPL
         character(len=1,kind=c_char), intent(in) :: filetemplate(*)
-      end function impl
+      end function IMPL
     end interface
 
     success = .false.
-    tmp_p = impl(esio_f_c_string(filetemplate))
+    tmp_p = IMPL(esio_f_c_string(filetemplate))
     if (esio_c_f_stringcopy(tmp_p, filename)) then
       success = .true.
     end if
     call esio_c_free(tmp_p)
+
+#undef IMPL
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
   end function create_testfilename
 
