@@ -32,6 +32,7 @@ libesio_internal_la_SOURCES       += metadata.c       metadata.h
 libesio_internal_la_SOURCES       += restart-rename.c restart-rename.h
 libesio_internal_la_SOURCES       += uri.c            uri.h
 libesio_internal_la_CFLAGS         = $(AM_CFLAGS)   $(HDF5_CFLAGS)
+libesio_internal_la_CFLAGS        += -Wc,$(VISIBILITY_CFLAGS)
 libesio_internal_la_CPPFLAGS       = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 libesio_internal_la_CPPFLAGS      += -Wc,-DESIO_SHARED_EXPORTS
 libesio_internal_la_LDFLAGS        = $(LTLIBINTL)         # gnulib requirement
