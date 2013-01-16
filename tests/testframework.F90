@@ -277,19 +277,29 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  subroutine testframework_unlink (filename)
+  subroutine testframework_unlink (pathname)
 
-#ifdef __INTEL_COMPILER
-  use ifport, only: unlink
-#endif /* __INTEL_COMPILER */
+    use, intrinsic :: iso_c_binding, only: c_int, c_char
 
-    character(len=*), intent(in) :: filename
+    character(len=*), intent(in) :: pathname
     logical                      :: file_exists
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+!   While GCC and Intel provide unlink intrinsics (the latter through ifport),
+!   IBM apparently does not.  Instead uniformly rely on unlink(2) from POSIX.
+    interface
+      function unlink_c (pathname) bind (C, name="unlink")
+        import
+        integer(c_int)                           :: unlink_c
+        character(len=1,kind=c_char), intent(in) :: pathname(*)
+      end function unlink_c
+    end interface
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 !   Attempt to delete the named temporary file, if it exists
     if (.not. verbose .and. world_rank == 0) then
-      inquire (file=trim(filename), exist=file_exists)
-      if (file_exists) ierr = unlink(trim(filename))
+      inquire (file=trim(pathname), exist=file_exists)
+      if (file_exists) ierr = unlink_c(esio_f_c_string(pathname))
     end if
 
   end subroutine testframework_unlink
