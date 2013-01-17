@@ -4,7 +4,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 # HDF5/MPI installation used to build @PACKAGE_NAME@
-# Retrieve these using `pkg-config --variable=name @PACKAGE_NAME@-hdf5`
+# Retrieve these using `pkg-config --variable=name @PACKAGE_TARNAME@-hdf5`
 hdf5_version=@HDF5_VERSION@
 h5pcc=@H5CC@
 h5pfc=@H5FC@
@@ -13,15 +13,15 @@ mpifc=@MPIFC_LOCATION@
 hdf5_fflags=@HDF5_FFLAGS@
 hdf5_flibs=@HDF5_FLIBS@
 # Fortran compilation and linking information
-# Retrieve these using `pkg-config --variable=name @PACKAGE_NAME@-hdf5`
-# Note -l@PACKAGE_NAME@f uses the HDF5 C API so no -lhdf5_fortran appears below
+# Retrieve these using `pkg-config --variable=name @PACKAGE_TARNAME@-hdf5`
+# Note -l@PACKAGE_TARNAME@f uses the HDF5 C API so no -lhdf5_fortran appears below
 fflags=-I@libdir@
-flibs=-L@libdir@ -l@PACKAGE_NAME@f @HDF5_LDFLAGS@
+flibs=-L@libdir@ -l@PACKAGE_TARNAME@f @HDF5_LDFLAGS@
 
-Name: @PACKAGE_NAME@-hdf5
+Name: @PACKAGE_TARNAME@-hdf5
 Description: @PACKAGE_DESCRIPTION@
 URL: @PACKAGE_URL@
 Requires:
 Version: @VERSION@
-Libs: -L${libdir} -l@PACKAGE_NAME@ @HDF5_LDFLAGS@
+Libs: -L${libdir} -l@PACKAGE_TARNAME@ @HDF5_LDFLAGS@
 Cflags: -I${includedir}
