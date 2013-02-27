@@ -15,10 +15,11 @@ EXTRA_DIST  += build-aux/update_license.pl
 EXTRA_DIST  += m4/gnulib-cache.m4
 
 dist-hook: docs
-	: # Eliminate .svn directories in dist tarball
-	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
 	: # Include generated documentation in the dist tarball
 	cp -rv $(top_builddir)/docs $(top_distdir)
+	: # Eliminate .git and .svn directories in dist tarball
+	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
+	find $(distdir)/ -name '.git' -type d -exec rm {} \;
 
 # Tools in the auxillary directory
 AUX_DIST  = build-aux/install-sh
