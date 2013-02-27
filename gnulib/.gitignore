@@ -11,6 +11,8 @@
 /Makefile.in
 /ref-add.sed
 /ref-del.sed
+/signal.h
+/stdalign.h
 /stdio.h
 /stdlib.h
 /string.h
