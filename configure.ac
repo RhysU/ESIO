@@ -1,7 +1,7 @@
 dnl ----------------------------------------------------
 dnl Package name, release number, description, and URL
 dnl ----------------------------------------------------
-AC_INIT([ESIO], [0.1.8], [rhys@ices.utexas.edu], [esio])
+AC_INIT([ESIO], [0.1.9], [rhys@ices.utexas.edu], [esio])
 AC_REVISION([$Id$])
 PACKAGE_DESCRIPTION="ExaScale IO library for turbulence simulation restart files"
 AC_SUBST([PACKAGE_DESCRIPTION])
