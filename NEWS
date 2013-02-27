@@ -1,3 +1,23 @@
+What's new in ESIO 0.1.8
+------------------------
+
+ESIO now supports the IBM XL Fortran compilers as installed on Argonne's Mira
+resource.  This required primarily build system changes as well as some
+portability-related fixes.
+
+This release contains the following:
+
+    * Feature #2680: Correct license headers to be LGPL3
+    * Feature #2681: Update gnulib modules
+    * Feature #2686: Protect ESIO_SHARED_EXPORTS for XL compilers
+    * Feature #2687: Protect -fvisibility for XL compilers
+    * Feature #2777: Roll ESIO 0.1.8 Release
+    * Support #2683: IBM XLF Internal Compiler Error
+    * Support #2688: Workaround apparent lack of unlink instrinsic on XLF
+    * Bug #2673: Problems getting xlf to preprocess source files ending in .f90.
+    * Software Engineering #2674: Update license headers for 2013
+
+
 What's new in ESIO 0.1.7
 ------------------------
 
