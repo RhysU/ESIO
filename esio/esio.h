@@ -248,7 +248,7 @@ int esio_file_close_restart(esio_handle h,
  * \param h        Handle to use.
  * \param location Null-terminated attribute location.
  *                 Must be either "/" to specify a file-level attribute or
- *                 be the name an existing line, plane, or field.
+ *                 be the name of an existing line, plane, or field.
  * \param name     Null-terminated attribute name.
  * \param value    Null-terminated attribute value to set.
  *
@@ -270,7 +270,7 @@ esio_string_set(const esio_handle h,
  * \param h        Handle to use.
  * \param location Null-terminated attribute location.
  *                 Must be either "/" to specify a file-level attribute or
- *                 be the name an existing line, plane, or field.
+ *                 be the name of an existing line, plane, or field.
  * \param name     Null-terminated attribute name.
  *
  * \return A newly allocated buffer containing the null-terminated string
@@ -386,7 +386,7 @@ esio_attribute_readv(const esio_handle h,                                  \
  * \param h        Handle to use.
  * \param location Null-terminated attribute location.
  *                 Must be either "/" to specify a file-level attribute or
- *                 be the name an existing line, plane, or field.
+ *                 be the name of an existing line, plane, or field.
  * \param name     Null-terminated attribute name.
  * \param value    Buffer containing the scalar to write.
  *
@@ -436,7 +436,7 @@ ESIO_ATTRIBUTE_WRITE_GEN_CXX_BY_VALUE(int)
  * \param h        Handle to use.
  * \param location Null-terminated attribute location.
  *                 Must be either "/" to specify a file-level attribute or
- *                 be the name an existing line, plane, or field.
+ *                 be the name of an existing line, plane, or field.
  * \param name     Null-terminated attribute name.
  * \param value    Buffer to contain the read value.
  *
@@ -488,7 +488,7 @@ ESIO_ATTRIBUTE_READ_GEN_CXX(int)
  * \param h           Handle to use.
  * \param location    Null-terminated attribute location.
  *                    Must be either "/" to specify a file-level attribute or
- *                    be the name an existing line, plane, or field.
+ *                    be the name of an existing line, plane, or field.
  * \param name        Null-terminated attribute name.
  * \param value       Buffer containing the scalar to write.
  * \param ncomponents Number of vector components.
@@ -530,7 +530,7 @@ ESIO_ATTRIBUTE_WRITEV_GEN_CXX(int)
  * \param h           Handle to use.
  * \param location    Null-terminated attribute location.
  *                    Must be either "/" to specify a file-level attribute or
- *                    be the name an existing line, plane, or field.
+ *                    be the name of an existing line, plane, or field.
  * \param name        Null-terminated attribute name.
  * \param value       Buffer to contain the read value.
  * \param ncomponents Number of vector components.
@@ -576,7 +576,7 @@ ESIO_ATTRIBUTE_READV_GEN_CXX(int)
  * \param h Handle to use.
  * \param location Null-terminated attribute location.
  *                 Must be either "/" to specify a file-level attribute or
- *                 be the name an existing line, plane, or field.
+ *                 be the name of an existing line, plane, or field.
  * \param name Null-terminated attribute name.
  * \param ncomponents Buffer to contain the number of components.
  *
