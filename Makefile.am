@@ -104,6 +104,8 @@ endif
 # Make sure that libtool is up to date
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
+	mv libtool libtool.bak
+	$(SED) libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
 
 # Push license updates into appropriate subdirectories
 .license.stamp:

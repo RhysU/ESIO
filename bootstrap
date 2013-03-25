@@ -1,13 +1,3 @@
 #! /bin/sh
 # $Id$
-set -e -u
-
 autoreconf -v -i || exit 1
-
-echo "Working around Intel linking futziness by adding -Wl"
-echo "See http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-March/008868.html"
-ed - libtool <<HERE
-g/^wl=""$/
-s/^.*$/wl="-Wl,"/
-wq
-HERE

@@ -116,6 +116,13 @@ dnl ------------------------------------------------
 LT_INIT()
 LT_PREREQ([2.2.6])
 AC_SUBST(LIBTOOL_DEPS)
+dnl See also libtool target in toplevel Makefile.am
+LT_OUTPUT
+AC_MSG_NOTICE([Working around linking futziness by adding -Wl to libtool])
+AC_MSG_NOTICE([See http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-March/008868.html])
+AC_PROG_SED
+mv -v libtool libtool.bak
+$SED libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
 AC_CACHE_SAVE
 
 dnl ------------------------------------------------
