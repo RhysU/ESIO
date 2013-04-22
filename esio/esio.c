@@ -1378,6 +1378,7 @@ int esio_field_read_internal(const esio_handle h,
                              const char *comment,
                              hid_t type_id)
 {
+    char msg[256]; // message buffer for error handling
     (void) comment; // Present for consistency with esio_field_write_internal
     assert(comment == 0);
 
@@ -1416,7 +1417,8 @@ int esio_field_read_internal(const esio_handle h,
         case ESIO_SUCCESS:
             break;
         case ESIO_NOTFOUND:
-            ESIO_ERROR("Field not found in file", status);
+	    snprintf(msg, sizeof(msg), "Field '%s' not found in file", name);
+            ESIO_ERROR(msg, status);
         default:
             ESIO_ERROR("Unable to read field's ESIO metadata", status);
     }
@@ -1715,6 +1717,7 @@ int esio_plane_read_internal(const esio_handle h,
                              const char *comment,
                              hid_t type_id)
 {
+    char msg[256]; // message error buffer
     (void) comment; // Present for consistency with esio_field_write_internal
     assert(comment == 0);
 
@@ -1748,7 +1751,8 @@ int esio_plane_read_internal(const esio_handle h,
         case ESIO_SUCCESS:
             break;
         case ESIO_NOTFOUND:
-            ESIO_ERROR("Plane not found in file", status);
+	    snprintf(msg, sizeof(msg), "Plane '%s' not found in file", name);
+            ESIO_ERROR(msg, status);
         default:
             ESIO_ERROR("Unable to read plane's ESIO metadata", status);
     }
@@ -2022,6 +2026,7 @@ int esio_line_read_internal(const esio_handle h,
                             const char *comment,
                             hid_t type_id)
 {
+    char msg[256];   // message buffer for error handling
     (void) comment; // Present for consistency with esio_field_write_internal
     assert(comment == 0);
 
@@ -2052,7 +2057,8 @@ int esio_line_read_internal(const esio_handle h,
         case ESIO_SUCCESS:
             break;
         case ESIO_NOTFOUND:
-            ESIO_ERROR("Line not found in file", status);
+	    snprintf(msg, sizeof(msg), "Line '%s' not found in file", name);
+            ESIO_ERROR(msg, status);
         default:
             ESIO_ERROR("Unable to read line's ESIO metadata", status);
     }
@@ -2247,6 +2253,8 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
                                 TYPE *value,                                  \
                                 int ncomponents)                              \
 {                                                                             \
+    char msg[256]; /* message buffer for errors */                            \
+                                                                              \
     /* Sanity check incoming arguments */                                     \
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);  \
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);  \
@@ -2266,7 +2274,9 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
             &type_class, &type_size);                                         \
     ENABLE_HDF5_ERROR_HANDLER(one)                                            \
     if (err1 == H5E_NOTFOUND) {                                               \
-        ESIO_ERROR("Attribute not found at location", ESIO_EINVAL);           \
+        snprintf(msg, sizeof(msg), "Attribute '%s' not found at location",    \
+                 name);                                                       \
+        ESIO_ERROR(msg, ESIO_EINVAL);                                         \
     } else if (err1 < 0) {                                                    \
         ESIO_ERROR("unable to interrogate attribute at location",             \
                     ESIO_EINVAL);                                             \
