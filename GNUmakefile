@@ -40,7 +40,9 @@ include Makefile
 _build-aux ?= build-aux
 _autoreconf ?= autoreconf -v
 
-### include $(srcdir)/maint.mk
+# ks note (5/21/13) - next line is troublesome if you do not store svn
+# passwords - commenting out for now...
+###include $(srcdir)/maint.mk
 
 # Ensure that $(VERSION) is up to date for dist-related targets, but not
 # for others: rerunning autoreconf and recompiling everything isn't cheap.
