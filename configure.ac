@@ -138,6 +138,10 @@ DX_INIT_DOXYGEN([esio],[doxygen/doxygen.cfg],[docs])
 #-------------------------
 AX_CODE_COVERAGE
 
+# Query configuration environment
+
+AX_SUMMARIZE_ENV
+
 dnl ------------------------------------------------
 dnl Generate Makefiles
 dnl ------------------------------------------------
@@ -163,3 +167,7 @@ AC_MSG_NOTICE([Working around linking futziness by adding -Wl to libtool])
 AC_MSG_NOTICE([See http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-March/008868.html])
 mv -v libtool libtool.bak
 $SED libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
+
+dnl Final summary
+
+AX_SUMMARIZE_CONFIG
