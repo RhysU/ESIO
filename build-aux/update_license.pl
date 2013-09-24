@@ -3,11 +3,11 @@
 # Simple support script for license management with PECOS developed
 # software. Intended for use with autotools based projects. In
 # particular, if a ".in" version of an input src file exists, the .in
-# version will be updated in favor of named src file..
-#
+# version will be updated in favor of named src file.
+# 
 # Originally: August 2010 (ks)
 # --------------------------------------------------------------------
-# Id: update_license.pl 13675 2010-09-19 17:50:33Z karl
+# $Id: update_license.pl 29234 2012-04-05 16:38:55Z karl $
 # --------------------------------------------------------------------
 
 
@@ -21,12 +21,17 @@ my $license_end_delim='----------el-$';
 
 # Command-line parsing
 
-GetOptions("S=s@","c2f_comment") || die "Error using GetOptions";
+GetOptions("S=s@","c2f_comment","c2sh_comment")  || die "Error using GetOptions";
 
 if (@ARGV >= 2) {
     $license_file = shift@ARGV;
 } else {
     print "\nUsage: update_license.pl [OPTION] LICENSE-FILE SOURCE-FILES...\n\n";
+    print "OPTIONS:\n";
+    print "  -S dir               use dir as location of source-files\n";
+    print "  -c2f_comment         convert c++ comments in license header to F90 style\n";
+    print "  -c2sh_comment        convert c++ comments in license header to shell script style\n";
+    print "\n";
     exit 0;
 }
 
@@ -34,7 +39,7 @@ if (@opt_S) {
     @top_srcdir = @opt_S;
  }
 
-# Verify license file
+# Verify license file 
 # existence and cache contents.
 
 if ( ! -s $license_file ) {
@@ -59,7 +64,24 @@ if ($opt_c2f_comment) {
     my @license_tmp=();
 
     foreach $line (@license_text) {
-	if ($line =~ s/^\/\//!!/) {
+	if ($line =~ s/^\/\//!!/) { 
+	    push(@license_tmp,$line);
+	} else {
+	    push(@license_tmp,$line);
+	}
+    }
+
+    @license_text=@license_tmp;
+}
+
+# Convert C/C++ comment (//) to shell script (#)
+
+if ($opt_c2sh_comment) {
+
+    my @license_tmp=();
+
+    foreach $line (@license_text) {
+	if ($line =~ s/^\/\//#/) { 
 	    push(@license_tmp,$line);
 	} else {
 	    push(@license_tmp,$line);
@@ -75,7 +97,7 @@ if ($opt_c2f_comment) {
 
 my $found_delim = 0;
 
-while (@ARGV)
+while (@ARGV) 
 {
     $found_delim = 0;
 
@@ -99,7 +121,12 @@ while (@ARGV)
     my $dirname  = dirname("$infile");
     my $tmpfile  = "$dirname/.$basename.tmp";
 
-    open ($TMPFILE,">$tmpfile") || die "Cannot create tmp file $tmpfile";
+    # Let's punt if we cannot create tmp files locally
+
+    if ( ! open ($TMPFILE,">$tmpfile") ) {
+	print "[license_tool]: Warning -> unable to create tmp file locally ($tmpfile) - aborting update.\n";
+	next;
+    }
 
     while (<$IN>) {
 	if(/$license_begin_delim/../$license_end_delim/) {
@@ -118,7 +145,10 @@ while (@ARGV)
     if( $found_delim ) {
 	if ( compare($infile,$tmpfile) != 0 )  {
 	    print "[license_tool]: updating license in file $infile\n";
+	    # cache perms of original file so we can mirror them
+	    my $mode_orig = (stat($infile))[2] & 0777;
 	    rename($tmpfile,$infile) || die "Cannot rename updated file\n";
+	    chmod($mode_orig,$infile) || die "Cannot chmod permissions to match original\n";
 	} else {
 	    unlink($tmpfile) || die "Unable to remove temporary file\n";
 	}
