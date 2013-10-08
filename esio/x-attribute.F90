@@ -49,7 +49,7 @@
                    ,ncomponents                     &
 #endif
                   ) bind (C, name=CBINDNAME)
-      import
+      import :: c_char, c_int, c_double, c_float, esio_handle
       integer(c_int)                                  :: IMPL
       type(esio_handle),            intent(in), value :: handle
       character(len=1,kind=c_char), intent(in)        :: location(*)
