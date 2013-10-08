@@ -91,14 +91,16 @@ module esio
 ! Rename C_PTR to ESIO_HANDLE to make the handle object types more opaque.
 ! State traverses the language boundary as TYPE(ESIO_HANDLE)s.
 ! Renaming also prevents collision if caller uses ISO_C_BINDING directly.
-  use, intrinsic :: iso_c_binding, only: c_char,               &
+  use, intrinsic :: iso_c_binding, only: c_associated,         &
+                                         c_char,               &
                                          c_double,             &
                                          c_double_complex,     &
                                          c_float,              &
                                          c_float_complex,      &
+                                         c_f_pointer,          &
                                          c_int,                &
                                          c_null_char,          &
-                                         c_associated,         &
+                                         c_ptr,                &
                                          esio_handle => c_ptr
 
   use esio_c_binding, only: esio_f_c_string, esio_f_c_logical, &
@@ -263,7 +265,7 @@ contains
     ! for details on MPI communicator interoperation
     interface
       function IMPL (comm) bind (C, name="esio_handle_initialize_fortran")
-        import
+        import :: esio_handle
         type(esio_handle)          :: IMPL
         integer, intent(in), value :: comm  ! Note integer not integer(c_int)
       end function IMPL
@@ -297,7 +299,7 @@ contains
 
     interface
       function IMPL (handle, size) bind (C, name="esio_handle_comm_size")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                    :: IMPL
         type(esio_handle),            intent(in),   value :: handle
         integer(c_int),               intent(inout)       :: size
@@ -327,7 +329,7 @@ contains
 
     interface
       function IMPL (handle, rank) bind (C, name="esio_handle_comm_rank")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                    :: IMPL
         type(esio_handle),            intent(in),   value :: handle
         integer(c_int),               intent(inout)       :: rank
@@ -355,7 +357,7 @@ contains
 
     interface
       function IMPL (handle) bind (C, name="esio_handle_finalize")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                       :: IMPL
         type(esio_handle), intent(in), value :: handle
       end function IMPL
@@ -391,7 +393,7 @@ contains
     interface
       function IMPL (handle, file, overwrite) &
                      bind (C, name="esio_file_create")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
@@ -423,7 +425,7 @@ contains
     interface
       function IMPL (handle, file, readwrite)  &
                      bind (C, name="esio_file_open")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: file(*)
@@ -456,7 +458,7 @@ contains
     interface
       function IMPL (handle, srcfile, dstfile, overwrite)  &
                      bind (C, name="esio_file_clone")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: srcfile(*)
@@ -480,8 +482,6 @@ contains
 
   subroutine esio_file_path (handle, file_path, ierr)
 
-    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
-
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(out)           :: file_path
     integer,           intent(out), optional :: ierr
@@ -493,7 +493,7 @@ contains
 !   The C implementation returns newly allocated memory
     interface
       function IMPL (handle) bind (C, name="esio_file_path")
-        import
+        import :: c_ptr, esio_handle
         type(c_ptr)                          :: IMPL
         type(esio_handle), intent(in), value :: handle
       end function IMPL
@@ -531,7 +531,7 @@ contains
 
     interface
       function IMPL (handle) bind (C, name="esio_file_flush")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                       :: IMPL
         type(esio_handle), intent(in), value :: handle
       end function IMPL
@@ -558,7 +558,7 @@ contains
 
     interface
       function IMPL (handle) bind (C, name="esio_file_close")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                       :: IMPL
         type(esio_handle), intent(in), value :: handle
       end function IMPL
@@ -589,7 +589,7 @@ contains
     interface
       function IMPL (handle, restart_template, retain_count)  &
                      bind (C, name="esio_file_close_restart")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: restart_template(*)
@@ -628,7 +628,7 @@ contains
     interface
       function IMPL (handle, location, name, value)  &
                      bind (C, name="esio_string_set")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: location(*)
@@ -652,8 +652,6 @@ contains
 
   subroutine esio_string_get (handle, location, name, value, ierr)
 
-    use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
-
     type(esio_handle), intent(in)            :: handle
     character(len=*),  intent(in)            :: location
     character(len=*),  intent(in)            :: name
@@ -668,7 +666,7 @@ contains
     interface
       function IMPL (handle, location, name)  &
                      bind (C, name="esio_string_get")
-        import
+        import :: c_char, c_ptr, esio_handle
         type(c_ptr)                                     :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: location(*)
@@ -863,7 +861,7 @@ end subroutine esio_attribute_readv_integer
     interface
       function IMPL (handle, location, name, ncomponents)  &
                      bind (C, name="esio_attribute_sizev")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: location(*)
@@ -906,7 +904,7 @@ end subroutine esio_attribute_readv_integer
     interface
       function IMPL (handle, aglobal, astart, alocal)  &
                      bind (C, name="esio_line_establish")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         integer(c_int),               intent(in), value :: aglobal, &
@@ -942,7 +940,7 @@ end subroutine esio_attribute_readv_integer
       function IMPL (handle, bglobal, bstart, blocal,     &
                              aglobal, astart, alocal)     &
                      bind (C, name="esio_plane_establish")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         integer(c_int),               intent(in), value :: bglobal, &
@@ -986,7 +984,7 @@ end subroutine esio_attribute_readv_integer
                              bglobal, bstart, blocal,     &
                              aglobal, astart, alocal)     &
                      bind (C, name="esio_field_establish")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         integer(c_int),               intent(in), value :: cglobal, &
@@ -1030,7 +1028,7 @@ end subroutine esio_attribute_readv_integer
     interface
       function IMPL (handle, aglobal, astart, alocal)  &
                      bind (C, name="esio_line_established")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                    :: IMPL
         type(esio_handle),            intent(in),   value :: handle
         integer(c_int),               intent(inout)       :: aglobal, &
@@ -1074,7 +1072,7 @@ end subroutine esio_attribute_readv_integer
       function IMPL (handle, bglobal, bstart, blocal,  &
                              aglobal, astart, alocal)  &
                      bind (C, name="esio_plane_established")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                    :: IMPL
         type(esio_handle),            intent(in),   value :: handle
         integer(c_int),               intent(inout)       :: bglobal, &
@@ -1130,7 +1128,7 @@ end subroutine esio_attribute_readv_integer
                              bglobal, bstart, blocal,  &
                              aglobal, astart, alocal)  &
                      bind (C, name="esio_field_established")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                                    :: IMPL
         type(esio_handle),            intent(in),   value :: handle
         integer(c_int),               intent(inout)       :: cglobal, &
@@ -1266,7 +1264,7 @@ end subroutine esio_line_read_integer
 
     interface
       function IMPL (handle, name, aglobal) bind (C, name="esio_line_size")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1391,7 +1389,7 @@ end subroutine esio_line_readv_integer
     interface
       function IMPL (handle, name, aglobal, ncomponents)  &
                      bind (C, name="esio_line_sizev")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1512,7 +1510,7 @@ end subroutine esio_plane_read_integer
     interface
       function IMPL (handle, name, bglobal, aglobal)  &
                      bind (C, name="esio_plane_size")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1642,7 +1640,7 @@ end subroutine esio_plane_readv_integer
     interface
       function IMPL (handle, name, bglobal, aglobal, ncomponents)  &
                      bind (C, name="esio_plane_sizev")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1767,7 +1765,7 @@ end subroutine esio_field_read_integer
     interface
       function IMPL (handle, name, cglobal, bglobal, aglobal)  &
                      bind (C, name="esio_field_size")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1900,7 +1898,7 @@ end subroutine esio_field_readv_integer
     interface
       function IMPL (handle, name, cglobal, bglobal, aglobal, ncomponents)  &
                      bind (C, name="esio_field_sizev")
-        import
+        import :: c_char, c_int, esio_handle
         integer(c_int)                                  :: IMPL
         type(esio_handle),            intent(in), value :: handle
         character(len=1,kind=c_char), intent(in)        :: name(*)
@@ -1945,7 +1943,7 @@ end subroutine esio_field_readv_integer
 
     interface
       function IMPL () bind (C, name="esio_field_layout_count")
-        import
+        import :: c_int
         integer(c_int) :: IMPL
       end function IMPL
     end interface
@@ -1970,7 +1968,7 @@ end subroutine esio_field_readv_integer
 #define IMPL esio_field_layout_get_c
     interface
       function IMPL (handle) bind (C, name="esio_field_layout_get")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                       :: IMPL
         type(esio_handle), intent(in), value :: handle
       end function IMPL
@@ -1999,7 +1997,7 @@ end subroutine esio_field_readv_integer
     interface
       function IMPL (handle, layout_index)  &
                      bind (C, name="esio_field_layout_set")
-        import
+        import :: c_int, esio_handle
         integer(c_int)                       :: IMPL
         type(esio_handle), intent(in), value :: handle
         integer(c_int),    intent(in), value :: layout_index
@@ -2031,7 +2029,7 @@ end subroutine esio_field_readv_integer
     interface
       subroutine IMPL (reason, file, line, esio_errno)  &
                        bind (C, name="esio_error")
-        import
+        import :: c_char, c_int, esio_handle
         character(len=1,kind=c_char), intent(in)        :: reason(*)
         character(len=1,kind=c_char), intent(in)        :: file(*)
         integer(c_int),               intent(in), value :: line
