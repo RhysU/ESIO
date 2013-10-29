@@ -21,6 +21,7 @@ EXTRA_DIST          = layout_template.c      \
                       empty.h5
 
 TESTS              = # Append below
+XFAIL_TESTS        = # Append below
 TESTS_ENVIRONMENT  = ESIO_TEST_INPUT_DIR=$(srcdir)
 TESTS_ENVIRONMENT += ESIO_TEST_OUTPUT_DIR=$(builddir)
 
@@ -59,6 +60,13 @@ dist_check_SCRIPTS += basic.sh
 check_PROGRAMS     += basic
 basic_SOURCES       = basic.c testutils.c
 basic_LDADD         = ../esio/libesio.la
+
+## Ensure Fortran testframework can return non-zero exit status
+TESTS            += sanity_f
+XFAIL_TESTS      += sanity_f
+check_PROGRAMS   += sanity_f
+sanity_f_SOURCES  = sanity_f.F90 testutils.c testframework.F90
+sanity_f_LDADD    = ../esio/libesiof.la
 
 ## Basic Fortran API sanity checks
 TESTS           += basic_f

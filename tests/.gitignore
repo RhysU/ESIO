@@ -30,6 +30,7 @@
 /plane_int_f
 /restart_helpers
 /restart_rename
+/sanity_f
 /string
 /string_f
 /uri_tests
