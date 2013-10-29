@@ -1,8 +1,7 @@
-ESIO has been developed by The PECOS Development Team.  See
-http://pecos.ices.utexas.edu/ for more details on PECOS.  Major code
-contributors from PECOS include:
-
-  Rhys Ulerich <rhys@ices.utexas.edu>
-  Nicholas Malaya <nick@ices.utexas.edu>
-  Karl Schulz <karl@ices.utexas.edu>
-  Victor Topalian <topalian@ices.utexas.edu>
+karl     = Karl Schulz     <karl@ices.utexas.edu>
+nick     = Nicholas Malaya <nick@ices.utexas.edu>
+oliver   = Todd A. Oliver  <oliver@ices.utexas.edu>
+rhys     = Rhys Ulerich    <rhys@ices.utexas.edu>
+rmoser   = Robert D. Moser <rmoser@ices.utexas.edu>
+roystgnr = Roy Stogner     <roystgnr@ices.utexas.edu>
+topalian = Victor Topalian <topalian@ices.utexas.edu>
