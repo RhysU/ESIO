@@ -4,6 +4,7 @@
 /charset.alias
 /configmake.h
 /.deps
+/.libs
 /dirent.h
 /fcntl.h
 /getopt.h
@@ -23,3 +24,6 @@
 /warn-on-use.h
 /wchar.h
 /wctype.h
+/*.o
+/*.lo
+/*.la

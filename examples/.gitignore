@@ -1,8 +1,10 @@
 /concepts1
 /concepts2
 /.deps
+/.libs
 /.license.stamp
 /Makefile
 /Makefile.dep
 /Makefile.in
 /restart1
+/*.o

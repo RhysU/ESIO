@@ -3,6 +3,7 @@
 /autom4te.cache
 /config.cache
 /config.log
+/config.lt
 /_configs.sed
 /config.status
 /configure
