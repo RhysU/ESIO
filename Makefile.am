@@ -16,7 +16,7 @@ EXTRA_DIST  += m4/gnulib-cache.m4
 
 dist-hook: docs
 	: # Include generated documentation in the dist tarball
-	cp -rv $(top_builddir)/docs $(top_distdir)
+	cp -r $(top_builddir)/docs $(top_distdir)
 	: # Eliminate .git and .svn directories in dist tarball
 	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
 	find $(distdir)/ -name '.git' -type d -exec rm {} \;
