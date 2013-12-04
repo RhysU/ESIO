@@ -1,3 +1,19 @@
+What's new in ESIO 0.1.9
+------------------------
+
+ESIO now better supports older IBM XL Fortran compilers.
+
+This release contains the following:
+
+    * Feature #2136: Disambiguate HDF5 1.6 vs 1.8 API calls
+    * Feature #2966: Narrow import statements for XLF 11.1
+    * Feature #3015: Roll ESIO 0.1.9 Release
+    * Support #2135: Workaround OpenMPI bug within test suite
+    * Support #2967: Reduce scope of import for XLF 11.1
+    * Document #1900: Add pronunciation to the docs
+    * Document #2006: Update stale Fortran linking information post-#1509
+
+
 What's new in ESIO 0.1.8
 ------------------------
 
