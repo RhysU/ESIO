@@ -35,8 +35,9 @@
 !! u (field), xist,xien,zjst,zjen (coordinates of field)
 module p3dfft_like_header
 
-  use mpi
   implicit none
+
+  include 'mpif.h'      !! More portable than 'use mpi' on old implementations
 
   integer(4), parameter :: nx=32                 ! physical space lengths
   integer(4), parameter :: ny=1000

@@ -1,9 +1,10 @@
 program main
 
-    use mpi
     use esio
 
     implicit none
+
+    include 'mpif.h'    !! Prefer 'use mpi' above 'implicit none' if possible
 
     integer             :: ierr, world_size, world_rank, version
     type(esio_handle)   :: h

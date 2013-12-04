@@ -31,7 +31,6 @@
 !! This routine will therefore be an early test for the ESIO library.
 program p3dfft_like
 
-  use mpi
   use esio
 
 ! The header contains problem size, initial conditions, precision, etc.
@@ -41,6 +40,8 @@ program p3dfft_like
                                 xist, xisz, zjst, zjsz, u, & ! Wave space
                                 initialize_problem, initialize_field
   implicit none
+
+  include 'mpif.h'      !! More portable than 'use mpi' on old implementations
 
   integer(4)            :: myid, numprocs, ierr, i
   integer(4), parameter :: niter = 1
