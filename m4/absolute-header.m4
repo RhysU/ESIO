@@ -1,4 +1,4 @@
-# absolute-header.m4 serial 16
+# absolute-header.m4 serial 17
 dnl Copyright (C) 2006-2013 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -61,9 +61,11 @@ AC_DEFUN([gl_ABSOLUTE_HEADER_ONE],
   dnl detect the absolute name of <dirent.h>, <signal.h>, <poll.h>
   dnl and others. The workaround is to force preservation of comments
   dnl through option -C. This ensures all necessary #line directives
-  dnl are present. GCC supports option -C as well.
-  case "$host_os" in
-    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+  dnl are present. GCC supports option -C as well.  Various Blue Gene
+  dnl compilers for Intrepid also support -C, needed for detecting
+  dnl when compiling for that system.
+  case $host_os:$CC in
+    aix*:* | *:bg* | *:blrts_*) gl_absname_cpp="$ac_cpp -C" ;;
     *)    gl_absname_cpp="$ac_cpp" ;;
   esac
 changequote(,)
