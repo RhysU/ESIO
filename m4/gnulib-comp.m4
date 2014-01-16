@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module getopt-gnu:
   # Code from module getopt-posix:
   # Code from module gettext-h:
+  # Code from module gettimeofday:
   # Code from module gnumakefile:
   # Code from module include_next:
   # Code from module intprops:
@@ -119,6 +120,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module strnlen:
   # Code from module strverscmp:
   # Code from module sys_stat:
+  # Code from module sys_time:
   # Code from module sys_types:
   # Code from module sysexits:
   # Code from module time:
@@ -217,6 +219,12 @@ AC_SUBST([LTALLOCA])
   AC_SUBST([GNULIB_GL_UNISTD_H_GETOPT])
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
+  gl_FUNC_GETTIMEOFDAY
+  if test $HAVE_GETTIMEOFDAY = 0 || test $REPLACE_GETTIMEOFDAY = 1; then
+    AC_LIBOBJ([gettimeofday])
+    gl_PREREQ_GETTIMEOFDAY
+  fi
+  gl_SYS_TIME_MODULE_INDICATOR([gettimeofday])
   # Autoconf 2.61a.99 and earlier don't support linking a file only
   # in VPATH builds.  But since GNUmakefile is for maintainer use
   # only, it does not matter if we skip the link with older autoconf.
@@ -400,6 +408,8 @@ AC_SUBST([LTALLOCA])
   fi
   gl_STRING_MODULE_INDICATOR([strverscmp])
   gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
+  gl_HEADER_SYS_TIME_H
   AC_PROG_MKDIR_P
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
@@ -601,6 +611,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt1.c
   lib/getopt_int.h
   lib/gettext.h
+  lib/gettimeofday.c
   lib/intprops.h
   lib/itold.c
   lib/lstat.c
@@ -661,6 +672,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strnlen.c
   lib/strverscmp.c
   lib/sys_stat.in.h
+  lib/sys_time.in.h
   lib/sys_types.in.h
   lib/sysexits.in.h
   lib/time.in.h
@@ -694,6 +706,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/float_h.m4
   m4/fstat.m4
   m4/getopt.m4
+  m4/gettimeofday.m4
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/intmax_t.m4
@@ -750,6 +763,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strverscmp.m4
   m4/sys_socket_h.m4
   m4/sys_stat_h.m4
+  m4/sys_time_h.m4
   m4/sys_types_h.m4
   m4/sysexits.m4
   m4/time_h.m4
