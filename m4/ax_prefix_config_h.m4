@@ -1,5 +1,5 @@
 # ===========================================================================
-#           http://autoconf-archive.cryp.to/ax_prefix_config_h.html
+#    http://www.gnu.org/software/autoconf-archive/ax_prefix_config_h.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -68,10 +68,10 @@
 #   it by itself". You might want to clean up about these - consider an
 #   extra mylib/conf.h that reads something like:
 #
-#      #include <mylib/_config.h>
-#      #ifndef _testpkg_const
-#      #define _testpkg_const const
-#      #endif
+#     #include <mylib/_config.h>
+#     #ifndef _testpkg_const
+#     #define _testpkg_const const
+#     #endif
 #
 #   and then start using _testpkg_const in the header files. That is also a
 #   good thing to differentiate whether some library-user has starting to
@@ -95,7 +95,7 @@
 #
 #   This program is free software; you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
-#   Free Software Foundation; either version 2 of the License, or (at your
+#   Free Software Foundation; either version 3 of the License, or (at your
 #   option) any later version.
 #
 #   This program is distributed in the hope that it will be useful, but
@@ -119,9 +119,12 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
+#serial 13
+
 AC_DEFUN([AX_PREFIX_CONFIG_H],[dnl
+AC_PREREQ([2.62])
 AC_BEFORE([AC_CONFIG_HEADERS],[$0])dnl
-AC_CONFIG_COMMANDS([ifelse($1,,$PACKAGE-config.h,$1)],[dnl
+AC_CONFIG_COMMANDS(m4_default([$1], [$PACKAGE-config.h]),[dnl
 AS_VAR_PUSHDEF([_OUT],[ac_prefix_conf_OUT])dnl
 AS_VAR_PUSHDEF([_DEF],[ac_prefix_conf_DEF])dnl
 AS_VAR_PUSHDEF([_PKG],[ac_prefix_conf_PKG])dnl
@@ -130,12 +133,12 @@ AS_VAR_PUSHDEF([_UPP],[ac_prefix_conf_UPP])dnl
 AS_VAR_PUSHDEF([_INP],[ac_prefix_conf_INP])dnl
 m4_pushdef([_script],[conftest.prefix])dnl
 m4_pushdef([_symbol],[m4_cr_Letters[]m4_cr_digits[]_])dnl
-_OUT=`echo ifelse($1, , $PACKAGE-config.h, $1)`
+_OUT=`echo m4_default([$1], [$PACKAGE-config.h])`
 _DEF=`echo _$_OUT | sed -e "y:m4_cr_letters:m4_cr_LETTERS[]:" -e "s/@<:@^m4_cr_Letters@:>@/_/g"`
-_PKG=`echo ifelse($2, , $PACKAGE, $2)`
+_PKG=`echo m4_default([$2], [$PACKAGE])`
 _LOW=`echo _$_PKG | sed -e "y:m4_cr_LETTERS-:m4_cr_letters[]_:"`
 _UPP=`echo $_PKG | sed -e "y:m4_cr_letters-:m4_cr_LETTERS[]_:"  -e "/^@<:@m4_cr_digits@:>@/s/^/_/"`
-_INP=`echo "ifelse($3,,,$3)" | sed -e 's/ *//'`
+_INP=`echo "$3" | sed -e 's/ *//'`
 if test ".$_INP" = "."; then
    for ac_file in : $CONFIG_HEADERS; do test "_$ac_file" = _: && continue
      case "$ac_file" in
@@ -163,14 +166,14 @@ else
   fi fi
   AC_MSG_NOTICE(creating $_OUT - prefix $_UPP for $_INP defines)
   if test -f $_INP ; then
-    echo "s/^@%:@undef  *\\(@<:@m4_cr_LETTERS[]_@:>@\\)/@%:@undef $_UPP""_\\1/" > _script
-    echo "s/^@%:@undef  *\\(@<:@m4_cr_letters@:>@\\)/@%:@undef $_LOW""_\\1/" >> _script
-    echo "s/^@%:@def[]ine  *\\(@<:@m4_cr_LETTERS[]_@:>@@<:@_symbol@:>@*\\)\\(.*\\)/@%:@ifndef $_UPP""_\\1 \\" >> _script
-    echo "@%:@def[]ine $_UPP""_\\1 \\2 \\" >> _script
-    echo "@%:@endif/" >>_script
-    echo "s/^@%:@def[]ine  *\\(@<:@m4_cr_letters@:>@@<:@_symbol@:>@*\\)\\(.*\\)/@%:@ifndef $_LOW""_\\1 \\" >> _script
-    echo "@%:@define $_LOW""_\\1 \\2 \\" >> _script
-    echo "@%:@endif/" >> _script
+    AS_ECHO(["s/^@%:@undef  *\\(@<:@m4_cr_LETTERS[]_@:>@\\)/@%:@undef $_UPP""_\\1/"]) > _script
+    AS_ECHO(["s/^@%:@undef  *\\(@<:@m4_cr_letters@:>@\\)/@%:@undef $_LOW""_\\1/"]) >> _script
+    AS_ECHO(["s/^@%:@def[]ine  *\\(@<:@m4_cr_LETTERS[]_@:>@@<:@_symbol@:>@*\\)\\(.*\\)/@%:@ifndef $_UPP""_\\1\\"]) >> _script
+    AS_ECHO(["@%:@def[]ine $_UPP""_\\1\\2\\"]) >> _script
+    AS_ECHO(["@%:@endif/"]) >> _script
+    AS_ECHO(["s/^@%:@def[]ine  *\\(@<:@m4_cr_letters@:>@@<:@_symbol@:>@*\\)\\(.*\\)/@%:@ifndef $_LOW""_\\1\\"]) >> _script
+    AS_ECHO(["@%:@define $_LOW""_\\1\\2\\"]) >> _script
+    AS_ECHO(["@%:@endif/"]) >> _script
     # now executing _script on _DEF input to create _OUT output file
     echo "@%:@ifndef $_DEF"      >$tmp/pconfig.h
     echo "@%:@def[]ine $_DEF 1" >>$tmp/pconfig.h
@@ -189,7 +192,6 @@ else
       rm -f "$_OUT"
       mv $tmp/pconfig.h "$_OUT"
     fi
-    cp _script _configs.sed
   else
     AC_MSG_ERROR([input file $_INP does not exist - skip generating $_OUT])
   fi
@@ -204,12 +206,3 @@ AS_VAR_POPDEF([_PKG])dnl
 AS_VAR_POPDEF([_DEF])dnl
 AS_VAR_POPDEF([_OUT])dnl
 ],[PACKAGE="$PACKAGE"])])
-
-dnl implementation note: a bug report (31.5.2005) from Marten Svantesson points
-dnl out a problem where `echo "\1"` results in a Control-A. The unix standard
-dnl    http://www.opengroup.org/onlinepubs/000095399/utilities/echo.html
-dnl defines all backslash-sequences to be inherently non-portable asking
-dnl for replacement mit printf. Some old systems had problems with that
-dnl one either. However, the latest libtool (!) release does export an $ECHO
-dnl (and $echo) that does the right thing - just one question is left: what
-dnl was the first version to have it? Is it greater 2.58 ?

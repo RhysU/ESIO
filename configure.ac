@@ -37,7 +37,10 @@ dnl ------------------------------------------------
 dnl Manipulate C settings and find MPI/HDF5
 dnl ------------------------------------------------
 AX_CHECK_ENABLE_DEBUG([info])
+AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
+AM_PROG_CC_C_O
+AM_PROG_AR
 gl_EARLY
 gl_INIT
 AX_APPEND_LINK_FLAGS([-Wl,--as-needed],[LDFLAGS])
