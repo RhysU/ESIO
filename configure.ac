@@ -51,7 +51,6 @@ AX_PROG_CC_C99_CFLAGS(,AC_MSG_ERROR([Compiler cannot support ISO C99]))
 ACX_MPI(,AC_MSG_ERROR(Could not find MPI compilation tools for C, e.g. mpicc.))
 MPICC_LOCATION=$(eval command -v $MPICC)
 AC_SUBST([MPICC_LOCATION])
-AX_MPIP()
 AX_LIB_HDF5([parallel])
 if test "x$with_hdf5" != "xyes"; then
     AC_MSG_ERROR([Parallel HDF5 installation not detected.])
