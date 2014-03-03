@@ -666,15 +666,17 @@ int esio_file_clone(esio_handle h,
         ESIO_ERROR("dstfile == NULL", ESIO_EFAULT);
     }
 
-    // One rank copies the file synchronously and broadcasts the result
+    // One rank copies the file synchronously and "broadcasts" the result;
+    // The "broadcast" is a summing Allreduce that behaves as useful barrier.
     const int worker = h->comm_size - 1; // Last rank does work
-    int status;
+    int status = 0;
     if (h->comm_rank == worker) {
         int prefix_len = scheme_prefix_len(srcfile);
         status = file_copy(srcfile + prefix_len, dstfile + prefix_len,
                            overwrite, 1 /*blockuntilsync*/);
     }
-    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
+    ESIO_MPICHKQ(MPI_Allreduce(MPI_IN_PLACE, &status, 1/*count*/,
+                               MPI_INT, MPI_SUM, h->comm));
 
     // Bail now if an error occurred
     if (status) return status;
@@ -772,16 +774,18 @@ int esio_file_close_restart(esio_handle h,
         ESIO_ERROR("Unable to close current restart file", close_status);
     }
 
-    // One rank invokes restart_rename and broadcasts the result
+    // One rank invokes restart_rename and "broadcasts" the result.
+    // The "broadcast" is a summing Allreduce that behaves as useful barrier.
     const int worker = h->comm_size - 1; // Last rank does work
-    int status;
+    int status = 0;
     if (h->comm_rank == worker) {
         status = restart_rename(
                 src_filename, // No URI scheme prefix munging required
                 restart_template + scheme_prefix_len(restart_template),
                 retain_count);
     }
-    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
+    ESIO_MPICHKQ(MPI_Allreduce(MPI_IN_PLACE, &status, 1/*count*/,
+                               MPI_INT, MPI_SUM, h->comm));
 
     // Free temporary memory
     free(src_filename);
