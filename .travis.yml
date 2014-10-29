@@ -1,7 +1,7 @@
 before_script:
   - sudo apt-get -qq update
   - sudo apt-get -qq install autotools-dev gfortran libhdf5-mpi-dev
-script: ./configure && make && make check && make distcheck
+script:
   - ./bootstrap
   - ./configure
   - make all
