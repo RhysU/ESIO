@@ -1,0 +1,8 @@
+before_script:
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install gfortran libhdf5-mpi-dev
+script: ./configure && make && make check && make distcheck
+  - ./configure
+  - make all
+  - make check
+  - make distcheck
