@@ -3,6 +3,7 @@ before_script:
   - sudo apt-get -qq install autotools-dev gfortran libhdf5-mpi-dev
 script:
   - ./bootstrap
+  - which h5pcc
   - ./configure
   - make all
   - make check
