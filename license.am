@@ -2,7 +2,9 @@
 # Embedded license header support
 #---------------------------------
 
+CLEANFILES    =
 CLEANFILES    += .license.stamp
+BUILT_SOURCES =
 BUILT_SOURCES += .license.stamp
 
 .license.stamp: $(top_builddir)/LICENSE
