@@ -1,6 +1,7 @@
 /config.h
 /config.h.in
 /.deps
+/.dirstamp
 /.libs
 /esio-config.h
 /.license.stamp

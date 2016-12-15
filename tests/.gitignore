@@ -15,15 +15,18 @@
 /layout2_double
 /layout2_float
 /layout2_int
+/.libs
 /.license.stamp
 /line_double
 /line_float
 /line_int
 /line_int_f
+/*.log
 /Makefile
 /Makefile.dep
 /Makefile.in
 /*.mod
+/*.o
 /plane_double
 /plane_float
 /plane_int
@@ -33,4 +36,5 @@
 /sanity_f
 /string
 /string_f
+/*.trs
 /uri_tests
