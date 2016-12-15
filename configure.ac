@@ -164,10 +164,9 @@ AC_CONFIG_FILES([
 AC_OUTPUT()
 
 dnl See also libtool target in toplevel Makefile.am
-AC_MSG_NOTICE([Working around linking futziness by adding -Wl to libtool])
-AC_MSG_NOTICE([See http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-March/008868.html])
+AC_MSG_NOTICE([Working around Debian futziness by forcing link_all_deplibs=yes])
 mv -v libtool libtool.bak
-$SED libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
+$SED libtool.bak -e 's/^link_all_deplibs=no$/link_all_deplibs=yes/' > libtool && rm libtool.bak
 
 dnl Final summary
 
