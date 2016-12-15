@@ -3,7 +3,10 @@ What's new in ESIO 0.2.0-pre
 
 Not release shape yet.  Final notes to be determined...
 
-    * Updated compilation/autotools workarounds for GNU libtool 2.4.6
+    * Updated compilation/autotools workarounds for GNU libtool 2.4.6 on Debian.
+      If you observe strange linking troubles under apps/ look at commit
+      9ec7fdde5b05c0d976d9ac9ba67b4b62873b2c3d for a possible resolution
+      on other libtool versions or distribution patches.
 
 
 What's new in ESIO 0.1.9
