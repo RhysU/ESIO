@@ -665,14 +665,14 @@ int main(int argc, char *argv[])
     switch (d.typesize)
     {
         case sizeof(double):
-            p_esio_field_writev = &esio_field_writev_double;
-            p_esio_plane_writev = &esio_plane_writev_double;
-            p_esio_line_writev  = &esio_line_writev_double;
+            p_esio_field_writev = (void *) &esio_field_writev_double;
+            p_esio_plane_writev = (void *) &esio_plane_writev_double;
+            p_esio_line_writev  = (void *) &esio_line_writev_double;
             break;
         case sizeof(float):
-            p_esio_field_writev = &esio_field_writev_float;
-            p_esio_plane_writev = &esio_plane_writev_float;
-            p_esio_line_writev  = &esio_line_writev_float;
+            p_esio_field_writev = (void *) &esio_field_writev_float;
+            p_esio_plane_writev = (void *) &esio_plane_writev_float;
+            p_esio_line_writev  = (void *) &esio_line_writev_float;
             break;
         default:
             MPI_Abort(MPI_COMM_WORLD, 1); // Sanity failure
