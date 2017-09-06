@@ -101,12 +101,6 @@ coverage: docs lcov-reset check lcov-report
 
 endif
 
-# Make sure that libtool is up to date
-libtool: $(LIBTOOL_DEPS)
-	$(SHELL) ./config.status --recheck
-	mv libtool libtool.bak
-	$(SED) libtool.bak -e 's/^link_all_deplibs=no$/link_all_deplibs=yes/' > libtool && rm libtool.bak
-
 # Push license updates into appropriate subdirectories
 .license.stamp:
 	cd esio  && $(MAKE) $(AM_MAKEFLAGS) .license.stamp
