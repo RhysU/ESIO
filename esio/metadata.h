@@ -44,7 +44,7 @@ hid_t esio_type_arrayify(hid_t type_id, int ncomponents);
 int esio_field_metadata_write(hid_t loc_id, const char *name,
                               int layout_index,
                               int cglobal, int bglobal, int aglobal,
-                              int ncomponents);
+                              hid_t type_id);
 
 int esio_field_metadata_read(hid_t loc_id, const char *name,
                              int *layout_index,
@@ -53,7 +53,7 @@ int esio_field_metadata_read(hid_t loc_id, const char *name,
 
 int esio_plane_metadata_write(hid_t loc_id, const char *name,
                               int bglobal, int aglobal,
-                              int ncomponents);
+                              hid_t type_id);
 
 int esio_plane_metadata_read(hid_t loc_id, const char *name,
                              int *bglobal, int *aglobal,
@@ -61,7 +61,7 @@ int esio_plane_metadata_read(hid_t loc_id, const char *name,
 
 int esio_line_metadata_write(hid_t loc_id, const char *name,
                              int aglobal,
-                             int ncomponents);
+                             hid_t type_id);
 
 int esio_line_metadata_read(hid_t loc_id, const char *name,
                             int *aglobal,

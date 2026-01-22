@@ -32,11 +32,11 @@
 // TODO See bug #1229
 // TODO See bug #1422
 
-hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *field,
-                 int cglobal, int cstart, int clocal, int cstride,
-                 int bglobal, int bstart, int blocal, int bstride,
-                 int aglobal, int astart, int alocal, int astride,
-                 hid_t type_id)
+int METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *field,
+               int cglobal, int cstart, int clocal, int cstride,
+               int bglobal, int bstart, int blocal, int bstride,
+               int aglobal, int astart, int alocal, int astride,
+               hid_t type_id)
 {
     (void) cglobal; /* Unused but present for API consistency */
     (void) aglobal; /* Unused but present for API consistency */
