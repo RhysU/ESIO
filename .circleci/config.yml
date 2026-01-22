@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  distcheck:
     docker:
       # Use Ubuntu-based image with build essentials
       - image: cimg/base:stable
@@ -20,20 +20,17 @@ jobs:
           command: ./bootstrap
 
       - run:
-          name: Check h5pcc location
-          command: which h5pcc
-
-      - run:
           name: Configure
           command: ./configure
 
-      - run:
-          name: Build
-          command: make all
-
-      - run:
-          name: Run tests
-          command: make check
+      ## Running distcheck only covers these details and saves time
+      #- run:
+      #    name: Build
+      #    command: make all
+      #
+      #- run:
+      #    name: Run tests
+      #    command: make check
 
       - run:
           name: Distribution check
@@ -41,6 +38,6 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
+  distcheck:
     jobs:
-      - build
+      - distcheck
