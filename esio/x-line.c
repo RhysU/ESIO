@@ -29,9 +29,9 @@
 #error "One of METHODNAME, OPFUNC, or QUALIFIER not defined"
 #endif
 
-hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
-                 int aglobal, int astart, int alocal, int astride,
-                 hid_t type_id)
+int METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *line,
+               int aglobal, int astart, int alocal, int astride,
+               hid_t type_id)
 {
     (void) aglobal; /* Unused but present for API consistency */
 
