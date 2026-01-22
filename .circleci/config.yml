@@ -1,0 +1,46 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      # Use Ubuntu-based image with build essentials
+      - image: cimg/base:stable
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get -qq update
+            sudo apt-get -qq install autotools-dev gfortran libhdf5-mpi-dev
+
+      - run:
+          name: Bootstrap
+          command: ./bootstrap
+
+      - run:
+          name: Check h5pcc location
+          command: which h5pcc
+
+      - run:
+          name: Configure
+          command: ./configure
+
+      - run:
+          name: Build
+          command: make all
+
+      - run:
+          name: Run tests
+          command: make check
+
+      - run:
+          name: Distribution check
+          command: make distcheck
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
