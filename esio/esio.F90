@@ -1925,7 +1925,7 @@ end subroutine esio_field_readv_integer
 
   end subroutine esio_field_sizev
 
-!!\@}
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
