@@ -1,78 +1,107 @@
-# Attribute Test Failure Analysis
+# Attribute Test Failure Analysis & Fix
 
 ## Summary
 
-All attribute tests (attribute_int.sh, attribute_double.sh, attribute_float.sh) fail with:
+All attribute tests (attribute_int.sh, attribute_double.sh, attribute_float.sh) were failing with:
 ```
 esio: esio.c:2215: ERROR: Attribute rank != 1 unsupported
 ```
 
-## Investigation
+**Status**: ✅ **FIXED** - All attribute tests now pass.
 
-### Test Script (attribute_int.sh)
-The script runs the following commands:
-- `mpiexec -np 1 ./attribute_int -n 6`
-- `mpiexec -np 2 ./attribute_int -n 25`
-- `mpiexec -np 1 ./attribute_int_f`
-- `mpiexec -np 2 ./attribute_int_f`
+## Root Causes
 
-### Observed Failure
-When running the test manually with debug output, we found:
-- **First attribute query**: `err=0, rank=1, dims[0]=1` ✓ (succeeds)
-- **Second attribute query**: `err=157, rank=21998, dims[0]=139603598100288` ✗ (fails)
+Three critical bugs were identified and fixed in `esio/h5utils.c`:
 
-The second call returns error code 157 with **uninitialized** rank and dims values (garbage data).
-
-## Root Cause
-
-**File**: `esio/h5utils.c`
-**Function**: `esio_H5LTget_attribute_ndims_info`
-**Lines**: 66-72
-
+### 1. Missing Error Check for H5Aget_type() (Line 66)
 ```c
-/* Get an identifier for the datatype. */
+/* BEFORE (BUGGY): */
 tid = H5Aget_type(attr_id);
 
-/* Get the class. */
-*type_class = H5Tget_class(tid);
-
-/* Get the size. */
-*type_size = H5Tget_size(tid);
-```
-
-**The Bug**: The code does NOT check if `H5Aget_type()` returns a valid handle before using `tid` in subsequent calls. If `H5Aget_type()` fails, the function continues with an invalid `tid`, leading to errors later in the function. When an error occurs after this point, the function returns an error code WITHOUT initializing the output parameters (`rank` and `dims`).
-
-The calling code in `esio/esio.c:2214` then checks:
-```c
-if (rank != 1) {
-    ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
-}
-```
-
-Since `rank` contains uninitialized garbage data (e.g., 21998), this check fails.
-
-## Historical Analysis
-
-This bug has existed since the **first commit** (11a207a "esio: #2409 Update NEWS for 0.1.7"). The code at line 66 of `esio/h5utils.c` has never included error checking for `H5Aget_type()`.
-
-The issue is likely triggered by:
-- Changes in HDF5 library behavior (current system uses HDF5 1.10.10)
-- Specific test data that exercises this code path
-
-## Recommended Fix
-
-Add error checking after `H5Aget_type()`:
-
-```c
-/* Get an identifier for the datatype. */
+/* AFTER (FIXED): */
 if ((e = tid = H5Aget_type(attr_id)) < 0)
     goto bail;
+```
+**Issue**: If `H5Aget_type()` failed, `tid` was invalid but code continued using it.
+**API Docs**: [H5Aget_type](https://support.hdfgroup.org/documentation/hdf5/latest/group___h5_a.html) returns < 0 on error.
 
-/* Get the class. */
+### 2. Missing Error Check for H5Tget_class() (Line 69)
+```c
+/* BEFORE (BUGGY): */
 *type_class = H5Tget_class(tid);
 
-/* Get the size. */
+/* AFTER (FIXED): */
+if ((*type_class = H5Tget_class(tid)) == H5T_NO_CLASS) {
+    e = -1;
+    goto bail;
+}
+```
+**Issue**: If `H5Tget_class()` failed, it returned `H5T_NO_CLASS` (-1) but code didn't check.
+**API Docs**: [H5Tget_class](https://support.hdfgroup.org/documentation/hdf5/latest/group___h5_t.html) returns H5T_NO_CLASS on error.
+
+### 3. Missing Error Check for H5Tget_size() (Line 72)
+```c
+/* BEFORE (BUGGY): */
 *type_size = H5Tget_size(tid);
+
+/* AFTER (FIXED): */
+if ((*type_size = H5Tget_size(tid)) == 0) {
+    e = -1;
+    goto bail;
+}
+```
+**Issue**: If `H5Tget_size()` failed, it returned 0 but code didn't check.
+**API Docs**: [H5Tget_size](https://support.hdfgroup.org/documentation/hdf5/latest/group___h5_t.html) returns 0 on error.
+
+### 4. Type Mismatch: H5E_NOTFOUND Truncation (Lines 58-59)
+```c
+/* BEFORE (BUGGY): */
+if (H5Aexists(obj_id, attr_name) == 0)
+    e = H5E_NOTFOUND;  /* H5E_NOTFOUND is hid_t (64-bit), e is herr_t (32-bit)! */
+
+/* AFTER (FIXED): */
+if (H5Aexists(obj_id, attr_name) == 0)
+    e = -2;  /* Use simple error code instead of truncated H5E_NOTFOUND */
+```
+**Issue**: `H5E_NOTFOUND` is an `hid_t` (64-bit error ID), but `e` is `herr_t` (32-bit). Assignment caused truncation, resulting in `err=157` instead of the expected huge error ID.
+
+### 5. Incomplete Error Checking in esio.c (Line 2213)
+```c
+/* BEFORE (BUGGY): */
+else if (err < 0) {  /* Missed positive error codes like 157! */
+
+/* AFTER (FIXED): */
+else if (err != 0) {  /* Catch all non-zero errors */
+```
+And updated to check for `-2` instead of `H5E_NOTFOUND`:
+```c
+/* BEFORE (BUGGY): */
+if (err == H5E_NOTFOUND) {
+
+/* AFTER (FIXED): */
+if (err == -2) {  /* Match the -2 from h5utils.c */
 ```
 
-This ensures that if `H5Aget_type()` fails, the function properly cleans up and returns an error without leaving output parameters uninitialized.
+## Diagnostic Evidence
+
+With debug output, the failure pattern was:
+- **1st call** (existing attribute): `err=0, rank=1, dims[0]=1` ✓
+- **2nd call** (nonexistent attribute): `err=157, rank=21998, dims[0]=139603598100288` ✗
+
+The `err=157` was the truncated `H5E_NOTFOUND`, and rank/dims contained uninitialized memory.
+
+## Historical Context
+
+These bugs have existed since the **first commit** (11a207a from 2012-06-29). They were triggered by HDF5 1.10.10 on the current system.
+
+## Test Results
+
+After fixes, all attribute tests pass:
+- ✅ attribute_int.sh
+- ✅ attribute_double.sh
+- ✅ attribute_float.sh
+
+## References
+
+- [HDF5 Attributes API (H5A)](https://support.hdfgroup.org/documentation/hdf5/latest/group___h5_a.html)
+- [HDF5 Datatypes API (H5T)](https://support.hdfgroup.org/documentation/hdf5/latest/group___h5_t.html)
