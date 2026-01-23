@@ -2198,25 +2198,24 @@ int esio_attribute_sizev(const esio_handle h,
     hsize_t dims[H5S_MAX_RANK]; // Oversized to protect smashing the stack
     H5T_class_t type_class;
     size_t type_size;
+
     DISABLE_HDF5_ERROR_HANDLER(one)
-    const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id,
+    const htri_t try = esio_H5LTget_attribute_ndims_info(h->file_id,
                                                          location,
                                                          name,
                                                          &rank, dims,
                                                          &type_class,
                                                          &type_size);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (err == H5E_NOTFOUND) {
-        return ESIO_NOTFOUND;  // ESIO_ERROR not called to allow existence query
-    } else if (err < 0) {
-        ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
-    }
-    if (rank != 1) {
-        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
-    }
 
-    // Ensure we won't overflow the return value type
-    if (dims[0] > INT_MAX) {
+    if (try < 0) {
+        ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
+    } else if (try == 0) {
+        return ESIO_NOTFOUND; // ESIO_ERROR not called allows existence query
+    } else if (rank != 1) {
+        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
+    } else if (dims[0] > INT_MAX) {
+        // Ensure we won't overflow the return value type
         ESIO_ERROR("Attribute size > INT_MAX", ESIO_ESANITY);
     }
 
@@ -2273,15 +2272,15 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     H5T_class_t type_class;                                                   \
     size_t type_size;                                                         \
     DISABLE_HDF5_ERROR_HANDLER(one)                                           \
-    const herr_t err1 = esio_H5LTget_attribute_ndims_info(                    \
+    const htri_t try1 = esio_H5LTget_attribute_ndims_info(                    \
             h->file_id, location, name, &rank, dims,                          \
             &type_class, &type_size);                                         \
     ENABLE_HDF5_ERROR_HANDLER(one)                                            \
-    if (err1 == H5E_NOTFOUND) {                                               \
+    if (try1 == 0) {                                                          \
         snprintf(msg, sizeof(msg), "Attribute '%s' not found at location",    \
                  name);                                                       \
         ESIO_ERROR(msg, ESIO_EINVAL);                                         \
-    } else if (err1 < 0) {                                                    \
+    } else if (try1 < 0) {                                                    \
         ESIO_ERROR("unable to interrogate attribute at location",             \
                     ESIO_EINVAL);                                             \
     }                                                                         \

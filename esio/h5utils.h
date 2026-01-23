@@ -50,7 +50,7 @@ extern "C" {
 #define ENABLE_HDF5_ERROR_HANDLER(id)                                 \
     H5Eset_auto2(H5E_DEFAULT, hdf5_handler##id, hdf5_client_data##id);
 
-herr_t
+htri_t
 esio_H5LTget_attribute_ndims_info(hid_t loc_id,
                                   const char *obj_name,
                                   const char *attr_name,
