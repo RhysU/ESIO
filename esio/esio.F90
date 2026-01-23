@@ -120,12 +120,13 @@ module esio
   public :: esio_handle
 
 !>Status codes matching the \c esio_status C \c enum
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) ||                 \
-    defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
+!! @cond INTERNAL
+#if defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
 # define enumerator integer(c_int), parameter
 #else
   enum, bind(C) ! TODO Appending ":: esio_status" would be nice...
 #endif
+!! @endcond
     enumerator :: ESIO_SUCCESS  =  0 !< Success
     enumerator :: ESIO_EFAULT   =  3 !< Invalid pointer
     enumerator :: ESIO_EINVAL   =  4 !< Invalid argument supplied by user
@@ -133,12 +134,13 @@ module esio
     enumerator :: ESIO_ESANITY  =  7 !< Sanity check failed - shouldn't happen
     enumerator :: ESIO_ENOMEM   =  8 !< Memory allocation failed
     enumerator :: ESIO_NOTFOUND =  9 !< Object not found
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) ||                 \
-    defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
+!! @cond INTERNAL
+#if defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
 # undef enumerator
 #else
   end enum
 #endif
+!! @endcond
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
@@ -371,7 +373,7 @@ contains
 
   end subroutine esio_handle_finalize
 
-!> @}
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
