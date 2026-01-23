@@ -55,21 +55,30 @@ esio_H5LTget_attribute_ndims_info(hid_t loc_id,
     /* Open the attribute. */
     if ((e = attr_id = H5Aopen(obj_id, attr_name, H5P_DEFAULT)) < 0) {
         /* H5Aopen gives no information about existence as of HDF5 1.8.7 */
+        /* Return -2 to indicate "not found" since H5E_NOTFOUND is an hid_t */
+        /* and doesn't fit in herr_t return type */
         if (H5Aexists(obj_id, attr_name) == 0)
-            e = H5E_NOTFOUND;
+            e = -2;
 
         H5Oclose(obj_id);
         return e;
     }
 
     /* Get an identifier for the datatype. */
-    tid = H5Aget_type(attr_id);
+    if ((e = tid = H5Aget_type(attr_id)) < 0)
+        goto bail;
 
     /* Get the class. */
-    *type_class = H5Tget_class(tid);
+    if ((*type_class = H5Tget_class(tid)) == H5T_NO_CLASS) {
+        e = -1;
+        goto bail;
+    }
 
     /* Get the size. */
-    *type_size = H5Tget_size(tid);
+    if ((*type_size = H5Tget_size(tid)) == 0) {
+        e = -1;
+        goto bail;
+    }
 
     /* Get the dataspace handle */
     if ((e = sid = H5Aget_space(attr_id)) < 0)

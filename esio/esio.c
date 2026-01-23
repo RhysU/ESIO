@@ -2206,9 +2206,9 @@ int esio_attribute_sizev(const esio_handle h,
                                                          &type_class,
                                                          &type_size);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (err == H5E_NOTFOUND) {
+    if (err == -2) {
         return ESIO_NOTFOUND;  // ESIO_ERROR not called to allow existence query
-    } else if (err < 0) {
+    } else if (err != 0) {
         ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
     }
     if (rank != 1) {
