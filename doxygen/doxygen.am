@@ -156,4 +156,12 @@ DX_CLEANFILES = \
     $(DX_CLEAN_PDF) \
     $(DX_CLEAN_LATEX)
 
-endif DX_COND_doc
+else
+
+## Stub targets when Doxygen documentation is disabled
+.PHONY: doxygen-run doxygen-doc
+
+doxygen-run:
+doxygen-doc:
+
+endif
