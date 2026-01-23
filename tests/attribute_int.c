@@ -23,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #define TYPE              int
 #define AFFIX(name)       name ## _int

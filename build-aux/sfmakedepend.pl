@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
 #
-# $Id$
 #
 #-------------------------------------------------------------------
 # July 2010 - koomie modified from a starting version found online

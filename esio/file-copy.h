@@ -23,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifndef ESIO_FILE_COPY_H
 #define ESIO_FILE_COPY_H

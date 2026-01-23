@@ -23,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifndef ESIO_CHUNKSIZE_H
 #define ESIO_CHUNKSIZE_H
