@@ -2190,7 +2190,7 @@ int esio_attribute_sizev(const esio_handle h,
     // Sanity check incoming arguments
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (location == NULL) ESIO_ERROR("location == NULL",           ESIO_EFAULT);
+    if (location == NULL) ESIO_ERROR("location == NULL",       ESIO_EFAULT);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     // Attempt to retrieve information on the attribute
