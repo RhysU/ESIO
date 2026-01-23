@@ -160,7 +160,7 @@ FCT_BGN()
         FCT_TEARDOWN_END();
 
         // Test scalar-valued attributes, including overwrite details
-        FCT_TEST_BGN(attribute)
+        FCT_TEST_BGN(attribute_scalar)
         {
             TYPE value;
 
@@ -236,7 +236,7 @@ FCT_BGN()
         FCT_TEST_END();
 
         // Test vector-like attributes
-        FCT_TEST_BGN(attribute)
+        FCT_TEST_BGN(attribute_vector)
         {
             TYPE *value;
 
