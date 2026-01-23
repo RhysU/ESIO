@@ -250,7 +250,7 @@ int restart_rename(const char *src_filepath,
         // Construct the source pathname for any in-range entry
         if (0 > snprintf_realloc(&srcbuf, &srclen, "%s/%s",
                                  tmpl_dirname, namelist[n]->d_name)) {
-            snprintf(errmsg, sizeof(errmsg), "Unable to form srcbuf for '%s'",
+            snprintf(errmsg, sizeof(errmsg), "Unable to form srcbuf for '%.226s'",
                      namelist[n]->d_name);
             free(srcbuf);
             free(dstbuf);
@@ -263,7 +263,7 @@ int restart_rename(const char *src_filepath,
         // Construct the destination pathname from the template details
         if (0 > snprintf_realloc(&dstbuf, &dstlen, "%s/%s%0*d%s",
                                  tmpl_dirname, prefix, ndigits, next, suffix)) {
-            snprintf(errmsg, sizeof(errmsg), "Unable to form dstbuf for '%s'",
+            snprintf(errmsg, sizeof(errmsg), "Unable to form dstbuf for '%.226s'",
                      namelist[n]->d_name);
             free(srcbuf);
             free(dstbuf);

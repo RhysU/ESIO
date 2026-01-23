@@ -268,9 +268,9 @@ contains
     ! for details on MPI communicator interoperation
     interface
       function IMPL (comm) bind (C, name="esio_handle_initialize_fortran")
-        import :: esio_handle
-        type(esio_handle)          :: IMPL
-        integer, intent(in), value :: comm  ! Note integer not integer(c_int)
+        import :: esio_handle, c_int
+        type(esio_handle)              :: IMPL
+        integer(c_int), intent(in), value :: comm
       end function IMPL
     end interface
 

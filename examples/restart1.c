@@ -2,11 +2,16 @@
 #include <mpi.h>
 #include <esio/esio.h>
 
+static void finalize_mpi(void)
+{
+    MPI_Finalize();
+}
+
 int main(int argc, char *argv[])
 {
     // Initialize MPI and arrange for its finalization
     MPI_Init(&argc, &argv);
-    atexit((void (*) ()) MPI_Finalize);
+    atexit(finalize_mpi);
     int world_size, world_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
@@ -16,7 +21,7 @@ int main(int argc, char *argv[])
         esio_handle s = esio_handle_initialize(MPI_COMM_SELF);
         esio_file_create(s, "template.h5", 1 /* overwrite */);
         esio_string_set(s, "/", "program", argv[0]);
-        esio_string_set(s, "/", "built",   __DATE__ " " __TIME__);
+        esio_string_set(s, "/", "built",   "ESIO example program");
         esio_handle_finalize(s);
     }
     MPI_Barrier(MPI_COMM_WORLD);  // Prevent template create/clone race

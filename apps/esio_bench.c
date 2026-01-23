@@ -560,6 +560,11 @@ static struct argp argp = {
 // Rank-dependent output streams established in main().
 static FILE *rankout, *rankerr;
 
+static void finalize_mpi(void)
+{
+    MPI_Finalize();
+}
+
 int main(int argc, char *argv[])
 {
     GRVY_TIMER_INIT(argp_program_version);
@@ -579,7 +584,7 @@ int main(int argc, char *argv[])
 
     // Initialize/finalize MPI
     MPI_Init(&argc, &argv);
-    atexit((void (*) ()) MPI_Finalize);
+    atexit(finalize_mpi);
     MPI_Comm_size(MPI_COMM_WORLD, &d.world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &d.world_rank);
 

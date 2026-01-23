@@ -42,7 +42,7 @@ int METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *plane,
     const hsize_t nelems = blocal * bstride;
     const hsize_t lies   = 1;
     const hid_t memspace
-        = H5Screate_simple(1, blocal * alocal ? &nelems : &lies, NULL);
+        = H5Screate_simple(1, (blocal && alocal) ? &nelems : &lies, NULL);
     assert(memspace > 0);
     if (blocal * alocal == 0) {
         H5Sselect_none(memspace);
