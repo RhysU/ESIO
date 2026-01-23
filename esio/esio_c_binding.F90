@@ -23,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 !> \file
 !! Provides utilities to simplify Fortran-to-C interfacing within ESIO.

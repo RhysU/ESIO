@@ -23,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 ! Designed to be #included from esio.F90 within a subroutine declaration
 

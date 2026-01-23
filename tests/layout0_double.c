@@ -23,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #define REAL              double
 #define REAL_H5T          H5T_NATIVE_DOUBLE

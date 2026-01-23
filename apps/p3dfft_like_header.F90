@@ -23,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 !> Module that contains the problem in use.  Parallel problem
 !! decomposition based upon P3DFFT's logic but may differ in

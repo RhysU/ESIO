@@ -23,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 !> Program designed to 'chunk' a field into multiple pieces so we can
 !! load it up into an HDF-like storage.  Ideally, field should be similar

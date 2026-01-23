@@ -23,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 // Designed to be #included from layout.c
 #if !defined(METHODNAME) || !defined(OPFUNC) || !defined(QUALIFIER)

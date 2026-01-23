@@ -23,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 ! TODO Allow Fortran to detect invalid handle before other failure
 ! TODO Disable error handling when ierr is present??
