@@ -2,7 +2,7 @@
 /.libs
 /esio_bench
 /esio_rename
-/.license.stamp
+/license.stamp
 /main
 /Makefile
 /Makefile.dep

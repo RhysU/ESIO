@@ -2,7 +2,7 @@
 /concepts2
 /.deps
 /.libs
-/.license.stamp
+/license.stamp
 /Makefile
 /Makefile.dep
 /Makefile.in
