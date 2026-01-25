@@ -153,7 +153,7 @@ int restart_rename(const char *src_filepath,
                    const char *dst_template,
                    int retain_count)
 {
-    char errmsg[256] = ""; // Used to provide fairly extensive error messages
+    char errmsg[512] = ""; // Used to provide fairly extensive error messages
 
     if (src_filepath == NULL) ESIO_ERROR("src_filepath == NULL", ESIO_EFAULT);
     if (dst_template == NULL) ESIO_ERROR("dst_template == NULL", ESIO_EFAULT);
