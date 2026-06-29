@@ -64,7 +64,7 @@ program p3dfft_like
   call initialize_problem(myid,numprocs)
 
   if (myid.eq.0) write(*,*) "initializing field:", ny, nz, nx, nc
-  call initialize_field(myid)
+  call initialize_field()
 
 ! Print domain decomposition details on each MPI rank
 ! do i = 0, numprocs - 1

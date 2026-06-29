@@ -66,9 +66,9 @@ contains
 !! on each processor.  Global sizes are ny, nx, and nz.  Absolute
 !! coordinates are given by xist xien, zjst zjen, and 1 ny in the
 !! x, z, and y directions.
-  subroutine initialize_field(proc)
+  subroutine initialize_field()
 
-    integer(4) :: i,j,k,n,proc
+    integer(4) :: i,j,k,n
 
     !this loop is stride-1: u(ny,zjsz,xisz)
     do n=1,nc
