@@ -1,8 +1,24 @@
-What's new in ESIO 0.2.0-pre
+What's new in ESIO 0.2.1-pre
 ----------------------------
 
 Not release shape yet.  Final notes to be determined...
 
+    * TBD
+
+
+What's new in ESIO 0.2.0
+------------------------
+
+Dusted off the old project.
+
+    * Hardened esio_file_clone and esio_file_close_restart with a summing
+      Allreduce for barrier-like robustness across ranks.
+    * Fixed type mismatches when reading attribute sizes.
+    * Fixed function return type mismatches in template-generated code.
+    * Migrated continuous integration from Travis CI to Circle CI.
+    * Added Doxygen documentation deployment from continuous integration.
+    * Fixed numerous Doxygen build warnings and a parser segfault.
+    * Updated libtool to 2.5.4.
     * Updated compilation/autotools workarounds for GNU libtool 2.4.6 on Debian.
     * Removed libtool dependency hacks for libesio.la
 
