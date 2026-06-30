@@ -11,7 +11,6 @@
 #
 # LAST MODIFICATION
 #
-#   $Id$
 #
 # COPYLEFT
 #

@@ -1,0 +1,78 @@
+version: 2.1
+
+jobs:
+  distcheck:
+    docker:
+      - image: cimg/base:stable
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt-get -qq update
+            sudo apt-get -qq install autotools-dev gfortran libhdf5-mpi-dev
+
+      - run:
+          name: Bootstrap
+          command: ./bootstrap
+
+      - run:
+          name: Configure
+          command: ./configure
+
+      - run:
+          name: Distribution check
+          command: make distcheck
+
+  deploy-docs:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Install Doxygen and Graphviz
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install -y doxygen graphviz
+      - run:
+          name: Build Doxygen documentation
+          command: |
+            PROJECT=ESIO \
+            VERSION=$(grep AC_INIT configure.ac | cut -d, -f2 | tr -d '[] ') \
+            DOCDIR=docs \
+            SRCDIR=. \
+            GENERATE_HTML=YES \
+            GENERATE_LATEX=NO \
+            GENERATE_RTF=NO \
+            GENERATE_MAN=NO \
+            GENERATE_XML=NO \
+            GENERATE_CHI=NO \
+            HAVE_DOT=YES \
+            DOT_PATH="" \
+            BUILDDATE="" \
+            BUILDHOST="" \
+            BUILDUSER="" \
+            doxygen doxygen/doxygen.cfg
+      - run:
+          name: Deploy to gh-pages
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              echo "Deploying documentation to gh-pages..."
+              ./.circleci/deploy-ghpages.sh docs/html
+            else
+              echo "Not master (current: ${CIRCLE_BRANCH}), skipping deployment"
+            fi
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - distcheck
+      - deploy-docs:
+          requires:
+            - distcheck
+          filters:
+            branches:
+              only: master

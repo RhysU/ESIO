@@ -33,6 +33,7 @@ FC=@MPIFC@
 AM_CFLAGS   += $(HDF5_CFLAGS)
 AM_CPPFLAGS += $(HDF5_CPPFLAGS)
 AM_FCFLAGS  += $(HDF5_FFLAGS)
+AM_LDFLAGS  += $(HDF5_LDFLAGS)
 
 #############################################################################
 ## INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL INTERNAL ##

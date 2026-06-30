@@ -27,6 +27,7 @@ esio_bench_CPPFLAGS  = $(AM_CPPFLAGS) $(HDF5_CPPFLAGS)
 esio_bench_LDADD     = ../esio/libesio.la
 esio_bench_LDADD    += ../gnulib/libgnu.la $(LTLIBINTL)
 esio_bench_LDADD    += $(GRVY_LIBS)
+esio_bench_LDADD    += $(HDF5_LDFLAGS)
 
 # Restart renaming tool which has few formal ESIO dependencies
 bin_PROGRAMS        += esio_rename
@@ -37,7 +38,7 @@ esio_rename_LDADD    = ../gnulib/libgnu.la $(LTLIBINTL) -lm
 # See http://code.google.com/p/p3dfft/ for more details on P3DFFT
 noinst_PROGRAMS          += p3dfft_like
 p3dfft_like_SOURCES       = p3dfft_like_header.F90 p3dfft_like.F90
-p3dfft_like_LDADD         = ../esio/libesiof.la $(GRVY_LIBS)
+p3dfft_like_LDADD         = ../esio/libesiof.la $(GRVY_LIBS) $(HDF5_LDFLAGS)
 p3dfft_like_LIBTOOLFLAGS  = --tag=FC
 p3dfft_like.F90: p3dfft_like_header.o    # Explicit module dependence
 

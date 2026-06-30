@@ -1,10 +1,11 @@
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
-!! ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-!! http://red.ices.utexas.edu/projects/esio/
+!! ExaScale IO library for turbulence simulation restart files
+!! http://github.com/RhysU/ESIO
 !!
-!! Copyright (C) 2010-2014 The PECOS Development Team
+!! Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+!! Copyright (C) 2010-2017 The PECOS Development Team
 !!
 !! This file is part of ESIO.
 !!
@@ -22,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 ! TODO Allow Fortran to detect invalid handle before other failure
 ! TODO Disable error handling when ierr is present??
@@ -120,12 +120,13 @@ module esio
   public :: esio_handle
 
 !>Status codes matching the \c esio_status C \c enum
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) ||                 \
-    defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
+!! @cond INTERNAL
+#if defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
 # define enumerator integer(c_int), parameter
 #else
   enum, bind(C) ! TODO Appending ":: esio_status" would be nice...
 #endif
+!! @endcond
     enumerator :: ESIO_SUCCESS  =  0 !< Success
     enumerator :: ESIO_EFAULT   =  3 !< Invalid pointer
     enumerator :: ESIO_EINVAL   =  4 !< Invalid argument supplied by user
@@ -133,12 +134,13 @@ module esio
     enumerator :: ESIO_ESANITY  =  7 !< Sanity check failed - shouldn't happen
     enumerator :: ESIO_ENOMEM   =  8 !< Memory allocation failed
     enumerator :: ESIO_NOTFOUND =  9 !< Object not found
-#if defined(DOXYGEN_SHOULD_SKIP_THIS) ||                 \
-    defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
+!! @cond INTERNAL
+#if defined(__INTEL_COMPILER) && __INTEL_COMPILER < 1110
 # undef enumerator
 #else
   end enum
 #endif
+!! @endcond
 
 ! TODO Allow Fortran to use customizable error handling
 ! Error handling routine
@@ -371,7 +373,7 @@ contains
 
   end subroutine esio_handle_finalize
 
-!> @}
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1925,7 +1927,7 @@ end subroutine esio_field_readv_integer
 
   end subroutine esio_field_sizev
 
-!!\@}
+!!@}
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

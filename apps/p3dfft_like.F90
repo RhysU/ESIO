@@ -1,10 +1,11 @@
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
-!! ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-!! http://red.ices.utexas.edu/projects/esio/
+!! ExaScale IO library for turbulence simulation restart files
+!! http://github.com/RhysU/ESIO
 !!
-!! Copyright (C) 2010-2014 The PECOS Development Team
+!! Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+!! Copyright (C) 2010-2017 The PECOS Development Team
 !!
 !! This file is part of ESIO.
 !!
@@ -22,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 !> Program designed to 'chunk' a field into multiple pieces so we can
 !! load it up into an HDF-like storage.  Ideally, field should be similar
@@ -64,7 +64,7 @@ program p3dfft_like
   call initialize_problem(myid,numprocs)
 
   if (myid.eq.0) write(*,*) "initializing field:", ny, nz, nx, nc
-  call initialize_field(myid)
+  call initialize_field()
 
 ! Print domain decomposition details on each MPI rank
 ! do i = 0, numprocs - 1

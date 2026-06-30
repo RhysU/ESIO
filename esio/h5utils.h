@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifndef ESIO_H5UTILS_H
 #define ESIO_H5UTILS_H
@@ -50,7 +50,7 @@ extern "C" {
 #define ENABLE_HDF5_ERROR_HANDLER(id)                                 \
     H5Eset_auto2(H5E_DEFAULT, hdf5_handler##id, hdf5_client_data##id);
 
-herr_t
+htri_t
 esio_H5LTget_attribute_ndims_info(hid_t loc_id,
                                   const char *obj_name,
                                   const char *attr_name,

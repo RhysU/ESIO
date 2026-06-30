@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -665,14 +665,14 @@ int main(int argc, char *argv[])
     switch (d.typesize)
     {
         case sizeof(double):
-            p_esio_field_writev = &esio_field_writev_double;
-            p_esio_plane_writev = &esio_plane_writev_double;
-            p_esio_line_writev  = &esio_line_writev_double;
+            p_esio_field_writev = (void *) &esio_field_writev_double;
+            p_esio_plane_writev = (void *) &esio_plane_writev_double;
+            p_esio_line_writev  = (void *) &esio_line_writev_double;
             break;
         case sizeof(float):
-            p_esio_field_writev = &esio_field_writev_float;
-            p_esio_plane_writev = &esio_plane_writev_float;
-            p_esio_line_writev  = &esio_line_writev_float;
+            p_esio_field_writev = (void *) &esio_field_writev_float;
+            p_esio_plane_writev = (void *) &esio_plane_writev_float;
+            p_esio_line_writev  = (void *) &esio_line_writev_float;
             break;
         default:
             MPI_Abort(MPI_COMM_WORLD, 1); // Sanity failure

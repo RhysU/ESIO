@@ -38,7 +38,6 @@ The library's manual is divided into the following subsections:
   <li> \ref error.h "C/C++ error handling API"</li>
   <li> \ref esio.F90 "Fortran API"</li>
   <li> \subpage benchmark</li>
-  <li> <a href="http://buildbot.ices.utexas.edu/docs/buildbot/esio/build/docs/html/lcov/">Buildbot test coverage</a> </li>
 </ul>
 
 Thank you for your interest in ESIO.
@@ -57,7 +56,6 @@ welcome at the same e-mail address.  All bug reports should include:
 </ul>
 
 \section licence License
-Copyright (C) 2010, 2011, 2012, 2013 The PECOS Development Team
 \copydoc License
 
 \section acknowledgements Acknowledgments

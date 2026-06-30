@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -666,15 +666,17 @@ int esio_file_clone(esio_handle h,
         ESIO_ERROR("dstfile == NULL", ESIO_EFAULT);
     }
 
-    // One rank copies the file synchronously and broadcasts the result
+    // One rank copies the file synchronously and "broadcasts" the result;
+    // The "broadcast" is a summing Allreduce that behaves as useful barrier.
     const int worker = h->comm_size - 1; // Last rank does work
-    int status;
+    int status = 0;
     if (h->comm_rank == worker) {
         int prefix_len = scheme_prefix_len(srcfile);
         status = file_copy(srcfile + prefix_len, dstfile + prefix_len,
                            overwrite, 1 /*blockuntilsync*/);
     }
-    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
+    ESIO_MPICHKQ(MPI_Allreduce(MPI_IN_PLACE, &status, 1/*count*/,
+                               MPI_INT, MPI_SUM, h->comm));
 
     // Bail now if an error occurred
     if (status) return status;
@@ -772,16 +774,18 @@ int esio_file_close_restart(esio_handle h,
         ESIO_ERROR("Unable to close current restart file", close_status);
     }
 
-    // One rank invokes restart_rename and broadcasts the result
+    // One rank invokes restart_rename and "broadcasts" the result.
+    // The "broadcast" is a summing Allreduce that behaves as useful barrier.
     const int worker = h->comm_size - 1; // Last rank does work
-    int status;
+    int status = 0;
     if (h->comm_rank == worker) {
         status = restart_rename(
                 src_filename, // No URI scheme prefix munging required
                 restart_template + scheme_prefix_len(restart_template),
                 retain_count);
     }
-    ESIO_MPICHKQ(MPI_Bcast(&status, 1/*count*/, MPI_INT, worker, h->comm));
+    ESIO_MPICHKQ(MPI_Allreduce(MPI_IN_PLACE, &status, 1/*count*/,
+                               MPI_INT, MPI_SUM, h->comm));
 
     // Free temporary memory
     free(src_filename);
@@ -2186,7 +2190,7 @@ int esio_attribute_sizev(const esio_handle h,
     // Sanity check incoming arguments
     if (h == NULL)        ESIO_ERROR("h == NULL",              ESIO_EFAULT);
     if (h->file_id == -1) ESIO_ERROR("No file currently open", ESIO_EINVAL);
-    if (location == NULL) ESIO_ERROR("location == NULL",           ESIO_EFAULT);
+    if (location == NULL) ESIO_ERROR("location == NULL",       ESIO_EFAULT);
     if (name == NULL)     ESIO_ERROR("name == NULL",           ESIO_EFAULT);
 
     // Attempt to retrieve information on the attribute
@@ -2194,25 +2198,24 @@ int esio_attribute_sizev(const esio_handle h,
     hsize_t dims[H5S_MAX_RANK]; // Oversized to protect smashing the stack
     H5T_class_t type_class;
     size_t type_size;
+
     DISABLE_HDF5_ERROR_HANDLER(one)
-    const herr_t err = esio_H5LTget_attribute_ndims_info(h->file_id,
+    const htri_t try = esio_H5LTget_attribute_ndims_info(h->file_id,
                                                          location,
                                                          name,
                                                          &rank, dims,
                                                          &type_class,
                                                          &type_size);
     ENABLE_HDF5_ERROR_HANDLER(one)
-    if (err == H5E_NOTFOUND) {
-        return ESIO_NOTFOUND;  // ESIO_ERROR not called to allow existence query
-    } else if (err < 0) {
-        ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
-    }
-    if (rank != 1) {
-        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
-    }
 
-    // Ensure we won't overflow the return value type
-    if (dims[0] > INT_MAX) {
+    if (try < 0) {
+        ESIO_ERROR("Failure querying attribute at location", ESIO_EFAILED);
+    } else if (try == 0) {
+        return ESIO_NOTFOUND; // ESIO_ERROR not called allows existence query
+    } else if (rank != 1) {
+        ESIO_ERROR("Attribute rank != 1 unsupported", ESIO_EFAILED);
+    } else if (dims[0] > INT_MAX) {
+        // Ensure we won't overflow the return value type
         ESIO_ERROR("Attribute size > INT_MAX", ESIO_ESANITY);
     }
 
@@ -2269,15 +2272,15 @@ int esio_attribute_readv_##TYPE(const esio_handle h,                          \
     H5T_class_t type_class;                                                   \
     size_t type_size;                                                         \
     DISABLE_HDF5_ERROR_HANDLER(one)                                           \
-    const herr_t err1 = esio_H5LTget_attribute_ndims_info(                    \
+    const htri_t try1 = esio_H5LTget_attribute_ndims_info(                    \
             h->file_id, location, name, &rank, dims,                          \
             &type_class, &type_size);                                         \
     ENABLE_HDF5_ERROR_HANDLER(one)                                            \
-    if (err1 == H5E_NOTFOUND) {                                               \
+    if (try1 == 0) {                                                          \
         snprintf(msg, sizeof(msg), "Attribute '%s' not found at location",    \
                  name);                                                       \
         ESIO_ERROR(msg, ESIO_EINVAL);                                         \
-    } else if (err1 < 0) {                                                    \
+    } else if (try1 < 0) {                                                    \
         ESIO_ERROR("unable to interrogate attribute at location",             \
                     ESIO_EINVAL);                                             \
     }                                                                         \

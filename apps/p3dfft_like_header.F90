@@ -1,10 +1,11 @@
 !!-----------------------------------------------------------------------bl-
 !!--------------------------------------------------------------------------
 !!
-!! ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-!! http://red.ices.utexas.edu/projects/esio/
+!! ExaScale IO library for turbulence simulation restart files
+!! http://github.com/RhysU/ESIO
 !!
-!! Copyright (C) 2010-2014 The PECOS Development Team
+!! Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+!! Copyright (C) 2010-2017 The PECOS Development Team
 !!
 !! This file is part of ESIO.
 !!
@@ -22,7 +23,6 @@
 !! along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 !!
 !!-----------------------------------------------------------------------el-
-!! $Id$
 
 !> Module that contains the problem in use.  Parallel problem
 !! decomposition based upon P3DFFT's logic but may differ in
@@ -66,9 +66,9 @@ contains
 !! on each processor.  Global sizes are ny, nx, and nz.  Absolute
 !! coordinates are given by xist xien, zjst zjen, and 1 ny in the
 !! x, z, and y directions.
-  subroutine initialize_field(proc)
+  subroutine initialize_field()
 
-    integer(4) :: i,j,k,n,proc
+    integer(4) :: i,j,k,n
 
     !this loop is stride-1: u(ny,zjsz,xisz)
     do n=1,nc

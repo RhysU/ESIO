@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 // Designed to be #included from layout.c
 #if !defined(METHODNAME) || !defined(OPFUNC) || !defined(QUALIFIER)
@@ -32,11 +32,11 @@
 // TODO See bug #1229
 // TODO See bug #1422
 
-hid_t METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *field,
-                 int cglobal, int cstart, int clocal, int cstride,
-                 int bglobal, int bstart, int blocal, int bstride,
-                 int aglobal, int astart, int alocal, int astride,
-                 hid_t type_id)
+int METHODNAME(hid_t plist_id, hid_t dset_id, QUALIFIER void *field,
+               int cglobal, int cstart, int clocal, int cstride,
+               int bglobal, int bstart, int blocal, int bstride,
+               int aglobal, int astart, int alocal, int astride,
+               hid_t type_id)
 {
     (void) cglobal; /* Unused but present for API consistency */
     (void) aglobal; /* Unused but present for API consistency */

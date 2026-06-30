@@ -15,11 +15,13 @@ EXTRA_DIST  += build-aux/update_license.pl
 EXTRA_DIST  += m4/gnulib-cache.m4
 
 dist-hook: docs
-	: # Include generated documentation in the dist tarball
-	cp -r $(top_builddir)/docs $(top_distdir)
+	: # Include generated documentation in the dist tarball if present
+	if test -d $(top_builddir)/docs; then \
+	    cp -r $(top_builddir)/docs $(top_distdir); \
+	fi
 	: # Eliminate .git and .svn directories in dist tarball
-	find $(distdir)/ -name '.svn' -type d -exec rm {} \;
-	find $(distdir)/ -name '.git' -type d -exec rm {} \;
+	-find $(distdir)/ -name '.svn' -type d -prune -exec rm -rf {} \;
+	-find $(distdir)/ -name '.git' -type d -prune -exec rm -rf {} \;
 
 # Tools in the auxillary directory
 AUX_DIST  = build-aux/install-sh
@@ -100,12 +102,6 @@ lcov-reset:
 coverage: docs lcov-reset check lcov-report
 
 endif
-
-# Make sure that libtool is up to date
-libtool: $(LIBTOOL_DEPS)
-	$(SHELL) ./config.status --recheck
-	mv libtool libtool.bak
-	$(SED) libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
 
 # Push license updates into appropriate subdirectories
 .license.stamp:

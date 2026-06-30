@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifndef ESIO_CHUNKSIZE_H
 #define ESIO_CHUNKSIZE_H

@@ -1,10 +1,11 @@
 //-----------------------------------------------------------------------bl-
 //--------------------------------------------------------------------------
 //
-// ESIO 0.1.9: ExaScale IO library for turbulence simulation restart files
-// http://red.ices.utexas.edu/projects/esio/
+// ExaScale IO library for turbulence simulation restart files
+// http://github.com/RhysU/ESIO
 //
-// Copyright (C) 2010-2014 The PECOS Development Team
+// Copyright (C) 2010-2017, 2022, 2026 Rhys Ulerich
+// Copyright (C) 2010-2017 The PECOS Development Team
 //
 // This file is part of ESIO.
 //
@@ -22,7 +23,6 @@
 // along with ESIO.  If not, see <http://www.gnu.org/licenses/>.
 //
 //-----------------------------------------------------------------------el-
-// $Id$
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -153,7 +153,7 @@ int restart_rename(const char *src_filepath,
                    const char *dst_template,
                    int retain_count)
 {
-    char errmsg[256] = ""; // Used to provide fairly extensive error messages
+    char errmsg[512] = ""; // Used to provide fairly extensive error messages
 
     if (src_filepath == NULL) ESIO_ERROR("src_filepath == NULL", ESIO_EFAULT);
     if (dst_template == NULL) ESIO_ERROR("dst_template == NULL", ESIO_EFAULT);

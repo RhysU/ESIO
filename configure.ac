@@ -1,11 +1,10 @@
 dnl ----------------------------------------------------
 dnl Package name, release number, description, and URL
 dnl ----------------------------------------------------
-AC_INIT([ESIO], [0.1.9], [rhys@ices.utexas.edu], [esio])
-AC_REVISION([$Id$])
+AC_INIT([ESIO], [0.2.0], [rhys.ulerich@gmail.com], [esio])
 PACKAGE_DESCRIPTION="ExaScale IO library for turbulence simulation restart files"
 AC_SUBST([PACKAGE_DESCRIPTION])
-PACKAGE_URL="http://red.ices.utexas.edu/projects/esio/"
+PACKAGE_URL="http://github.com/RhysU/ESIO"
 AC_SUBST([PACKAGE_URL])
 
 dnl ------------------------------------------------
@@ -19,7 +18,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AX_PREFIX_CONFIG_H([esio/esio-config.h])
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE(1.11 no-define tar-ustar color-tests -Wall foreign)
+AM_INIT_AUTOMAKE(1.11 no-define tar-ustar color-tests -Wall foreign subdir-objects)
 AC_PREREQ([2.64])
 AX_AM_MACROS
 AX_ADD_AM_CTAGSFLAGS
@@ -132,7 +131,7 @@ DX_RTF_FEATURE([OFF])
 DX_XML_FEATURE([OFF])
 DX_PDF_FEATURE([OFF])
 DX_PS_FEATURE([OFF])
-DX_INIT_DOXYGEN([esio],[doxygen/doxygen.cfg],[docs])
+DX_INIT_DOXYGEN(AC_PACKAGE_NAME,[doxygen/doxygen.cfg],[docs])
 
 #--------------------------
 # Checks for code coverage
@@ -140,7 +139,6 @@ DX_INIT_DOXYGEN([esio],[doxygen/doxygen.cfg],[docs])
 AX_CODE_COVERAGE
 
 # Query configuration environment
-
 AX_SUMMARIZE_ENV
 
 dnl ------------------------------------------------
@@ -163,12 +161,5 @@ AC_CONFIG_FILES([
 
 AC_OUTPUT()
 
-dnl See also libtool target in toplevel Makefile.am
-AC_MSG_NOTICE([Working around linking futziness by adding -Wl to libtool])
-AC_MSG_NOTICE([See http://mail.hdfgroup.org/pipermail/hdf-forum_hdfgroup.org/2011-March/008868.html])
-mv -v libtool libtool.bak
-$SED libtool.bak -e 's/^wl=""$/wl="-Wl,"/' > libtool && rm libtool.bak
-
 dnl Final summary
-
 AX_SUMMARIZE_CONFIG
