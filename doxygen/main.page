@@ -16,6 +16,11 @@ may be useful in other contexts.  The library is written in C99 and may
 be used by C89 or C++ applications.  A Fortran API built atop the F2003
 standard ISO_C_BINDING is also available.
 
+The project is hosted at <a
+href="https://github.com/RhysU/ESIO">https://github.com/RhysU/ESIO</a>.
+
+\section features Features
+
 The ESIO library provides:
 <ul>
   <li>Distributed IO of 1D lines, 2D planes, and 3D fields of data</li>
@@ -27,7 +32,9 @@ The ESIO library provides:
   <li>Storage within the widely-used HDF5 file format</li>
 </ul>
 
-The library's manual is divided into the following subsections:
+\section manual Manual
+
+ESIO's manual consists of the following topics:
 
 <ul>
   <li> \subpage installation </li>
@@ -40,20 +47,22 @@ The library's manual is divided into the following subsections:
   <li> \subpage benchmark</li>
 </ul>
 
-Thank you for your interest in ESIO.
-
 \section bugs Reporting Bugs
 
-Bugs in the code and errors or omissions in the documentation can be
-reported to rhys@ices.utexas.edu.  Requests and contributions are
-welcome at the same e-mail address.  All bug reports should include:
+Report bugs in the code or errors/omissions in the documentation via <a
+href="https://github.com/RhysU/ESIO/issues">https://github.com/RhysU/ESIO/issues</a>.
+All bug reports should include:
 <ul>
   <li>the version number of the ESIO library,</li>
+  <li>the version number of the HDF5 library,</li>
+  <li>the vendor and version number of the MPI stack,</li>
   <li>the hardware and operating system,</li>
   <li>the local compiler version number,</li>
   <li>a description of the bug behavior, and ideally, </li>
   <li>a short program which reproduces the bug.</li>
 </ul>
+Feature requests are welcome.  Contributions, especially as pull requests, are
+doubly welcome.
 
 \section licence License
 \copydoc License

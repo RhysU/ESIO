@@ -80,7 +80,7 @@ examples, and some additional ESIO-related utilities.
 If you see error messages regarding <tt>-fPIC</tt>, see the above configuration
 hints regarding building shared versus static versions of ESIO.
 
-<h2> Build Verification (Optional) </h2>
+<h2>Build Verification (Recommended)</h2>
 
 To optionally verify that the software is working properly, a check target is
 provided to run a suite of functionality tests against the local build.  To run
@@ -100,5 +100,30 @@ After the build is complete, issue
 
 to install the library.  The installation will consist of three top-level
 directories housing ESIO's include files, compiled libraries, and utilities.
+
+<h2> pkg-config </h2>
+
+To ease building and linking applications that use this library, ESIO
+installs two <code><a
+href="https://en.wikipedia.org/wiki/Pkg-config">pkg-config</a></code> files:
+<dl>
+  <dt><code>$PREFIX/lib/pkgconfig/esio.pc</code>
+  <dd>Includes only ESIO compilation and linking requirements</dd>
+  <dt><code>$PREFIX/lib/pkgconfig/esio-hdf5.pc</code>
+  <dd>Includes both ESIO and HDF5 compilation and linking requirements</dd>
+</dl>
+
+These <code>.pc</code> files capture many compilation and linking details for
+C/C++/Fortran.  The files are human-readable.  Users are encouraged to review
+the contents.  Interrogating these files directly may be simpler than looking up
+such details through other means.  You may find the Autoconf macro
+<code>PKG_CHECK_MODULES</code> particularly useful for this purpose.
+
+For example, provided your <code>$PKG_CONFIG_PATH</code> includes ESIO's
+installed <code>$PREFIX/lib/pkgconfig</code>, you can query settings from the
+CLI like so:
+
+\code > pkg-config esio      --cflags --libs \endcode
+\code > pkg-config esio-hdf5 --cflags --libs \endcode
 
 */
